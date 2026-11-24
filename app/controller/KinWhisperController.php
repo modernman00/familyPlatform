@@ -1353,6 +1353,8 @@ final class KinWhisperController extends BaseController
             'png' => 'image/png',
             'webp' => 'image/webp',
             'gif' => 'image/gif',
+            'heic' => 'image/heic',
+            'heif' => 'image/heif',
             'pdf' => 'application/pdf',
             'mp4' => $kind === 'audio' ? 'audio/mp4' : 'video/mp4',
             'webm' => $kind === 'audio' ? 'audio/webm' : 'video/webm',
@@ -1403,6 +1405,10 @@ final class KinWhisperController extends BaseController
         header('Content-Length: ' . (string)$length);
         header('X-Content-Type-Options: nosniff');
         header('Cache-Control: private, max-age=3600');
+
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
 
         if ($isPartial) {
             $fh = @fopen($realFile, 'rb');

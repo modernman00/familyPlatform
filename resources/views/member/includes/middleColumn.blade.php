@@ -354,8 +354,10 @@
   </script>
   @endif
 
-  {{-- Dismissible "What's New This Week" Banner --}}
-  @include('member.includes.whatsNewBanner')
+  @if(empty($usePreactFeed))
+    {{-- Dismissible "What's New This Week" Banner (Legacy fallback when Preact feed is disabled) --}}
+    @include('member.includes.whatsNewBanner')
+  @endif
 
   {{-- Connected Kin Requests Banner (Top of Feed — always mounted for live Pusher arrival) --}}
   @php

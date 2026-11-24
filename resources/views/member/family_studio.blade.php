@@ -562,6 +562,9 @@ function videoStudioPip() {
             <a href="/reels" class="fvs-btn fvs-btn-glass">
                 <i class="bi bi-arrow-left"></i> Return to Family Reels
             </a>
+            <a href="/director-mode" class="fvs-btn fvs-btn-glass" style="white-space:nowrap;flex-shrink:0;min-height:44px;" title="Plan and render multi-shot family films with @elders, @homestead &amp; @reunion tags at £0 cost">
+                <i class="bi bi-camera-reels-fill text-warning"></i> Director Mode (Multi-Shot)
+            </a>
             <button type="button" class="fvs-btn fvs-btn-gold" id="btnTriggerUpload">
                 <i class="bi bi-cloud-arrow-up"></i> Upload Media (Direct to R2)
             </button>

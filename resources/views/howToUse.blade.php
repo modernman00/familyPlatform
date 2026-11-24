@@ -50,6 +50,44 @@
           </div>
         </section>
 
+        <!-- Pillar 0: Homepage Heritage & Celebration Ambient Reel -->
+        <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
+          <div class="card-body p-4 p-md-5">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: rgba(163,22,33, 0.12); color: #a31621;">
+                <i class="bi bi-camera-reels-fill fs-4"></i>
+              </div>
+              <div>
+                <h3 class="fw-bold mb-0 text-dark">Family Sanctuary Atmosphere &amp; Ambient Hero Reel</h3>
+                <span class="badge bg-primary" style="background: #a31621 !important;">Living Heritage Experience</span>
+              </div>
+            </div>
+
+            <p class="lead text-secondary">
+              The FamilyPlatform homepage welcomes relatives with a cinematic, looping ambient film capturing multi-generational family life across garden reunion dinners, grandparent-grandchild photo albums, three-generation candlelit birthday celebrations, and golden-hour autumn park walks.
+            </p>
+
+            <div class="row g-4 mt-2">
+              <div class="col-md-6">
+                <div class="p-3 rounded-3 bg-light border h-100">
+                  <h6 class="fw-bold text-dark"><i class="bi bi-display text-primary me-2"></i>Desktop &amp; High-Bandwidth Display</h6>
+                  <p class="small text-muted mb-0">
+                    On screens 768px and wider, an optimised 720p H.264 ambient video plays quietly with sound muted, framed beneath a rich midnight-crimson heritage scrim that guarantees crisp text contrast.
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="p-3 rounded-3 bg-light border h-100">
+                  <h6 class="fw-bold text-dark"><i class="bi bi-phone text-success me-2"></i>Mobile &amp; Reduced Motion Fallback</h6>
+                  <p class="small text-muted mb-0">
+                    On mobile devices or when Reduced Motion is enabled in device settings, the video is instantly replaced with an eager-loaded still poster, and a 44px <em>Pause ambient video</em> toggle allows instant pause or resume at any time.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Pillar 1: 7-Generation Dynasty Navigation -->
         <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
           <div class="card-body p-4 p-md-5">
@@ -378,11 +416,11 @@
 
             <div class="p-3 rounded-3 bg-light border">
               <div class="d-flex align-items-center gap-2 mb-1">
-                <i class="bi bi-magic text-danger fs-5"></i>
-                <span class="fw-bold text-dark">1-Tap In-Feed 3D Stage Converter, Threaded Replies &amp; Living Expressions</span>
+                <i class="bi bi-stars text-danger fs-5"></i>
+                <span class="fw-bold text-dark">Scenic Post Backdrops, 1-Tap In-Feed Stage Switcher &amp; Living Expressions</span>
               </div>
               <p class="small text-muted mb-0">
-                Authors can transform any text memory right inside the feed with the <strong>✨ Convert to 3D Stage</strong> pill bar (Grand, Aurora, Heirloom, Dynasty, Roundtable, or Governance), or revert to plain text in one tap. Comment threads support multi-tab <strong>Standard Emojis</strong>, <strong>✨ Living 3D Emojis</strong>, <strong>🙋 Me-Stickers</strong>, and <strong>🎬 Family GIFs</strong>, automatic reply flattening with collapsible long discussions, and self-healing island isolation so every post card stays responsive.
+                Tap <strong>Backdrop (Aa)</strong> on the feed composer — or use the <strong>✨ Add Backdrop</strong> swatch bar on any of your published text posts — to frame quotes, proverbs, and family reflections over 8 rich atmospheric scenes (<strong>Starlight Bokeh</strong>, <strong>Golden Fireflies</strong>, <strong>Sunset Horizon</strong>, <strong>Enchanted Forest</strong>, <strong>Deep Ocean</strong>, <strong>Rose Velvet</strong>, <strong>Aurora Sky</strong>, and <strong>Royal Noir</strong>) or 6 <strong>3D Milestone Stages</strong> (Grand, Aurora Prism, Heirloom, Dynasty, Roundtable, and Governance), and revert to plain text anytime. Comment threads support multi-tab <strong>Standard Emojis</strong>, <strong>✨ Living 3D Emojis</strong>, <strong>🙋 Me-Stickers</strong>, and <strong>🎬 Family GIFs</strong>, automatic reply flattening with collapsible long discussions, and self-healing island isolation so every post card stays responsive.
               </p>
             </div>
           </div>
@@ -561,7 +599,7 @@
             </div>
 
             <p class="lead text-secondary">
-              Members can spark daily conversations with the <strong>Daily Family Spark</strong> card at the top of the feed (rotating quick polls, heritage questions, and archive flashbacks into one living thread, with 1-tap privacy-safe WhatsApp sharing), discover hidden gems via entertaining <strong>In-Feed Feature Spotlights</strong> (playful, story-driven cards interleaved in your feed — from settling lighthearted sibling debates at the <em>Family RoundTable</em> to <em>Then &amp; Now</em> photo recreations — with 1-tap launch, "Next Idea" shuffling, and dismiss controls), enjoy automated <strong>Family Historian "Do You Know?"</strong> timeline cards (celebrating monthly birthdays with Day & Month only, plus weekly rotating highlights on family occupations, tree roots, anniversaries, and favourite memories), preserve rich family chronicles with the built-in AI Story Assistant at <strong>Family Journal</strong>, post short-form video memories in <strong>Family Reels</strong>, stay informed with friendly verified <strong>Platform Announcements</strong> on everyone's feed, and explore public heritage articles on our <a href="/blogs" class="fw-bold text-decoration-none" style="color: #7a0e16;">Public Blog</a>.
+              Members can spark daily conversations with the <strong>Daily Family Spark</strong> card at the top of the feed (rotating quick polls, heritage questions, and archive flashbacks into one living thread, with 1-tap privacy-safe WhatsApp sharing), paste <strong>Instagram Reels, YouTube, TikTok, or Google Photos</strong> links for native portrait/landscape video playback with clean uncropped posters and real creator captions, discover hidden gems via entertaining <strong>In-Feed Feature Spotlights</strong> (playful, story-driven cards interleaved in your feed — from settling lighthearted sibling debates at the <em>Family RoundTable</em> to <em>Then &amp; Now</em> photo recreations — with 1-tap launch, "Next Idea" shuffling, and dismiss controls), enjoy automated <strong>Family Historian "Do You Know?"</strong> timeline cards (celebrating monthly birthdays with Day & Month only, plus weekly rotating highlights on family occupations, tree roots, anniversaries, and favourite memories), preserve rich family chronicles with the built-in AI Story Assistant at <strong>Family Journal</strong>, post short-form video memories in <strong>Family Reels</strong>, stay informed with friendly verified <strong>Platform Announcements</strong> on everyone's feed, and explore public heritage articles on our <a href="/blogs" class="fw-bold text-decoration-none" style="color: #7a0e16;">Public Blog</a>.
             </p>
 
             <div class="row g-3 mb-3">
@@ -601,7 +639,7 @@
                 <div class="p-3 rounded-3 bg-light border">
                   <h6 class="fw-bold text-dark"><i class="bi bi-emoji-smile text-warning me-2"></i>Living Avatar &amp; Emoji Studio</h6>
                   <p class="small text-muted mb-0">
-                    Open <a href="/member/emoji-studio">Emoji Studio</a> to build an avatar that looks like you: a Gender Expression choice (Neutral, Feminine or Masculine) that never limits your other options, 13 skin tones, vitiligo and freckles, 5 face and eye shapes, 21 hairstyles and headwear (including hijab, dastar, gele and kufi), hair colours, facial hair, outfits and eyewear. In the <strong>Living Photo</strong> tab (or by tapping <strong>✨ Living Avatar</strong> directly on any photo in your post feed or photo lightbox), the <strong>ATG Photo-to-Avatar Transformation Engine</strong> automatically transforms your portrait, post photo, webcam snapshot, or existing profile picture into an OpenArt-calibre stylised avatar across six curated art styles (<em>Illustrated Comic</em>, <em>Anime Cel-Shade</em>, <em>3D Studio Render</em>, <em>Royal Oil Portrait</em>, <em>Retro Pop Art</em>, and <em>Polished Headshot</em>) while preserving your exact facial geometry, complexion undertone, hairstyle and pose. Drag the interactive <strong>Before / After split-comparison slider</strong> to inspect the transformation side by side, fine-tune Stylisation Strength, Ink Linework Crispness and Facial Detail Preservation in real time, or tap <strong>Generate Neural AI Avatar (HD)</strong> to regenerate. Use the <strong>Pop out</strong> button (or simply scroll down on mobile) to keep a floating <strong>Picture-in-Picture (PiP)</strong> preview of your Living Photo pinned on screen while adjusting styles and sliders, and tap it to expand full-screen. Switch to <strong>Living Motion</strong> to watch your stylised avatar breathe, blink and perform interactive expressions (😄 Smile, 💃 Dance, 😉 Wink, 😂 Laugh, 👍 Nod, ❤️ Love), tap <strong>✨ Use as Profile Picture</strong> to set it directly as your animated Living Profile Picture, tap <strong>📣 Post to Family Feed</strong> to publish your stylised Living Photo straight to the family timeline with a custom caption, or download an HD PNG. When sharing any of your posts from the family feed, tap the green share button to open the <strong>WhatsApp &amp; Social Media Share Hub</strong> with one-tap sharing to WhatsApp, Facebook, X (Twitter), LinkedIn, Telegram, Messages, Email, and Copy Link. Your 3D cartoon avatar also follows your cursor or your phone's tilt, and tapping the reaction bar (👋 😂 😮 ❤️ 🙆 💃 🫵 👏) makes it wave, laugh, point at you or clap. Turn on <strong>Talk mode</strong> and its mouth moves when you speak; the audio stays on your device. In <strong>Living Emojis</strong>, every emoji moves — including <strong>Yes, You!</strong> (a hand that jabs straight at the reader) and <strong>Applause</strong> (clapping hands). Pick a skin tone for the hand and people emojis (Hello Kin, Held With Love, Ancestral Blessing, Kinship Embrace, Yes, You!, Applause), tap one to copy it, then paste it into any post or comment — or choose it from <em>✨ 3D Family Emojis</em> in the post composer. In the feed it animates, a post that is only living emojis shows them sticker-sized, and anyone can tap one to view it in 3D / AR.
+                    Open <a href="/member/emoji-studio">Emoji Studio</a> to build an avatar that looks like you: a Gender Expression choice (Neutral, Feminine or Masculine) that never limits your other options, 13 skin tones, vitiligo and freckles, 5 face and eye shapes, 21 hairstyles and headwear (including hijab, dastar, gele and kufi), hair colours, facial hair, outfits and eyewear. In <strong>My photo</strong> mode, your real portrait comes to life on our 60fps 2.5D Living Canvas with breathing, eye micro-blinks, spring-damped cursor/tilt parallax, Verlet reaction particle bursts, themed challenge frames (Birthday Toast, Sunday Groove, Proud Moment, Big News), unlockable aura packs, on-device <strong>Talk &amp; sing mode</strong>, and one-tap <strong>Download animation</strong> &amp; <strong>Share animation</strong> (MP4/WebM video with a public <a href="/living-avatar">Try Living Avatar</a> challenge link). In the <strong>Living Photo</strong> tab (or by tapping <strong>✨ Living Avatar</strong> directly on any photo in your post feed or photo lightbox), the <strong>ATG Photo-to-Avatar Transformation Engine</strong> automatically transforms your portrait, post photo, webcam snapshot, or existing profile picture into an OpenArt-calibre stylised avatar across six curated art styles (<em>Illustrated Comic</em>, <em>Anime Cel-Shade</em>, <em>3D Studio Render</em>, <em>Royal Oil Portrait</em>, <em>Retro Pop Art</em>, and <em>Polished Headshot</em>) while preserving your exact facial geometry, complexion undertone, hairstyle and pose. Drag the interactive <strong>Before / After split-comparison slider</strong> to inspect the transformation side by side, fine-tune Stylisation Strength, Ink Linework Crispness and Facial Detail Preservation in real time, or tap <strong>Generate Neural AI Avatar (HD)</strong> to regenerate. Use the <strong>Pop out</strong> button (or simply scroll down on mobile) to keep a floating <strong>Picture-in-Picture (PiP)</strong> preview of your Living Photo pinned on screen while adjusting styles and sliders, and tap it to expand full-screen. Switch to <strong>Living Motion</strong> to watch your stylised avatar breathe, blink and perform interactive expressions (😄 Smile, 💃 Dance, 😉 Wink, 😂 Laugh, 👍 Nod, ❤️ Love), tap <strong>✨ Use as Profile Picture</strong> to set it directly as your animated Living Profile Picture, tap <strong>📣 Post to Family Feed</strong> to publish your stylised Living Photo straight to the family timeline with a custom caption, or download an HD PNG. When sharing any of your posts from the family feed, tap the green share button to open the <strong>WhatsApp &amp; Social Media Share Hub</strong> with one-tap sharing to WhatsApp, Facebook, X (Twitter), LinkedIn, Telegram, Messages, Email, and Copy Link. Your 3D cartoon avatar also follows your cursor or your phone's tilt, and tapping the reaction bar (👋 😂 😮 ❤️ 🙆 💃 🫵 👏) makes it wave, laugh, point at you or clap. Turn on <strong>Talk mode</strong> and its mouth moves when you speak; the audio stays on your device. In <strong>Living Emojis</strong>, every emoji moves — including <strong>Yes, You!</strong> (a hand that jabs straight at the reader) and <strong>Applause</strong> (clapping hands). Pick a skin tone for the hand and people emojis (Hello Kin, Held With Love, Ancestral Blessing, Kinship Embrace, Yes, You!, Applause), tap one to copy it, then paste it into any post or comment — or choose it from <em>✨ 3D Family Emojis</em> in the post composer. In the feed it animates, a post that is only living emojis shows them sticker-sized, and anyone can tap one to view it in 3D / AR.
                   </p>
                   <p class="small text-muted mb-0 mt-2">
                     <strong>Living emojis in posts &amp; comments:</strong> add them from the post composer's <em>✨ 3D Family Emojis</em> tab, or from the <em>✨ Living</em> tab in any comment's emoji picker (it follows your skin-tone choice). In the feed, <strong>tap a living emoji to play it</strong> with a burst of hearts, confetti or stars; tap it again within a moment to open it in 3D / AR.
@@ -1195,6 +1233,7 @@
             <li><strong>Right-Hand Inspector:</strong> Adjust Transform, Remove Background, Masks, Skin Retouch, Bezier Speed Curves, Colour LUTs, and Keyframe Diamonds (&lt;&gt;).</li>
             <li><strong>Bottom Multi-Track Timeline:</strong> Split, Ripple Delete, Freeze Frame, Reverse, Mirror, Crop, and toggle Magnetic Snapping or per-track Lock/Hide/Mute.</li>
             <li><strong>1-Click Magic Recipes:</strong> Open <em>? How to Use</em> inside the studio for instant presets like <em>Polish Talking Head</em>, <em>Animate Old Photo</em>, and <em>Party Reel</em>.</li>
+            <li><strong>Director Mode (<code>/director-mode</code>):</strong> Open <em>Creative Studio &rarr; Director Mode</em> to plan and render multi-shot heirloom and reunion films shot by shot. Mention relatives and moments with tags such as <code>@elders</code>, <code>@grandparents</code>, <code>@homestead</code>, or <code>@reunion</code>, choose a camera move, and tap <em>Plan my video</em> or <em>Render MP4 film</em> to download an H.264 MP4 film and subtitle file (<code>.srt</code>) at zero cost.</li>
         </ul>
     </div>
     <div class="card bg-dark text-light border-secondary rounded-4 p-4" id="playbook-living-heirloom">

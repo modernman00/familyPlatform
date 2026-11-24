@@ -32,7 +32,18 @@ assert($reel['status'] === 'draft_pending_approval', "Expected status draft_pend
 assert($reel['duration_seconds'] >= 30 && $reel['duration_seconds'] <= 60, "Duration must be between 30 and 60 seconds");
 assert(!empty($reel['storyboard']), "Expected storyboard array to be populated");
 assert(!empty($reel['audio_url']), "Expected audio_url to be assigned");
-echo "✓ Curate weekly reel generated reel #{$reel['id']} (Duration: {$reel['duration_seconds']}s, Status: {$reel['status']})\n";
+assert(!empty($reel['storyboard']['fun_facts']), "Expected fun_facts payload in storyboard");
+assert(($reel['storyboard']['fun_facts']['total_posts'] ?? 0) >= 1, "Expected total_posts >= 1");
+assert(($reel['storyboard']['aspect_ratios'] ?? []) === ['16:9', '9:16'], "Expected both 16:9 and 9:16 aspect ratios");
+assert(!empty($reel['storyboard']['explainer_manifests']['16:9']), "Expected 16:9 SovereignVideoRenderer manifest");
+assert(!empty($reel['storyboard']['explainer_manifests']['9:16']), "Expected 9:16 SovereignVideoRenderer manifest");
+echo "✓ Curate weekly reel generated reel #{$reel['id']} with Fun Facts + 16:9 & 9:16 manifests (Duration: {$reel['duration_seconds']}s)\n";
+
+// 2b. Test pure computeWeeklyFunFacts on empty posts (quiet-week fallback)
+$emptyFacts = WeeklyActivityVideoCuratorService::computeWeeklyFunFacts([], [], new DateTimeImmutable('-7 days'), new DateTimeImmutable(), true);
+assert($emptyFacts['total_posts'] === 0, "Expected 0 posts on empty week");
+assert($emptyFacts['golden_day'] === 'Sunday', "Expected Sunday fallback golden_day");
+echo "✓ Empty-week Fun Facts fallback verified\n";
 
 // 3. Test getPendingReel
 $pending = WeeklyActivityVideoCuratorService::getPendingReel($testUserIdA, $testFamCode);

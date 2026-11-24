@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { isDirectVideoDescriptor, resolveVideoPlaybackSrc } from './feedUtils';
+import { isDirectVideoDescriptor, isVideoPath, resolveVideoPlaybackSrc } from './feedUtils';
 import { attachWebGL4kCas } from './AtgWebGL4kRenderer';
 import {
     activePostId,
@@ -96,6 +96,7 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo, playerId }) {
     const [userActivatedIframe, setUserActivatedIframe] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isBuffering, setIsBuffering] = useState(false);
+    const [streamFailed, setStreamFailed] = useState(false);
     const [detectedRatio, setDetectedRatio] = useState(() => safeAspectRatio(vid?.aspectRatio || vid?.aspect_ratio));
 
     const isDirect = isDirectVideoDescriptor(vid);
@@ -252,12 +253,23 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo, playerId }) {
     }, [isDirect, playSrc, webglActive]);
 
     const handleSingleError = (e) => {
+        setIsBuffering(false);
         const el = e?.currentTarget;
         if (!el) return;
-        if (!el.dataset.retried && fallbackOriginal && el.src !== fallbackOriginal && fallbackOriginal.startsWith('http')) {
+        if (
+            !el.dataset.retried
+            && fallbackOriginal
+            && el.src !== fallbackOriginal
+            && fallbackOriginal.startsWith('http')
+            && isVideoPath(fallbackOriginal)
+        ) {
             el.dataset.retried = '1';
             el.src = fallbackOriginal;
             el.load();
+            return;
+        }
+        if (vid?.provider === 'instagram' || vid?.sourceUrl) {
+            setStreamFailed(true);
         }
     };
 
@@ -292,9 +304,50 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo, playerId }) {
         }
     };
 
+    const instagramSourceUrl = vid?.provider === 'instagram'
+        ? (vid?.sourceUrl || (typeof fallbackOriginal === 'string' && fallbackOriginal.includes('instagram.com') ? fallbackOriginal : ''))
+        : '';
+
     return (
         <div ref={containerRef} className="video-embed-container feed-video-breakout mb-3 position-relative">
-            {isDirect ? (
+            {streamFailed && instagramSourceUrl ? (
+                <a
+                    href={instagramSourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-testid="instagram-video-fallback-card"
+                    className="link-preview-card text-decoration-none rounded-3 overflow-hidden shadow-sm d-block"
+                >
+                    {thumbUrl && (
+                        <div className="link-preview-card__media link-preview-card__media--portrait">
+                            <img
+                                src={thumbUrl}
+                                alt={vid?.sourceTitle || vid?.hook || 'Instagram Reel'}
+                                className="w-100 h-100 object-fit-cover"
+                                style={{ objectPosition: '50% 24%' }}
+                                loading="lazy"
+                                referrerPolicy="no-referrer"
+                            />
+                            <span className="link-preview-card__platform-pill">Instagram</span>
+                            {!String(thumbUrl).includes('stp=cmp1_') && (
+                                <span className="link-preview-card__play-badge" aria-hidden="true">
+                                    <i className="bi bi-play-fill" />
+                                </span>
+                            )}
+                        </div>
+                    )}
+                    <div className="p-3 link-preview-card__body d-flex align-items-center justify-content-between gap-2">
+                        <div className="min-w-0">
+                            <h6 className="fw-bold mb-0 link-preview-card__title">
+                                {vid?.sourceTitle || vid?.hook || 'Instagram Reel'}
+                            </h6>
+                        </div>
+                        <span className="badge rounded-pill px-3 py-2 link-preview-card__cta d-inline-flex align-items-center">
+                            Watch on Instagram →
+                        </span>
+                    </div>
+                </a>
+            ) : isDirect ? (
                 <div className="position-relative feed-media-aura-container">
                     {thumbUrl && (
                         <div className="feed-media-aura-backdrop" aria-hidden="true" style={{ zIndex: 1, inset: 0 }}>
@@ -313,6 +366,38 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo, playerId }) {
                             zIndex: 2,
                         }}
                     >
+                        {instagramSourceUrl && durationSec === 0 && (
+                            <a
+                                href={instagramSourceUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="position-absolute d-inline-flex align-items-center gap-1.5 text-decoration-none"
+                                title="Open original Reel on Instagram"
+                                aria-label="Open original Reel on Instagram"
+                                style={{
+                                    top: '10px',
+                                    left: '10px',
+                                    zIndex: 6,
+                                    minHeight: '44px',
+                                    minWidth: '44px',
+                                    padding: '0 14px',
+                                    borderRadius: '9999px',
+                                    background: 'rgba(15, 23, 42, 0.82)',
+                                    backdropFilter: 'blur(8px)',
+                                    border: '1px solid rgba(255, 255, 255, 0.22)',
+                                    color: '#ffffff',
+                                    fontSize: '0.75rem',
+                                    fontWeight: 700,
+                                    whiteSpace: 'nowrap',
+                                    flexShrink: 0,
+                                }}
+                            >
+                                <i className="bi bi-instagram" aria-hidden="true" />
+                                <span>Instagram</span>
+                                <i className="bi bi-box-arrow-up-right" style={{ fontSize: '0.68rem', opacity: 0.85 }} aria-hidden="true" />
+                            </a>
+                        )}
                         {durationSec > 0 && (
                             <span
                                 className="badge rounded-pill position-absolute d-inline-flex align-items-center gap-1"

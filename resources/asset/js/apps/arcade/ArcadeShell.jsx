@@ -15,6 +15,7 @@ import { TrophyStage3D } from './TrophyStage3D';
 import { LeagueTablesPanel } from './LeagueTablesPanel';
 import { VictoryReplayModal } from './VictoryReplayModal';
 import { HowToPlayModal } from './HowToPlayModal';
+import { triggerHaptic, useSoundEffects } from './hooks/useSoundEffects';
 import styles from './ArcadeShell.module.css';
 
 const GAMES = [
@@ -80,6 +81,7 @@ export function ArcadeShell({ bootstrap = {} }) {
     const [showHowToPlay, setShowHowToPlay] = useState(false);
     const [showShareModal, setShowShareModal] = useState(false);
     const [shareCopied, setShareCopied] = useState(false);
+    const sound = useSoundEffects();
 
     const lastProgressSentRef = useRef(0);
     const guestStartedRef = useRef(false);
@@ -225,6 +227,8 @@ export function ArcadeShell({ bootstrap = {} }) {
 
     const handleComplete = async (payload) => {
         if (!puzzle || submitting) return;
+        triggerHaptic(20);
+        sound.playVictory();
         setSubmitting(true);
         setLastReplay(payload.replay || []);
 
@@ -468,7 +472,7 @@ export function ArcadeShell({ bootstrap = {} }) {
                                 </div>
 
                                 <div className={styles.toolbarActions}>
-                                    <button type="button" className={styles.raceBtn} onClick={handleCreateLiveRace} title="Create a live head-to-head race link for family members">
+                                    <button type="button" className={styles.raceBtn} onClick={() => { triggerHaptic(12); sound.playTap(); handleCreateLiveRace(); }} title="Create a live head-to-head race link for family members">
                                         <span className={styles.liveDot} aria-hidden="true" />
                                         <i className="bi bi-lightning-charge-fill" aria-hidden="true" />
                                         <span>Race Live</span>
@@ -477,6 +481,8 @@ export function ArcadeShell({ bootstrap = {} }) {
                                         type="button"
                                         className={styles.howToBtn}
                                         onClick={() => {
+                                            triggerHaptic(12);
+                                            sound.playTap();
                                             setShowHowToPlay(true);
                                             trackPublicEvent('how_to_play');
                                         }}
@@ -489,6 +495,8 @@ export function ArcadeShell({ bootstrap = {} }) {
                                         type="button"
                                         className={styles.shareBtn}
                                         onClick={() => {
+                                            triggerHaptic(12);
+                                            sound.playTap();
                                             setShareCopied(false);
                                             setShowShareModal(true);
                                         }}
@@ -496,6 +504,16 @@ export function ArcadeShell({ bootstrap = {} }) {
                                     >
                                         <i className="bi bi-share-fill" aria-hidden="true" />
                                         <span>Share<span className={styles.shareLabelGame}> {activeGameMeta.name}</span></span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={styles.soundToggleBtn}
+                                        onClick={sound.toggleSound}
+                                        aria-label={sound.soundEnabled ? 'Mute sound effects' : 'Enable sound effects'}
+                                        aria-pressed={sound.soundEnabled}
+                                        title={sound.soundEnabled ? 'Sound on' : 'Sound muted'}
+                                    >
+                                        <i className={`bi ${sound.soundEnabled ? 'bi-volume-up-fill' : 'bi-volume-mute-fill'}`} aria-hidden="true" />
                                     </button>
                                 </div>
                             </>
@@ -589,31 +607,31 @@ export function ArcadeShell({ bootstrap = {} }) {
                     ) : (
                         <>
                             {activeGame === 'kinzip' && (
-                                <KinZipGame puzzle={puzzle} onProgress={handleProgress} onComplete={handleComplete} submitting={submitting} />
+                                <KinZipGame puzzle={puzzle} onProgress={handleProgress} onComplete={handleComplete} submitting={submitting} sound={sound} />
                             )}
                             {activeGame === 'kingrid' && (
-                                <KinGridGame puzzle={puzzle} onProgress={handleProgress} onComplete={handleComplete} submitting={submitting} />
+                                <KinGridGame puzzle={puzzle} onProgress={handleProgress} onComplete={handleComplete} submitting={submitting} sound={sound} />
                             )}
                             {activeGame === 'kinword' && (
-                                <KinWordGame puzzle={puzzle} onProgress={handleProgress} onComplete={handleComplete} submitting={submitting} />
+                                <KinWordGame puzzle={puzzle} onProgress={handleProgress} onComplete={handleComplete} submitting={submitting} sound={sound} />
                             )}
                             {activeGame === 'kinpulse' && (
-                                <KinPulseGame puzzle={puzzle} onProgress={handleProgress} onComplete={handleComplete} submitting={submitting} />
+                                <KinPulseGame puzzle={puzzle} onProgress={handleProgress} onComplete={handleComplete} submitting={submitting} sound={sound} />
                             )}
                             {activeGame === 'wordie' && (
-                                <WordieGame puzzle={puzzle} onProgress={handleProgress} onComplete={handleComplete} submitting={submitting} />
+                                <WordieGame puzzle={puzzle} onProgress={handleProgress} onComplete={handleComplete} submitting={submitting} sound={sound} />
                             )}
                             {activeGame === 'cheeseboard' && (
-                                <CheeseboardGame puzzle={puzzle} onProgress={handleProgress} onComplete={handleComplete} submitting={submitting} />
+                                <CheeseboardGame puzzle={puzzle} onProgress={handleProgress} onComplete={handleComplete} submitting={submitting} sound={sound} />
                             )}
                             {activeGame === 'chess' && (
-                                <FamilyChessGame puzzle={puzzle} onProgress={handleProgress} onComplete={handleComplete} submitting={submitting} />
+                                <FamilyChessGame puzzle={puzzle} onProgress={handleProgress} onComplete={handleComplete} submitting={submitting} sound={sound} />
                             )}
                             {activeGame === 'ayo' && (
-                                <AyoGame puzzle={puzzle} onProgress={handleProgress} onComplete={handleComplete} submitting={submitting} />
+                                <AyoGame puzzle={puzzle} onProgress={handleProgress} onComplete={handleComplete} submitting={submitting} sound={sound} />
                             )}
                             {activeGame === 'minesweeper' && (
-                                <MinesweeperGame puzzle={puzzle} onProgress={handleProgress} onComplete={handleComplete} submitting={submitting} />
+                                <MinesweeperGame puzzle={puzzle} onProgress={handleProgress} onComplete={handleComplete} submitting={submitting} sound={sound} />
                             )}
                         </>
                     )}

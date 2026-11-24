@@ -7,6 +7,7 @@ declare(strict_types=1);
  * Developed by Advanced Technology Group (ATG Pods 3 & 4)
  */
 
+$router->map('GET', '/living-avatar', 'App\controller\PublicLivingAvatarController@show', 'public_living_avatar');
 $router->map('GET', '/member/emoji-studio', 'App\controller\members\AtgEmojiController@studio', 'atg_emoji_studio');
 $router->map('GET', '/member/emojiStudio', 'App\controller\members\AtgEmojiController@studio', 'atg_emoji_studio_alias');
 $router->map('GET', '/api/emoji/catalog', 'App\controller\members\AtgEmojiController@catalog', 'api_emoji_catalog');
@@ -15,6 +16,9 @@ $router->map('GET', '/api/emoji/svg/[*:id]', 'App\controller\members\AtgEmojiCon
 $router->map('POST', '/api/emoji/save-avatar', 'App\controller\members\AtgEmojiController@saveAvatar', 'api_emoji_save_avatar');
 $router->map('POST', '/api/emoji/photo-to-avatar', 'App\controller\members\AtgEmojiController@photoToAvatar', 'api_emoji_photo_to_avatar');
 $router->map('POST', '/api/emoji/transform-photo-avatar', 'App\controller\members\AtgEmojiController@transformPhotoAvatar', 'api_emoji_transform_photo_avatar');
+$router->map('POST', '/api/emoji/talking-avatar/render', 'App\controller\members\AtgEmojiController@renderTalkingAvatar', 'api_emoji_talking_avatar_render');
+$router->map('GET', '/api/emoji/talking-avatar/status/[a:jobId]', 'App\controller\members\AtgEmojiController@talkingAvatarStatus', 'api_emoji_talking_avatar_status');
+$router->map('GET', '/api/emoji/talking-avatar/video/[a:jobId]', 'App\controller\members\AtgEmojiController@streamTalkingAvatarVideo', 'api_emoji_talking_avatar_video');
 // RFC-0011 Me-stickers (session-gated: must NOT be in $publicControllers)
 $router->map('POST', '/api/emoji/me-stickers/face', 'App\controller\members\AtgEmojiController@saveStickerFace', 'api_emoji_me_sticker_face');
 $router->map('POST', '/api/emoji/me-stickers/look', 'App\controller\members\AtgEmojiController@saveStickerLook', 'api_emoji_me_sticker_look');

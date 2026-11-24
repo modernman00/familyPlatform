@@ -9,7 +9,9 @@ import { LightboxModal } from './LightboxModal';
 import { VideoModal } from './VideoModal';
 import { ViewersModal } from './ViewersModal';
 import { SharePortalModal } from './SharePortalModal';
+import { WhatsNewBanner } from './WhatsNewBanner';
 import {
+    extractPreviewableUrls,
     normalizeComment,
     normalizePost,
     unwrapFeedResponse,
@@ -40,6 +42,7 @@ export function FeedShell({ bootstrap = {} }) {
     const [streamFilter, setStreamFilter] = useState('all'); // 'all' | 'tagged'
     const [hashtagFilter, setHashtagFilter] = useState('');
     const [trendingHashtags, setTrendingHashtags] = useState([]);
+    const [showTopicsTray, setShowTopicsTray] = useState(false);
     const [pendingLivePosts, setPendingLivePosts] = useState([]);
     const [highlightedPostNo, setHighlightedPostNo] = useState(null);
 
@@ -210,8 +213,8 @@ export function FeedShell({ bootstrap = {} }) {
             const rawMsg = String(post.postMessage || '');
             if (!rawMsg) return;
 
-            const allMatches = rawMsg.match(/https?:\/\/[^\s<>"']+/gi) || [];
-            const candidateUrls = Array.from(new Set(allMatches.map((u) => u.replace(/[.,;!?)]+$/, '')))).filter((u) => {
+            const allMatches = extractPreviewableUrls(rawMsg, 6);
+            const candidateUrls = allMatches.filter((u) => {
                 if (/\.(?:jpe?g|png|webp|avif|gif)(?:\?.*)?$/i.test(u)) return false;
                 if (parseVideoUrl(u)) return false;
                 return true;
@@ -551,8 +554,8 @@ export function FeedShell({ bootstrap = {} }) {
         setPosts((prev) => prev.filter((p) => String(p.post_no) !== String(postNo)));
     }, []);
 
-    const handleOpenLightbox = useCallback((images, index, p) => {
-        setLightboxState({ isOpen: true, images, index, postNo: p.post_no });
+    const handleOpenLightbox = useCallback((images, index, p, startAnimated = false) => {
+        setLightboxState({ isOpen: true, images, index, postNo: p.post_no, startAnimated: Boolean(startAnimated) });
     }, []);
 
     const handleOpenVideo = useCallback((videos, index) => {
@@ -730,6 +733,9 @@ export function FeedShell({ bootstrap = {} }) {
 
     return (
         <div ref={shellRef} id="postIt" className="feed-posts-container" data-testid="feed-island-shell">
+            {/* What's New Banner (Preact-native, hydrated from resources/data/whats_new.php) */}
+            <WhatsNewBanner whatsNew={bootstrap?.whatsNew} />
+
             {/* Error Alert */}
             {errorMessage && (
                 <div className="alert alert-danger shadow-sm rounded-3 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-2" role="alert">
@@ -855,16 +861,54 @@ export function FeedShell({ bootstrap = {} }) {
                         </span>
                     </button>
                 </div>
-                {streamFilter === 'tagged' && (
-                    <span className="text-muted" style={{ fontSize: '0.875rem' }}>
-                        Showing memories featuring you
-                    </span>
-                )}
+                <div className="d-flex align-items-center gap-2 ms-auto">
+                    {streamFilter === 'tagged' && (
+                        <span className="text-muted" style={{ fontSize: '0.875rem' }}>
+                            Showing memories featuring you
+                        </span>
+                    )}
+                    {trendingHashtags.length > 0 && !hashtagFilter && (
+                        <button
+                            type="button"
+                            className={`btn btn-sm rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-2 transition-all ${showTopicsTray ? 'btn-primary text-white shadow-xs' : 'border shadow-2xs'}`}
+                            onClick={() => setShowTopicsTray((prev) => !prev)}
+                            aria-expanded={showTopicsTray}
+                            aria-controls="family-topics-tray"
+                            title={showTopicsTray ? 'Hide Family Topics & Milestones' : 'Show Family Topics & Milestones'}
+                            style={{
+                                fontSize: '0.82rem',
+                                whiteSpace: 'nowrap',
+                                flexShrink: 0,
+                                minHeight: '44px',
+                                ...(showTopicsTray
+                                    ? {}
+                                    : {
+                                        backgroundColor: 'var(--card-bg, #ffffff)',
+                                        color: 'var(--text-main, #0f172a)',
+                                    }),
+                            }}
+                        >
+                            <i className="bi bi-tags-fill" aria-hidden="true" />
+                            <span>Topics</span>
+                            <span
+                                className={`badge rounded-pill ${showTopicsTray ? 'bg-white text-primary' : 'bg-secondary bg-opacity-25'}`}
+                                style={{
+                                    fontSize: '0.68rem',
+                                    color: showTopicsTray ? undefined : 'var(--text-main, #0f172a)',
+                                }}
+                            >
+                                {trendingHashtags.length}
+                            </span>
+                            <i className={`bi ${showTopicsTray ? 'bi-chevron-up' : 'bi-chevron-down'}`} aria-hidden="true" />
+                        </button>
+                    )}
+                </div>
             </div>
 
-            {/* Trending Family Hashtags Carousel */}
-            {trendingHashtags.length > 0 && !hashtagFilter && (
+            {/* Trending Family Hashtags Carousel (hidden by default to save vertical space) */}
+            {showTopicsTray && trendingHashtags.length > 0 && !hashtagFilter && (
                 <div
+                    id="family-topics-tray"
                     className="trending-hashtags-tray card border-0 shadow-sm mb-4 p-3"
                     style={{ borderRadius: '14px', backgroundColor: 'var(--card-bg)' }}
                 >
@@ -875,7 +919,15 @@ export function FeedShell({ bootstrap = {} }) {
                                 Family Topics &amp; Milestones
                             </span>
                         </div>
-                        <span className="text-muted" style={{ fontSize: '0.875rem' }}>Click to filter</span>
+                        <button
+                            type="button"
+                            className="btn btn-sm btn-link text-muted text-decoration-none p-0 px-2"
+                            onClick={() => setShowTopicsTray(false)}
+                            aria-label="Hide Family Topics & Milestones"
+                            style={{ fontSize: '0.82rem', minHeight: '44px', whiteSpace: 'nowrap', flexShrink: 0 }}
+                        >
+                            Hide
+                        </button>
                     </div>
                     <div className="d-flex gap-2 flex-wrap align-items-center">
                         {trendingHashtags.map((item) => (
@@ -884,7 +936,10 @@ export function FeedShell({ bootstrap = {} }) {
                                 type="button"
                                 className="btn btn-sm family-hashtag-pill d-inline-flex align-items-center gap-1 shadow-xs"
                                 style={{ minHeight: '44px', whiteSpace: 'nowrap', flexShrink: 0 }}
-                                onClick={() => handleSelectHashtag(item.tag)}
+                                onClick={() => {
+                                    setShowTopicsTray(false);
+                                    handleSelectHashtag(item.tag);
+                                }}
                                 title={`View family memories tagged #${item.tag}`}
                             >
                                 <span className="fw-semibold">#{item.tag}</span>
@@ -1025,6 +1080,7 @@ export function FeedShell({ bootstrap = {} }) {
                 isOpen={lightboxState.isOpen}
                 images={lightboxState.images}
                 initialIndex={lightboxState.index}
+                initialAnimate={Boolean(lightboxState.startAnimated)}
                 post={activeLightboxPost}
                 bootstrap={profileBootstrap}
                 onClose={() => setLightboxState({ isOpen: false, images: [], index: 0, postNo: null })}

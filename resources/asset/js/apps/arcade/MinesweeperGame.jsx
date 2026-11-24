@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
-import { playArcadeSfx, formatElapsedMs } from './arcadeEngine';
+import { formatElapsedMs } from './arcadeEngine';
+import { createGameSfx } from './hooks/useSoundEffects';
 import styles from './ArcadeShell.module.css';
 
-export function MinesweeperGame({ puzzle, onProgress, onComplete, submitting }) {
+export function MinesweeperGame({ puzzle, onProgress, onComplete, submitting, sound }) {
+    const playArcadeSfx = createGameSfx(sound);
     const rows = puzzle?.rows || 8;
     const cols = puzzle?.cols || 8;
     const totalMines = puzzle?.totalMines || 10;

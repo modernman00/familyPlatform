@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
-import { playArcadeSfx, formatElapsedMs } from './arcadeEngine';
+import { formatElapsedMs } from './arcadeEngine';
+import { triggerHaptic } from './hooks/useSoundEffects';
 import styles from './ArcadeShell.module.css';
 
 function fnv1aHex(input) {
@@ -11,7 +12,7 @@ function fnv1aHex(input) {
     return hash.toString(16).padStart(8, '0');
 }
 
-export function KinWordGame({ puzzle, onProgress, onComplete, submitting }) {
+export function KinWordGame({ puzzle, onProgress, onComplete, submitting, sound }) {
     const seedKey = puzzle?.seedKey || '';
     const manifest = puzzle?.groupManifest || {};
     const maxMistakes = puzzle?.maxMistakes || 4;
@@ -58,7 +59,8 @@ export function KinWordGame({ puzzle, onProgress, onComplete, submitting }) {
 
     const toggleTile = (word) => {
         if (completedRef.current || submitting) return;
-        playArcadeSfx('tick');
+        triggerHaptic(10);
+        sound?.playTap?.();
         setSelected((prev) => {
             if (prev.includes(word)) {
                 return prev.filter((w) => w !== word);
@@ -77,7 +79,8 @@ export function KinWordGame({ puzzle, onProgress, onComplete, submitting }) {
             }
             return copy;
         });
-        playArcadeSfx('tick');
+        triggerHaptic(10);
+        sound?.playTap?.();
     };
 
     const handleSubmitGroup = () => {
@@ -98,7 +101,8 @@ export function KinWordGame({ puzzle, onProgress, onComplete, submitting }) {
             setRemainingTiles((prev) => prev.filter((w) => !selected.includes(w)));
             setSelected([]);
             replayRef.current.push({ t: Date.now() - startTimeRef.current, group: match.title });
-            playArcadeSfx('connect', nextSolved.length * 4);
+            triggerHaptic(16);
+            sound?.playRowComplete?.();
             setStatusNote(`Found "${match.title}"!`);
 
             // Native Web Animations API spring reveal (zero-bundle overhead)
@@ -121,7 +125,8 @@ export function KinWordGame({ puzzle, onProgress, onComplete, submitting }) {
                 completedRef.current = true;
                 const finalMs = Date.now() - startTimeRef.current;
                 setElapsedMs(finalMs);
-                playArcadeSfx('complete');
+                triggerHaptic(20);
+                sound?.playVictory?.();
                 setStatusNote('Splendid! All 4 word groups solved!');
                 if (onComplete) {
                     onComplete({
@@ -152,7 +157,8 @@ export function KinWordGame({ puzzle, onProgress, onComplete, submitting }) {
 
             const nextMistakes = mistakes + 1;
             setMistakes(nextMistakes);
-            playArcadeSfx('error');
+            triggerHaptic(18);
+            sound?.playError?.();
             if (nextMistakes >= maxMistakes) {
                 setStatusNote('Out of hearts! Board reset so you can try again.');
                 setRemainingTiles(Array.isArray(puzzle?.tiles) ? [...puzzle.tiles] : []);
@@ -182,7 +188,8 @@ export function KinWordGame({ puzzle, onProgress, onComplete, submitting }) {
                             setHintsUsed((h) => h + 1);
                             setSelected(quartet.slice(0, 2));
                             setStatusNote(`Hint: highlighted 2 words from "${manifest[key].title}".`);
-                            playArcadeSfx('tick');
+                            triggerHaptic(10);
+                            sound?.playTap?.();
                             return;
                         }
                     }

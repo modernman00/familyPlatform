@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
-import { playArcadeSfx, formatElapsedMs } from './arcadeEngine';
+import { formatElapsedMs } from './arcadeEngine';
+import { createGameSfx } from './hooks/useSoundEffects';
 import styles from './ArcadeShell.module.css';
 
 const REGION_COLOURS = [
@@ -7,7 +8,8 @@ const REGION_COLOURS = [
     '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#eab308',
 ];
 
-export function CheeseboardGame({ puzzle, onProgress, onComplete, submitting }) {
+export function CheeseboardGame({ puzzle, onProgress, onComplete, submitting, sound }) {
+    const playArcadeSfx = createGameSfx(sound);
     const size = puzzle?.size || 7;
     const regions = puzzle?.regions || [];
     const targetQueens = puzzle?.targetQueens || size;

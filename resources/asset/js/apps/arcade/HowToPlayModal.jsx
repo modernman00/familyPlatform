@@ -229,6 +229,92 @@ const KINPULSE_STEPS = [
     { phase: 'Won', active: -1, note: 'Sequence mastered! Ready to play KinPulse.' },
 ];
 
+// Ayò Olópon demo. Pits 0-5 are South (you), 6-11 are North (opponent).
+// `hl` marks the pits being played, `cap` marks pits just captured.
+const AYO_START = [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4];
+const AYO_SCENE = [6, 4, 4, 3, 6, 2, 3, 3, 5, 4, 4, 4];
+const AYO_STEPS = [
+    { pits: AYO_START, hl: [], cap: [], score: 0, note: 'The board starts with 4 seeds in each of the 12 pits. You own the bottom row.' },
+    { pits: AYO_START, hl: [3], cap: [], score: 0, note: 'Choose a pit on your side — pick up the 4 seeds in the highlighted pit.' },
+    { pits: [4, 4, 4, 0, 5, 5, 5, 5, 4, 4, 4, 4], hl: [4, 5, 6, 7], cap: [], score: 0, note: 'Sow anti-clockwise, one seed per pit. The last pit holds 5, so nothing is captured.' },
+    { pits: AYO_SCENE, hl: [5, 6, 7], cap: [], score: 0, note: 'Later in the game: your end pit holds 2 seeds, and the two opponent pits ahead each hold 3.' },
+    { pits: [6, 4, 4, 3, 6, 0, 4, 4, 5, 4, 4, 4], hl: [6, 7], cap: [], score: 0, note: 'Sow 2 seeds. The last seed lands on the opponent’s side and makes EXACTLY 4 — a capture (jẹ mẹ́rin)!' },
+    { pits: [6, 4, 4, 3, 6, 0, 0, 0, 5, 4, 4, 4], hl: [], cap: [6, 7], score: 8, note: 'Chain capture: the pit right behind it also holds 4, so you take both — 8 seeds!' },
+    { pits: [6, 4, 4, 3, 6, 0, 0, 0, 5, 4, 4, 4], hl: [], cap: [], score: 8, note: 'Fair play: you may never starve your opponent. If their side is empty, you must feed them.' },
+    { pits: [6, 4, 4, 3, 6, 0, 0, 0, 5, 4, 4, 4], hl: [], cap: [], score: 8, note: 'The first to capture 25 seeds wins. Ready to play the real board?' },
+];
+
+// ---- Wordie demo: answer is HEART. g = green, y = gold, x = grey. ----
+const WORDIE_STEPS = [
+    { rows: [], note: 'Guess the hidden 5-letter word. You have 6 tries.' },
+    { rows: [['CLOUD', 'xxxxx']], note: 'Guess 1: CLOUD — every tile is grey, so none of those letters are in the word.' },
+    { rows: [['CLOUD', 'xxxxx'], ['SHARE', 'xyggy']], note: 'Guess 2: SHARE — A and R are green (right spot). H and E are gold (wrong spot).' },
+    { rows: [['CLOUD', 'xxxxx'], ['SHARE', 'xyggy']], note: 'Green letters stay anchored. Move the gold H and E into new positions.' },
+    { rows: [['CLOUD', 'xxxxx'], ['SHARE', 'xyggy'], ['HEART', 'ggggg']], note: 'Guess 3: HEART — all green. You solved it!' },
+    { rows: [['CLOUD', 'xxxxx'], ['SHARE', 'xyggy'], ['HEART', 'ggggg']], note: 'Fewer guesses earn more Family Cup points. Ready to play?' },
+];
+const WORDIE_COLOURS = {
+    g: { bg: '#15803d', fg: '#ffffff' },
+    y: { bg: '#fcd34d', fg: '#1c1917' },
+    x: { bg: '#475569', fg: '#ffffff' },
+};
+
+// ---- Cheeseboard (Queens) demo: 4x4 with four colour territories. ----
+const CHEESE_REGIONS = ['AABB', 'CCBB', 'CDDD', 'DDDD'];
+const CHEESE_COLOURS = { A: '#fecdd3', B: '#bae6fd', C: '#fde68a', D: '#bbf7d0' };
+const CHEESE_STEPS = [
+    { crowns: [], crosses: [], note: 'Each colour is a territory. Place one 👑 in every row, column and colour.' },
+    { crowns: [[0, 1]], crosses: [], note: 'Start with the smallest territory (pink). Try a crown in its right-hand square.' },
+    { crowns: [[0, 1]], crosses: [[0, 0], [0, 2], [1, 0], [1, 1], [1, 2]], note: 'Halo rule: crowns cannot touch, even diagonally — cross out every neighbour.' },
+    { crowns: [[0, 1], [2, 0]], crosses: [[0, 0], [0, 2], [1, 0], [1, 1], [1, 2], [2, 1], [3, 0], [3, 1]], note: 'Yellow has only one open square left, so the crown must go there.' },
+    { crowns: [[0, 1], [2, 0], [1, 3]], crosses: [[0, 0], [0, 2], [0, 3], [1, 0], [1, 1], [1, 2], [2, 1], [2, 2], [2, 3], [3, 0], [3, 1]], note: 'Row 2 has one open square left — place a crown and cross out its neighbours.' },
+    { crowns: [[0, 1], [2, 0], [1, 3], [3, 2]], crosses: [[0, 0], [0, 2], [0, 3], [1, 0], [1, 1], [1, 2], [2, 1], [2, 2], [2, 3], [3, 0], [3, 1], [3, 3]], note: 'The last crown fits the final row, column and territory.' },
+    { crowns: [[0, 1], [2, 0], [1, 3], [3, 2]], crosses: [], note: 'Solved! One crown per row, column and colour, with none touching.' },
+];
+
+// ---- Family Chess demo: sparse boards that teach each piece. ----
+const chessXY = (sq) => [sq.charCodeAt(0) - 97, 8 - parseInt(sq[1], 10)];
+const chessSq = (c, r) => `${String.fromCharCode(97 + c)}${8 - r}`;
+const DIAG = [[1, 1], [1, -1], [-1, 1], [-1, -1]];
+const ORTH = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+const chessRays = (from, dirs) => {
+    const [c0, r0] = chessXY(from);
+    const out = [];
+    dirs.forEach(([dc, dr]) => {
+        let c = c0 + dc;
+        let r = r0 + dr;
+        while (c >= 0 && c < 8 && r >= 0 && r < 8) {
+            out.push(chessSq(c, r));
+            c += dc;
+            r += dr;
+        }
+    });
+    return out;
+};
+const CHESS_STEPS = [
+    { pieces: { e2: '♙' }, hl: ['e3', 'e4'], note: 'A pawn moves forward 1 square, or 2 from its starting square.' },
+    { pieces: { e4: '♙', d5: '♟' }, hl: ['d5', 'e5'], note: 'Pawns capture diagonally. This pawn can take the black pawn on d5.' },
+    { pieces: { g1: '♘' }, hl: ['f3', 'h3', 'e2'], note: 'A knight jumps in an L-shape and can leap over other pieces.' },
+    { pieces: { c1: '♗' }, hl: chessRays('c1', DIAG), note: 'A bishop slides any distance along a diagonal.' },
+    { pieces: { a1: '♖' }, hl: chessRays('a1', ORTH), note: 'A rook slides any distance in a straight line.' },
+    { pieces: { d4: '♕' }, hl: chessRays('d4', [...DIAG, ...ORTH]), note: 'The queen combines rook and bishop — any direction, any distance.' },
+    { pieces: { e1: '♖', e8: '♚' }, hl: ['e8'], note: 'Check! The rook attacks the black king, so black must respond at once.' },
+    { pieces: { g6: '♔', g7: '♕', h8: '♚' }, hl: ['h8'], note: 'Checkmate! The king is attacked and has no safe square. You win.' },
+];
+
+// ---- Minesweeper demo: 3x3 grid with mines at (0,2) and (2,0). ----
+const MINE_NUMBERS = [[0, 1, 'M'], [1, 2, 1], ['M', 1, 0]];
+const MINE_STEPS = [
+    { open: [], flags: [], hl: [], note: 'Two mines are hidden in this grid. Tap a square to reveal it.' },
+    { open: ['0,0', '0,1', '1,0', '1,1'], flags: [], hl: ['0,0'], note: 'A 0 touches no mines, so it opens its neighbours automatically.' },
+    { open: ['0,0', '0,1', '1,0', '1,1', '1,2', '2,1', '2,2'], flags: [], hl: ['2,2'], note: 'Another 0 in the opposite corner opens even more of the board.' },
+    { open: ['0,0', '0,1', '1,0', '1,1', '1,2', '2,1', '2,2'], flags: [], hl: ['0,1'], note: 'This 1 touches only one hidden square, so that square must be a mine.' },
+    { open: ['0,0', '0,1', '1,0', '1,1', '1,2', '2,1', '2,2'], flags: ['0,2'], hl: ['0,2'], note: 'Flag it with 🚩 so you never tap it by accident.' },
+    { open: ['0,0', '0,1', '1,0', '1,1', '1,2', '2,1', '2,2'], flags: ['0,2'], hl: ['1,0'], note: 'This 1 also touches just one hidden square — another mine.' },
+    { open: ['0,0', '0,1', '1,0', '1,1', '1,2', '2,1', '2,2'], flags: ['0,2', '2,0'], hl: ['2,0'], note: 'Flag the second mine.' },
+    { open: ['0,0', '0,1', '1,0', '1,1', '1,2', '2,1', '2,2'], flags: ['0,2', '2,0'], hl: [], note: 'Every safe square is open and both mines are flagged. You win!' },
+];
+
 export function HowToPlayModal({ initialGame = 'kinzip', onClose }) {
     const [demoGame, setDemoGame] = useState(GAME_GUIDES[initialGame] ? initialGame : 'kinzip');
     const [activeView, setActiveView] = useState('demo'); // 'demo' | 'strategy'
@@ -388,6 +474,208 @@ export function HowToPlayModal({ initialGame = 'kinzip', onClose }) {
                             })}
                         </div>
                     )}
+                    <p className={styles.demoNarration} aria-live="polite">
+                        <strong>Step {step + 1}/{guide.totalSteps}:</strong> {current.note}
+                    </p>
+                </div>
+            );
+        }
+
+        if (demoGame === 'wordie') {
+            const current = WORDIE_STEPS[step] || WORDIE_STEPS[0];
+            const rows = [...current.rows];
+            while (rows.length < 3) rows.push(['', '']);
+            return (
+                <div className={styles.demoBoardCenter}>
+                    <div role="img" aria-label="Wordie live platform demonstration" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        {rows.map(([word, marks], r) => (
+                            <div key={r} style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                                {[0, 1, 2, 3, 4].map((i) => {
+                                    const colour = marks ? WORDIE_COLOURS[marks[i]] : null;
+                                    return (
+                                        <div
+                                            key={i}
+                                            style={{
+                                                width: 44,
+                                                height: 44,
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                fontWeight: 800,
+                                                fontSize: '1.25rem',
+                                                borderRadius: 8,
+                                                flexShrink: 0,
+                                                background: colour ? colour.bg : '#fff7ed',
+                                                color: colour ? colour.fg : '#1c1917',
+                                                border: `2px solid ${colour ? colour.bg : '#d6c3a5'}`,
+                                            }}
+                                        >
+                                            {word ? word[i] : ''}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        ))}
+                    </div>
+                    <p className={styles.demoNarration} aria-live="polite">
+                        <strong>Step {step + 1}/{guide.totalSteps}:</strong> {current.note}
+                    </p>
+                </div>
+            );
+        }
+
+        if (demoGame === 'cheeseboard') {
+            const current = CHEESE_STEPS[step] || CHEESE_STEPS[0];
+            const has = (list, r, c) => list.some(([rr, cc]) => rr === r && cc === c);
+            return (
+                <div className={styles.demoBoardCenter}>
+                    <div role="img" aria-label="Cheeseboard live platform demonstration" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 44px)', gap: 4 }}>
+                        {CHEESE_REGIONS.map((row, r) => row.split('').map((reg, c) => (
+                            <div
+                                key={`${r}-${c}`}
+                                style={{
+                                    width: 44,
+                                    height: 44,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    borderRadius: 8,
+                                    fontSize: '1.25rem',
+                                    fontWeight: 700,
+                                    color: '#1c1917',
+                                    background: CHEESE_COLOURS[reg],
+                                    border: '2px solid rgba(28,25,23,0.25)',
+                                }}
+                            >
+                                {has(current.crowns, r, c) ? '👑' : has(current.crosses, r, c) ? '×' : ''}
+                            </div>
+                        )))}
+                    </div>
+                    <p className={styles.demoNarration} aria-live="polite">
+                        <strong>Step {step + 1}/{guide.totalSteps}:</strong> {current.note}
+                    </p>
+                </div>
+            );
+        }
+
+        if (demoGame === 'chess') {
+            const current = CHESS_STEPS[step] || CHESS_STEPS[0];
+            return (
+                <div className={styles.demoBoardCenter}>
+                    <div role="img" aria-label="Family Chess live platform demonstration" style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 36px)', border: '2px solid #78350f', borderRadius: 8, overflow: 'hidden' }}>
+                        {Array.from({ length: 64 }, (_, i) => {
+                            const r = Math.floor(i / 8);
+                            const c = i % 8;
+                            const sq = chessSq(c, r);
+                            const isHl = current.hl.includes(sq);
+                            const dark = (r + c) % 2 === 1;
+                            return (
+                                <div
+                                    key={sq}
+                                    style={{
+                                        width: 36,
+                                        height: 36,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontSize: '1.25rem',
+                                        color: '#1c1917',
+                                        background: isHl ? '#fcd34d' : dark ? '#d6b98c' : '#fff7ed',
+                                        transition: 'background 0.3s',
+                                    }}
+                                >
+                                    {current.pieces[sq] || ''}
+                                </div>
+                            );
+                        })}
+                    </div>
+                    <p className={styles.demoNarration} aria-live="polite">
+                        <strong>Step {step + 1}/{guide.totalSteps}:</strong> {current.note}
+                    </p>
+                </div>
+            );
+        }
+
+        if (demoGame === 'minesweeper') {
+            const current = MINE_STEPS[step] || MINE_STEPS[0];
+            return (
+                <div className={styles.demoBoardCenter}>
+                    <div role="img" aria-label="Minesweeper live platform demonstration" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 44px)', gap: 4 }}>
+                        {MINE_NUMBERS.map((row, r) => row.map((val, c) => {
+                            const key = `${r},${c}`;
+                            const isOpen = current.open.includes(key);
+                            const isFlag = current.flags.includes(key);
+                            const isHl = current.hl.includes(key);
+                            return (
+                                <div
+                                    key={key}
+                                    style={{
+                                        width: 44,
+                                        height: 44,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        borderRadius: 8,
+                                        fontWeight: 800,
+                                        fontSize: '1.25rem',
+                                        background: isOpen ? '#fff7ed' : '#475569',
+                                        color: '#1c1917',
+                                        border: `2px solid ${isHl ? '#b45309' : isOpen ? '#d6c3a5' : '#334155'}`,
+                                        boxShadow: isHl ? '0 0 0 3px rgba(180,83,9,0.35)' : 'none',
+                                    }}
+                                >
+                                    {isFlag ? '🚩' : isOpen && val !== 0 ? val : ''}
+                                </div>
+                            );
+                        }))}
+                    </div>
+                    <p className={styles.demoNarration} aria-live="polite">
+                        <strong>Step {step + 1}/{guide.totalSteps}:</strong> {current.note}
+                    </p>
+                </div>
+            );
+        }
+
+        if (demoGame === 'ayo') {
+            const current = AYO_STEPS[step] || AYO_STEPS[0];
+            const renderPit = (idx) => {
+                const isHl = current.hl.includes(idx);
+                const isCap = current.cap.includes(idx);
+                return (
+                    <div
+                        key={idx}
+                        style={{
+                            width: 44,
+                            height: 44,
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: 700,
+                            fontSize: '0.875rem',
+                            color: '#1c1917',
+                            background: isCap ? '#fde68a' : isHl ? '#fcd34d' : '#fff7ed',
+                            border: `2px solid ${isCap || isHl ? '#b45309' : '#d6c3a5'}`,
+                            boxShadow: isHl || isCap ? '0 0 0 3px rgba(180,83,9,0.25)' : 'none',
+                            transition: 'background 0.3s, box-shadow 0.3s',
+                            flexShrink: 0,
+                        }}
+                    >
+                        {current.pits[idx]}
+                    </div>
+                );
+            };
+            const northRow = [11, 10, 9, 8, 7, 6];
+            const southRow = [0, 1, 2, 3, 4, 5];
+            return (
+                <div className={styles.demoBoardCenter}>
+                    <div role="img" aria-label="Ayò Olópon live platform demonstration" style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: 12, borderRadius: 16, background: '#78350f' }}>
+                        <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>{northRow.map(renderPit)}</div>
+                        <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>{southRow.map(renderPit)}</div>
+                    </div>
+                    <p className={styles.demoNarration}>
+                        <strong>Seeds captured: {current.score}/25</strong>
+                    </p>
                     <p className={styles.demoNarration} aria-live="polite">
                         <strong>Step {step + 1}/{guide.totalSteps}:</strong> {current.note}
                     </p>

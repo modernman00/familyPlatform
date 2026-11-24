@@ -173,6 +173,10 @@ export function StudioShell({ bootstrap = {} }) {
                             <span>{m.label}</span>
                         </button>
                     ))}
+                    <a href="/director-mode" className={styles.btn} style={{ whiteSpace: 'nowrap', flexShrink: 0, minHeight: '44px' }}>
+                        <i className="bi bi-camera-reels-fill" aria-hidden="true" />
+                        <span>Director Mode</span>
+                    </a>
                     <a href="/reels" className={styles.btn}>
                         <i className="bi bi-collection-play" aria-hidden="true" />
                         <span>View Reels</span>

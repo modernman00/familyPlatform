@@ -71,6 +71,7 @@
   #pwa-install-banner .pwa-banner-actions {
     margin-top: 12px;
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 8px;
   }
@@ -79,6 +80,8 @@
     align-items: center;
     justify-content: center;
     gap: 6px;
+    width: auto;
+    max-width: 100%;
     flex: 1 1 auto;
     min-height: 44px;
     min-width: 44px;

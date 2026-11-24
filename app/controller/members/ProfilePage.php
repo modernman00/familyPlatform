@@ -114,6 +114,9 @@ final class ProfilePage extends ProcessImg
                 $pinnedWishlists = [];
             }
 
+            $whatsNewPath = dirname(__DIR__, 3) . '/resources/data/whats_new.php';
+            $whatsNewData = is_file($whatsNewPath) ? require $whatsNewPath : null;
+
             $usePreactFeed = true;
             $feedBootstrapJson = json_encode([
                 'famCode' => (string)($data['famCode'] ?? ''),
@@ -126,6 +129,7 @@ final class ProfilePage extends ProcessImg
                 'postAudiences' => $postAudiences,
                 'pusherKey' => (string)($_ENV['MIX_PUSHER_APP_KEY'] ?? getenv('MIX_PUSHER_APP_KEY') ?: ''),
                 'pusherCluster' => (string)($_ENV['MIX_PUSHER_APP_CLUSTER'] ?? getenv('MIX_PUSHER_APP_CLUSTER') ?: 'eu'),
+                'whatsNew' => is_array($whatsNewData) ? $whatsNewData : null,
             ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?: '{}';
 
             view('member/profilePage', [

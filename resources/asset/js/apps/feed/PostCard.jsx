@@ -9,6 +9,7 @@ import { RichTextTokens } from './RichTextTokens';
 import {
     TEXT_STAGE_CATALOG,
     formatRelativeTime,
+    getArcadeChallengeMeta,
     getAvatarUrl,
     getInitials,
     getMediaCaption,
@@ -69,6 +70,8 @@ export const PostCard = memo(function PostCard({
     const [slideFocals, setSlideFocals] = useState({});
     const carouselTrackRef = useRef(null);
     const [convertingStage, setConvertingStage] = useState(false);
+    const [arcadeThumbFailed, setArcadeThumbFailed] = useState(false);
+    const [arcadeLinkCopied, setArcadeLinkCopied] = useState(false);
     const reactionCloseTimerRef = useRef(null);
     const reactionLongPressTimerRef = useRef(null);
     const reactionWrapperRef = useRef(null);
@@ -123,6 +126,7 @@ export const PostCard = memo(function PostCard({
 
     const isOfficial = Boolean(post.is_official || post.id === 'FAMILY_PLATFORM_OFFICIAL');
     const isHistorian = Boolean(post.is_historian || post.id === 'FAMILY_HISTORIAN');
+    const canSharePost = ownPost || isHistorian || isOfficial;
     const isTaggedSelf = Array.isArray(post.post_tags)
         && post.post_tags.some((t) => String(t.user_id || t.id) === currentUserId);
 
@@ -135,6 +139,7 @@ export const PostCard = memo(function PostCard({
     const captionText = getMediaCaption(post) || (hasMedia || hasLinkPreview ? '' : stripStyleToken(post.postMessage || ''));
     const hasLivingArEmoji = Boolean(post.ar_emoji && /^[a-z0-9_]+_3d$/i.test(String(post.ar_emoji).trim()));
     const hasRichBody = Boolean(captionText || hasLivingArEmoji);
+    const arcadeMeta = !hasMedia && !pollMeta ? getArcadeChallengeMeta(post) : null;
 
     const cardAccentStyle = {
         borderRadius: isOfficial || isHistorian || isTaggedSelf ? '12px' : '8px',
@@ -237,11 +242,24 @@ export const PostCard = memo(function PostCard({
     const handleConfirmDelete = async () => {
         if (deleting) return;
         setDeleting(true);
+        const encodedPostNo = encodeURIComponent(post.post_no);
         try {
-            await apiFetch(`/post/${encodeURIComponent(post.post_no)}`, {
-                method: 'DELETE',
-                timeoutMs: 45000,
-            }, bootstrap);
+            try {
+                await apiFetch(`/post/${encodedPostNo}`, {
+                    method: 'DELETE',
+                    timeoutMs: 45000,
+                }, bootstrap);
+            } catch (deleteErr) {
+                if (deleteErr?.status === 405) {
+                    await apiFetch(`/post/${encodedPostNo}/delete`, {
+                        method: 'POST',
+                        body: {},
+                        timeoutMs: 45000,
+                    }, bootstrap);
+                } else {
+                    throw deleteErr;
+                }
+            }
             onDeletePost?.(post.post_no);
             notifyToast('Post deleted', 'success');
         } catch (err) {
@@ -563,36 +581,51 @@ export const PostCard = memo(function PostCard({
                                         </li>
                                     </>
                                 ) : (
-                                    <li>
-                                        <button
-                                            type="button"
-                                            className="dropdown-item py-2 d-flex align-items-center gap-2 text-danger"
-                                            style={{ minHeight: '44px', whiteSpace: 'nowrap' }}
-                                            onClick={async () => {
-                                                if (typeof window.openReportModal === 'function') {
-                                                    window.openReportModal('post', post.post_no);
-                                                    return;
-                                                }
-                                                try {
-                                                    await apiFetch('/member/content/report', {
-                                                        method: 'POST',
-                                                        body: {
-                                                            target_type: 'post',
-                                                            target_id: post.post_no,
-                                                            reason: 'inappropriate',
-                                                            details: 'Flagged from family feed',
-                                                        },
-                                                    }, bootstrap);
-                                                    notifyToast('Report submitted to family moderators', 'success');
-                                                } catch (err) {
-                                                    notifyToast(err?.message || 'Unable to submit report.', 'error');
-                                                }
-                                            }}
-                                        >
-                                            <i className="bi bi-flag-fill" aria-hidden="true" />
-                                            <span>Report Post</span>
-                                        </button>
-                                    </li>
+                                    <>
+                                        {canSharePost && (
+                                            <li>
+                                                <button
+                                                    type="button"
+                                                    className="dropdown-item py-2 d-flex align-items-center gap-2"
+                                                    style={{ minHeight: '44px' }}
+                                                    onClick={handleShare}
+                                                >
+                                                    <i className="bi bi-send-fill text-success" style={{ transform: 'rotate(-15deg)', display: 'inline-block' }} aria-hidden="true" />
+                                                    <span>Share Post</span>
+                                                </button>
+                                            </li>
+                                        )}
+                                        <li>
+                                            <button
+                                                type="button"
+                                                className="dropdown-item py-2 d-flex align-items-center gap-2 text-danger"
+                                                style={{ minHeight: '44px', whiteSpace: 'nowrap' }}
+                                                onClick={async () => {
+                                                    if (typeof window.openReportModal === 'function') {
+                                                        window.openReportModal('post', post.post_no);
+                                                        return;
+                                                    }
+                                                    try {
+                                                        await apiFetch('/member/content/report', {
+                                                            method: 'POST',
+                                                            body: {
+                                                                target_type: 'post',
+                                                                target_id: post.post_no,
+                                                                reason: 'inappropriate',
+                                                                details: 'Flagged from family feed',
+                                                            },
+                                                        }, bootstrap);
+                                                        notifyToast('Report submitted to family moderators', 'success');
+                                                    } catch (err) {
+                                                        notifyToast(err?.message || 'Unable to submit report.', 'error');
+                                                    }
+                                                }}
+                                            >
+                                                <i className="bi bi-flag-fill" aria-hidden="true" />
+                                                <span>Report Post</span>
+                                            </button>
+                                        </li>
+                                    </>
                                 )}
                                 {isTaggedSelf && (
                                     <li>
@@ -623,17 +656,26 @@ export const PostCard = memo(function PostCard({
                     <div className="d-flex gap-2">
                         <button
                             type="button"
-                            className="btn btn-danger btn-sm rounded-pill px-3 fw-semibold"
-                            style={{ minHeight: '44px' }}
+                            className="btn btn-danger btn-sm rounded-pill px-3 fw-semibold d-inline-flex align-items-center justify-content-center"
+                            style={{ minHeight: '44px', whiteSpace: 'nowrap', flexShrink: 0 }}
+                            data-spin="true"
                             disabled={deleting}
                             onClick={handleConfirmDelete}
                         >
-                            {deleting ? 'Deleting…' : 'Confirm Delete'}
+                            {deleting ? (
+                                <>
+                                    <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true" />
+                                    Deleting…
+                                </>
+                            ) : (
+                                'Confirm Delete'
+                            )}
                         </button>
                         <button
                             type="button"
                             className="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-semibold"
-                            style={{ minHeight: '44px' }}
+                            style={{ minHeight: '44px', whiteSpace: 'nowrap', flexShrink: 0 }}
+                            disabled={deleting}
                             onClick={() => setConfirmingDelete(false)}
                         >
                             Cancel
@@ -672,27 +714,143 @@ export const PostCard = memo(function PostCard({
                         </button>
                     </div>
                 </div>
+            ) : arcadeMeta ? (
+                <div
+                    className="fp-arcade-card mx-1 mb-3"
+                    data-testid="feed-arcade-challenge-card"
+                    style={{
+                        '--fp-arcade-accent': arcadeMeta.game.accent,
+                        '--fp-arcade-accent-deep': arcadeMeta.game.accentDeep,
+                        '--fp-arcade-glow': arcadeMeta.game.glow,
+                    }}
+                >
+                    <div className="fp-arcade-card__glow" aria-hidden="true" />
+                    <div className="fp-arcade-card__grid" aria-hidden="true" />
+
+                    <div className="fp-arcade-card__top">
+                        <span className="fp-arcade-card__eyebrow">
+                            <i className="bi bi-trophy-fill" aria-hidden="true" />
+                            <span>FAMILY ARCADE CHALLENGE</span>
+                        </span>
+                        <span className="fp-arcade-card__tag">{arcadeMeta.game.tag}</span>
+                    </div>
+
+                    <div className="fp-arcade-card__hero">
+                        <div className="fp-arcade-card__identity">
+                            <div className="fp-arcade-card__emblem" aria-hidden="true">
+                                <i className={`bi ${arcadeMeta.game.icon}`} />
+                            </div>
+                            <div className="fp-arcade-card__titles">
+                                <h6 className="fp-arcade-card__game" title={arcadeMeta.game.name}>
+                                    {arcadeMeta.game.name}
+                                </h6>
+                                <p className="fp-arcade-card__prompt">{arcadeMeta.promptText}</p>
+                            </div>
+                        </div>
+
+                        {(arcadeMeta.scoreFormatted || arcadeMeta.timeLabel) && (
+                            <div className="fp-arcade-card__stats">
+                                {arcadeMeta.scoreFormatted && (
+                                    <div className="fp-arcade-card__stat">
+                                        <span className="fp-arcade-card__stat-label">SCORE</span>
+                                        <span className="fp-arcade-card__stat-value">
+                                            {arcadeMeta.scoreFormatted}
+                                            <small className="fp-arcade-card__stat-unit">pts</small>
+                                        </span>
+                                    </div>
+                                )}
+                                {arcadeMeta.timeLabel && (
+                                    <div className="fp-arcade-card__stat">
+                                        <span className="fp-arcade-card__stat-label">TIME</span>
+                                        <span className="fp-arcade-card__stat-value">
+                                            {arcadeMeta.timeLabel}
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    {!arcadeThumbFailed && (
+                        <a
+                            href={arcadeMeta.shareUrl}
+                            className="fp-arcade-card__preview-link"
+                            aria-label={`Open ${arcadeMeta.game.name} challenge`}
+                        >
+                            <img
+                                src={arcadeMeta.cardImageUrl}
+                                alt={`${arcadeMeta.game.name} challenge card`}
+                                className="fp-arcade-card__preview-img"
+                                loading="lazy"
+                                onError={() => setArcadeThumbFailed(true)}
+                            />
+                        </a>
+                    )}
+
+                    <div className="fp-arcade-card__actions">
+                        <a
+                            href={arcadeMeta.shareUrl}
+                            className="fp-arcade-card__cta"
+                            data-testid="feed-arcade-accept-btn"
+                        >
+                            <i className="bi bi-play-fill" aria-hidden="true" />
+                            <span>Accept Challenge</span>
+                        </a>
+                        <button
+                            type="button"
+                            className="fp-arcade-card__secondary"
+                            onClick={async () => {
+                                const fullUrl = typeof window !== 'undefined'
+                                    ? `${window.location.origin}${arcadeMeta.shareUrl}`
+                                    : arcadeMeta.shareUrl;
+                                try {
+                                    await navigator.clipboard.writeText(fullUrl);
+                                    setArcadeLinkCopied(true);
+                                    notifyToast(`${arcadeMeta.game.name} challenge link copied!`, 'success');
+                                    setTimeout(() => setArcadeLinkCopied(false), 2200);
+                                } catch {
+                                    notifyToast('Could not copy challenge link.', 'error');
+                                }
+                            }}
+                        >
+                            <i className={`bi ${arcadeLinkCopied ? 'bi-check2' : 'bi-link-45deg'}`} aria-hidden="true" />
+                            <span>{arcadeLinkCopied ? 'Copied' : 'Copy Link'}</span>
+                        </button>
+                    </div>
+                </div>
             ) : (
                 !hasMedia && !pollMeta && hasRichBody && (
                     <div className="post-content px-1 mb-3">
                         {stageMeta ? (
                             <div
-                                className={`fp-text-stage fp-text-stage--${stageMeta.slug}`}
+                                className={`fp-text-stage fp-text-stage--${stageMeta.slug}${stageMeta.category === 'scenic' ? ' fp-text-stage--scenic' : ''}`}
                                 data-testid="feed-text-stage-card"
                             >
                                 <div className="fp-text-stage__orb fp-text-stage__orb--a" aria-hidden="true" />
                                 <div className="fp-text-stage__orb fp-text-stage__orb--b" aria-hidden="true" />
-                                <div className="fp-text-stage__grid" aria-hidden="true" />
-                                <div className="fp-text-stage__header">
-                                    <span className="fp-stage-badge">
-                                        {stageMeta.slug === 'alert_pulse' && (
-                                            <span className="fp-stage-badge__pulse" aria-hidden="true" />
-                                        )}
-                                        <span>{stageMeta.badge}</span>
-                                    </span>
-                                </div>
+                                {stageMeta.category === 'scenic' ? (
+                                    <div className="fp-text-stage__bokeh" aria-hidden="true" />
+                                ) : (
+                                    <div className="fp-text-stage__grid" aria-hidden="true" />
+                                )}
+                                {stageMeta.badge && (
+                                    <div className="fp-text-stage__header">
+                                        <span className="fp-stage-badge">
+                                            {stageMeta.slug === 'alert_pulse' && (
+                                                <span className="fp-stage-badge__pulse" aria-hidden="true" />
+                                            )}
+                                            <span>{stageMeta.badge}</span>
+                                        </span>
+                                    </div>
+                                )}
                                 <div
-                                    className={`fp-text-stage__body ${captionText.length <= 95 ? 'fp-text-stage__body--hero' : 'fp-text-stage__body--prose'}`}
+                                    className={`fp-text-stage__body ${
+                                        captionText.length <= 120
+                                            ? 'fp-text-stage__body--hero'
+                                            : captionText.length <= 260
+                                                ? 'fp-text-stage__body--prose'
+                                                : 'fp-text-stage__body--extended'
+                                    }`}
                                 >
                                     {renderTokens(captionText)}
                                 </div>
@@ -720,7 +878,7 @@ export const PostCard = memo(function PostCard({
                                         className="fp-stage-converter__trigger"
                                         disabled={convertingStage}
                                         onClick={handleCyclePostStage}
-                                        title="One-tap convert this post into a 3D futuristic stage"
+                                        title="Cycle through scenic post backdrops and 3D stages"
                                     >
                                         {convertingStage ? (
                                             <span
@@ -729,9 +887,9 @@ export const PostCard = memo(function PostCard({
                                                 style={{ width: '13px', height: '13px', borderWidth: '2px' }}
                                             />
                                         ) : (
-                                            <i className="bi bi-magic" aria-hidden="true" />
+                                            <i className="bi bi-stars" aria-hidden="true" />
                                         )}
-                                        <span>{post.post_style ? '✨ Next 3D Stage' : '✨ Convert to 3D Stage'}</span>
+                                        <span>{post.post_style ? '✨ Next Backdrop' : '✨ Add Backdrop'}</span>
                                     </button>
 
                                     {TEXT_STAGE_CATALOG.map((st) => (
@@ -741,8 +899,15 @@ export const PostCard = memo(function PostCard({
                                             className={`fp-stage-converter__chip ${post.post_style === st.slug ? 'is-active' : ''}`}
                                             disabled={convertingStage}
                                             onClick={() => handleSetPostStage(st.slug)}
-                                            title={`Convert post to ${st.label}`}
+                                            title={`Apply ${st.label} post backdrop`}
                                         >
+                                            {st.swatch && (
+                                                <span
+                                                    className="fp-stage-converter__dot"
+                                                    style={{ background: st.swatch }}
+                                                    aria-hidden="true"
+                                                />
+                                            )}
                                             <span>{st.label}</span>
                                         </button>
                                     ))}
@@ -766,7 +931,7 @@ export const PostCard = memo(function PostCard({
             )}
 
             {/* OpenGraph Link Preview (for text posts without native media) */}
-            {post.link_preview && (post.link_preview.image || post.link_preview.title || post.link_preview.url) && !hasMedia && !stageMeta && (() => {
+            {post.link_preview && (post.link_preview.image || post.link_preview.title || post.link_preview.url) && !hasMedia && !stageMeta && !arcadeMeta && (() => {
                 const lp = post.link_preview;
                 const cleanPreviewImg = String(lp.image || '').replace(/&amp;/g, '&').trim();
                 const showPreviewImg = cleanPreviewImg !== '' && brokenPreviewImgUrl !== lp.image;
@@ -801,6 +966,24 @@ export const PostCard = memo(function PostCard({
                                             ? 'bi-balloon-fill text-warning'
                                             : 'bi-globe2';
 
+                const isInstagramPreview = Boolean(
+                    lp.is_instagram
+                    || lpDomainLower.includes('instagram.com')
+                    || lpDomainLower.includes('instagr.am')
+                );
+                const parsedPreviewRatio = (() => {
+                    if (typeof lp.aspect_ratio !== 'string') return null;
+                    const parts = lp.aspect_ratio.split('/');
+                    if (parts.length !== 2) return null;
+                    const w = parseFloat(parts[0]);
+                    const h = parseFloat(parts[1]);
+                    return Number.isFinite(w) && Number.isFinite(h) && h > 0 ? (w / h) : null;
+                })();
+                const isPortraitPreview = parsedPreviewRatio !== null
+                    ? parsedPreviewRatio < 0.96
+                    : (isInstagramPreview && isSocialVideo);
+                const hasBakedWhatsappPlayBadge = cleanPreviewImg.includes('stp=cmp1_');
+
                 return (
                     <div
                         className="link-preview-container mb-3 px-1"
@@ -813,11 +996,12 @@ export const PostCard = memo(function PostCard({
                             className="link-preview-card text-decoration-none rounded-3 overflow-hidden shadow-sm"
                         >
                             {showPreviewImg && (
-                                <div className="link-preview-card__media">
+                                <div className={`link-preview-card__media ${isPortraitPreview ? 'link-preview-card__media--portrait' : ''}`}>
                                     <img
                                         src={cleanPreviewImg}
                                         alt={lp.title || 'Link preview'}
                                         className="w-100 h-100 object-fit-cover"
+                                        style={isPortraitPreview ? { objectPosition: '50% 24%' } : undefined}
                                         loading="lazy"
                                         referrerPolicy="no-referrer"
                                         onError={() => setBrokenPreviewImgUrl(lp.image)}
@@ -825,7 +1009,7 @@ export const PostCard = memo(function PostCard({
                                     <span className="link-preview-card__platform-pill">
                                         {lp.site_name || lp.domain || 'Web Link'}
                                     </span>
-                                    {isSocialVideo && (
+                                    {isSocialVideo && !hasBakedWhatsappPlayBadge && (
                                         <span className="link-preview-card__play-badge" aria-hidden="true">
                                             <i className="bi bi-play-fill" />
                                         </span>
@@ -962,6 +1146,32 @@ export const PostCard = memo(function PostCard({
                                         }}
                                         loading="lazy"
                                     />
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn btn-sm rounded-pill d-inline-flex align-items-center gap-1"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onOpenLightbox?.([singleImgUrl], 0, post, true);
+                                    }}
+                                    style={{
+                                        position: 'absolute',
+                                        right: 12,
+                                        bottom: 12,
+                                        minHeight: '44px',
+                                        padding: '6px 14px',
+                                        background: 'rgba(15, 23, 42, 0.86)',
+                                        color: '#ffffff',
+                                        border: '1px solid rgba(251, 191, 36, 0.65)',
+                                        fontWeight: 600,
+                                        whiteSpace: 'nowrap',
+                                        flexShrink: 0,
+                                        backdropFilter: 'blur(6px)',
+                                    }}
+                                    title="Animate this photo with 60fps living motion and video export"
+                                >
+                                    <span aria-hidden="true">🎬</span>
+                                    <span>Animate</span>
                                 </button>
                             </div>
                         </div>
@@ -1260,12 +1470,47 @@ export const PostCard = memo(function PostCard({
 
             {/* Videos (Classic Horizontal Multi-Video Carousel or Single Video Aura Stage) */}
             {videos.length > 0 && (
-                <FeedVideoGallery
-                    videos={videos}
-                    postNo={post.post_no}
-                    normalizedMedia={post.normalized_media}
-                    onOpenVideo={onOpenVideo}
-                />
+                <>
+                    <FeedVideoGallery
+                        videos={videos}
+                        postNo={post.post_no}
+                        normalizedMedia={post.normalized_media}
+                        onOpenVideo={onOpenVideo}
+                    />
+                    {post.link_preview?.is_instagram && post.link_preview?.url && (
+                        <div
+                            className="instagram-native-source-bar mx-1 mb-3 p-2.5 rounded-3 d-flex align-items-center justify-content-between gap-2"
+                            data-testid="instagram-native-source-bar"
+                        >
+                            <div className="d-flex align-items-start gap-2.5 min-w-0 flex-grow-1">
+                                <span className="instagram-native-source-bar__icon" aria-hidden="true">
+                                    <i className="bi bi-instagram" />
+                                </span>
+                                <div className="min-w-0 flex-grow-1">
+                                    <div className="fw-bold instagram-native-source-bar__title" title={post.link_preview.title || 'Instagram Reel'}>
+                                        {post.link_preview.title || 'Instagram Reel'}
+                                    </div>
+                                    {post.link_preview.description
+                                        && post.link_preview.description !== 'Watch this reel on Instagram'
+                                        && post.link_preview.description !== 'Watch this video on Instagram' && (
+                                            <p className="mb-0 instagram-native-source-bar__desc" title={post.link_preview.description}>
+                                                {post.link_preview.description}
+                                            </p>
+                                        )}
+                                </div>
+                            </div>
+                            <a
+                                href={post.link_preview.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="instagram-native-source-bar__cta text-decoration-none"
+                            >
+                                <span>Open Reel</span>
+                                <i className="bi bi-box-arrow-up-right" style={{ fontSize: '0.72rem' }} aria-hidden="true" />
+                            </a>
+                        </div>
+                    )}
+                </>
             )}
 
             {/* Classic 3D Poll Arena */}
@@ -1442,7 +1687,7 @@ export const PostCard = memo(function PostCard({
                         <i className="bi bi-chat-quote-fill" style={{ fontSize: '1.3rem', lineHeight: 1 }} aria-hidden="true" />
                     </button>
 
-                    {ownPost && (
+                    {canSharePost && (
                         <button
                             type="button"
                             className="btn btn-action-glyph btn-action-share rounded-circle"

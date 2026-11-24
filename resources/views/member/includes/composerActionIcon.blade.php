@@ -204,6 +204,28 @@
     </span>
     @break
 
+  @case('backdrop')
+    <span class="composer-pill-icon composer-pill-icon--backdrop" aria-hidden="true">
+      <span class="composer-pill-icon__sheen"></span>
+      <span class="composer-pill-icon__spark"></span>
+      <svg class="composer-pill-svg composer-pill-svg--backdrop" width="22" height="22" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true">
+        <defs>
+          <radialGradient id="{{ $p }}-bg-canvas" cx="32%" cy="28%" r="76%">
+            <stop offset="0%" stop-color="#38bdf8"/>
+            <stop offset="48%" stop-color="#0369a1"/>
+            <stop offset="100%" stop-color="#020817"/>
+          </radialGradient>
+        </defs>
+        <rect x="3.8" y="4.8" width="20.4" height="18.4" rx="4.2" fill="url(#{{ $p }}-bg-canvas)" stroke="#7dd3fc" stroke-width="0.9"/>
+        <circle cx="8.2" cy="9.2" r="1.4" fill="#67e8f9" fill-opacity="0.85"/>
+        <circle cx="20.2" cy="8.4" r="1.9" fill="#38bdf8" fill-opacity="0.55"/>
+        <circle cx="19.4" cy="18.8" r="1.5" fill="#bae6fd" fill-opacity="0.8"/>
+        <circle cx="7.6" cy="19.1" r="1.0" fill="#e0f2fe" fill-opacity="0.9"/>
+        <text x="14" y="17.2" text-anchor="middle" fill="#ffffff" font-family="system-ui, -apple-system, sans-serif" font-size="9.6" font-weight="800" letter-spacing="-0.3">Aa</text>
+      </svg>
+    </span>
+    @break
+
   @case('header')
     <svg class="composer-header-svg" width="22" height="22" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true">
       <defs>

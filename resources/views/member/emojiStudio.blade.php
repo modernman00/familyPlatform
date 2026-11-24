@@ -42,7 +42,10 @@
                      title="Tap to react · drag to rotate">
                     {!! $initialSvg !!}
                     @if (!empty($hasProfilePhoto))
-                        {{-- Your real portrait acting out the chosen reaction (same art as the Me-sticker). --}}
+                        {{-- ATG 60fps Living Canvas Stage (LivingHeirloomAnimator + Spring Physics + Particles) --}}
+                        <canvas id="atgPhotoLivingStage" class="atg-photo-living-stage" width="512" height="512"
+                                aria-label="Your animated living photo avatar" hidden></canvas>
+                        {{-- Fallback SVG sticker if Canvas/JS is unavailable. --}}
                         <img id="atgPhotoStickerStage" class="atg-photo-sticker-stage" alt="Your photo avatar" hidden
                              data-base="/api/emoji/avatar-sticker/{{ rawurlencode((string)$stickerUserId) }}/"
                              data-photo-url="{{ $stickerPhotoUrl ?? '' }}"
@@ -66,9 +69,38 @@
                     <button type="button" class="atg-react-btn" data-reaction="point" aria-label="Point at you">🫵</button>
                     <button type="button" class="atg-react-btn" data-reaction="clap" aria-label="Clap">👏</button>
                 </div>
+
+                @if (!empty($hasProfilePhoto))
+                    <div class="atg-photo-pills-row atg-photo-only" role="group" aria-label="Challenge frames">
+                        <button type="button" class="atg-photo-pill" data-photo-frame="none" aria-pressed="true">Clean</button>
+                        <button type="button" class="atg-photo-pill" data-photo-frame="birthday" aria-pressed="false">🥂 Birthday</button>
+                        <button type="button" class="atg-photo-pill" data-photo-frame="sunday" aria-pressed="false">💃 Groove</button>
+                        <button type="button" class="atg-photo-pill" data-photo-frame="proud" aria-pressed="false">👏 Proud</button>
+                        <button type="button" class="atg-photo-pill" data-photo-frame="surprise" aria-pressed="false">😮 News</button>
+                    </div>
+                    <div class="atg-photo-pills-row atg-photo-only" role="group" aria-label="Aura packs">
+                        <button type="button" class="atg-photo-pill" data-photo-pack="classic" aria-pressed="true">✨ Gold</button>
+                        <button type="button" class="atg-photo-pill" data-photo-pack="royal_crown" aria-pressed="false" data-locked="true" title="Try 3 reactions or share to unlock">👑 Crown</button>
+                        <button type="button" class="atg-photo-pill" data-photo-pack="fireworks" aria-pressed="false" data-locked="true" title="Try 5 reactions or download to unlock">🎆 Fireworks</button>
+                        <button type="button" class="atg-photo-pill" data-photo-pack="kente_prism" aria-pressed="false" data-locked="true" title="Try all 8 reactions to unlock">🌈 Prism</button>
+                    </div>
+                @endif
             </div>
 
             <div class="atg-motion-controls">
+                @if (!empty($hasProfilePhoto))
+                    <button type="button" id="atgPhotoVoiceBtn" class="atg-motion-toggle atg-photo-only" aria-pressed="false">
+                        <span class="atg-motion-icon">🎤</span>
+                        <span><strong>Talk &amp; sing mode</strong><small>Real mouth &amp; jaw mesh moves to your voice · audio stays on your device</small></span>
+                    </button>
+                    <div class="atg-photo-pills-row atg-photo-only" role="group" aria-label="Synchronised duet mode">
+                        <label class="atg-photo-pill" for="atgDuetPhotoInput" style="display:inline-flex;align-items:center;gap:6px;">
+                            <span>🤝 Merge 2nd photo (Sync Duet)</span>
+                            <input type="file" id="atgDuetPhotoInput" accept="image/png,image/jpeg,image/webp" hidden>
+                        </label>
+                        <button type="button" id="atgDuetClearBtn" class="atg-photo-pill" hidden>✕ Solo view</button>
+                    </div>
+                @endif
                 <button type="button" id="atgTalkBtn" class="atg-motion-toggle atg-cartoon-only" aria-pressed="false">
                     <span class="atg-motion-icon">🎙️</span>
                     <span><strong>Talk mode</strong><small>Lip-syncs to your voice · audio never leaves your device</small></span>
@@ -94,6 +126,37 @@
                    title="Post your saved avatar doing the last reaction you tried">
                     <span>📣 Use in a post</span>
                 </a>
+                @if (!empty($hasProfilePhoto))
+                    <div class="atg-photo-export-row atg-photo-only">
+                        <button type="button" id="atgDownloadPhotoAnimBtn" class="atg-btn-primary btn-spin-on-click" data-spin="true"
+                                title="Download your animated living avatar as a video">
+                            <span>⬇️ Video MP4</span>
+                        </button>
+                        <button type="button" id="atgDownloadPhotoGifBtn" class="atg-btn-secondary btn-spin-on-click" data-spin="true"
+                                title="Download a looping animated GIF for WhatsApp, Messages &amp; social">
+                            <span>🎞️ Loop GIF</span>
+                        </button>
+                        <button type="button" id="atgSharePhotoAnimBtn" class="atg-btn-secondary btn-spin-on-click" data-spin="true"
+                                title="Share your animated living avatar to WhatsApp, Messages or social media">
+                            <span>📤 Share</span>
+                        </button>
+                    </div>
+                    <div class="atg-photo-pills-row atg-photo-only">
+                        <select id="atgPhotoAspectSelect" class="form-select form-select-sm" style="max-width: 210px; min-height: 44px;" aria-label="Export aspect ratio">
+                            <option value="1:1" selected>1:1 Square</option>
+                            <option value="9:16">9:16 Story / Reels</option>
+                            <option value="16:9">16:9 Widescreen</option>
+                            <option value="4:5">4:5 Portrait</option>
+                            <option value="3:4">3:4 Classic</option>
+                            <option value="2:3">2:3 Tall</option>
+                            <option value="3:2">3:2 Photo</option>
+                            <option value="4:3">4:3 Standard</option>
+                            <option value="5:4">5:4 Print</option>
+                            <option value="9:21">9:21 Ultra Tall</option>
+                            <option value="21:9">21:9 Cinema</option>
+                        </select>
+                    </div>
+                @endif
             </div>
             <p class="atg-stage-note atg-cartoon-only">Tap a reaction above, then <em>Use in a post</em> — your avatar joins the post as a Me-sticker. Your profile photo stays as it is.</p>
             <p class="atg-stage-note atg-photo-only">This is your real profile photo. Tap a reaction above, then <em>Use in a post</em>: exactly this goes into your post.</p>
@@ -105,21 +168,86 @@
         <!-- Right Column: Trait Customisation & Kinship Catalog -->
         <div class="atg-controls-card">
 
-            <!-- Navigation Tabs -->
-            <div class="atg-tabs" role="tablist">
-                <button type="button" class="atg-tab-btn active" role="tab" data-atg-tab="avatar-tab" onclick="switchAtgTab('avatar-tab', this)">
-                    👤 Avatar
+            @php $defaultPhotoTab = !empty($hasProfilePhoto); @endphp
+            <!-- Navigation Tabs (3D Tactile Mode Switcher) -->
+            <div class="atg-tabs" role="tablist" aria-label="Emoji Studio modes">
+                <button type="button" class="atg-tab-btn {{ !$defaultPhotoTab ? 'active' : '' }}" role="tab" data-atg-tab="avatar-tab" onclick="switchAtgTab('avatar-tab', this)" aria-selected="{{ !$defaultPhotoTab ? 'true' : 'false' }}">
+                    <span class="atg-tab-icon3d" aria-hidden="true">
+                        <svg viewBox="0 0 40 40" width="34" height="34" fill="none">
+                            <defs>
+                                <radialGradient id="atgTabAvBg" cx="35%" cy="28%" r="72%">
+                                    <stop offset="0%" stop-color="#fde68a"/>
+                                    <stop offset="55%" stop-color="#f59e0b"/>
+                                    <stop offset="100%" stop-color="#b45309"/>
+                                </radialGradient>
+                                <linearGradient id="atgTabAvSkin" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stop-color="#fff7ed"/>
+                                    <stop offset="100%" stop-color="#fed7aa"/>
+                                </linearGradient>
+                            </defs>
+                            <circle cx="20" cy="20" r="18" fill="url(#atgTabAvBg)"/>
+                            <ellipse cx="14" cy="11" rx="6" ry="3" fill="rgba(255,255,255,0.45)" transform="rotate(-20 14 11)"/>
+                            <circle cx="20" cy="15.5" r="5.5" fill="url(#atgTabAvSkin)"/>
+                            <path d="M10.5 31c1.2-5 5-7.5 9.5-7.5s8.3 2.5 9.5 7.5" fill="url(#atgTabAvSkin)"/>
+                        </svg>
+                    </span>
+                    <span class="atg-tab-copy">
+                        <span class="atg-tab-title">Build 3D Avatar</span>
+                        <span class="atg-tab-sub">Customise face &amp; outfit</span>
+                    </span>
                 </button>
-                <button type="button" class="atg-tab-btn" role="tab" data-atg-tab="photo-avatar-tab" onclick="switchAtgTab('photo-avatar-tab', this)">
-                    📸 Living Photo
+                <button type="button" class="atg-tab-btn {{ $defaultPhotoTab ? 'active' : '' }}" role="tab" data-atg-tab="photo-avatar-tab" onclick="switchAtgTab('photo-avatar-tab', this)" aria-selected="{{ $defaultPhotoTab ? 'true' : 'false' }}">
+                    <span class="atg-tab-icon3d" aria-hidden="true">
+                        <svg viewBox="0 0 40 40" width="34" height="34" fill="none">
+                            <defs>
+                                <linearGradient id="atgTabPhCard" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#38bdf8"/>
+                                    <stop offset="55%" stop-color="#2563eb"/>
+                                    <stop offset="100%" stop-color="#1e3a8a"/>
+                                </linearGradient>
+                                <radialGradient id="atgTabPhSpark" cx="35%" cy="35%" r="70%">
+                                    <stop offset="0%" stop-color="#fef08a"/>
+                                    <stop offset="100%" stop-color="#f59e0b"/>
+                                </radialGradient>
+                            </defs>
+                            <rect x="6" y="7" width="24" height="26" rx="6" transform="rotate(-6 18 20)" fill="url(#atgTabPhCard)" stroke="rgba(255,255,255,0.65)" stroke-width="1.5"/>
+                            <circle cx="17.5" cy="17" r="4" fill="#e0f2fe"/>
+                            <path d="M10.5 27.5c1.3-3.5 3.8-5.2 7-5.2s5.7 1.7 7 5.2" fill="#bae6fd"/>
+                            <path d="M31 6l1.7 4.3L37 12l-4.3 1.7L31 18l-1.7-4.3L25 12l4.3-1.7L31 6z" fill="url(#atgTabPhSpark)"/>
+                        </svg>
+                    </span>
+                    <span class="atg-tab-copy">
+                        <span class="atg-tab-title">Photo to Avatar</span>
+                        <span class="atg-tab-sub">Turn your photo into AI art</span>
+                    </span>
                 </button>
-                <button type="button" class="atg-tab-btn" role="tab" data-atg-tab="catalog-tab" onclick="switchAtgTab('catalog-tab', this)">
-                    🛡️ Living Emojis
+                <button type="button" class="atg-tab-btn" role="tab" data-atg-tab="catalog-tab" onclick="switchAtgTab('catalog-tab', this)" aria-selected="false">
+                    <span class="atg-tab-icon3d" aria-hidden="true">
+                        <svg viewBox="0 0 40 40" width="34" height="34" fill="none">
+                            <defs>
+                                <radialGradient id="atgTabEmOrb" cx="32%" cy="28%" r="72%">
+                                    <stop offset="0%" stop-color="#fef08a"/>
+                                    <stop offset="55%" stop-color="#fbbf24"/>
+                                    <stop offset="100%" stop-color="#d97706"/>
+                                </radialGradient>
+                            </defs>
+                            <circle cx="20" cy="20" r="17" fill="url(#atgTabEmOrb)"/>
+                            <ellipse cx="14" cy="11" rx="5.5" ry="2.6" fill="rgba(255,255,255,0.55)" transform="rotate(-22 14 11)"/>
+                            <circle cx="14.5" cy="18" r="2" fill="#451a03"/>
+                            <circle cx="25.5" cy="18" r="2" fill="#451a03"/>
+                            <path d="M13.5 23.5c1.6 3.2 4.1 4.5 6.5 4.5s4.9-1.3 6.5-4.5" stroke="#451a03" stroke-width="2.2" stroke-linecap="round"/>
+                            <circle cx="33" cy="9" r="3" fill="#f43f5e" stroke="#ffffff" stroke-width="1.2"/>
+                        </svg>
+                    </span>
+                    <span class="atg-tab-copy">
+                        <span class="atg-tab-title">Living Emojis</span>
+                        <span class="atg-tab-sub">Animated stickers for posts</span>
+                    </span>
                 </button>
             </div>
 
             <!-- TAB 1: Avatar Customiser -->
-            <div id="avatar-tab" class="atg-tab-content">
+            <div id="avatar-tab" class="atg-tab-content" @if($defaultPhotoTab) style="display: none;" @endif>
                 @php $avatarOptions = \App\services\AtgAvatarRenderer::options(); @endphp
 
                 <div class="atg-section-chips" role="tablist" aria-label="Customiser sections">
@@ -160,7 +288,7 @@
             </div>
 
             <!-- TAB 2: Photo-to-Living Avatar (OpenArt-Grade Hybrid Transformation Studio) -->
-            <div id="photo-avatar-tab" class="atg-tab-content" style="display: none;">
+            <div id="photo-avatar-tab" class="atg-tab-content" @if(!$defaultPhotoTab) style="display: none;" @endif>
                 @php
                     $studioAvatarStyles = $avatarStyles ?? \App\services\AtgPhotoAvatarEngine::getStylesForUi();
                 @endphp
@@ -263,16 +391,6 @@
                                     Or drag and drop a JPEG, PNG or WEBP portrait onto this card
                                 </div>
 
-                                <!-- Quick Apply & Publish Bar (Directly Under Stage for One-Tap Profile & Feed Use) -->
-                                <div class="d-grid gap-2 mt-2 pt-2 border-top" style="border-color: var(--atg-p2a-border, rgba(148,163,184,0.2)) !important;">
-                                    <button type="button" id="atgSaveLivingPortraitQuickBtn" class="atg-btn-primary btn-spin-on-click w-100" data-spin="true" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;">
-                                        <span>✨ Use as Profile Picture</span>
-                                    </button>
-                                    <button type="button" id="atgPostLivingPortraitQuickBtn" class="atg-btn-secondary btn-spin-on-click w-100" data-spin="true" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;">
-                                        <span>📣 Post to Family Feed</span>
-                                    </button>
-                                </div>
-
                                 <!-- Living Photo Expressions & Choreography Bar -->
                                 <div class="atg-p2a-expressions-wrap">
                                     <div class="atg-p2a-sublabel">Animate Your Stylised Avatar</div>
@@ -308,6 +426,47 @@
                                         <option value="idle">😌 Natural Breathe &amp; Blink Only</option>
                                     </select>
                                 </div>
+
+                                <!-- Tier B: In-House Neural Talking Movie Generator (Kokoro TTS + LivePortrait/MuseTalk) -->
+                                <div class="atg-p2a-panel mt-3 text-start" id="atgNeuralTalkingCard">
+                                    <div class="atg-p2a-panel-title mb-2">🎬 HD Talking Movie (Neural AI)</div>
+                                    <label for="atgTalkingScript" class="atg-p2a-field-label">Type what your avatar should say (optional if uploading audio):</label>
+                                    <textarea id="atgTalkingScript" class="form-control mb-2" rows="2" maxlength="500"
+                                              placeholder="Happy birthday! Wishing our whole family a wonderful celebration today!"></textarea>
+
+                                    <div class="d-flex flex-wrap gap-2 mb-2">
+                                        <select id="atgTalkingVoice" class="form-select" style="flex: 1 1 160px; min-height: 44px;" aria-label="Choose voice">
+                                            @foreach (\App\services\TalkingAvatarNeuralService::VOICES as $vKey => $vLabel)
+                                                <option value="{{ $vKey }}">{{ $vLabel }}</option>
+                                            @endforeach
+                                        </select>
+                                        <select id="atgTalkingPreset" class="form-select" style="flex: 1 1 150px; min-height: 44px;" aria-label="Choose expression">
+                                            @foreach (\App\services\TalkingAvatarNeuralService::EXPRESSIONS as $eKey => $eLabel)
+                                                <option value="{{ $eKey }}">{{ $eLabel }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div class="d-flex flex-wrap gap-2 mb-2 align-items-center">
+                                        <label for="atgTalkingAudioInput" class="btn btn-sm btn-outline-secondary rounded-pill px-3 mb-0 d-inline-flex align-items-center" style="min-height: 44px; white-space: nowrap; flex-shrink: 0; cursor: pointer;">
+                                            <span>📁 Upload voice memo</span>
+                                            <input type="file" id="atgTalkingAudioInput" accept="audio/wav,audio/mpeg,audio/mp3,audio/webm,audio/ogg,audio/mp4" class="d-none">
+                                        </label>
+                                        <span id="atgTalkingAudioName" class="small text-muted"></span>
+                                    </div>
+
+                                    <button type="button" id="atgGenerateTalkingMovieBtn" class="atg-btn-primary w-100 btn-spin-on-click" data-spin="true" style="min-height: 44px; white-space: nowrap; font-size: 0.86rem; padding: 10px 12px;">
+                                        <span>🎬 Generate Talking Video</span>
+                                    </button>
+                                    <div id="atgTalkingStatusMsg" class="small mt-2 text-muted" aria-live="polite"></div>
+
+                                    <div id="atgTalkingVideoWrap" class="mt-2" hidden>
+                                        <video id="atgTalkingResultVideo" class="w-100 rounded-3" controls playsinline></video>
+                                        <a id="atgTalkingDownloadLink" class="atg-btn-secondary w-100 mt-2 text-decoration-none d-inline-flex align-items-center justify-content-center" download="talking-avatar.mp4" style="min-height: 44px; white-space: nowrap;">
+                                            <span>⬇️ Download HD MP4</span>
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -339,6 +498,8 @@
                                 </div>
                             </div>
 
+                            <!-- 2 & 3 Inline Row: Synthesise/Fine-Tune + Apply/Publish/Export -->
+                            <div class="atg-p2a-inline-row">
                             <!-- 2. Neural AI Deep Redraw & On-Device Fine-Tuning -->
                             <div class="atg-p2a-panel">
                                 <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
@@ -354,13 +515,13 @@
                                     </button>
                                 </div>
 
-                                <!-- Progressive Disclosure Fine-Tuning Sliders -->
+                                <!-- Inline Fine-Tuning Sliders (Visible by default for direct access) -->
                                 <div class="atg-finetune-accordion mt-3">
-                                    <button type="button" id="atgToggleFineTuneBtn" class="atg-finetune-toggle" aria-expanded="false" aria-controls="atgFineTuneDrawer">
+                                    <button type="button" id="atgToggleFineTuneBtn" class="atg-finetune-toggle" aria-expanded="true" aria-controls="atgFineTuneDrawer">
                                         <span>🎛️ Fine-Tune Stylisation &amp; Linework</span>
-                                        <span class="atg-finetune-chevron" id="atgFineTuneChevron" aria-hidden="true">▾</span>
+                                        <span class="atg-finetune-chevron" id="atgFineTuneChevron" aria-hidden="true">▴</span>
                                     </button>
-                                    <div id="atgFineTuneDrawer" class="atg-finetune-drawer" hidden>
+                                    <div id="atgFineTuneDrawer" class="atg-finetune-drawer">
                                         <div class="atg-slider-row">
                                             <div class="d-flex justify-content-between align-items-center mb-1">
                                                 <label for="atgStyleStrength" class="atg-slider-label">Stylisation Strength</label>
@@ -394,27 +555,28 @@
                             <!-- 3. Save as Living Profile Picture, Post to Family Feed, Download HD PNG, or Sync Cartoon Palette -->
                             <div class="atg-p2a-panel">
                                 <div class="atg-p2a-panel-title mb-2">3. Apply, Publish or Export Your Avatar</div>
-                                <div class="d-grid gap-2">
-                                    <button type="button" id="atgSaveLivingPortraitBtn" class="atg-btn-primary btn-spin-on-click" data-spin="true" style="min-height: 44px; white-space: nowrap; flex-shrink: 0;">
-                                        <span>✨ Set Avatar as Living Profile Picture</span>
+                                <div class="d-grid gap-2" style="min-width: 0;">
+                                    <button type="button" id="atgSaveLivingPortraitBtn" class="atg-btn-primary btn-spin-on-click w-100" data-spin="true" style="min-height: 44px; min-width: 0; white-space: nowrap; flex-shrink: 0;">
+                                        <span>✨ Set as Profile Picture</span>
                                     </button>
-                                    <button type="button" id="atgPostLivingPortraitBtn" class="atg-btn-secondary btn-spin-on-click w-100" data-spin="true" style="min-height: 44px; white-space: nowrap; flex-shrink: 0; font-weight: 700;">
-                                        <span>📣 Post Living Photo to Family Feed</span>
+                                    <button type="button" id="atgPostLivingPortraitBtn" class="atg-btn-secondary btn-spin-on-click w-100" data-spin="true" style="min-height: 44px; min-width: 0; white-space: nowrap; flex-shrink: 0; font-weight: 700;">
+                                        <span>📣 Post to Family Feed</span>
                                     </button>
-                                    <div class="atg-p2a-secondary-actions">
-                                        <button type="button" id="atgDownloadAvatarBtn" class="atg-btn-secondary">
+                                    <div class="atg-p2a-secondary-actions" style="min-width: 0;">
+                                        <button type="button" id="atgDownloadAvatarBtn" class="atg-btn-secondary w-100" style="min-height: 44px; min-width: 0; white-space: nowrap; flex-shrink: 0;">
                                             <span>⬇️ Download HD Avatar</span>
                                         </button>
-                                        <button type="button" id="atgShareAvatarBtn" class="atg-btn-secondary">
+                                        <button type="button" id="atgShareAvatarBtn" class="atg-btn-secondary w-100" style="min-height: 44px; min-width: 0; white-space: nowrap; flex-shrink: 0;">
                                             <span>📤 Share Branded Avatar</span>
                                         </button>
-                                        <button type="button" id="atgSyncPhotoToAvatarBtn" class="atg-btn-secondary btn-spin-on-click" data-spin="true">
+                                        <button type="button" id="atgSyncPhotoToAvatarBtn" class="atg-btn-secondary btn-spin-on-click w-100" data-spin="true" style="min-height: 44px; min-width: 0; white-space: nowrap; flex-shrink: 0;">
                                             <span>🎨 Colour My 3D Cartoon</span>
                                         </button>
                                     </div>
                                 </div>
                                 <div id="atgPhotoMatchSummary" class="atg-p2a-match-summary" style="display: none;"></div>
                             </div>
+                            </div><!-- /.atg-p2a-inline-row -->
                         </div>
                     </div>
                 </div>
@@ -532,9 +694,15 @@
     }
 
     function switchAtgTab(tabId, btn) {
-        document.querySelectorAll('.atg-tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.atg-tab-btn').forEach(b => {
+            b.classList.remove('active');
+            b.setAttribute('aria-selected', 'false');
+        });
         document.querySelectorAll('.atg-tab-content').forEach(c => c.style.display = 'none');
-        if (btn) btn.classList.add('active');
+        if (btn) {
+            btn.classList.add('active');
+            btn.setAttribute('aria-selected', 'true');
+        }
         const target = document.getElementById(tabId);
         if (target) target.style.display = 'block';
         window.dispatchEvent(new CustomEvent('atg:tab-changed', { detail: { tabId: tabId } }));
@@ -557,22 +725,129 @@
         }
     }));
 
-    // Photo avatar: the member's real portrait claps, laughs, waves… exactly as in the Me-sticker.
+    // Photo avatar: ATG 60fps Living Canvas Stage (LivingHeirloomAnimator + spring physics + particles + video export/share),
+    // with graceful fallback to the SVG Me-sticker if Canvas is unavailable.
     (function () {
         const img = document.getElementById('atgPhotoStickerStage');
+        const canvas = document.getElementById('atgPhotoLivingStage');
         const viewport = document.getElementById('atgAvatarViewport');
         const btns = document.querySelectorAll('.atg-look-btn');
         if (!img || !viewport || !btns.length) return;
         const order = ['hello', 'laugh', 'wow', 'love', 'nod', 'dance', 'point', 'clap'];
         let current = 'hello';
         let bust = '';
-        const show = (reaction) => {
+        let livingStage = null;
+        let livingReady = false;
+
+        const show = (reaction, playSound) => {
             if (order.indexOf(reaction) === -1) return;
             current = reaction;
             syncLink();
-            img.src = img.dataset.base + reaction + '?look=photo' + bust;
-            img.alt = 'Your photo avatar: ' + reaction;
+            if (livingReady && livingStage) {
+                img.hidden = true;
+                livingStage.start();
+                livingStage.triggerReaction(reaction, { playSound: Boolean(playSound) });
+            } else {
+                img.src = img.dataset.base + reaction + '?look=photo' + bust;
+                img.alt = 'Your photo avatar: ' + reaction;
+            }
         };
+
+        const initLivingStage = async () => {
+            if (!canvas || !img.dataset.photoUrl || typeof window.AtgLivingPhotoAvatarStage !== 'function') return;
+            const syncPacksUi = (stageInst) => {
+                document.querySelectorAll('.atg-photo-pill[data-photo-pack]').forEach(btn => {
+                    const key = btn.dataset.photoPack;
+                    const unlocked = stageInst.isPackUnlocked(key);
+                    btn.dataset.locked = unlocked ? 'false' : 'true';
+                    btn.setAttribute('aria-pressed', String(stageInst.currentPack === key));
+                });
+            };
+            const stageInstance = new window.AtgLivingPhotoAvatarStage({
+                canvas: canvas,
+                viewport: viewport,
+                photoUrl: img.dataset.photoUrl,
+                senderName: @json(trim((string)($userData['firstname'] ?? ''))),
+                onPackUnlocked: (pack) => {
+                    syncPacksUi(stageInstance);
+                    if (window.swalToast) window.swalToast('Unlocked ' + pack.icon + ' ' + pack.label + ' aura!', 'success');
+                },
+                onVoiceStateChange: (active) => {
+                    const vBtn = document.getElementById('atgPhotoVoiceBtn');
+                    if (vBtn) vBtn.setAttribute('aria-pressed', String(Boolean(active)));
+                },
+                onDuetStateChange: (active) => {
+                    const clearBtn = document.getElementById('atgDuetClearBtn');
+                    if (clearBtn) clearBtn.hidden = !active;
+                },
+            });
+            const ok = await stageInstance.init();
+            if (!ok) return;
+            livingStage = stageInstance;
+            livingReady = true;
+            syncPacksUi(livingStage);
+            if (window.atgStickerLook === 'photo') {
+                img.hidden = true;
+                livingStage.start();
+                livingStage.triggerReaction(current, { playSound: false });
+            }
+        };
+
+        document.querySelectorAll('.atg-photo-pill[data-photo-frame]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (!livingStage) return;
+                livingStage.setFrame(btn.dataset.photoFrame);
+                document.querySelectorAll('.atg-photo-pill[data-photo-frame]').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+            });
+        });
+
+        document.querySelectorAll('.atg-photo-pill[data-photo-pack]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (!livingStage) return;
+                const key = btn.dataset.photoPack;
+                if (!livingStage.setPack(key)) {
+                    if (window.swalToast) window.swalToast(btn.getAttribute('title') || 'Keep reacting to unlock this aura pack!', 'info');
+                    return;
+                }
+                document.querySelectorAll('.atg-photo-pill[data-photo-pack]').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+                livingStage.triggerReaction(current, { playSound: true });
+            });
+        });
+
+        const voiceBtn = document.getElementById('atgPhotoVoiceBtn');
+        if (voiceBtn) {
+            voiceBtn.addEventListener('click', async () => {
+                if (!livingStage || !livingReady) return;
+                try {
+                    await livingStage.toggleVoiceReactive();
+                } catch (err) {
+                    if (window.Swal) {
+                        window.Swal.fire({ icon: 'warning', title: 'Microphone unavailable', text: String(err && err.message || err) });
+                    }
+                }
+            });
+        }
+
+        const duetInput = document.getElementById('atgDuetPhotoInput');
+        const duetClearBtn = document.getElementById('atgDuetClearBtn');
+        if (duetInput) {
+            duetInput.addEventListener('change', (e) => {
+                const file = e.target && e.target.files && e.target.files[0];
+                if (file && livingStage) livingStage.loadDuetFile(file);
+            });
+        }
+        if (duetClearBtn) {
+            duetClearBtn.addEventListener('click', () => {
+                if (livingStage) livingStage.clearDuet();
+                if (duetInput) duetInput.value = '';
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initLivingStage, { once: true });
+        } else {
+            initLivingStage();
+        }
 
         // Find the face once per photo (MediaPipe BlazeFace, runs on this device only) and
         // store its position so every sticker zooms in on it. Never blocks the studio.
@@ -630,7 +905,8 @@
                 if (r && r.success) {
                     img.dataset.faceKnown = '1';
                     bust = '&f=' + encodeURIComponent(r.version || Date.now());
-                    if (window.atgStickerLook === 'photo') show(current);
+                    if (livingStage) livingStage.applyFaceBox(payload);
+                    if (window.atgStickerLook === 'photo') show(current, false);
                 }
             } catch (err) {
                 console.info('[Me-sticker] face zoom skipped:', err && err.message ? err.message : err);
@@ -644,9 +920,20 @@
             const photo = look === 'photo';
             viewport.classList.toggle('atg-photo-look', photo);
             if (stage) stage.classList.toggle('atg-photo-mode', photo);
-            img.hidden = !photo;
+            if (photo) {
+                if (livingReady && livingStage) {
+                    img.hidden = true;
+                    livingStage.start();
+                } else {
+                    img.hidden = false;
+                }
+                show(current, false);
+                findFace();
+            } else {
+                img.hidden = true;
+                if (livingStage) livingStage.stop();
+            }
             btns.forEach(b => b.setAttribute('aria-checked', String(b.dataset.look === look)));
-            if (photo) { show(current); findFace(); }
             try { localStorage.setItem('atgStickerLook', look); } catch (e) { /* private mode */ }
         };
         btns.forEach(b => b.addEventListener('click', () => setLook(b.dataset.look)));
@@ -658,10 +945,65 @@
                 }
             }));
         document.querySelectorAll('.atg-react-btn[data-reaction]').forEach(b =>
-            b.addEventListener('click', () => { if (window.atgStickerLook === 'photo') show(b.dataset.reaction); }));
+            b.addEventListener('click', () => { if (window.atgStickerLook === 'photo') show(b.dataset.reaction, true); }));
         viewport.addEventListener('click', () => {
-            if (window.atgStickerLook === 'photo') show(order[(order.indexOf(current) + 1) % order.length]);
+            if (window.atgStickerLook === 'photo' && !livingReady) {
+                show(order[(order.indexOf(current) + 1) % order.length], true);
+            }
         });
+        viewport.addEventListener('keydown', (e) => {
+            if (window.atgStickerLook === 'photo' && (e.key === 'Enter' || e.key === ' ')) {
+                e.preventDefault();
+                show(order[(order.indexOf(current) + 1) % order.length], true);
+            }
+        });
+
+        // Full-animation Download & Share via SovereignVideoStudioClient + ShareManager
+        const runExport = async (btn, mode) => {
+            if (!btn || btn.dataset.busy === '1') return;
+            if (!livingStage || !livingReady) {
+                if (window.Swal) {
+                    window.Swal.fire({ icon: 'info', title: 'Preparing your living photo', text: 'Please wait a moment for your portrait to finish loading.' });
+                }
+                return;
+            }
+            btn.dataset.busy = '1';
+            btn.disabled = true;
+            if (window.ScoreTenantSpinner) window.ScoreTenantSpinner.start(btn);
+            try {
+                if (mode === 'download') {
+                    await livingStage.downloadAnimatedVideo();
+                    if (window.swalToast) window.swalToast('Animated avatar video downloaded!', 'success');
+                } else if (mode === 'gif') {
+                    await livingStage.downloadAnimatedGif();
+                    if (window.swalToast) window.swalToast('Looping GIF downloaded!', 'success');
+                } else {
+                    await livingStage.shareAnimatedVideo();
+                }
+            } catch (err) {
+                if (window.Swal) {
+                    window.Swal.fire({ icon: 'error', title: 'Could not export animation', text: String(err && err.message || err) });
+                }
+            } finally {
+                btn.dataset.busy = '';
+                btn.disabled = false;
+                if (window.ScoreTenantSpinner) window.ScoreTenantSpinner.stop(btn);
+            }
+        };
+
+        const dlBtn = document.getElementById('atgDownloadPhotoAnimBtn');
+        const gifBtn = document.getElementById('atgDownloadPhotoGifBtn');
+        const shBtn = document.getElementById('atgSharePhotoAnimBtn');
+        const aspectSel = document.getElementById('atgPhotoAspectSelect');
+        if (dlBtn) dlBtn.addEventListener('click', () => runExport(dlBtn, 'download'));
+        if (gifBtn) gifBtn.addEventListener('click', () => runExport(gifBtn, 'gif'));
+        if (shBtn) shBtn.addEventListener('click', () => runExport(shBtn, 'share'));
+        if (aspectSel) {
+            aspectSel.addEventListener('change', () => {
+                if (livingStage) livingStage.setAspectRatio(aspectSel.value);
+            });
+        }
+
         let saved = null;
         try { saved = localStorage.getItem('atgStickerLook'); } catch (e) { /* private mode */ }
         setLook(saved === 'avatar' ? 'avatar' : 'photo');
@@ -700,5 +1042,178 @@
         });
     })();
 </script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/atg-living-photo-avatar.js?v={{ assetVersion('js/atg-living-photo-avatar.js') }}" defer></script>
 <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/atg-avatar-styliser.js?v={{ assetVersion('js/atg-avatar-styliser.js') }}" defer></script>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
+    // Tier B: Neural Talking Movie Generator (Kokoro TTS + LivePortrait/MuseTalk sidecar)
+    (function () {
+        const btn = document.getElementById('atgGenerateTalkingMovieBtn');
+        const scriptEl = document.getElementById('atgTalkingScript');
+        const voiceEl = document.getElementById('atgTalkingVoice');
+        const presetEl = document.getElementById('atgTalkingPreset');
+        const audioInput = document.getElementById('atgTalkingAudioInput');
+        const audioNameEl = document.getElementById('atgTalkingAudioName');
+        const statusEl = document.getElementById('atgTalkingStatusMsg');
+        const videoWrap = document.getElementById('atgTalkingVideoWrap');
+        const videoEl = document.getElementById('atgTalkingResultVideo');
+        const dlLink = document.getElementById('atgTalkingDownloadLink');
+        if (!btn) return;
+
+        let audioDataUrl = '';
+        if (audioInput) {
+            audioInput.addEventListener('change', () => {
+                const file = audioInput.files && audioInput.files[0];
+                if (!file) { audioDataUrl = ''; if (audioNameEl) audioNameEl.textContent = ''; return; }
+                if (audioNameEl) audioNameEl.textContent = file.name;
+                const reader = new FileReader();
+                reader.onload = () => { audioDataUrl = typeof reader.result === 'string' ? reader.result : ''; };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        const showResultVideo = (url) => {
+            if (!videoWrap || !videoEl || !dlLink) return;
+            videoEl.src = url;
+            dlLink.href = url;
+            videoWrap.hidden = false;
+        };
+
+        const renderBrowserTalkingFallback = (canvas, preset, uploadedAudioUrl) => {
+            return new Promise((resolve, reject) => {
+                if (typeof canvas.captureStream !== 'function' || typeof MediaRecorder === 'undefined') {
+                    reject(new Error('Your browser does not support canvas video recording.'));
+                    return;
+                }
+                const engine = window.AtgEmojiEngine;
+                const actionMap = { natural: 'laugh', smile: 'smile', laugh: 'laugh', wink: 'wink', sing: 'dance' };
+                const mappedAction = actionMap[preset] || 'smile';
+                if (engine && typeof engine.playPhotoReaction === 'function') {
+                    engine.playPhotoReaction(mappedAction);
+                    if (engine.motion) {
+                        engine.motion.talking = true;
+                        engine.motion.talkLevel = 0.65;
+                    }
+                }
+
+                const stream = canvas.captureStream(30);
+                let audioEl = null;
+                let audioCtx = null;
+                if (uploadedAudioUrl) {
+                    try {
+                        audioEl = new Audio(uploadedAudioUrl);
+                        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                        audioCtx = new AudioCtx();
+                        const src = audioCtx.createMediaElementSource(audioEl);
+                        const dest = audioCtx.createMediaStreamDestination();
+                        src.connect(dest);
+                        src.connect(audioCtx.destination);
+                        dest.stream.getAudioTracks().forEach(t => stream.addTrack(t));
+                        audioEl.play().catch(() => {});
+                    } catch (_) { /* video-only fallback */ }
+                }
+
+                const mimes = ['video/mp4;codecs=avc1', 'video/webm;codecs=vp9', 'video/webm'];
+                const mime = mimes.find(m => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(m)) || 'video/webm';
+                const chunks = [];
+                let recorder;
+                try {
+                    recorder = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 6000000 });
+                } catch (_) {
+                    recorder = new MediaRecorder(stream);
+                }
+                recorder.ondataavailable = (e) => { if (e.data && e.data.size > 0) chunks.push(e.data); };
+                recorder.onstop = () => {
+                    if (engine && engine.motion) {
+                        engine.motion.talking = false;
+                        engine.motion.talkLevel = 0;
+                    }
+                    if (audioEl) { audioEl.pause(); audioEl.src = ''; }
+                    if (audioCtx && typeof audioCtx.close === 'function') audioCtx.close().catch(() => {});
+                    resolve(URL.createObjectURL(new Blob(chunks, { type: mime })));
+                };
+                recorder.onerror = (err) => reject(err);
+                recorder.start(100);
+                setTimeout(() => { if (recorder.state === 'recording') recorder.stop(); }, 3200);
+            });
+        };
+
+        const pollStatus = async (jobId) => {
+            for (let i = 0; i < 40; i++) {
+                await new Promise(r => setTimeout(r, 1500));
+                const res = await fetch('/api/emoji/talking-avatar/status/' + encodeURIComponent(jobId), {
+                    credentials: 'same-origin',
+                    headers: { 'Accept': 'application/json' }
+                }).then(r => r.json());
+                const data = res && res.data ? res.data : res;
+                if (data && data.status === 'completed' && data.video_url) {
+                    showResultVideo(data.video_url);
+                    if (statusEl) statusEl.textContent = '✅ Your HD neural talking video is ready!';
+                    return;
+                }
+                if (data && data.status === 'failed') {
+                    throw new Error(data.error || 'Neural render failed.');
+                }
+            }
+            throw new Error('Render timed out waiting for GPU worker.');
+        };
+
+        btn.addEventListener('click', async () => {
+            if (btn.dataset.busy === '1') return;
+            const canvas = document.getElementById('atgPhotoLivingCanvas');
+            if (!canvas) return;
+            const scriptText = scriptEl ? scriptEl.value.trim() : '';
+            if (!scriptText && !audioDataUrl) {
+                if (window.swalToast) window.swalToast('Type a script or upload a voice memo first.', 'info');
+                return;
+            }
+            btn.dataset.busy = '1';
+            btn.disabled = true;
+            if (window.ScoreTenantSpinner) window.ScoreTenantSpinner.start(btn);
+            if (statusEl) statusEl.textContent = 'Submitting portrait to ATG Neural GPU worker…';
+
+            try {
+                const token = document.querySelector('input[name="token"]')?.value ||
+                    document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+                const res = await fetch('/api/emoji/talking-avatar/render', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': token, 'X-Requested-With': 'XMLHttpRequest' },
+                    body: JSON.stringify({
+                        token: token,
+                        csrf_token: token,
+                        image_data_url: canvas.toDataURL('image/png'),
+                        script_text: scriptText,
+                        audio_data_url: audioDataUrl,
+                        voice_id: voiceEl ? voiceEl.value : 'bf_emma',
+                        expression_preset: presetEl ? presetEl.value : 'natural',
+                    })
+                }).then(r => r.json());
+
+                const payload = res && res.data ? res.data : res;
+                if (!res || res.success === false) {
+                    throw new Error((res && res.message) || (res && res.error) || 'Could not queue render.');
+                }
+                if (payload.video_url) {
+                    showResultVideo(payload.video_url);
+                    if (statusEl) statusEl.textContent = payload.message || 'Ready!';
+                } else if (payload.sidecar_online && payload.job_id) {
+                    if (statusEl) statusEl.textContent = payload.message || 'Rendering on GPU…';
+                    await pollStatus(payload.job_id);
+                } else {
+                    if (statusEl) statusEl.textContent = 'GPU worker offline — rendering locally with ATG Mesh Puppet…';
+                    const localUrl = await renderBrowserTalkingFallback(canvas, presetEl ? presetEl.value : 'natural', audioDataUrl);
+                    showResultVideo(localUrl);
+                    if (statusEl) statusEl.textContent = '✅ Your animated talking video is ready (local ATG engine)!';
+                }
+            } catch (err) {
+                if (statusEl) statusEl.textContent = String(err && err.message || err);
+                if (window.Swal) window.Swal.fire({ icon: 'error', title: 'Talking movie error', text: String(err && err.message || err) });
+            } finally {
+                btn.dataset.busy = '';
+                btn.disabled = false;
+                if (window.ScoreTenantSpinner) window.ScoreTenantSpinner.stop(btn);
+            }
+        });
+    })();
+</script>
 @endsection

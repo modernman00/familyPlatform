@@ -396,7 +396,7 @@
                             <span class="sp-date-mon">{{ !empty($data['month']) ? strtoupper(substr((string)$data['month'], 0, 3)) : 'CEL' }}</span>
                         </div>
                         <div class="min-w-0">
-                            <div class="fw-bold text-dark">{{ $data['firstName'] ?? $data['fullName'] }}'s birthday</div>
+                            <div class="fw-bold sp-birthday-title">{{ $data['firstName'] ?? $data['fullName'] }}'s birthday</div>
                             <div class="text-muted small">Celebrate with a custom family keepsake</div>
                         </div>
                     </div>

@@ -1,0 +1,280 @@
+.card {
+    border-radius: var(--radius-lg, 18px);
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.body {
+    padding: 1.5rem;
+}
+
+.header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.headerText {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.badgeRow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.badge {
+    display: inline-block;
+    border-radius: 9999px;
+    padding: 0.25rem 0.625rem;
+    background-color: #a31621;
+    color: #ffffff;
+    font-size: var(--text-xs, 0.75rem);
+    letter-spacing: 0.04em;
+    font-weight: 700;
+    text-transform: uppercase;
+    line-height: 1.2;
+}
+
+.title {
+    margin: 0;
+    color: #0f172a;
+    font-size: var(--text-lg, 1.15rem);
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.summary {
+    margin: 0 0 1rem;
+    color: #334155;
+    font-size: var(--text-sm, 0.875rem);
+    line-height: 1.5;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.cta {
+    background-color: #a31621;
+    color: #ffffff;
+    border: 1px solid #a31621;
+    border-radius: 12px;
+    min-height: 44px;
+    padding: 10px 16px;
+    font-size: var(--text-sm, 0.875rem);
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.cta:hover {
+    filter: brightness(1.08);
+    color: #ffffff;
+}
+
+.cta:active {
+    transform: scale(0.98);
+}
+
+.secondary {
+    background-color: #f1f5f9;
+    color: #0f172a;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    min-height: 44px;
+    padding: 10px 14px;
+    font-size: var(--text-sm, 0.875rem);
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.secondary:hover {
+    background-color: #e2e8f0;
+    color: #0f172a;
+}
+
+.secondary:active {
+    transform: scale(0.98);
+}
+
+.dismiss {
+    background-color: transparent;
+    color: #475569;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.dismiss:hover {
+    background-color: #f1f5f9;
+    color: #0f172a;
+}
+
+.dismiss:active {
+    transform: scale(0.98);
+}
+
+.cta:focus-visible,
+.secondary:focus-visible,
+.dismiss:focus-visible {
+    outline: 2px solid #a31621;
+    outline-offset: 2px;
+}
+
+.grid {
+    margin-top: 1rem;
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: 0.5rem;
+}
+
+@media (min-width: 768px) {
+    .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.item {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: var(--radius-md, 12px);
+    padding: 12px 14px;
+    height: 100%;
+}
+
+.itemTitle {
+    color: #0f172a;
+    font-size: var(--text-sm, 0.875rem);
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.itemDesc {
+    color: #475569;
+    font-size: var(--text-xs, 0.8125rem);
+    line-height: 1.45;
+}
+
+/* Dark Mode Overrides (WCAG AA Contrast) */
+:global(body.dark-mode) .card,
+:global(body.dark-theme) .card,
+:global([data-bs-theme="dark"]) .card,
+:global(html.dark) .card,
+:global(html.dark-mode) .card {
+    background: #1e293b;
+    border-color: rgba(148, 163, 184, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+:global(body.dark-mode) .title,
+:global(body.dark-theme) .title,
+:global([data-bs-theme="dark"]) .title,
+:global(html.dark) .title,
+:global(html.dark-mode) .title {
+    color: #f8fafc;
+}
+
+:global(body.dark-mode) .summary,
+:global(body.dark-theme) .summary,
+:global([data-bs-theme="dark"]) .summary,
+:global(html.dark) .summary,
+:global(html.dark-mode) .summary {
+    color: #cbd5e1;
+}
+
+:global(body.dark-mode) .item,
+:global(body.dark-theme) .item,
+:global([data-bs-theme="dark"]) .item,
+:global(html.dark) .item,
+:global(html.dark-mode) .item {
+    background-color: #0f172a;
+    border-color: rgba(148, 163, 184, 0.25);
+}
+
+:global(body.dark-mode) .itemTitle,
+:global(body.dark-theme) .itemTitle,
+:global([data-bs-theme="dark"]) .itemTitle,
+:global(html.dark) .itemTitle,
+:global(html.dark-mode) .itemTitle {
+    color: #f8fafc;
+}
+
+:global(body.dark-mode) .itemDesc,
+:global(body.dark-theme) .itemDesc,
+:global([data-bs-theme="dark"]) .itemDesc,
+:global(html.dark) .itemDesc,
+:global(html.dark-mode) .itemDesc {
+    color: #cbd5e1;
+}
+
+:global(body.dark-mode) .secondary,
+:global(body.dark-theme) .secondary,
+:global([data-bs-theme="dark"]) .secondary,
+:global(html.dark) .secondary,
+:global(html.dark-mode) .secondary {
+    background-color: #334155;
+    color: #f8fafc;
+    border-color: #475569;
+}
+
+:global(body.dark-mode) .secondary:hover,
+:global(body.dark-theme) .secondary:hover,
+:global([data-bs-theme="dark"]) .secondary:hover,
+:global(html.dark) .secondary:hover,
+:global(html.dark-mode) .secondary:hover {
+    background-color: #475569;
+    color: #ffffff;
+}
+
+:global(body.dark-mode) .dismiss,
+:global(body.dark-theme) .dismiss,
+:global([data-bs-theme="dark"]) .dismiss,
+:global(html.dark) .dismiss,
+:global(html.dark-mode) .dismiss {
+    color: #cbd5e1;
+}
+
+:global(body.dark-mode) .dismiss:hover,
+:global(body.dark-theme) .dismiss:hover,
+:global([data-bs-theme="dark"]) .dismiss:hover,
+:global(html.dark) .dismiss:hover,
+:global(html.dark-mode) .dismiss:hover {
+    background-color: #334155;
+    color: #ffffff;
+}

@@ -151,7 +151,7 @@ echo ""
 # ------------------------------------------------------------------------------
 echo -e "${BOLD}${CYAN}[GATE 2/8] Running PHPStan Level 8 Analysis...${NC}"
 if [ -x "vendor/bin/phpstan" ]; then
-    if vendor/bin/phpstan analyse --level=8; then
+    if vendor/bin/phpstan analyse --level=8 --memory-limit=1G; then
         echo -e "${GREEN}  ✅ Gate 2 Passed: Zero PHPStan Level 8 errors.${NC}"
     else
         echo -e "${RED}  ❌ Gate 2 Failed: PHPStan Level 8 reported errors.${NC}"

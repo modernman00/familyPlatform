@@ -371,22 +371,32 @@
     transition: transform .14s ease, stroke .14s ease, fill .14s ease;
 }
 
-/* Individual Action Tactile Accents on Hover */
-.kw-react-trigger--reply:hover { color: #2563eb; background: rgba(37, 99, 235, 0.12); }
-.kw-react-trigger--star:hover { color: #d97706; background: rgba(217, 119, 6, 0.12); }
-.kw-react-trigger--star.is-starred { color: #f59e0b; }
-.kw-react-trigger--star.is-starred:hover { color: #d97706; background: rgba(245, 158, 11, 0.16); }
-.kw-react-trigger--react:hover { color: #d97706; background: rgba(217, 119, 6, 0.12); }
-.kw-react-trigger--edit:hover { color: #059669; background: rgba(5, 150, 105, 0.12); }
-.kw-react-trigger--danger:hover { color: #dc2626; background: rgba(220, 38, 38, 0.12); }
+/* Individual Action Tactile Accents (Colourful at rest + richer on hover) */
+.kw-react-trigger--reply { color: #2563eb; background: rgba(37, 99, 235, 0.08); }
+.kw-react-trigger--reply:hover { color: #1d4ed8; background: rgba(37, 99, 235, 0.16); }
+.kw-react-trigger--star { color: #d97706; background: rgba(217, 119, 6, 0.08); }
+.kw-react-trigger--star:hover { color: #b45309; background: rgba(217, 119, 6, 0.16); }
+.kw-react-trigger--star.is-starred { color: #f59e0b; background: rgba(245, 158, 11, 0.14); }
+.kw-react-trigger--star.is-starred:hover { color: #d97706; background: rgba(245, 158, 11, 0.22); }
+.kw-react-trigger--react { color: #db2777; background: rgba(219, 39, 119, 0.08); }
+.kw-react-trigger--react:hover { color: #be185d; background: rgba(219, 39, 119, 0.16); }
+.kw-react-trigger--edit { color: #059669; background: rgba(5, 150, 105, 0.08); }
+.kw-react-trigger--edit:hover { color: #047857; background: rgba(5, 150, 105, 0.16); }
+.kw-react-trigger--danger { color: #dc2626; background: rgba(220, 38, 38, 0.08); }
+.kw-react-trigger--danger:hover { color: #b91c1c; background: rgba(220, 38, 38, 0.16); }
 
-.dark-mode .kw-react-trigger--reply:hover { color: #60a5fa; background: rgba(96, 165, 250, 0.18); }
-.dark-mode .kw-react-trigger--star:hover { color: #fbbf24; background: rgba(251, 191, 36, 0.18); }
-.dark-mode .kw-react-trigger--star.is-starred { color: #fbbf24; }
-.dark-mode .kw-react-trigger--star.is-starred:hover { color: #f59e0b; background: rgba(251, 191, 36, 0.22); }
-.dark-mode .kw-react-trigger--react:hover { color: #fbbf24; background: rgba(251, 191, 36, 0.18); }
-.dark-mode .kw-react-trigger--edit:hover { color: #34d399; background: rgba(52, 211, 153, 0.18); }
-.dark-mode .kw-react-trigger--danger:hover { color: #f87171; background: rgba(248, 113, 113, 0.18); }
+.dark-mode .kw-react-trigger--reply { color: #60a5fa; background: rgba(96, 165, 250, 0.14); }
+.dark-mode .kw-react-trigger--reply:hover { color: #93c5fd; background: rgba(96, 165, 250, 0.24); }
+.dark-mode .kw-react-trigger--star { color: #fbbf24; background: rgba(251, 191, 36, 0.14); }
+.dark-mode .kw-react-trigger--star:hover { color: #fde68a; background: rgba(251, 191, 36, 0.24); }
+.dark-mode .kw-react-trigger--star.is-starred { color: #fbbf24; background: rgba(251, 191, 36, 0.2); }
+.dark-mode .kw-react-trigger--star.is-starred:hover { color: #f59e0b; background: rgba(251, 191, 36, 0.28); }
+.dark-mode .kw-react-trigger--react { color: #f472b6; background: rgba(244, 114, 182, 0.14); }
+.dark-mode .kw-react-trigger--react:hover { color: #f9a8d4; background: rgba(244, 114, 182, 0.24); }
+.dark-mode .kw-react-trigger--edit { color: #34d399; background: rgba(52, 211, 153, 0.14); }
+.dark-mode .kw-react-trigger--edit:hover { color: #6ee7b7; background: rgba(52, 211, 153, 0.24); }
+.dark-mode .kw-react-trigger--danger { color: #f87171; background: rgba(248, 113, 113, 0.14); }
+.dark-mode .kw-react-trigger--danger:hover { color: #fca5a5; background: rgba(248, 113, 113, 0.24); }
 
 .kw-react-popover {
     position: absolute; bottom: calc(100% + 8px); top: auto;
@@ -1108,6 +1118,8 @@
 .kw-att-image-wrap { margin-top: 6px; margin-bottom: 4px; border-radius: 12px; overflow: hidden; cursor: pointer; max-width: 320px; }
 .kw-att-image { width: 100%; height: auto; max-height: 260px; object-fit: cover; display: block; transition: transform .2s; }
 .kw-att-image:hover { transform: scale(1.02); }
+.kw-att-image-fallback { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 10px; background: rgba(0,0,0,0.06); font-size: 0.8125rem; font-weight: 500; cursor: default; }
+.is-mine .kw-att-image-fallback { background: rgba(255,255,255,0.14); color: #fff; }
 .kw-att-video { width: 100%; max-width: 320px; max-height: 280px; border-radius: 10px; margin-top: 6px; background: #000; display: block; }
 .kw-att-doc { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: rgba(0,0,0,0.06); border-radius: 8px; text-decoration: none; color: inherit; margin-top: 6px; }
 .is-mine .kw-att-doc { background: rgba(255,255,255,0.12); color: #fff; }
@@ -1856,8 +1868,12 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
                         <template x-for="(att, aIdx) in msg.context_metadata.attachments" :key="aIdx">
                           <div>
                             <template x-if="attKind(att) === 'image'">
-                              <div class="kw-att-image-wrap" @click="activeLightboxImg = att.url" title="Click to enlarge">
-                                <img :src="att.url" :alt="att.original_name || att.name || 'Attached photograph'" class="kw-att-image" loading="lazy">
+                              <div class="kw-att-image-wrap" x-data="{ imgFailed: false }" :style="imgFailed ? 'cursor:default;' : ''" @click="!imgFailed && (activeLightboxImg = att.url)" :title="imgFailed ? 'Photo unavailable' : 'Click to enlarge'">
+                                <img x-show="!imgFailed" :src="att.url" :alt="att.original_name || att.name || 'Attached photograph'" class="kw-att-image" loading="lazy" x-on:error="imgFailed = true">
+                                <div x-show="imgFailed" x-cloak class="kw-att-image-fallback">
+                                  <i class="bi bi-image" aria-hidden="true"></i>
+                                  <span>Photo unavailable</span>
+                                </div>
                               </div>
                             </template>
                             <template x-if="attKind(att) === 'video'">
@@ -3282,9 +3298,11 @@ function kinWhisperApp() {
 
     extractFirstUrl(text) {
       if (!text || typeof text !== 'string') return null;
-      const m = text.match(/(https?:\/\/[^\s<>"'`]+)/i);
-      if (!m || !m[1]) return null;
-      const cleaned = m[1].replace(/:[a-z0-9_]+_3d:.*$/i, '').replace(/[.,;:!?)]+$/, '');
+      const pattern = /(https?:\/\/[^\s<>"'`]+)|(?:^|[\s(\[{"'])(www\.[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:\/[^\s<>"'`]*)?)|(?:^|[\s(\[{"'])([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9-]{1,63})*\.(?:com|org|net|io|app|dev|co\.uk|org\.uk|uk|edu|gov|ai|me|info|biz|tv|co)(?:\/[^\s<>"'`]*)?)(?![a-z0-9@._-])/i;
+      const m = text.match(pattern);
+      if (!m) return null;
+      const raw = m[1] ? m[1] : ('https://' + (m[2] || m[3] || ''));
+      const cleaned = raw.replace(/:[a-z0-9_]+_3d:.*$/i, '').replace(/[.,;:!?)]+$/, '');
       return this.isSafeHttpUrl(cleaned) ? cleaned : null;
     },
 

@@ -197,4 +197,18 @@
   }
 })();
 </script>
-{!! function_exists('renderBiometricPasskeyPrompt') ? renderBiometricPasskeyPrompt($nonce ?? null) : '' !!}
+@php
+    $__biometricCanPrompt = function_exists('renderBiometricPasskeyPrompt')
+        && (
+            !empty($_SESSION['user_id'])
+            || !empty($_SESSION['id'])
+            || !empty($_SESSION['manager_id'])
+            || !empty($_SESSION['staff_email'])
+            || !empty($_SESSION['client_email'])
+            || !empty($_SESSION['landlord_id'])
+            || !empty($_SESSION['tenant_id'])
+            || (!empty($_SESSION['auth']['codeVerified']) && (!empty($_SESSION['auth']['identifyCust']) || !empty($_SESSION['auth']['id'])))
+        )
+        && empty($_SESSION['needs_tos']);
+@endphp
+{!! $__biometricCanPrompt ? renderBiometricPasskeyPrompt($nonce ?? null) : '' !!}

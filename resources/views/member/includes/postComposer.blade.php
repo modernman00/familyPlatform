@@ -79,6 +79,17 @@
       </button>
 
       <button type="button"
+              class="btn composer-pill-btn composer-pill-btn--backdrop"
+              data-bs-toggle="modal"
+              data-bs-target="#postModal"
+              onclick="setTimeout(function () { if (window.__setComposerTextStage) { var cur = document.getElementById('composerPostStyleInput'); if (!cur || !cur.value) { window.__setComposerTextStage('starlight_bokeh'); } } var ed = document.getElementById('postMessageEditor'); if (ed) ed.focus(); }, 120)"
+              title="Scenic Post Backdrops - Write quotes and reflections over Starlight Bokeh and atmospheric scenes"
+              aria-label="{{ __('feed.backdrop', 'Choose a scenic post background') }}">
+        @include('member.includes.composerActionIcon', ['type' => 'backdrop', 'prefix' => $svgPrefix])
+        <span>{{ __('feed.backdrop_label', 'Backdrop') }}</span>
+      </button>
+
+      <button type="button"
               class="btn composer-pill-btn composer-pill-btn--thennow"
               data-bs-toggle="modal"
               data-bs-target="#postModal"

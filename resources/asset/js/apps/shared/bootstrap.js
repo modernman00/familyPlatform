@@ -27,10 +27,64 @@ export function readIslandBootstrap(scriptId, fallback = {}) {
     return { ...fallback };
 }
 
+export function getXsrfCookieTokens() {
+    if (typeof document === 'undefined' || typeof document.cookie !== 'string' || !document.cookie) {
+        return [];
+    }
+
+    const hexTokens = [];
+    const otherTokens = [];
+    const parts = document.cookie.split(';');
+
+    for (const part of parts) {
+        const eqIdx = part.indexOf('=');
+        if (eqIdx === -1) continue;
+        const name = part.slice(0, eqIdx).trim();
+        if (name !== 'XSRF-TOKEN') continue;
+        const rawVal = part.slice(eqIdx + 1).trim();
+        if (!rawVal) continue;
+        let decoded = rawVal;
+        try {
+            decoded = decodeURIComponent(rawVal);
+        } catch {
+            decoded = rawVal;
+        }
+        if (!decoded) continue;
+        if (/^[0-9a-f]{64}$/i.test(decoded)) {
+            if (!hexTokens.includes(decoded)) hexTokens.push(decoded);
+        } else if (!otherTokens.includes(decoded)) {
+            otherTokens.push(decoded);
+        }
+    }
+
+    return [...hexTokens, ...otherTokens];
+}
+
+export function syncCsrfTokenDom(token) {
+    if (!token || typeof document === 'undefined') return;
+    const clean = String(token);
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    if (meta) {
+        meta.setAttribute('content', clean);
+    }
+    if (typeof window !== 'undefined' && window.__FP_BOOTSTRAP__ && typeof window.__FP_BOOTSTRAP__ === 'object') {
+        window.__FP_BOOTSTRAP__.csrfToken = clean;
+    }
+}
+
 export function getCsrfToken(bootstrap = {}) {
     if (typeof window !== 'undefined' && typeof window.$csrf === 'function') {
         const token = window.$csrf();
         if (token) return String(token);
+    }
+
+    if (bootstrap && bootstrap._overrideCsrfToken) {
+        return String(bootstrap._overrideCsrfToken);
+    }
+
+    const cookieTokens = getXsrfCookieTokens();
+    if (cookieTokens.length > 0) {
+        return String(cookieTokens[0]);
     }
 
     if (typeof document !== 'undefined') {

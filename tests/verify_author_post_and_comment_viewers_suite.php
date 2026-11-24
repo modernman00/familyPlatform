@@ -307,31 +307,48 @@ runTest("Blade Invariant: post-card.blade.php contains author-clickable view tri
     }
 });
 
-// [TEST 7] Blade & Alpine Invariants: Viewers Modal in middleColumn
-runTest("Blade Invariant: middleColumn.blade.php contains Author Viewers Roster Modal", function() use ($rootDir) {
+// [TEST 7] Blade/Preact Invariants: Viewers Modal in middleColumn or Preact ViewersModal
+runTest("Blade/Preact Invariant: Author Viewers Roster Modal present", function() use ($rootDir) {
     $content = file_get_contents($rootDir . '/resources/views/member/includes/middleColumn.blade.php');
     if (!$content) {
         throw new \Exception("Failed to read middleColumn.blade.php");
     }
 
-    if (!str_contains($content, 'isViewersModalOpen')) {
-        throw new \Exception("middleColumn.blade.php missing isViewersModalOpen modal");
+    if (str_contains($content, 'isViewersModalOpen')) {
+        if (!str_contains($content, 'viewersType === \'comment\' ? \'Comment Viewers\' : \'Post Viewers\'')) {
+            throw new \Exception("middleColumn.blade.php missing dynamic title for post/comment viewers");
+        }
+        if (!str_contains($content, 'viewersSearchQuery')) {
+            throw new \Exception("middleColumn.blade.php missing viewersSearchQuery search filter");
+        }
+        if (!str_contains($content, 'viewersLoading')) {
+            throw new \Exception("middleColumn.blade.php missing viewersLoading skeleton state");
+        }
+        if (!str_contains($content, 'closeViewersModal()')) {
+            throw new \Exception("middleColumn.blade.php missing closeViewersModal() handler");
+        }
+        return;
     }
 
-    if (!str_contains($content, 'viewersType === \'comment\' ? \'Comment Viewers\' : \'Post Viewers\'')) {
-        throw new \Exception("middleColumn.blade.php missing dynamic title for post/comment viewers");
+    $viewersModal = file_get_contents($rootDir . '/resources/asset/js/apps/feed/ViewersModal.jsx');
+    $feedShell = file_get_contents($rootDir . '/resources/asset/js/apps/feed/FeedShell.jsx');
+    if (!$viewersModal || !$feedShell) {
+        throw new \Exception("Failed to read Preact ViewersModal.jsx or FeedShell.jsx");
     }
-
-    if (!str_contains($content, 'viewersSearchQuery')) {
-        throw new \Exception("middleColumn.blade.php missing viewersSearchQuery search filter");
+    if (!str_contains($feedShell, '<ViewersModal') || !str_contains($viewersModal, 'data-testid="viewers-modal"')) {
+        throw new \Exception("Preact FeedShell.jsx / ViewersModal.jsx missing viewers-modal");
     }
-
-    if (!str_contains($content, 'viewersLoading')) {
-        throw new \Exception("middleColumn.blade.php missing viewersLoading skeleton state");
+    if (!str_contains($viewersModal, "type === 'comment' ? 'Comment viewers' : 'Post viewers'")) {
+        throw new \Exception("ViewersModal.jsx missing dynamic aria-label for post/comment viewers");
     }
-
-    if (!str_contains($content, 'closeViewersModal()')) {
-        throw new \Exception("middleColumn.blade.php missing closeViewersModal() handler");
+    if (!str_contains($viewersModal, 'aria-label="Search viewers"')) {
+        throw new \Exception("ViewersModal.jsx missing search viewers filter");
+    }
+    if (!str_contains($viewersModal, 'Loading family viewers')) {
+        throw new \Exception("ViewersModal.jsx missing loading state");
+    }
+    if (!str_contains($viewersModal, 'onClose')) {
+        throw new \Exception("ViewersModal.jsx missing onClose handler");
     }
 });
 

@@ -1811,7 +1811,10 @@
             };
             const key = allowed[action] ? action : 'smile';
             pr.activeAction = key;
-            pr.actionUntil = performance.now() + (key === 'dance' ? 3200 : 2200);
+            pr.actionUntil = performance.now() + (key === 'dance' ? 3200 : 2600);
+            if (pr.compareMode && typeof this.setPhotoCompareMode === 'function') {
+                this.setPhotoCompareMode(false);
+            }
 
             const statusLabels = {
                 smile: '😄 Living Photo: Warm Smile & Cheek Lift',
@@ -2044,6 +2047,36 @@
             ctx.save();
             if (lockCompareAlignment) {
                 ctx.drawImage(pr.img, 0, 0, w, h);
+            } else if (typeof window.AtgDeformablePhotoPuppet === 'function') {
+                ctx.filter = `contrast(${(1 + (sharpen - 0.4) * 0.18).toFixed(2)}) saturate(${(1 + (skinTex - 0.5) * 0.15).toFixed(2)})`;
+                ctx.translate(w / 2 + danceDx * scale, h / 2 + danceDy * scale);
+                ctx.rotate(tx * 0.22 + danceRot);
+                ctx.scale(1.06, 1.06);
+                ctx.translate(-w / 2, -h / 2);
+
+                if (!pr.meshPuppet) {
+                    pr.meshPuppet = new window.AtgDeformablePhotoPuppet({ gridCols: 28, gridRows: 30 });
+                }
+                if (pr.meshPuppet.image !== pr.img) {
+                    pr.meshPuppet.setImage(pr.img);
+                }
+
+                const blinkAmount = pr.blinking ? (pr.blink <= 1 ? pr.blink : 2 - pr.blink) : 0;
+                const actionKey = isReacting ? (pr.activeAction || 'smile') : (talkLevel > 0.04 ? 'talk' : 'hello');
+                const actionEnv = isReacting ? Math.min(1, (pr.actionUntil - now) / 600) : 0;
+
+                pr.meshPuppet.updateDeformation({
+                    elapsedSec: elapsedSec,
+                    mode: actionKey,
+                    intensity: Math.max(0, actionEnv),
+                    voiceLevel: talkLevel,
+                    blinkAmount: blinkAmount,
+                    winkAmount: (isReacting && actionKey === 'wink') ? Math.sin(actionEnv * Math.PI) : 0,
+                    smileAmount: smileFactor,
+                    tiltX: tx * 3.5,
+                    tiltY: ty * 3.5
+                });
+                pr.meshPuppet.render(ctx, 0, 0, w, h);
             } else {
                 ctx.filter = `contrast(${(1 + (sharpen - 0.4) * 0.18).toFixed(2)}) saturate(${(1 + (skinTex - 0.5) * 0.15).toFixed(2)})`;
                 ctx.translate(w / 2 + danceDx * scale, h / 2 + danceDy * scale);

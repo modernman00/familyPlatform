@@ -51,6 +51,13 @@ $router->map(
   name: 'delete_post'
 );
 
+$router->map(
+  method: 'POST',
+  route: '/post/[i:postNo]/delete',
+  target: 'App\controller\members\PostMessage@deletePost',
+  name: 'delete_post_fallback'
+);
+
 // REPOST AN EARLIER POST (author only)
 $router->map(
   method: 'POST',

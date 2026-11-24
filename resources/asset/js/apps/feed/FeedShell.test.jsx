@@ -589,6 +589,119 @@ describe('Profile Feed Preact Island (Phases 1–4)', () => {
         });
     });
 
+    it('promotes Instagram Reel link_preview to native portrait video player with source bar and falls back cleanly on stream error', async () => {
+        const igReelPost = {
+            post_no: '991',
+            id: 'u_1',
+            fullName: 'Wally Olaogun',
+            postMessage: 'https://www.instagram.com/reel/DUNGKnBCSdC/',
+            post_likes: 0,
+            comments: [],
+            images: [],
+            videos: [],
+            link_preview: {
+                url: 'https://www.instagram.com/reel/DUNGKnBCSdC/',
+                original_url: 'https://www.instagram.com/reel/DUNGKnBCSdC/',
+                title: 'DJ Banks (@djbanks) on Instagram Reels',
+                description: 'Afrobeats & Amapiano live set in Falmouth!',
+                image: '/public/uploads/link_previews/ig_clean_poster.jpg',
+                video_url: '/resources/videos/external-stream?ig=DUNGKnBCSdC&sig=test_sig',
+                proxied_video_url: '/resources/videos/external-stream?ig=DUNGKnBCSdC&sig=test_sig',
+                aspect_ratio: '9 / 16',
+                site_name: 'Instagram',
+                domain: 'instagram.com',
+                is_video: true,
+                is_social_video: true,
+                is_instagram: true,
+                ig_shortcode: 'DUNGKnBCSdC',
+                cta_label: 'Watch on Instagram →',
+            },
+        };
+
+        globalThis.fetch = vi.fn(() =>
+            Promise.resolve({
+                ok: true,
+                status: 200,
+                headers: new Headers({ 'content-type': 'application/json' }),
+                json: async () => ({ status: 'success', tags: [] }),
+            })
+        );
+
+        const { container } = render(
+            <FeedShell
+                bootstrap={{
+                    ...baseBootstrap,
+                    initialPosts: [igReelPost],
+                    initialHasMore: false,
+                }}
+            />
+        );
+
+        const videoEl = container.querySelector('video');
+        expect(videoEl).toBeTruthy();
+        expect(videoEl.getAttribute('src')).toBe('/resources/videos/external-stream?ig=DUNGKnBCSdC&sig=test_sig');
+        expect(videoEl.getAttribute('poster')).toBe('/public/uploads/link_previews/ig_clean_poster.jpg');
+        expect(container.querySelector('[data-testid="instagram-native-source-bar"]')).toBeTruthy();
+        expect(screen.getByText('Afrobeats & Amapiano live set in Falmouth!')).toBeTruthy();
+
+        // Simulate stream error -> falls back cleanly to portrait Instagram card without double play badge
+        fireEvent.error(videoEl);
+        await waitFor(() => {
+            const fallbackCard = container.querySelector('[data-testid="instagram-video-fallback-card"]');
+            expect(fallbackCard).toBeTruthy();
+            expect(fallbackCard.querySelector('.link-preview-card__media--portrait')).toBeTruthy();
+            expect(fallbackCard.querySelector('.link-preview-card__play-badge')).toBeTruthy();
+        });
+    });
+
+    it('renders Instagram fallback card in 4:5 portrait and suppresses duplicate play badge on cmp1 thumbnails', async () => {
+        const igFallbackPost = {
+            post_no: '992',
+            id: 'u_1',
+            fullName: 'Wally Olaogun',
+            postMessage: 'https://www.instagram.com/reel/DUNGKnBCSdC/',
+            post_likes: 0,
+            comments: [],
+            images: [],
+            videos: [],
+            link_preview: {
+                url: 'https://www.instagram.com/reel/DUNGKnBCSdC/',
+                original_url: 'https://www.instagram.com/reel/DUNGKnBCSdC/',
+                title: 'DJ Banks on Instagram',
+                description: 'Watch this reel on Instagram',
+                image: 'https://scontent.cdninstagram.com/v/t51.71878-15/626369314_n.jpg?stp=cmp1_dst-jpg_e35_s640x640_tt6',
+                site_name: 'Instagram',
+                domain: 'instagram.com',
+                is_video: false,
+                is_social_video: true,
+                is_instagram: true,
+                cta_label: 'Watch on Instagram →',
+            },
+        };
+
+        globalThis.fetch = vi.fn(() =>
+            Promise.resolve({
+                ok: true,
+                status: 200,
+                headers: new Headers({ 'content-type': 'application/json' }),
+                json: async () => ({ status: 'success', tags: [] }),
+            })
+        );
+
+        const { container } = render(
+            <FeedShell
+                bootstrap={{
+                    ...baseBootstrap,
+                    initialPosts: [igFallbackPost],
+                    initialHasMore: false,
+                }}
+            />
+        );
+
+        expect(container.querySelector('.link-preview-card__media--portrait')).toBeTruthy();
+        expect(container.querySelector('.link-preview-card__play-badge')).toBeNull();
+    });
+
     it('hides redundant BBC raw URL from post caption and card footer when Rich Link Preview card is rendered', async () => {
         const bbcPost = {
             post_no: '989',
@@ -1579,5 +1692,252 @@ describe('Profile Feed Preact Island (Phases 1–4)', () => {
             expect(screen.getByText('Inline reply worked!')).toBeTruthy();
         });
         expect(targetComment.querySelector('[data-testid="inline-reply-composer"]')).toBeNull();
+    });
+
+    it('allows sharing Family Historian milestone posts via SharePortalModal', async () => {
+        const historianPost = {
+            post_no: '369',
+            id: 'FAMILY_HISTORIAN',
+            is_historian: true,
+            fullName: 'Family Historian',
+            postMessage: "🎂 Upcoming Birthday in 5 Days (Nov 28, 2026): Temitope Olaogun's Birthday!",
+            post_img0: 'historian_milestone_spotlight_a819c1cdd768.jpg',
+            post_likes: 0,
+            views_count: 1,
+            comments: [],
+            date_created: '2026-11-23 15:00:43',
+        };
+
+        render(
+            <FeedShell
+                bootstrap={{
+                    ...baseBootstrap,
+                    initialPosts: [historianPost],
+                    initialHasMore: false,
+                }}
+            />
+        );
+
+        const shareBtn = screen.getByRole('button', { name: 'Share this memory' });
+        expect(shareBtn).toBeTruthy();
+        fireEvent.click(shareBtn);
+
+        await waitFor(() => {
+            expect(screen.getByTestId('share-portal-modal')).toBeTruthy();
+        });
+        const waCta = screen.getByTestId('share-portal-whatsapp-cta');
+        expect(decodeURIComponent(waCta.getAttribute('href'))).toContain('/post/369');
+        fireEvent.click(screen.getByTestId('close-share-portal'));
+        expect(screen.queryByTestId('share-portal-modal')).toBeNull();
+    });
+
+    it('hides Family Topics & Milestones tray by default and toggles it via the Topics button', async () => {
+        globalThis.fetch = vi.fn((url) => {
+            if (String(url).includes('/api/hashtags/trending')) {
+                return Promise.resolve({
+                    ok: true,
+                    status: 200,
+                    headers: new Headers({ 'content-type': 'application/json' }),
+                    json: async () => ({
+                        status: 'success',
+                        tags: [
+                            { tag: 'livingavatar', count: 3 },
+                            { tag: 'throwback', count: 3 },
+                        ],
+                    }),
+                });
+            }
+            return Promise.resolve({
+                ok: true,
+                status: 200,
+                headers: new Headers({ 'content-type': 'application/json' }),
+                json: async () => ({
+                    status: 'success',
+                    message: { message: [], pagination: { has_more: false } },
+                }),
+            });
+        });
+
+        render(
+            <FeedShell
+                bootstrap={{
+                    ...baseBootstrap,
+                    initialPosts: [],
+                    initialHasMore: false,
+                }}
+            />
+        );
+
+        const topicsToggle = await screen.findByRole('button', { name: /Topics/i });
+        expect(topicsToggle.getAttribute('aria-expanded')).toBe('false');
+        expect(screen.queryByText('Family Topics & Milestones')).toBeNull();
+
+        fireEvent.click(topicsToggle);
+        expect(topicsToggle.getAttribute('aria-expanded')).toBe('true');
+        expect(screen.getByText('Family Topics & Milestones')).toBeTruthy();
+        expect(screen.getByText('#livingavatar')).toBeTruthy();
+
+        fireEvent.click(screen.getByRole('button', { name: 'Hide Family Topics & Milestones' }));
+        expect(screen.queryByText('Family Topics & Milestones')).toBeNull();
+    });
+
+    it('renders Family Arcade challenge posts as a branded challenge card without raw URL or 3D stage converter clutter', () => {
+        const arcadePost = {
+            post_no: '9912',
+            id: 'u_owner',
+            firstName: 'Wally',
+            lastName: 'Olaogun',
+            fullName: '318422WALLY',
+            postFamCode: 'OLA001',
+            postMessage: '🏆 I just scored 1832 pts in KinPulse (52s)! Think you can beat my time? Accept my Family Arcade challenge: /arcade/share/ec221fd6818ac2d9888003687a9b0c57',
+            post_time: String(Date.now()),
+            images: [],
+            videos: [],
+            reactions: {},
+            comments: [],
+            total_comments: 0,
+        };
+
+        const { container } = render(
+            <FeedShell
+                bootstrap={{
+                    ...baseBootstrap,
+                    initialPosts: [arcadePost],
+                    initialHasMore: false,
+                }}
+            />
+        );
+
+        const card = container.querySelector('[data-testid="feed-arcade-challenge-card"]');
+        expect(card).toBeTruthy();
+        expect(card.textContent).toContain('FAMILY ARCADE CHALLENGE');
+        expect(card.textContent).toContain('KinPulse');
+        expect(card.textContent).toContain('Memory Pattern');
+        expect(card.textContent).toContain('1,832');
+        expect(card.textContent).toContain('52s');
+
+        const acceptBtn = container.querySelector('[data-testid="feed-arcade-accept-btn"]');
+        expect(acceptBtn).toBeTruthy();
+        expect(acceptBtn.getAttribute('href')).toBe('/arcade/share/ec221fd6818ac2d9888003687a9b0c57');
+        expect(acceptBtn.textContent).toContain('Accept Challenge');
+
+        // Must NOT expose raw /arcade/share/ path text or 3D stage converter pills
+        expect(container.textContent).not.toContain('/arcade/share/ec221fd6818ac2d9888003687a9b0c57');
+        expect(container.querySelector('[data-testid="infeed-stage-converter"]')).toBeNull();
+    });
+
+    it('renders Preact WhatsNewBanner, toggles 4 update cards, and persists dismissal in localStorage', () => {
+        window.localStorage.removeItem('fp_whats_new_2026_11_w4_dismissed');
+        const whatsNew = {
+            version_key: '2026_11_w4',
+            badge: 'What’s New',
+            title: 'Fresh updates for your family circle this week',
+            summary: 'Challenge relatives in the expanded 7-game Family Arcade.',
+            primary_cta: { label: 'Open Family Arcade', url: '/arcade', icon: 'bi-trophy-fill' },
+            playbook_url: '/playbook',
+            items: [
+                { title: 'Family Arcade (7-Game Suite)', description: 'Play 7 daily family games.', icon: 'bi-trophy-fill', color: '#d97706' },
+                { title: 'Super-HD Living Photo & PiP', description: 'Animate cherished family portraits.', icon: 'bi-person-bounding-box', color: '#a31621' },
+                { title: 'Feed Media, Emojis & Link Previews', description: 'Smoother video playback.', icon: 'bi-play-circle-fill', color: '#2563eb' },
+                { title: 'Creative Studio & White Theme Polish', description: 'Refreshed white theme.', icon: 'bi-stars', color: '#059669' },
+            ],
+        };
+
+        const { container } = render(
+            <FeedShell
+                bootstrap={{
+                    ...baseBootstrap,
+                    initialPosts: [],
+                    initialHasMore: false,
+                    whatsNew,
+                }}
+            />
+        );
+
+        const banner = container.querySelector('[data-testid="whats-new-banner"]');
+        expect(banner).toBeTruthy();
+        expect(screen.getByText('Fresh updates for your family circle this week')).toBeTruthy();
+        expect(screen.getByText('Open Family Arcade').closest('a').getAttribute('href')).toBe('/arcade');
+        expect(screen.getByText('Playbook').closest('a').getAttribute('href')).toBe('/playbook');
+        expect(screen.queryByText('Family Arcade (7-Game Suite)')).toBeNull();
+
+        fireEvent.click(screen.getByText('See all 4 updates'));
+        expect(screen.getByText('Hide details')).toBeTruthy();
+        expect(screen.getByText('Family Arcade (7-Game Suite)')).toBeTruthy();
+        expect(screen.getByText('Super-HD Living Photo & PiP')).toBeTruthy();
+        expect(screen.getByText('Feed Media, Emojis & Link Previews')).toBeTruthy();
+        expect(screen.getByText('Creative Studio & White Theme Polish')).toBeTruthy();
+
+        fireEvent.click(screen.getByLabelText('Dismiss What’s New banner'));
+        expect(container.querySelector('[data-testid="whats-new-banner"]')).toBeNull();
+        expect(window.localStorage.getItem('fp_whats_new_2026_11_w4_dismissed')).toBe('true');
+        window.localStorage.removeItem('fp_whats_new_2026_11_w4_dismissed');
+    });
+
+    it('renders Scenic Post Backdrops (starlight_bokeh & curated scenes) without noisy badge clutter, scales 3-tier typography, and rejects XSS style injection', () => {
+        const posts = [
+            {
+                post_no: '9101',
+                id: 'u_owner',
+                firstName: 'Wally',
+                lastName: 'Olaogun',
+                postMessage: 'Stay silent even when triggered. You will win 99% of your battles through silence and observation. [style:starlight_bokeh]',
+                images: [],
+                videos: [],
+                comments: [],
+            },
+            {
+                post_no: '9102',
+                id: 'u_owner',
+                firstName: 'Wally',
+                lastName: 'Olaogun',
+                postMessage: `${'A'.repeat(285)} [style:golden_ember]`,
+                images: [],
+                videos: [],
+                comments: [],
+            },
+            {
+                post_no: '9103',
+                id: 'u_owner',
+                firstName: 'Wally',
+                lastName: 'Olaogun',
+                postMessage: 'Attempted injection [style:evil_xss_onclick]',
+                post_style: 'evil_xss" onclick="alert(1)',
+                images: [],
+                videos: [],
+                comments: [],
+            },
+        ];
+
+        const { container } = render(
+            <FeedShell
+                bootstrap={{
+                    ...baseBootstrap,
+                    userId: 'u_owner',
+                    initialPosts: posts,
+                    initialHasMore: false,
+                }}
+            />
+        );
+
+        // 1. Starlight Bokeh renders tall scenic card with bokeh layer, hero typography, and NO header badge clutter
+        const scenicCard = container.querySelector('#post9101 [data-testid="feed-text-stage-card"]');
+        expect(scenicCard).toBeTruthy();
+        expect(scenicCard.classList.contains('fp-text-stage--starlight_bokeh')).toBe(true);
+        expect(scenicCard.classList.contains('fp-text-stage--scenic')).toBe(true);
+        expect(scenicCard.querySelector('.fp-text-stage__bokeh')).toBeTruthy();
+        expect(scenicCard.querySelector('.fp-stage-badge')).toBeNull();
+        expect(scenicCard.querySelector('.fp-text-stage__body--hero')).toBeTruthy();
+        expect(scenicCard.textContent).toContain('Stay silent even when triggered.');
+        expect(scenicCard.textContent).not.toContain('[style:starlight_bokeh]');
+
+        // 2. Long (>260 char) scenic post steps down to --extended typography without clipping
+        const extendedCard = container.querySelector('#post9102 [data-testid="feed-text-stage-card"]');
+        expect(extendedCard).toBeTruthy();
+        expect(extendedCard.classList.contains('fp-text-stage--golden_ember')).toBe(true);
+        expect(extendedCard.querySelector('.fp-text-stage__body--extended')).toBeTruthy();
+
+        // 3. Adversarial style injection falls back safely to plain text card
+        expect(container.querySelector('#post9103 [data-testid="feed-text-stage-card"]')).toBeNull();
     });
 });

@@ -94,8 +94,15 @@ header("Pragma: no-cache");
 
 
 if (!isset($_SESSION['token']) || !is_string($_SESSION['token']) || !preg_match('/^[0-9a-f]{64}$/D', $_SESSION['token'])) {
-    $token = bin2hex(random_bytes(32));
-    $_SESSION['token'] = $token;
+    $existingXsrfCookie = isset($_COOKIE['XSRF-TOKEN']) && is_string($_COOKIE['XSRF-TOKEN'])
+        ? rawurldecode($_COOKIE['XSRF-TOKEN'])
+        : '';
+    if ($existingXsrfCookie !== '' && preg_match('/^[0-9a-f]{64}$/Di', $existingXsrfCookie)) {
+        $_SESSION['token'] = strtolower($existingXsrfCookie);
+    } else {
+        $token = bin2hex(random_bytes(32));
+        $_SESSION['token'] = $token;
+    }
 }
 
 if (!isset($_COOKIE['XSRF-TOKEN']) || $_COOKIE['XSRF-TOKEN'] !== $_SESSION['token']) {
@@ -105,7 +112,12 @@ if (!isset($_COOKIE['XSRF-TOKEN']) || $_COOKIE['XSRF-TOKEN'] !== $_SESSION['toke
     // whether `domain` is present create two *separate* same-named cookies (RFC 6265 treats a
     // host-only cookie and a Domain-scoped one as distinct), so the browser ends up holding both
     // and axios's XSRF auto-header can pick the stale one, silently failing CSRF checks.
-    $csrfCookieDomain = parse_url($_ENV['APP_URL'] ?? '', PHP_URL_HOST) ?: '';
+    // Fall back to host-only ('') when the active HTTP_HOST differs from APP_URL (e.g. localhost QA).
+    $configuredHost = strtolower((string) (parse_url($_ENV['APP_URL'] ?? '', PHP_URL_HOST) ?: ''));
+    $requestHost = strtolower((string) preg_replace('/:\d+$/', '', (string) ($_SERVER['HTTP_HOST'] ?? '')));
+    $csrfCookieDomain = ($configuredHost !== '' && ($requestHost === '' || $requestHost === $configuredHost || str_ends_with($requestHost, '.' . $configuredHost)))
+        ? $configuredHost
+        : '';
     setcookie('XSRF-TOKEN', $token, [
         'expires' => time() + $cookieExpire,
         'path' => '/',

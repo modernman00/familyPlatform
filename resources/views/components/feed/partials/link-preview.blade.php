@@ -121,11 +121,13 @@
          rel="noopener noreferrer"
          class="card text-decoration-none overflow-hidden link-preview-card shadow-sm">
 
-        <!-- Full 16:9 Graphics Banner (Hidden cleanly if image is absent or fails to load) -->
+        <!-- Adaptive Graphics Banner (4:5 portrait for vertical Instagram/Reels, 16:9 for landscape web cards) -->
         <template x-if="post.link_preview.image && !imgFailed">
-          <div class="position-relative overflow-hidden w-100" style="aspect-ratio: 16 / 9; background-color: #0f172a; max-height: 420px;">
+          <div class="position-relative overflow-hidden w-100"
+               :style="(post.link_preview.is_instagram && post.link_preview.is_social_video) ? 'aspect-ratio: 4 / 5; background-color: #0f172a; max-height: 460px;' : 'aspect-ratio: 16 / 9; background-color: #0f172a; max-height: 420px;'">
             <img :src="post.link_preview.image"
                  class="w-100 h-100 object-fit-cover"
+                 :style="(post.link_preview.is_instagram && post.link_preview.is_social_video) ? 'object-position: 50% 24%;' : ''"
                  :alt="post.link_preview.title || 'Link preview image'"
                  loading="lazy"
                  referrerpolicy="no-referrer"

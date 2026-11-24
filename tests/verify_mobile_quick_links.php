@@ -64,8 +64,12 @@ echo "[TEST 2] Verifying persistent target IDs in sidebar widgets...\n";
 
 $rightColPath = $rootDir . '/resources/views/member/includes/rightColumn.blade.php';
 $rightCol = file_exists($rightColPath) ? file_get_contents($rightColPath) : '';
-if (!str_contains($rightCol, 'id="upcomingEventsSection"')) {
-    $failures[] = "Missing id='upcomingEventsSection' in rightColumn.blade.php";
+$upcomingIslandPath = $rootDir . '/resources/asset/js/apps/profile/UpcomingEventsIsland.jsx';
+$upcomingIsland = file_exists($upcomingIslandPath) ? file_get_contents($upcomingIslandPath) : '';
+$hasUpcomingEventsSection = str_contains($rightCol, 'id="upcomingEventsSection"')
+    || (str_contains($rightCol, 'id="upcoming-events-root"') && str_contains($upcomingIsland, 'id="upcomingEventsSection"'));
+if (!$hasUpcomingEventsSection) {
+    $failures[] = "Missing id='upcomingEventsSection' in rightColumn.blade.php or UpcomingEventsIsland.jsx";
 }
 
 $heritagePath = $rootDir . '/resources/views/member/includes/familyHeritageWidget.blade.php';

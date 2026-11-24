@@ -9,6 +9,8 @@ P /.env_production
 P /storage/***
 P /public/uploads/***
 P /public/media/***
+P /public/storage/***
+P /public/audio/whispers/***
 P /resources/images/***
 P /resources/images/profile/***
 P /resources/images/post/***
@@ -20,6 +22,8 @@ P /bootstrap/cache/***
 # 2. EXCLUDE user runtime uploads from overwriting remote state
 - /public/uploads/***
 - /public/media/***
+- /public/storage/***
+- /public/audio/whispers/***
 - /resources/images/profile/***
 - /resources/images/post/***
 - /storage/***

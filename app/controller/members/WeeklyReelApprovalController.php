@@ -95,12 +95,17 @@ final class WeeklyReelApprovalController extends BaseController
                 return;
             }
 
+            $aspectRatio = in_array(($input['aspect_ratio'] ?? '9:16'), ['16:9', '9:16'], true)
+                ? (string)$input['aspect_ratio']
+                : '9:16';
+
             $result = WeeklyActivityVideoCuratorService::approveAndPostReel(
                 $reelId,
                 $userId,
                 $famCode,
                 $userName,
-                $profileImg
+                $profileImg,
+                $aspectRatio
             );
 
             if (empty($result['success'])) {

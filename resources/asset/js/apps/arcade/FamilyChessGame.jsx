@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'preact/hooks';
-import { playArcadeSfx, formatElapsedMs } from './arcadeEngine';
+import { formatElapsedMs } from './arcadeEngine';
+import { createGameSfx } from './hooks/useSoundEffects';
 import styles from './ArcadeShell.module.css';
 
 /**
@@ -35,7 +36,8 @@ const INITIAL_BOARD = [
     ['wR', 'wN', 'wB', 'wQ', 'wK', 'wB', 'wN', 'wR'],
 ];
 
-export function FamilyChessGame({ puzzle, onProgress, onComplete, submitting }) {
+export function FamilyChessGame({ puzzle, onProgress, onComplete, submitting, sound }) {
+    const playArcadeSfx = createGameSfx(sound);
     const [board, setBoard] = useState(INITIAL_BOARD);
     const [selectedSquare, setSelectedSquare] = useState(null); // [r, c]
     const [turn, setTurn] = useState('w'); // 'w' | 'b'

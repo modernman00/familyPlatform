@@ -1,8 +1,9 @@
-import { useState, useRef } from 'preact/hooks';
+import { useState, useRef, useEffect } from 'preact/hooks';
 import { apiFetch } from '../shared/apiClient';
 import { getCsrfToken, notifyToast } from '../shared/bootstrap';
 import {
     TEXT_STAGE_CATALOG,
+    extractPreviewableUrls,
     getAvatarUrl,
     getInitials,
     normalizePost,
@@ -24,7 +25,43 @@ export function PostComposer({ bootstrap, onOptimisticInsert, onReplaceOptimisti
     const [isExpanded, setIsExpanded] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [brokenAvatar, setBrokenAvatar] = useState(false);
+    const [linkPreview, setLinkPreview] = useState(null);
+    const [dismissedLinkUrl, setDismissedLinkUrl] = useState('');
     const fileInputRef = useRef(null);
+
+    useEffect(() => {
+        const urls = extractPreviewableUrls(message, 1);
+        const firstUrl = urls[0] || '';
+        if (!firstUrl) {
+            setLinkPreview(null);
+            return;
+        }
+        if (firstUrl === dismissedLinkUrl) return;
+
+        let cancelled = false;
+        const timer = setTimeout(async () => {
+            try {
+                const res = await apiFetch(`/api/link-preview?url=${encodeURIComponent(firstUrl)}`, {
+                    method: 'GET',
+                    timeoutMs: 12000,
+                }, bootstrap);
+                if (cancelled) return;
+                const d = res?.status === 'success' && res?.data ? res.data : (res?.message?.data || null);
+                if (d && (d.title || d.image || d.domain)) {
+                    setLinkPreview({ ...d, _sourceUrl: firstUrl });
+                } else {
+                    setLinkPreview(null);
+                }
+            } catch (_) {
+                if (!cancelled) setLinkPreview(null);
+            }
+        }, 280);
+
+        return () => {
+            cancelled = true;
+            clearTimeout(timer);
+        };
+    }, [message, dismissedLinkUrl, bootstrap]);
 
     const audiences = Array.isArray(bootstrap?.postAudiences) ? bootstrap.postAudiences : [];
     const authorName = `${bootstrap?.firstName || 'Family'} ${bootstrap?.lastName || 'Member'}`.trim();
@@ -96,6 +133,8 @@ export function PostComposer({ bootstrap, onOptimisticInsert, onReplaceOptimisti
         setShowOptions(false);
         setIsExpanded(false);
         setPollOptions(['', '']);
+        setLinkPreview(null);
+        setDismissedLinkUrl('');
 
         try {
             const formData = new FormData();
@@ -201,11 +240,38 @@ export function PostComposer({ bootstrap, onOptimisticInsert, onReplaceOptimisti
                             onError={() => setBrokenAvatar(true)}
                         />
                     )}
-                    <div className="flex-grow-1 min-w-0">
+                    <div
+                        className={`flex-grow-1 min-w-0 ${
+                            selectedStyle && files.length === 0
+                                ? `fp-text-stage fp-text-stage--composer fp-text-stage--${selectedStyle}${
+                                      TEXT_STAGE_CATALOG.find((s) => s.slug === selectedStyle)?.category === 'scenic'
+                                          ? ' fp-text-stage--scenic'
+                                          : ''
+                                  }`
+                                : ''
+                        }`}
+                    >
+                        {selectedStyle && files.length === 0 && (
+                            <div className="fp-text-stage__bokeh" aria-hidden="true" />
+                        )}
                         <textarea
                             ref={composerRef}
-                            rows={hasDraft ? 3 : 1}
-                            className={`${styles.composerTextarea} ${hasDraft ? styles.composerTextareaExpanded : ''}`}
+                            rows={hasDraft || selectedStyle ? 3 : 1}
+                            className={`${styles.composerTextarea} ${hasDraft || selectedStyle ? styles.composerTextareaExpanded : ''}`}
+                            style={
+                                selectedStyle && files.length === 0
+                                    ? {
+                                          background: 'transparent',
+                                          border: 'none',
+                                          color: '#ffffff',
+                                          fontWeight: 700,
+                                          fontSize: '1.2rem',
+                                          textAlign: 'center',
+                                          position: 'relative',
+                                          zIndex: 2,
+                                      }
+                                    : undefined
+                            }
                             placeholder="Share a moment with your family..."
                             value={message}
                             onFocus={() => setIsExpanded(true)}
@@ -215,52 +281,139 @@ export function PostComposer({ bootstrap, onOptimisticInsert, onReplaceOptimisti
                     </div>
                 </div>
 
-                {/* Expandable Emoji, 3D Stage & Audience Controls */}
-                {(showOptions || selectedStyle) && (
-                    <div className="d-flex align-items-center flex-wrap gap-2 mt-2">
-                        {QUICK_EMOJIS.map((em) => (
-                            <button
-                                key={em}
-                                type="button"
-                                className={styles.btnBase}
-                                style={{ padding: '0.25rem 0.625rem' }}
-                                onClick={() => setMessage((m) => `${m}${em}`)}
-                                aria-label={`Insert ${em}`}
-                            >
-                                {em}
-                            </button>
-                        ))}
-                        <select
-                            className="form-select"
-                            style={{ width: 'auto', minHeight: 44 }}
-                            aria-label="Choose 3D text stage"
-                            value={selectedStyle}
-                            onChange={(e) => setSelectedStyle(e.target.value)}
+                {/* Live Link Preview Card */}
+                {linkPreview && (
+                    <div className="mt-2 position-relative rounded-3 overflow-hidden shadow-sm link-preview-card" data-testid="composer-link-preview">
+                        <button
+                            type="button"
+                            className="btn btn-sm btn-dark bg-opacity-75 text-white position-absolute top-0 end-0 m-2 rounded-circle d-inline-flex align-items-center justify-content-center"
+                            style={{ width: '44px', height: '44px', zIndex: 3 }}
+                            aria-label="Dismiss link preview"
+                            title="Dismiss link preview"
+                            onClick={() => {
+                                setDismissedLinkUrl(linkPreview._sourceUrl || '');
+                                setLinkPreview(null);
+                            }}
                         >
-                            <option value="">Standard Card</option>
-                            {TEXT_STAGE_CATALOG.map((st) => (
-                                <option key={st.slug} value={st.slug}>
-                                    {st.label} Stage
-                                </option>
-                            ))}
-                        </select>
+                            <i className="bi bi-x-lg" aria-hidden="true" />
+                        </button>
+                        {linkPreview.image && (
+                            <div className="link-preview-card__media">
+                                <img
+                                    src={linkPreview.image}
+                                    alt={linkPreview.title || 'Link preview image'}
+                                    referrerPolicy="no-referrer"
+                                    loading="lazy"
+                                    className="w-100 h-100 object-fit-cover"
+                                />
+                            </div>
+                        )}
+                        <div className="p-3 link-preview-card__body">
+                            <div className="d-flex justify-content-between align-items-center mb-1 link-preview-card__eyebrow">
+                                <span className="badge rounded-pill text-bg-light border small">{linkPreview.domain || 'Link'}</span>
+                                <small className="fw-medium link-preview-card__type">Rich Preview</small>
+                            </div>
+                            <h6 className="fw-bold mb-1 link-preview-card__title">{linkPreview.title || linkPreview.domain || ''}</h6>
+                            {linkPreview.description && (
+                                <p className="small mb-2 link-preview-card__desc">{linkPreview.description}</p>
+                            )}
+                            <div className="pt-1 d-flex justify-content-between align-items-center link-preview-card__footer">
+                                <span className="small text-truncate link-preview-card__url" style={{ maxWidth: '65%' }}>
+                                    {linkPreview.site_name || linkPreview.domain || 'Web Link'}
+                                </span>
+                                <span className="badge rounded-pill px-2 py-1 link-preview-card__cta">
+                                    {linkPreview.cta_label || 'Open Link →'}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
-                        {audiences.length > 0 && (
+                {/* Expandable Emoji, Scenic Backdrop & Audience Controls */}
+                {(showOptions || selectedStyle) && (
+                    <div className="d-flex flex-column gap-2 mt-2">
+                        <div className="fp-stage-converter__row" role="radiogroup" aria-label="Choose post backdrop">
+                            <button
+                                type="button"
+                                className={`fp-stage-converter__chip ${!selectedStyle ? 'is-active' : ''}`}
+                                onClick={() => setSelectedStyle('')}
+                                aria-pressed={!selectedStyle ? 'true' : 'false'}
+                            >
+                                <span>Plain (Aa)</span>
+                            </button>
+                            {TEXT_STAGE_CATALOG.map((st) => (
+                                <button
+                                    key={st.slug}
+                                    type="button"
+                                    className={`fp-stage-converter__chip ${selectedStyle === st.slug ? 'is-active' : ''}`}
+                                    onClick={() => setSelectedStyle(st.slug)}
+                                    aria-pressed={selectedStyle === st.slug ? 'true' : 'false'}
+                                >
+                                    {st.swatch && (
+                                        <span
+                                            className="fp-stage-converter__dot"
+                                            style={{ background: st.swatch }}
+                                            aria-hidden="true"
+                                        />
+                                    )}
+                                    <span>{st.label}</span>
+                                </button>
+                            ))}
+                        </div>
+                        <div className="d-flex align-items-center flex-wrap gap-2">
+                            {QUICK_EMOJIS.map((em) => (
+                                <button
+                                    key={em}
+                                    type="button"
+                                    className={styles.btnBase}
+                                    style={{ padding: '0.25rem 0.625rem' }}
+                                    onClick={() => setMessage((m) => `${m}${em}`)}
+                                    aria-label={`Insert ${em}`}
+                                >
+                                    {em}
+                                </button>
+                            ))}
                             <select
                                 className="form-select"
                                 style={{ width: 'auto', minHeight: 44 }}
-                                aria-label="Post audience"
-                                value={audienceScope}
-                                onChange={(e) => setAudienceScope(e.target.value)}
+                                aria-label="Choose 3D text stage"
+                                value={selectedStyle}
+                                onChange={(e) => setSelectedStyle(e.target.value)}
                             >
-                                <option value="all">All Family Circles</option>
-                                {audiences.map((aud) => (
-                                    <option key={aud.scope || aud.code} value={aud.scope || aud.code}>
-                                        {aud.label || aud.name || aud.code}
-                                    </option>
-                                ))}
+                                <option value="">Standard Card</option>
+                                <optgroup label="Scenic Backdrops">
+                                    {TEXT_STAGE_CATALOG.filter((s) => s.category === 'scenic').map((st) => (
+                                        <option key={st.slug} value={st.slug}>
+                                            {st.label} Backdrop
+                                        </option>
+                                    ))}
+                                </optgroup>
+                                <optgroup label="3D Milestone Stages">
+                                    {TEXT_STAGE_CATALOG.filter((s) => s.category !== 'scenic').map((st) => (
+                                        <option key={st.slug} value={st.slug}>
+                                            {st.label} Stage
+                                        </option>
+                                    ))}
+                                </optgroup>
                             </select>
-                        )}
+
+                            {audiences.length > 0 && (
+                                <select
+                                    className="form-select"
+                                    style={{ width: 'auto', minHeight: 44 }}
+                                    aria-label="Post audience"
+                                    value={audienceScope}
+                                    onChange={(e) => setAudienceScope(e.target.value)}
+                                >
+                                    <option value="all">All Family Circles</option>
+                                    {audiences.map((aud) => (
+                                        <option key={aud.scope || aud.code} value={aud.scope || aud.code}>
+                                            {aud.label || aud.name || aud.code}
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
+                        </div>
                     </div>
                 )}
 

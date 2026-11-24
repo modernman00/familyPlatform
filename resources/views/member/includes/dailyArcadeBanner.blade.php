@@ -1,6 +1,7 @@
 {{-- Daily Family Arcade Banner on the Family Feed --}}
 @php
     $arcadeDate = date('Y-m-d');
+    $arcadeDateFormatted = date('D, j M Y', strtotime($arcadeDate));
     $arcadeGame = \App\services\FamilyArcadeService::getDailyFeaturedGame($arcadeDate);
     $arcadeGameLabel = match ($arcadeGame) {
         'kingrid' => 'KinGrid',
@@ -23,7 +24,7 @@
             <div class="min-w-0">
                 <div class="d-flex align-items-center gap-2 flex-wrap">
                     <span class="badge rounded-pill" style="background: rgba(251, 191, 36, 0.22); color: #fef3c7; border: 1px solid rgba(251, 191, 36, 0.5); font-size: 0.7rem;">DAILY FAMILY ARCADE</span>
-                    <span style="font-size: 0.78rem; color: #fde68a; font-weight: 600;">{{ $arcadeDate }}</span>
+                    <span style="font-size: 0.78rem; color: #fde68a; font-weight: 600;">{{ $arcadeDateFormatted }}</span>
                 </div>
                 <div class="fw-bold mt-1" style="font-size: 0.98rem; color: #ffffff;">
                     Today’s Featured Challenge: {{ $arcadeGameLabel }}

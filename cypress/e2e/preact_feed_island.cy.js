@@ -99,9 +99,9 @@ describe('Preact Feed Island (Phases 1–4) Browser & DOM Audit', () => {
         cy.get('#upcoming-events-root #upcomingEventsSection', { timeout: 30000 }).should('exist').and('contain.text', 'Upcoming Events');
         cy.get('[data-testid="feed-island-shell"]', { timeout: 30000 }).should('be.visible');
 
-        // Classic Hero Composer with 6 quick-action pills
+        // Classic Hero Composer with quick-action pills
         cy.get('#openPostModalTrigger').should('be.visible');
-        cy.get('#openPostModalTrigger .composer-pill-btn').should('have.length', 6);
+        cy.get('#openPostModalTrigger .composer-pill-btn').should('have.length', 7);
         cy.get('[role="tab"]').contains('All Family Memories').should('be.visible');
         cy.get('[role="tab"]').contains('Tagged With You').should('be.visible');
 

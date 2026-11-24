@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef, useMemo } from 'preact/hooks';
-import { playArcadeSfx, formatElapsedMs } from './arcadeEngine';
+import { formatElapsedMs } from './arcadeEngine';
+import { triggerHaptic } from './hooks/useSoundEffects';
 import styles from './ArcadeShell.module.css';
 
-export function KinGridGame({ puzzle, onProgress, onComplete, submitting }) {
+export function KinGridGame({ puzzle, onProgress, onComplete, submitting, sound }) {
     const size = puzzle?.size || 5;
     const givens = puzzle?.givens || [];
     const inequalities = puzzle?.inequalities || [];
@@ -20,10 +21,13 @@ export function KinGridGame({ puzzle, onProgress, onComplete, submitting }) {
     const [elapsedMs, setElapsedMs] = useState(0);
     const [statusNote, setStatusNote] = useState(`Fill every row and column with numbers 1–${size} (no repeats) and follow the > and < signs.`);
     const [showStrategy, setShowStrategy] = useState(false);
+    const [lastFilledCell, setLastFilledCell] = useState(null);
+    const [sweepingCells, setSweepingCells] = useState(() => new Set());
 
     const startTimeRef = useRef(Date.now());
     const replayRef = useRef([]);
     const completedRef = useRef(false);
+    const completedLinesRef = useRef(new Set());
 
     const initGrid = () => {
         const next = Array.from({ length: size }, (_, r) =>
@@ -32,6 +36,9 @@ export function KinGridGame({ puzzle, onProgress, onComplete, submitting }) {
         setGrid(next);
         setHistory([]);
         setSelected(null);
+        setLastFilledCell(null);
+        setSweepingCells(new Set());
+        completedLinesRef.current = new Set();
     };
 
     useEffect(() => {
@@ -64,6 +71,70 @@ export function KinGridGame({ puzzle, onProgress, onComplete, submitting }) {
         if (onProgress) onProgress(pct, elapsedMs);
     }, [filledCount, size]);
 
+    // Live inequality validation status (neutral | satisfied | invalid)
+    const ineqStatusMap = useMemo(() => {
+        const map = new Map();
+        for (const ineq of inequalities) {
+            const v1 = grid[ineq.r1]?.[ineq.c1] || 0;
+            const v2 = grid[ineq.r2]?.[ineq.c2] || 0;
+            const edgeKey = `${ineq.r1},${ineq.c1}-${ineq.r2},${ineq.c2}`;
+            if (v1 === 0 || v2 === 0) {
+                map.set(edgeKey, 'neutral');
+            } else {
+                const ok = ineq.op === '>' ? v1 > v2 : v1 < v2;
+                map.set(edgeKey, ok ? 'satisfied' : 'invalid');
+            }
+        }
+        return map;
+    }, [grid, inequalities]);
+
+    // Detect newly completed valid rows or columns and sweep gold sheen
+    useEffect(() => {
+        if (!grid.length) return;
+        const newlyCompleted = [];
+        for (let r = 0; r < size; r++) {
+            const rowKey = `r:${r}`;
+            const seen = new Set();
+            let valid = true;
+            for (let c = 0; c < size; c++) {
+                const v = grid[r]?.[c] || 0;
+                if (v < 1 || v > size || seen.has(v)) { valid = false; break; }
+                seen.add(v);
+            }
+            if (valid && !completedLinesRef.current.has(rowKey)) {
+                completedLinesRef.current.add(rowKey);
+                for (let c = 0; c < size; c++) newlyCompleted.push(`${r},${c}`);
+            } else if (!valid && completedLinesRef.current.has(rowKey)) {
+                completedLinesRef.current.delete(rowKey);
+            }
+        }
+        for (let c = 0; c < size; c++) {
+            const colKey = `c:${c}`;
+            const seen = new Set();
+            let valid = true;
+            for (let r = 0; r < size; r++) {
+                const v = grid[r]?.[c] || 0;
+                if (v < 1 || v > size || seen.has(v)) { valid = false; break; }
+                seen.add(v);
+            }
+            if (valid && !completedLinesRef.current.has(colKey)) {
+                completedLinesRef.current.add(colKey);
+                for (let r = 0; r < size; r++) newlyCompleted.push(`${r},${c}`);
+            } else if (!valid && completedLinesRef.current.has(colKey)) {
+                completedLinesRef.current.delete(colKey);
+            }
+        }
+        if (newlyCompleted.length > 0) {
+            triggerHaptic(16);
+            sound?.playRowComplete?.();
+            setSweepingCells((prev) => {
+                const next = new Set(prev);
+                newlyCompleted.forEach((k) => next.add(k));
+                return next;
+            });
+        }
+    }, [grid, size]);
+
     const validateBoard = (candidate) => {
         for (let r = 0; r < size; r++) {
             const seen = new Set();
@@ -93,7 +164,8 @@ export function KinGridGame({ puzzle, onProgress, onComplete, submitting }) {
     const applyMove = (r, c, val, { recordHistory = true } = {}) => {
         if (completedRef.current || submitting) return;
         if (givenMap.has(`${r},${c}`)) {
-            playArcadeSfx('error');
+            triggerHaptic(16);
+            sound?.playError?.();
             return;
         }
         const prevVal = grid[r]?.[c] ?? 0;
@@ -105,8 +177,34 @@ export function KinGridGame({ puzzle, onProgress, onComplete, submitting }) {
             setHistory((h) => [...h, { r, c, prevVal }]);
         }
         setGrid(next);
+        if (val > 0) {
+            setLastFilledCell(`${r},${c}`);
+        }
         replayRef.current.push({ t: Date.now() - startTimeRef.current, r, c, v: val });
-        playArcadeSfx('connect', r * size + c);
+
+        const hasIneqViolation = val > 0 && inequalities.some((ineq) => {
+            if (ineq.r1 === r && ineq.c1 === c) {
+                const other = next[ineq.r2]?.[ineq.c2] || 0;
+                return other > 0 && (ineq.op === '>' ? !(val > other) : !(val < other));
+            }
+            if (ineq.r2 === r && ineq.c2 === c) {
+                const other = next[ineq.r1]?.[ineq.c1] || 0;
+                return other > 0 && (ineq.op === '>' ? !(other > val) : !(other < val));
+            }
+            return false;
+        });
+
+        if (hasIneqViolation) {
+            triggerHaptic(18);
+            sound?.playError?.();
+        } else {
+            triggerHaptic(12);
+            if (val > 0) {
+                sound?.playConnect?.(filledCount + 1);
+            } else {
+                sound?.playTap?.();
+            }
+        }
 
         const allFilled = next.every((row) => row.every((cell) => cell > 0));
         if (allFilled) {
@@ -115,7 +213,8 @@ export function KinGridGame({ puzzle, onProgress, onComplete, submitting }) {
                 completedRef.current = true;
                 const finalMs = Date.now() - startTimeRef.current;
                 setElapsedMs(finalMs);
-                playArcadeSfx('complete');
+                triggerHaptic(20);
+                sound?.playVictory?.();
                 setStatusNote('Spot on! Logic grid solved!');
                 if (onComplete) {
                     onComplete({
@@ -129,7 +228,8 @@ export function KinGridGame({ puzzle, onProgress, onComplete, submitting }) {
                 }
             } else {
                 setStatusNote(err);
-                playArcadeSfx('error');
+                triggerHaptic(18);
+                sound?.playError?.();
             }
         }
     };
@@ -174,7 +274,8 @@ export function KinGridGame({ puzzle, onProgress, onComplete, submitting }) {
         next[last.r][last.c] = last.prevVal;
         setGrid(next);
         setHistory((h) => h.slice(0, -1));
-        playArcadeSfx('tick');
+        triggerHaptic(10);
+        sound?.playTap?.();
     };
 
     const solveFromBoard = (baseBoard) => {
@@ -325,7 +426,8 @@ export function KinGridGame({ puzzle, onProgress, onComplete, submitting }) {
         const solved = solveFromBoard(grid);
         if (!solved) {
             setStatusNote('One of your current entries conflicts with the clues — try Undo or Reset.');
-            playArcadeSfx('error');
+            triggerHaptic(18);
+            sound?.playError?.();
             return;
         }
         const hint = findSmartDeductionHint(grid, solved);
@@ -377,8 +479,13 @@ export function KinGridGame({ puzzle, onProgress, onComplete, submitting }) {
                     row.map((val, c) => {
                         const isGiven = givenMap.has(`${r},${c}`);
                         const isSel = selected && selected[0] === r && selected[1] === c;
+                        const cellKey = `${r},${c}`;
+                        const isPopping = lastFilledCell === cellKey;
+                        const isSweeping = sweepingCells.has(cellKey);
                         const rightIneq = c + 1 < size ? ineqBetween(r, c, r, c + 1) : null;
                         const downIneq = r + 1 < size ? ineqBetween(r, c, r + 1, c) : null;
+                        const rightStatus = rightIneq ? (ineqStatusMap.get(`${r},${c}-${r},${c + 1}`) || 'neutral') : 'neutral';
+                        const downStatus = downIneq ? (ineqStatusMap.get(`${r},${c}-${r + 1},${c}`) || 'neutral') : 'neutral';
 
                         return (
                             <div key={`${r}-${c}`} className={styles.logicCellWrap}>
@@ -388,15 +495,46 @@ export function KinGridGame({ puzzle, onProgress, onComplete, submitting }) {
                                         styles.logicCell,
                                         isGiven ? styles.logicCellGiven : '',
                                         isSel ? styles.logicCellSelected : '',
+                                        isPopping ? styles.logicCellPop : '',
+                                        isSweeping ? styles.logicCellSweep : '',
                                     ].filter(Boolean).join(' ')}
-                                    onClick={() => setSelected([r, c])}
+                                    onClick={() => { triggerHaptic(10); sound?.playTap?.(); setSelected([r, c]); }}
+                                    onAnimationEnd={() => {
+                                        if (isPopping) setLastFilledCell(null);
+                                        if (isSweeping) {
+                                            setSweepingCells((prev) => {
+                                                if (!prev.has(cellKey)) return prev;
+                                                const next = new Set(prev);
+                                                next.delete(cellKey);
+                                                return next;
+                                            });
+                                        }
+                                    }}
                                     aria-label={`Row ${r + 1} Column ${c + 1}, ${val > 0 ? `value ${val}` : 'empty'}${isGiven ? ', fixed clue' : ''}`}
                                 >
                                     {val > 0 ? val : ''}
                                 </button>
-                                {rightIneq && <span className={styles.ineqRight} aria-hidden="true">{rightIneq}</span>}
+                                {rightIneq && (
+                                    <span
+                                        className={[
+                                            styles.ineqRight,
+                                            rightStatus === 'satisfied' ? styles.ineqSatisfied : '',
+                                            rightStatus === 'invalid' ? styles.ineqInvalid : '',
+                                        ].filter(Boolean).join(' ')}
+                                        aria-hidden="true"
+                                    >
+                                        {rightIneq}
+                                    </span>
+                                )}
                                 {downIneq && (
-                                    <span className={styles.ineqDown} aria-hidden="true">
+                                    <span
+                                        className={[
+                                            styles.ineqDown,
+                                            downStatus === 'satisfied' ? styles.ineqSatisfied : '',
+                                            downStatus === 'invalid' ? styles.ineqInvalid : '',
+                                        ].filter(Boolean).join(' ')}
+                                        aria-hidden="true"
+                                    >
                                         {downIneq}
                                     </span>
                                 )}

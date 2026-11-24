@@ -95,6 +95,17 @@ class BaseController
     public static function validateCsrf(?array $payload = null): void
     {
         $sessionToken = (string) ($_SESSION['token'] ?? '');
+        $cookieToken = isset($_COOKIE['XSRF-TOKEN']) && is_string($_COOKIE['XSRF-TOKEN'])
+            ? rawurldecode($_COOKIE['XSRF-TOKEN'])
+            : '';
+
+        // Re-anchor session token from a valid 64-hex XSRF-TOKEN cookie if PHP session storage was evicted;
+        // client must still present a matching explicit header or body token (never trust $_COOKIE alone).
+        if ($sessionToken === '' && $cookieToken !== '' && preg_match('/^[0-9a-f]{64}$/Di', $cookieToken)) {
+            $sessionToken = strtolower($cookieToken);
+            $_SESSION['token'] = $sessionToken;
+        }
+
         if ($sessionToken === '') {
             throw new \Src\Exceptions\UnauthorisedException('We are not familiar with the nature of your activities.');
         }
@@ -103,6 +114,16 @@ class BaseController
         if ($headerToken === '' && function_exists('getallheaders')) {
             $headers = getallheaders();
             $headerToken = (string) ($headers['X-XSRF-TOKEN'] ?? $headers['X-CSRF-TOKEN'] ?? $headers['X-XSRF-Token'] ?? $headers['X-CSRF-Token'] ?? $headers['x-xsrf-token'] ?? $headers['x-csrf-token'] ?? '');
+        }
+
+        if ($payload === null && empty($_POST['token']) && empty($_POST['_token']) && empty($_POST['csrf_token'])) {
+            $rawInput = file_get_contents('php://input');
+            if (is_string($rawInput) && $rawInput !== '') {
+                $decodedInput = json_decode($rawInput, true);
+                if (is_array($decodedInput)) {
+                    $payload = $decodedInput;
+                }
+            }
         }
 
         $bodyCandidates = [

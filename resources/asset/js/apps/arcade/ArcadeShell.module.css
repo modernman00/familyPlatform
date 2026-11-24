@@ -369,12 +369,12 @@
 .shareBtn {
     min-height: 44px;
     padding: 8px 16px;
-    border-radius: 12px;
-    border: 1.5px solid rgba(52, 211, 153, 0.65);
-    background: linear-gradient(135deg, #047857 0%, #10b981 100%);
-    color: #ffffff;
+    border-radius: 999px;
+    border: 1px solid #334155;
+    background: rgba(15, 23, 42, 0.88);
+    color: #e2e8f0;
     font-size: 0.84rem;
-    font-weight: 800;
+    font-weight: 700;
     display: inline-flex;
     align-items: center;
     gap: 7px;
@@ -382,13 +382,13 @@
     flex-shrink: 0;
     touch-action: manipulation;
     cursor: pointer;
-    box-shadow: 0 6px 18px -6px rgba(16, 185, 129, 0.45);
-    transition: transform 0.15s ease, filter 0.15s ease;
+    transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
 }
 
 @media (hover: hover) {
     .shareBtn:hover {
-        filter: brightness(1.08);
+        background: #1e293b;
+        border-color: #475569;
         transform: translateY(-1px);
     }
 }
@@ -580,13 +580,29 @@
     transition: width 0.25s linear;
 }
 
+@keyframes arcProgressSheen {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(220%); }
+}
+
 .progressYou {
     position: absolute;
     inset: 0 auto 0 0;
     background: linear-gradient(90deg, #b91c1c, #f59e0b);
     border-radius: 999px;
     transition: width 0.2s ease;
+    overflow: hidden;
     z-index: 1;
+}
+
+.progressYou::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    width: 45%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.36), transparent);
+    animation: arcProgressSheen 1.8s ease-in-out infinite;
+    will-change: transform;
 }
 
 .pbChip {
@@ -682,6 +698,10 @@
     z-index: 1;
 }
 
+.zipSvgOverlay polyline {
+    filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.55));
+}
+
 .zipCell {
     position: relative;
     z-index: 2;
@@ -726,6 +746,33 @@
 :global(body.dark-mode) .wallRight,
 :global(html.dark-mode) .wallRight { border-right-color: #fbbf24 !important; }
 
+.wallHitTop { border-top-color: #ffffff !important; box-shadow: inset 0 5px 10px -2px rgba(250, 204, 21, 0.95); }
+.wallHitBottom { border-bottom-color: #ffffff !important; box-shadow: inset 0 -5px 10px -2px rgba(250, 204, 21, 0.95); }
+.wallHitLeft { border-left-color: #ffffff !important; box-shadow: inset 5px 0 10px -2px rgba(250, 204, 21, 0.95); }
+.wallHitRight { border-right-color: #ffffff !important; box-shadow: inset -5px 0 10px -2px rgba(250, 204, 21, 0.95); }
+
+@keyframes zipNodeRipple {
+    0% { transform: scale(1); opacity: 0.9; }
+    100% { transform: scale(1.8); opacity: 0; }
+}
+
+.zipDotWrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.zipNodeRipple {
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    border: 2.5px solid #facc15;
+    pointer-events: none;
+    animation: zipNodeRipple 450ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    will-change: transform, opacity;
+}
+
 .zipDot {
     width: clamp(22px, 6.2vw, 30px);
     height: clamp(22px, 6.2vw, 30px);
@@ -762,7 +809,32 @@
     min-width: 0;
 }
 
+@keyframes logicCellPop {
+    0% { transform: scale(0.88); }
+    60% { transform: scale(1.06); }
+    100% { transform: scale(1); }
+}
+
+@keyframes logicRowSweep {
+    0% { transform: translateX(-120%); opacity: 0.9; }
+    100% { transform: translateX(140%); opacity: 0; }
+}
+
+@keyframes ineqShakeRight {
+    0%, 100% { transform: translate(50%, -50%) translateX(0); }
+    25% { transform: translate(50%, -50%) translateX(-4px); }
+    75% { transform: translate(50%, -50%) translateX(4px); }
+}
+
+@keyframes ineqShakeDown {
+    0%, 100% { transform: translate(-50%, 50%) rotate(90deg) translateX(0); }
+    25% { transform: translate(-50%, 50%) rotate(90deg) translateX(-4px); }
+    75% { transform: translate(-50%, 50%) rotate(90deg) translateX(4px); }
+}
+
 .logicCell {
+    position: relative;
+    overflow: hidden;
     width: 100%;
     aspect-ratio: 1 / 1;
     min-width: 0;
@@ -776,6 +848,21 @@
     font-weight: 800;
     touch-action: manipulation;
     cursor: pointer;
+}
+
+.logicCellPop {
+    animation: logicCellPop 220ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    will-change: transform;
+}
+
+.logicCellSweep::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(250, 204, 21, 0.55), transparent);
+    pointer-events: none;
+    animation: logicRowSweep 520ms ease-out forwards;
+    will-change: transform, opacity;
 }
 
 .logicCellGiven {
@@ -793,14 +880,15 @@
     right: calc(var(--logic-gap, 12px) * -0.5);
     top: 50%;
     transform: translate(50%, -50%);
-    width: clamp(20px, 5vw, 24px);
-    height: clamp(20px, 5vw, 24px);
+    width: clamp(24px, 6vw, 29px);
+    height: clamp(24px, 6vw, 29px);
     border-radius: 999px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: clamp(0.88rem, 2.8vw, 1.02rem);
+    font-size: clamp(1.02rem, 3.2vw, 1.18rem);
     font-weight: 900;
+    -webkit-text-stroke: 0.6px currentColor;
     line-height: 1;
     color: #0f172a;
     background: #fbbf24;
@@ -809,6 +897,7 @@
     padding: 0;
     z-index: 6;
     pointer-events: none;
+    transition: transform 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
 }
 
 .ineqDown {
@@ -816,14 +905,15 @@
     left: 50%;
     bottom: calc(var(--logic-gap, 12px) * -0.5);
     transform: translate(-50%, 50%) rotate(90deg);
-    width: clamp(20px, 5vw, 24px);
-    height: clamp(20px, 5vw, 24px);
+    width: clamp(24px, 6vw, 29px);
+    height: clamp(24px, 6vw, 29px);
     border-radius: 999px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: clamp(0.88rem, 2.8vw, 1.02rem);
+    font-size: clamp(1.02rem, 3.2vw, 1.18rem);
     font-weight: 900;
+    -webkit-text-stroke: 0.6px currentColor;
     line-height: 1;
     color: #0f172a;
     background: #fbbf24;
@@ -832,6 +922,29 @@
     padding: 0;
     z-index: 6;
     pointer-events: none;
+    transition: transform 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
+}
+
+.ineqRight.ineqSatisfied {
+    box-shadow: 0 0 10px rgba(250, 204, 21, 0.7);
+    transform: translate(50%, -50%) scale(1.1);
+}
+
+.ineqDown.ineqSatisfied {
+    box-shadow: 0 0 10px rgba(250, 204, 21, 0.7);
+    transform: translate(-50%, 50%) rotate(90deg) scale(1.1);
+}
+
+.ineqRight.ineqInvalid {
+    background: #ef4444;
+    color: #ffffff;
+    animation: ineqShakeRight 250ms ease-in-out;
+}
+
+.ineqDown.ineqInvalid {
+    background: #ef4444;
+    color: #ffffff;
+    animation: ineqShakeDown 250ms ease-in-out;
 }
 
 .numPad {
@@ -2066,40 +2179,48 @@
 }
 
 /* How to Play Button, Inline Nudge & Live Platform Demo Modal */
-.howToBtn {
+.howToBtn,
+.soundToggleBtn {
     min-height: 44px;
+    min-width: 44px;
     padding: 8px 14px;
-    border-radius: 12px;
-    border: 1.5px solid #0284c7;
-    background: #e0f2fe;
-    color: #0c4a6e;
+    border-radius: 999px;
+    border: 1px solid #334155;
+    background: rgba(15, 23, 42, 0.88);
+    color: #e2e8f0;
     font-size: 0.82rem;
-    font-weight: 800;
+    font-weight: 700;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
     white-space: nowrap;
     flex-shrink: 0;
     touch-action: manipulation;
     cursor: pointer;
-    transition: transform 0.15s ease, filter 0.15s ease;
+    transition: transform 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
 }
 
 @media (hover: hover) {
-    .howToBtn:hover {
-        filter: brightness(0.97);
+    .howToBtn:hover,
+    .soundToggleBtn:hover {
+        background: #1e293b;
+        border-color: #475569;
     }
 }
 
-.howToBtn:active {
+.howToBtn:active,
+.soundToggleBtn:active {
     transform: scale(0.98);
 }
 
 :global(body.dark-mode) .howToBtn,
-:global(html.dark-mode) .howToBtn {
-    background: rgba(14, 165, 233, 0.2);
-    border-color: #38bdf8;
-    color: #e0f2fe;
+:global(html.dark-mode) .howToBtn,
+:global(body.dark-mode) .soundToggleBtn,
+:global(html.dark-mode) .soundToggleBtn {
+    background: rgba(15, 23, 42, 0.88);
+    border-color: #334155;
+    color: #e2e8f0;
 }
 
 .howToNudge {

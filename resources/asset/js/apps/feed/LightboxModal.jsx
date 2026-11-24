@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
 import { HEIRLOOM_REACTIONS, getHeirloomGlassSvg } from '../../components/profilePage/heirloomGlassReactions';
+import { AtgLivingPhotoAvatarStage } from '../../components/livingPhotoAvatar';
 import { apiFetch } from '../shared/apiClient';
 import { getCsrfToken, notifyToast } from '../shared/bootstrap';
 import { Portal } from '../shared/Portal';
@@ -11,6 +12,7 @@ export function LightboxModal({
     isOpen,
     images = [],
     initialIndex = 0,
+    initialAnimate = false,
     post = null,
     bootstrap = {},
     onClose,
@@ -20,11 +22,46 @@ export function LightboxModal({
     const [index, setIndex] = useState(initialIndex);
     const [commentDraft, setCommentDraft] = useState('');
     const [submitting, setSubmitting] = useState(false);
+    const [animateHere, setAnimateHere] = useState(false);
+    const [exportBusy, setExportBusy] = useState(false);
     const touchStartX = useRef(null);
+    const liveViewportRef = useRef(null);
+    const liveCanvasRef = useRef(null);
+    const liveStageRef = useRef(null);
 
     useEffect(() => {
         setIndex(initialIndex);
-    }, [initialIndex, isOpen]);
+        setAnimateHere(Boolean(initialAnimate));
+    }, [initialIndex, initialAnimate, isOpen]);
+
+    useEffect(() => {
+        if (!isOpen || !animateHere || !liveCanvasRef.current || !liveViewportRef.current) {
+            if (liveStageRef.current) {
+                liveStageRef.current.destroy();
+                liveStageRef.current = null;
+            }
+            return undefined;
+        }
+        const photoUrl = images[index] || images[0];
+        const stage = new AtgLivingPhotoAvatarStage({
+            canvas: liveCanvasRef.current,
+            viewport: liveViewportRef.current,
+            photoUrl,
+        });
+        liveStageRef.current = stage;
+        let cancelled = false;
+        stage.init().then((ok) => {
+            if (!cancelled && ok) {
+                stage.start();
+                stage.triggerReaction('smile', { playSound: false });
+            }
+        });
+        return () => {
+            cancelled = true;
+            stage.destroy();
+            if (liveStageRef.current === stage) liveStageRef.current = null;
+        };
+    }, [isOpen, animateHere, index, images]);
 
     useEffect(() => {
         if (!isOpen) return;
@@ -148,11 +185,67 @@ export function LightboxModal({
                         touchStartX.current = null;
                     }}
                 >
-                    <img
-                        src={currentSrc}
-                        alt={`Family photo ${index + 1}`}
-                        style={{ maxWidth: '100%', maxHeight: '58vh', objectFit: 'contain', borderRadius: 10 }}
-                    />
+                    {animateHere ? (
+                        <div className="d-flex flex-column align-items-center gap-2 w-100">
+                            <div
+                                ref={liveViewportRef}
+                                style={{ width: 280, height: 280, borderRadius: '50%', position: 'relative', cursor: 'grab' }}
+                                title="Tap to react · drag to tilt"
+                            >
+                                <canvas ref={liveCanvasRef} width={512} height={512} style={{ width: '100%', height: '100%', borderRadius: '50%' }} />
+                            </div>
+                            <div className="d-flex flex-wrap justify-content-center gap-2">
+                                {[
+                                    { key: 'laugh', label: '😂 Laugh' },
+                                    { key: 'dance', label: '💃 Dance' },
+                                    { key: 'love', label: '❤️ Love' },
+                                    { key: 'hello', label: '👋 Wave' },
+                                ].map((act) => (
+                                    <button
+                                        key={act.key}
+                                        type="button"
+                                        className="btn btn-sm btn-outline-light rounded-pill px-3"
+                                        style={{ minHeight: '44px', whiteSpace: 'nowrap', flexShrink: 0 }}
+                                        onClick={() => liveStageRef.current?.triggerReaction(act.key, { playSound: true })}
+                                    >
+                                        {act.label}
+                                    </button>
+                                ))}
+                                <button
+                                    type="button"
+                                    className="btn btn-sm btn-warning rounded-pill px-3 fw-semibold"
+                                    style={{ minHeight: '44px', whiteSpace: 'nowrap', flexShrink: 0 }}
+                                    disabled={exportBusy}
+                                    onClick={async () => {
+                                        if (!liveStageRef.current || exportBusy) return;
+                                        setExportBusy(true);
+                                        try { await liveStageRef.current.downloadAnimatedVideo(); } finally { setExportBusy(false); }
+                                    }}
+                                >
+                                    {exportBusy ? 'Recording…' : '⬇️ Download MP4'}
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn btn-sm btn-outline-info rounded-pill px-3 fw-semibold"
+                                    style={{ minHeight: '44px', whiteSpace: 'nowrap', flexShrink: 0 }}
+                                    disabled={exportBusy}
+                                    onClick={async () => {
+                                        if (!liveStageRef.current || exportBusy) return;
+                                        setExportBusy(true);
+                                        try { await liveStageRef.current.shareAnimatedVideo(); } finally { setExportBusy(false); }
+                                    }}
+                                >
+                                    📤 Share
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <img
+                            src={currentSrc}
+                            alt={`Family photo ${index + 1}`}
+                            style={{ maxWidth: '100%', maxHeight: '58vh', objectFit: 'contain', borderRadius: 10 }}
+                        />
+                    )}
 
                     {images.length > 1 && (
                         <div className="d-flex align-items-center justify-content-center gap-3">
@@ -190,15 +283,28 @@ export function LightboxModal({
                                         </button>
                                     ))}
                                 </div>
-                                <a
-                                    href={`/member/emojiStudio?tab=photo-avatar&photo_url=${encodeURIComponent(currentSrc)}`}
-                                    className="btn btn-sm btn-outline-light rounded-pill d-inline-flex align-items-center gap-1"
-                                    style={{ minHeight: '44px', whiteSpace: 'nowrap', flexShrink: 0 }}
-                                    title="Transform this photo into a Stylised Living Avatar"
-                                >
-                                    <span aria-hidden="true">✨</span>
-                                    <span>Living Avatar</span>
-                                </a>
+                                <div className="d-flex align-items-center gap-2 flex-wrap">
+                                    <button
+                                        type="button"
+                                        className={`btn btn-sm rounded-pill d-inline-flex align-items-center gap-1 ${animateHere ? 'btn-warning text-dark fw-semibold' : 'btn-outline-light'}`}
+                                        style={{ minHeight: '44px', whiteSpace: 'nowrap', flexShrink: 0 }}
+                                        aria-pressed={animateHere}
+                                        onClick={() => setAnimateHere((v) => !v)}
+                                        title="Animate this photo right here with 60fps mesh motion and video export"
+                                    >
+                                        <span aria-hidden="true">🎬</span>
+                                        <span>{animateHere ? 'View Original' : 'Animate Here'}</span>
+                                    </button>
+                                    <a
+                                        href={`/member/emojiStudio?tab=photo-avatar&photo_url=${encodeURIComponent(currentSrc)}`}
+                                        className="btn btn-sm btn-outline-light rounded-pill d-inline-flex align-items-center gap-1"
+                                        style={{ minHeight: '44px', whiteSpace: 'nowrap', flexShrink: 0 }}
+                                        title="Transform this photo into a Stylised Living Avatar"
+                                    >
+                                        <span aria-hidden="true">✨</span>
+                                        <span>Living Avatar</span>
+                                    </a>
+                                </div>
                             </div>
 
                             <div className="d-flex align-items-center flex-wrap gap-1" aria-label="Quick emojis">

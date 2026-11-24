@@ -104,7 +104,21 @@ final class LinkPreviewService
     }
 
     /**
-     * Extract the first previewable HTTP/HTTPS URL from a text message.
+     * Fast pre-filter to check whether text may contain an HTTP/HTTPS URL or domain name.
+     */
+    public static function containsPotentialUrl(?string $text): bool
+    {
+        if ($text === null || trim($text) === '') {
+            return false;
+        }
+        return str_contains($text, 'http://')
+            || str_contains($text, 'https://')
+            || str_contains($text, '.');
+    }
+
+    /**
+     * Extract the first previewable HTTP/HTTPS URL (including scheme-less domains like www.idecideapp.com)
+     * from a text message, normalized with an https:// scheme when omitted.
      */
     public static function extractFirstPreviewableUrl(?string $text): ?string
     {
@@ -114,6 +128,7 @@ final class LinkPreviewService
 
     /**
      * Extract all previewable HTTP/HTTPS URLs from a text message (up to $max).
+     * Supports explicit http(s):// URLs, www.domain.tld, and bare common-TLD domains (e.g. idecideapp.com).
      *
      * @param string|null $text
      * @param int $max
@@ -128,13 +143,25 @@ final class LinkPreviewService
         $normalizedText = str_replace("\xC2\xA0", ' ', $text);
         $normalizedText = (string)preg_replace('/(https?:\/\/[^\s<>"\'`:]+)(:[a-z0-9_]+_3d:)/iu', '$1 $2', $normalizedText);
 
-        if (preg_match_all('/(https?:\/\/[^\s<>"\'`]+)/iu', $normalizedText, $matches)) {
+        $pattern = '/(?:'
+            . '(https?:\/\/[^\s<>"\'`]+)'
+            . '|'
+            . '(?<![@\/\w.-])(www\.[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:\/[^\s<>"\'`]*)?)'
+            . '|'
+            . '(?<![@\/\w.-])([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9-]{1,63})*\.(?:com|org|net|io|app|dev|co\.uk|org\.uk|uk|edu|gov|ai|me|info|biz|tv|co)(?:\/[^\s<>"\'`]*)?)(?![a-z0-9@._-])'
+            . ')/iu';
+
+        if (preg_match_all($pattern, $normalizedText, $matches, PREG_SET_ORDER)) {
             $urls = [];
             $seen = [];
-            foreach ($matches[1] as $raw) {
+            foreach ($matches as $m) {
+                $full = $m[1] ?? '';
+                $www = $m[2] ?? '';
+                $bare = $m[3] ?? '';
+                $raw = $full !== '' ? $full : ('https://' . ($www !== '' ? $www : $bare));
                 $cleaned = (string)preg_replace('/:[a-z0-9_]+_3d:.*$/i', '', trim($raw));
                 $cleaned = rtrim($cleaned, '.,;:!?)]}');
-                if ($cleaned !== '' && !isset($seen[$cleaned])) {
+                if ($cleaned !== 'https://' && !isset($seen[$cleaned])) {
                     $seen[$cleaned] = true;
                     $urls[] = $cleaned;
                     if (count($urls) >= $max) {
@@ -258,8 +285,8 @@ final class LinkPreviewService
                     continue;
                 }
 
-                // If it's a single Google Photos video
-                if (!empty($preview['is_video']) && !empty($preview['video_url'])) {
+                // If it's a single Google Photos video (Instagram Reels stay in postMessage & hydrate via link_preview)
+                if (!empty($preview['is_video']) && !empty($preview['video_url']) && empty($preview['is_instagram'])) {
                     if (!in_array($preview['video_url'], $videos, true) && count($videos) < $max) {
                         $videos[] = (string)$preview['video_url'];
                     }
@@ -358,7 +385,7 @@ final class LinkPreviewService
                 CURLOPT_SSL_VERIFYPEER => true,
                 CURLOPT_SSL_VERIFYHOST => 2,
                 CURLOPT_HTTPHEADER => [
-                    'User-Agent: facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php) WhatsApp/2.23.20.0',
+                    'User-Agent: ' . self::crawlerUserAgentForUrl($u),
                     'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                     'Accept-Language: en-GB,en-US;q=0.9,en;q=0.8',
                 ],
@@ -634,14 +661,25 @@ final class LinkPreviewService
                     }
                 }
 
+                $extra = [];
+                if (!empty($cached['extra_data']) && is_string($cached['extra_data'])) {
+                    $decodedExtra = json_decode($cached['extra_data'], true);
+                    if (is_array($decodedExtra)) {
+                        $extra = $decodedExtra;
+                    }
+                }
+
+                $igShortcodeCached = self::extractInstagramShortcode($url)
+                    ?? self::extractInstagramShortcode((string)($cached['canonical_url'] ?? ''));
+                $needsInstagramV2Upgrade = $igShortcodeCached !== null
+                    && $allowNetworkFetch
+                    && empty($extra['ig_v2']);
+
                 $isFresh = !empty($cached['expires_at']) && strtotime((string)$cached['expires_at']) > time();
                 $hasRichContent = !empty($cached['image_url']) || !empty($cached['extra_data']) || !empty($cached['title']);
-                if ($isFresh || $hasRichContent || !$allowNetworkFetch) {
-                    if (!empty($cached['extra_data']) && is_string($cached['extra_data'])) {
-                        $extra = json_decode($cached['extra_data'], true);
-                        if (is_array($extra)) {
-                            $cached = array_merge($cached, $extra);
-                        }
+                if (!$needsInstagramV2Upgrade && ($isFresh || $hasRichContent || !$allowNetworkFetch)) {
+                    if ($extra !== []) {
+                        $cached = array_merge($cached, $extra);
                     }
                     return self::formatPreviewPayload($cached, $url);
                 }
@@ -690,6 +728,12 @@ final class LinkPreviewService
 
         // 4. Extract OpenGraph and Twitter card metadata
         $ogData = ($html !== null && trim($html) !== '') ? self::parseMetadata($html, $url) : [];
+        $igShortcode = self::extractInstagramShortcode($url)
+            ?? self::extractInstagramShortcode((string)($ogData['canonical_url'] ?? ''));
+        if ($igShortcode !== null) {
+            $ogData = self::enrichWithInstagramEmbed($url, $igShortcode, $ogData);
+        }
+
         if (empty($ogData['title']) && empty($ogData['image_url'])) {
             // Resilient Fallback: Inspect parent directory or root origin, or synthesize from safe URL
             $fallbackOg = self::fetchFallbackMetadata($url);
@@ -724,6 +768,15 @@ final class LinkPreviewService
             }
             if (!empty($ogData['album_videos'])) {
                 $extraDataArr['album_videos'] = $ogData['album_videos'];
+            }
+            if (!empty($ogData['aspect_ratio'])) {
+                $extraDataArr['aspect_ratio'] = $ogData['aspect_ratio'];
+            }
+            if (!empty($ogData['ig_v2'])) {
+                $extraDataArr['ig_v2'] = true;
+            }
+            if (!empty($ogData['ig_shortcode'])) {
+                $extraDataArr['ig_shortcode'] = $ogData['ig_shortcode'];
             }
             if ($frameBlocked) {
                 $extraDataArr['frame_blocked'] = true;
@@ -873,7 +926,7 @@ final class LinkPreviewService
                 CURLOPT_ENCODING => '',
                 CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
                 CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
-                CURLOPT_USERAGENT => 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php) WhatsApp/2.23.20.0',
+                CURLOPT_USERAGENT => self::crawlerUserAgentForUrl($currentUrl),
                 CURLOPT_SSL_VERIFYPEER => true,
                 CURLOPT_SSL_VERIFYHOST => 2,
                 CURLOPT_HEADERFUNCTION => function ($chInstance, string $headerLine) use (&$capturedHeaders, &$redirectLocation): int {
@@ -1769,16 +1822,33 @@ final class LinkPreviewService
             $videoStreamUrl = $rawVideo;
         }
 
+        $igShortcode = !empty($data['ig_shortcode']) && is_string($data['ig_shortcode'])
+            ? trim($data['ig_shortcode'])
+            : (self::extractInstagramShortcode($url) ?? self::extractInstagramShortcode($requestedUrl));
+        $isInstagram = self::isInstagramDomain($cleanDomain)
+            || self::isInstagramDomain($url)
+            || self::isInstagramDomain($requestedUrl)
+            || $igShortcode !== null;
+        $aspectRatio = isset($data['aspect_ratio']) && is_string($data['aspect_ratio']) && trim($data['aspect_ratio']) !== ''
+            ? trim($data['aspect_ratio'])
+            : ($isInstagram && (str_contains(strtolower($url . ' ' . $requestedUrl), '/reel') || $videoStreamUrl !== null) ? '9 / 16' : null);
+
         $parsedVideoEmbed = \App\classes\VideoParser::parseVideoUrl($url) ?? \App\classes\VideoParser::parseVideoUrl($requestedUrl);
         $frameBlocked = !empty($data['frame_blocked']);
         $rawEmbedUrl = $parsedVideoEmbed['embedUrl'] ?? null;
         $embedUrl = $frameBlocked ? null : $rawEmbedUrl;
         $canEmbed = $embedUrl !== null;
-        $renderMode = $canEmbed ? 'inline_iframe' : 'external_card';
 
         $albumVideos = is_array($data['album_videos'] ?? null) ? array_values($data['album_videos']) : [];
-        $proxiedVideoUrl = $videoStreamUrl !== null ? self::getProxiedVideoUrl($videoStreamUrl) : null;
+        if ($isInstagram && $igShortcode !== null && $videoStreamUrl !== null) {
+            $proxiedVideoUrl = self::getInstagramStreamProxyUrl($igShortcode);
+        } else {
+            $proxiedVideoUrl = $videoStreamUrl !== null ? self::getProxiedVideoUrl($videoStreamUrl) : null;
+        }
         $proxiedAlbumVideos = array_map(static fn(string $v): string => self::getProxiedVideoUrl($v), $albumVideos);
+        $renderMode = ($isInstagram && $proxiedVideoUrl !== null)
+            ? 'native_video'
+            : ($canEmbed ? 'inline_iframe' : 'external_card');
 
         $resolvedSiteName = $isGooglePhoto ? 'Google Photos' : self::resolveBrandSiteName($domain, (string)($data['site_name'] ?? $domain));
         $cleanTitle = preg_replace('/\s+/', ' ', trim($title)) ?? trim($title);
@@ -1797,6 +1867,7 @@ final class LinkPreviewService
         $isSocialVideo = $isGoogleVideo
             || !empty($rawVideo)
             || str_contains($combinedUrlLower, '/reel/')
+            || str_contains($combinedUrlLower, '/reels/')
             || str_contains($combinedUrlLower, '/share/v/')
             || str_contains($combinedUrlLower, '/share/r/')
             || str_contains($combinedUrlLower, '/videos/')
@@ -1807,11 +1878,16 @@ final class LinkPreviewService
             || str_contains($combinedUrlLower, 'youtu.be/');
 
         $description = trim((string)($data['description'] ?? ''));
+        if ($isInstagram && $description !== '') {
+            $description = self::cleanInstagramDescription($description);
+        }
         if ($description === '' || filter_var($description, FILTER_VALIDATE_URL)) {
             if ($resolvedSiteName === 'Facebook') {
                 $description = str_contains($combinedUrlLower, '/reel/') || str_contains($combinedUrlLower, '/share/r/')
                     ? 'Watch this reel on Facebook'
                     : ($isSocialVideo ? 'Watch this video on Facebook' : 'View this post on Facebook');
+            } elseif ($resolvedSiteName === 'Instagram') {
+                $description = $isSocialVideo ? 'Watch this reel on Instagram' : 'View this post on Instagram';
             } elseif ($resolvedSiteName !== '') {
                 $description = $isSocialVideo ? "Watch this video on {$resolvedSiteName}" : "Explore on {$resolvedSiteName}";
             }
@@ -1826,6 +1902,8 @@ final class LinkPreviewService
             $ctaLabel = 'Play Video →';
         } elseif ($isSocialVideo && $resolvedSiteName !== '') {
             $ctaLabel = "Watch on {$resolvedSiteName} →";
+        } elseif ($isInstagram) {
+            $ctaLabel = 'View on Instagram →';
         }
 
         return [
@@ -1835,14 +1913,17 @@ final class LinkPreviewService
             'description' => $description,
             'image' => $photoUrl !== '' ? $photoUrl : $rawImage,
             'photo_url' => $isPhotoLink ? ($photoUrl !== '' ? $photoUrl : $rawImage) : null,
-            'video_url' => $videoStreamUrl,
+            'video_url' => ($isInstagram && $proxiedVideoUrl !== null) ? $proxiedVideoUrl : $videoStreamUrl,
             'embed_url' => $embedUrl,
             'frame_blocked' => $frameBlocked,
             'can_embed' => $canEmbed,
             'render_mode' => $renderMode,
             'proxied_video_url' => $proxiedVideoUrl,
+            'aspect_ratio' => $aspectRatio,
             'is_video' => $isGoogleVideo || !empty($rawVideo) || $embedUrl !== null,
             'is_social_video' => $isSocialVideo,
+            'is_instagram' => $isInstagram,
+            'ig_shortcode' => $igShortcode,
             'album_images' => $data['album_images'] ?? [],
             'album_videos' => $albumVideos,
             'proxied_album_videos' => $proxiedAlbumVideos,
@@ -2177,6 +2258,477 @@ final class LinkPreviewService
         }
 
         return $repairedCount;
+    }
+
+    /**
+     * Checks whether a host or URL belongs to Instagram (`instagram.com`, `*.instagram.com`, `instagr.am`).
+     */
+    public static function isInstagramDomain(string $urlOrHost): bool
+    {
+        $raw = strtolower(trim($urlOrHost));
+        if ($raw === '') {
+            return false;
+        }
+        $host = str_contains($raw, '://') ? strtolower((string)(parse_url($raw, PHP_URL_HOST) ?: '')) : $raw;
+        $host = (string)preg_replace('/^www\./i', '', $host);
+        return $host === 'instagram.com'
+            || str_ends_with($host, '.instagram.com')
+            || $host === 'instagr.am';
+    }
+
+    /**
+     * Returns the optimal crawler User-Agent for a target URL.
+     * Strips the `WhatsApp/...` token strictly on Instagram domains so Instagram serves
+     * full `og:description` captions instead of empty descriptions and `cmp1` watermarked squares.
+     *
+     * @return non-empty-string
+     */
+    public static function crawlerUserAgentForUrl(string $url): string
+    {
+        if (self::isInstagramDomain($url)) {
+            return 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)';
+        }
+        return 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php) WhatsApp/2.23.20.0';
+    }
+
+    /**
+     * Extracts a validated Instagram media shortcode from `/reel/`, `/reels/`, `/p/`, or `/tv/` URLs.
+     */
+    public static function extractInstagramShortcode(?string $url): ?string
+    {
+        if ($url === null || trim($url) === '') {
+            return null;
+        }
+        $trimmed = trim($url);
+        if (!self::isInstagramDomain($trimmed)) {
+            return null;
+        }
+        $path = (string)(parse_url($trimmed, PHP_URL_PATH) ?: '');
+        if (preg_match('#^/(?:[A-Za-z0-9._]{1,40}/)?(?:reel|reels|p|tv)/([A-Za-z0-9_-]{5,24})(?:/|$)#i', $path, $m) === 1) {
+            $code = $m[1];
+            if (strtolower($code) !== 'embed' && strtolower($code) !== 'captioned') {
+                return $code;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Validates that a URL is an HTTPS media stream or asset on Instagram/Meta's public CDN
+     * (`*.cdninstagram.com` or `*.fbcdn.net`) and resolves exclusively to public IPs.
+     */
+    public static function isInstagramCdnUrl(string $url): bool
+    {
+        $trimmed = trim($url);
+        if ($trimmed === '' || strlen($trimmed) > 4096) {
+            return false;
+        }
+        $parts = parse_url($trimmed);
+        if (!is_array($parts) || strtolower((string)($parts['scheme'] ?? '')) !== 'https' || empty($parts['host'])) {
+            return false;
+        }
+        $host = strtolower((string)$parts['host']);
+        $allowedHost = $host === 'cdninstagram.com'
+            || str_ends_with($host, '.cdninstagram.com')
+            || $host === 'fbcdn.net'
+            || str_ends_with($host, '.fbcdn.net');
+        if (!$allowedHost) {
+            return false;
+        }
+        return self::isSafeUrl($trimmed);
+    }
+
+    /**
+     * Checks whether an Instagram signed CDN URL (`oe=<hex_unix_timestamp>`) has expired
+     * or will expire within `$bufferSeconds`.
+     */
+    public static function isInstagramCdnUrlExpired(string $url, int $bufferSeconds = 1800): bool
+    {
+        $query = (string)(parse_url($url, PHP_URL_QUERY) ?: '');
+        if ($query === '') {
+            return false;
+        }
+        parse_str($query, $params);
+        $oe = isset($params['oe']) && is_string($params['oe']) ? trim($params['oe']) : '';
+        if ($oe !== '' && preg_match('/^[0-9a-f]{7,10}$/i', $oe) === 1) {
+            $expTs = (int)hexdec($oe);
+            if ($expTs > 0 && $expTs <= (time() + $bufferSeconds)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Builds the HMAC-signed sovereign streaming proxy URL for an Instagram video shortcode.
+     */
+    public static function getInstagramStreamProxyUrl(string $shortcode): string
+    {
+        $clean = trim($shortcode);
+        if ($clean === '' || preg_match('/^[A-Za-z0-9_-]{5,24}$/', $clean) !== 1) {
+            return '';
+        }
+        $localFile = 'ig_' . $clean . '.mp4';
+        $localPath = __DIR__ . '/../../resources/videos/posts/' . $localFile;
+        if (is_file($localPath) && filesize($localPath) > 4096) {
+            return '/resources/videos/posts/' . $localFile;
+        }
+        $sig = self::signStreamUrl('ig:' . $clean);
+        return '/resources/videos/external-stream?ig=' . rawurlencode($clean) . '&sig=' . $sig;
+    }
+
+    /**
+     * Extracts a double-quoted JSON string literal immediately following `$marker` in `$html`
+     * in strict O(n) linear time without PCRE backtracking risk.
+     */
+    public static function extractQuotedJsonAfterMarker(string $html, string $marker): ?string
+    {
+        $pos = strpos($html, $marker);
+        if ($pos === false) {
+            return null;
+        }
+        $i = $pos + strlen($marker);
+        $len = strlen($html);
+        while ($i < $len && ($html[$i] === ' ' || $html[$i] === "\t" || $html[$i] === "\r" || $html[$i] === "\n")) {
+            $i++;
+        }
+        if ($i >= $len || $html[$i] !== '"') {
+            return null;
+        }
+        $start = $i;
+        $i++;
+        $escaped = false;
+        while ($i < $len) {
+            $ch = $html[$i];
+            if ($escaped) {
+                $escaped = false;
+            } elseif ($ch === '\\') {
+                $escaped = true;
+            } elseif ($ch === '"') {
+                $rawLiteral = substr($html, $start, $i - $start + 1);
+                $decoded = json_decode($rawLiteral, true);
+                return is_string($decoded) ? $decoded : null;
+            }
+            $i++;
+        }
+        return null;
+    }
+
+    /**
+     * Cleans Instagram `og:description` engagement boilerplate (e.g. `54M likes, 391K comments - user on Date: "Caption"`)
+     * into crisp human-readable post copy while preserving creator context.
+     */
+    public static function cleanInstagramDescription(string $raw): string
+    {
+        $desc = trim(html_entity_decode($raw, ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+        if ($desc === '') {
+            return '';
+        }
+        if (preg_match('/^[\d.,]+[KMB]?\s+likes?,\s*[\d.,]+[KMB]?\s+comments?\s*-\s*([A-Za-z0-9._]+)\s+on\s+[^:]+:\s*"(.*)"\.?\s*$/isu', $desc, $m) === 1) {
+            $captionBody = trim($m[2]);
+            if ($captionBody !== '') {
+                return $captionBody;
+            }
+        }
+        return $desc;
+    }
+
+    /**
+     * Fetches Instagram's public `/p/{shortcode}/embed/captioned/` endpoint to extract:
+     * 1. Progressive 720p HD `.mp4` `video_url` (when video is public & embeddable)
+     * 2. Clean, uncropped, watermark-free `display_url` / `EmbeddedMediaImage` (zero `cmp1` play-button overlay)
+     * 3. Exact media `aspect_ratio`, creator handle, and raw caption text
+     *
+     * @return array{video_url: ?string, image_url: ?string, aspect_ratio: ?string, username: ?string, full_name: ?string, caption: ?string}|null
+     */
+    public static function fetchInstagramEmbedMetadata(string $shortcode): ?array
+    {
+        $cleanCode = trim($shortcode);
+        if ($cleanCode === '' || preg_match('/^[A-Za-z0-9_-]{5,24}$/', $cleanCode) !== 1) {
+            return null;
+        }
+
+        $embedUrl = 'https://www.instagram.com/p/' . $cleanCode . '/embed/captioned/';
+        if (!self::isSafeUrl($embedUrl)) {
+            return null;
+        }
+
+        $ch = curl_init($embedUrl);
+        if ($ch === false) {
+            return null;
+        }
+
+        $buffer = '';
+        $maxBytes = 460800; // 450 KB cap
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => false,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_MAXREDIRS => 3,
+            CURLOPT_TIMEOUT => 4,
+            CURLOPT_CONNECTTIMEOUT => 2,
+            CURLOPT_ENCODING => '',
+            CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+            CURLOPT_PROTOCOLS => CURLPROTO_HTTPS,
+            CURLOPT_REDIR_PROTOCOLS => CURLPROTO_HTTPS,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_HTTPHEADER => [
+                'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+                'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language: en-GB,en-US;q=0.9,en;q=0.8',
+                'Sec-Fetch-Dest: iframe',
+                'Sec-Fetch-Mode: navigate',
+                'Sec-Fetch-Site: cross-site',
+            ],
+            CURLOPT_WRITEFUNCTION => static function ($chInstance, string $chunk) use (&$buffer, $maxBytes): int {
+                if (strlen($buffer) + strlen($chunk) > $maxBytes) {
+                    $remaining = $maxBytes - strlen($buffer);
+                    if ($remaining > 0) {
+                        $buffer .= substr($chunk, 0, $remaining);
+                    }
+                    return 0;
+                }
+                $buffer .= $chunk;
+                return strlen($chunk);
+            },
+        ]);
+
+        curl_exec($ch);
+        $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        if (\PHP_VERSION_ID < 80500) {
+            @curl_close($ch);
+        }
+
+        if ($buffer === '' || ($httpCode !== 200 && $httpCode !== 206 && $httpCode !== 0)) {
+            return null;
+        }
+
+        return self::parseInstagramEmbedHtml($buffer);
+    }
+
+    /**
+     * Pure parser for Instagram `/embed/captioned/` HTML & `PolarisEmbedSimple` `contextJSON`.
+     * Separated from network I/O for deterministic unit testing.
+     *
+     * @return array{video_url: ?string, image_url: ?string, aspect_ratio: ?string, username: ?string, full_name: ?string, caption: ?string}
+     */
+    public static function parseInstagramEmbedHtml(string $html): array
+    {
+        $videoUrl = null;
+        $imageUrl = null;
+        $aspectRatio = null;
+        $username = null;
+        $fullName = null;
+        $caption = null;
+
+        $contextJsonStr = self::extractQuotedJsonAfterMarker($html, '"contextJSON":');
+        if ($contextJsonStr !== null) {
+            $ctx = json_decode($contextJsonStr, true);
+            $media = null;
+            if (is_array($ctx)) {
+                if (isset($ctx['gql_data']['shortcode_media']) && is_array($ctx['gql_data']['shortcode_media'])) {
+                    $media = $ctx['gql_data']['shortcode_media'];
+                } elseif (isset($ctx['context']['media']) && is_array($ctx['context']['media'])) {
+                    $media = $ctx['context']['media'];
+                }
+            }
+
+            if (is_array($media)) {
+                $candVid = isset($media['video_url']) && is_string($media['video_url']) ? self::decodeMetaUrl($media['video_url']) : '';
+                if ($candVid === '' && isset($media['edge_sidecar_to_children']['edges']) && is_array($media['edge_sidecar_to_children']['edges'])) {
+                    foreach ($media['edge_sidecar_to_children']['edges'] as $edge) {
+                        $childVid = isset($edge['node']['video_url']) && is_string($edge['node']['video_url'])
+                            ? self::decodeMetaUrl($edge['node']['video_url'])
+                            : '';
+                        if ($childVid !== '' && self::isInstagramCdnUrl($childVid)) {
+                            $candVid = $childVid;
+                            break;
+                        }
+                    }
+                }
+                if ($candVid !== '' && self::isInstagramCdnUrl($candVid)) {
+                    $videoUrl = $candVid;
+                }
+
+                $candImg = isset($media['display_url']) && is_string($media['display_url']) ? self::decodeMetaUrl($media['display_url']) : '';
+                if ($candImg !== '' && self::isInstagramCdnUrl($candImg)) {
+                    $imageUrl = $candImg;
+                }
+
+                $dimW = isset($media['dimensions']['width']) && is_numeric($media['dimensions']['width']) ? (int)$media['dimensions']['width'] : 0;
+                $dimH = isset($media['dimensions']['height']) && is_numeric($media['dimensions']['height']) ? (int)$media['dimensions']['height'] : 0;
+                if ($dimW > 0 && $dimH > 0) {
+                    $aspectRatio = self::formatAspectRatio($dimW, $dimH);
+                }
+
+                if (isset($media['owner']['username']) && is_string($media['owner']['username']) && trim($media['owner']['username']) !== '') {
+                    $username = trim($media['owner']['username']);
+                }
+                if (isset($media['owner']['full_name']) && is_string($media['owner']['full_name']) && trim($media['owner']['full_name']) !== '') {
+                    $fullName = trim($media['owner']['full_name']);
+                }
+                $edgeText = $media['edge_media_to_caption']['edges'][0]['node']['text'] ?? null;
+                if (is_string($edgeText) && trim($edgeText) !== '') {
+                    $caption = trim($edgeText);
+                }
+            }
+        }
+
+        // DOM Fallbacks for EmbeddedMediaImage, UsernameText, and Caption when contextJSON is absent
+        if ($imageUrl === null && preg_match('/<img\b[^>]*?\bclass\s*=\s*["\'][^"\']*EmbeddedMediaImage[^"\']*["\'][^>]*?\bsrc\s*=\s*["\']([^"\']+)["\']/is', $html, $im) === 1) {
+            $domImg = self::decodeMetaUrl($im[1]);
+            if ($domImg !== '' && self::isInstagramCdnUrl($domImg)) {
+                $imageUrl = $domImg;
+            }
+        }
+        if ($username === null && preg_match('/class\s*=\s*["\'][^"\']*UsernameText[^"\']*["\'][^>]*>(.*?)<\/span>/is', $html, $um) === 1) {
+            $cleanUser = trim(strip_tags(html_entity_decode($um[1], ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+            if ($cleanUser !== '') {
+                $username = $cleanUser;
+            }
+        }
+        if ($caption === null && preg_match('/<div\b[^>]*?\bclass\s*=\s*["\'][^"\']*Caption[^"\']*["\'][^>]*>(.*?)<\/div>/is', $html, $cm) === 1) {
+            $inner = $cm[1];
+            $inner = (string)preg_replace('/<a\b[^>]*?\bclass\s*=\s*["\'][^"\']*CaptionUsername[^"\']*["\'][^>]*>.*?<\/a>/is', '', $inner);
+            $inner = (string)preg_replace('/<div\b[^>]*?\bclass\s*=\s*["\'][^"\']*CaptionCommentsExpand[^"\']*["\'][^>]*>.*?<\/div>/is', '', $inner);
+            $cleanCap = trim(strip_tags(html_entity_decode(str_replace(['<br>', '<br/>', '<br />'], "\n", $inner), ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+            if ($cleanCap !== '') {
+                $caption = $cleanCap;
+            }
+        }
+
+        return [
+            'video_url' => $videoUrl,
+            'image_url' => $imageUrl,
+            'aspect_ratio' => $aspectRatio,
+            'username' => $username,
+            'full_name' => $fullName,
+            'caption' => $caption,
+        ];
+    }
+
+    /**
+     * Merges Instagram `/embed/captioned/` video/poster/caption metadata into scraped OpenGraph data.
+     *
+     * @param array<string, mixed> $ogData
+     * @return array<string, mixed>
+     */
+    private static function enrichWithInstagramEmbed(string $url, string $shortcode, array $ogData): array
+    {
+        $ogData['ig_v2'] = true;
+        $ogData['ig_shortcode'] = $shortcode;
+        $ogData['site_name'] = 'Instagram';
+        if (empty($ogData['domain'])) {
+            $ogData['domain'] = 'instagram.com';
+        }
+
+        $embedMeta = (($_ENV['APP_ENV'] ?? '') === 'testing')
+            ? null
+            : self::fetchInstagramEmbedMetadata($shortcode);
+
+        if (is_array($embedMeta)) {
+            if (!empty($embedMeta['video_url'])) {
+                $ogData['video_url'] = $embedMeta['video_url'];
+            }
+            // Prefer watermark-free EmbeddedMediaImage / display_url over WhatsApp's `cmp1` square
+            if (!empty($embedMeta['image_url'])) {
+                $ogData['image_url'] = $embedMeta['image_url'];
+            }
+            if (!empty($embedMeta['aspect_ratio'])) {
+                $ogData['aspect_ratio'] = $embedMeta['aspect_ratio'];
+            }
+            if (!empty($embedMeta['caption'])) {
+                $ogData['description'] = $embedMeta['caption'];
+            }
+            $creatorLabel = !empty($embedMeta['full_name'])
+                ? $embedMeta['full_name'] . (!empty($embedMeta['username']) ? ' (@' . $embedMeta['username'] . ')' : '')
+                : (!empty($embedMeta['username']) ? '@' . $embedMeta['username'] : null);
+            if ($creatorLabel !== null && (empty($ogData['title']) || strtolower(trim((string)$ogData['title'])) === 'instagram')) {
+                $isReel = str_contains(strtolower($url), '/reel') || !empty($embedMeta['video_url']);
+                $ogData['title'] = $creatorLabel . ($isReel ? ' on Instagram Reels' : ' on Instagram');
+            }
+        }
+
+        if (!empty($ogData['description']) && is_string($ogData['description'])) {
+            $ogData['description'] = self::cleanInstagramDescription($ogData['description']);
+        }
+
+        if (empty($ogData['aspect_ratio']) && (str_contains(strtolower($url), '/reel') || !empty($ogData['video_url']))) {
+            $ogData['aspect_ratio'] = '9 / 16';
+        }
+
+        return $ogData;
+    }
+
+    /**
+     * Resolves a fresh, non-expired Instagram `.mp4` CDN URL for `$shortcode` on behalf of
+     * `ServeImgController::StreamExternalVideo()`. Refreshes cached `extra_data` transparently
+     * when `oe=` hex signatures expire (~32h TTL).
+     */
+    public static function resolveFreshInstagramVideoStream(string $shortcode, bool $forceRefresh = false): ?string
+    {
+        $cleanCode = trim($shortcode);
+        if ($cleanCode === '' || preg_match('/^[A-Za-z0-9_-]{5,24}$/', $cleanCode) !== 1) {
+            return null;
+        }
+
+        $db = Db::connect2();
+
+        if (!$forceRefresh) {
+            try {
+                $likePattern = '%' . $cleanCode . '%';
+                $stmt = $db->prepare(
+                    "SELECT url_hash, extra_data FROM link_preview_cache
+                     WHERE domain LIKE '%instagram%' AND url LIKE ? AND extra_data IS NOT NULL
+                     ORDER BY fetched_at DESC LIMIT 3"
+                );
+                $stmt->execute([$likePattern]);
+                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                    $extra = json_decode((string)($row['extra_data'] ?? ''), true);
+                    $cand = is_array($extra) && isset($extra['video_url']) && is_string($extra['video_url'])
+                        ? trim($extra['video_url'])
+                        : '';
+                    if ($cand !== '' && self::isInstagramCdnUrl($cand) && !self::isInstagramCdnUrlExpired($cand)) {
+                        return $cand;
+                    }
+                }
+            } catch (Throwable) {
+            }
+        }
+
+        $embedMeta = self::fetchInstagramEmbedMetadata($cleanCode);
+        $freshUrl = is_array($embedMeta) && isset($embedMeta['video_url'])
+            ? trim($embedMeta['video_url'])
+            : '';
+        if ($freshUrl === '' || !self::isInstagramCdnUrl($freshUrl)) {
+            return null;
+        }
+
+        // Opportunistically update any cached Instagram rows matching this shortcode
+        try {
+            $likePattern = '%' . $cleanCode . '%';
+            $stmt = $db->prepare(
+                "SELECT url_hash, extra_data FROM link_preview_cache
+                 WHERE domain LIKE '%instagram%' AND url LIKE ? LIMIT 5"
+            );
+            $stmt->execute([$likePattern]);
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $upd = $db->prepare("UPDATE link_preview_cache SET extra_data = ?, fetched_at = ? WHERE url_hash = ?");
+            $now = date('Y-m-d H:i:s');
+            foreach ($rows as $row) {
+                $extra = json_decode((string)($row['extra_data'] ?? ''), true);
+                if (!is_array($extra)) {
+                    $extra = [];
+                }
+                $extra['video_url'] = $freshUrl;
+                $extra['ig_v2'] = true;
+                $extra['ig_shortcode'] = $cleanCode;
+                $upd->execute([json_encode($extra, JSON_UNESCAPED_SLASHES), $now, (string)$row['url_hash']]);
+            }
+        } catch (Throwable) {
+        }
+
+        return $freshUrl;
     }
 
     /**

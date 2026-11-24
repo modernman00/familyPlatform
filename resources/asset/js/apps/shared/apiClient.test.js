@@ -6,6 +6,7 @@ describe('Island Bootstrap & API Client Security', () => {
     beforeEach(() => {
         document.head.innerHTML = '';
         document.body.innerHTML = '';
+        document.cookie = 'XSRF-TOKEN=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
         delete window.$csrf;
         delete window.__FP_BOOTSTRAP__;
     });
@@ -68,7 +69,67 @@ describe('Island Bootstrap & API Client Security', () => {
 
         const [, reqInit] = fetchMock.mock.calls[0];
         expect(reqInit.headers.get('X-CSRF-TOKEN')).toBe('sec_123');
+        expect(reqInit.headers.get('X-XSRF-TOKEN')).toBe('sec_123');
         expect(reqInit.headers.get('X-Requested-With')).toBe('XMLHttpRequest');
         expect(fd.get('csrf_token')).toBe('sec_123');
+    });
+
+    it('prefers live 64-hex XSRF-TOKEN cookie over stale page-load meta tag', () => {
+        const meta = document.createElement('meta');
+        meta.name = 'csrf-token';
+        meta.content = 'a'.repeat(64);
+        document.head.appendChild(meta);
+
+        const rotatedCookie = 'b'.repeat(64);
+        document.cookie = `XSRF-TOKEN=${rotatedCookie}; path=/`;
+
+        expect(getCsrfToken({ csrfToken: 'a'.repeat(64) })).toBe(rotatedCookie);
+    });
+
+    it('retries DELETE /post/:id once when 401 stale CSRF rotates XSRF-TOKEN cookie and syncs meta tag', async () => {
+        const staleToken = '1'.repeat(64);
+        const freshToken = '2'.repeat(64);
+
+        const meta = document.createElement('meta');
+        meta.name = 'csrf-token';
+        meta.content = staleToken;
+        document.head.appendChild(meta);
+        document.cookie = `XSRF-TOKEN=${staleToken}; path=/`;
+
+        const fetchMock = vi.fn().mockImplementationOnce(async () => {
+            // Simulate server response Set-Cookie: XSRF-TOKEN=<freshToken>
+            document.cookie = `XSRF-TOKEN=${freshToken}; path=/`;
+            return {
+                ok: false,
+                status: 401,
+                headers: new Headers({ 'content-type': 'application/json' }),
+                json: async () => ({
+                    status: 'error',
+                    code: 401,
+                    message: 'We are not familiar with the nature of your activities.',
+                }),
+            };
+        }).mockImplementationOnce(async () => ({
+            ok: true,
+            status: 200,
+            headers: new Headers({ 'content-type': 'application/json' }),
+            json: async () => ({
+                status: 'success',
+                message: 'post deleted successfully',
+            }),
+        }));
+
+        globalThis.fetch = fetchMock;
+
+        const res = await apiFetch('/post/901', { method: 'DELETE' }, { csrfToken: staleToken });
+        expect(res).toEqual({ status: 'success', message: 'post deleted successfully' });
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+
+        const [, firstInit] = fetchMock.mock.calls[0];
+        const [, secondInit] = fetchMock.mock.calls[1];
+        expect(firstInit.headers.get('X-CSRF-TOKEN')).toBe(staleToken);
+        expect(secondInit.headers.get('X-CSRF-TOKEN')).toBe(freshToken);
+        expect(secondInit.headers.get('X-XSRF-TOKEN')).toBe(freshToken);
+        expect(meta.getAttribute('content')).toBe(freshToken);
     });
 });

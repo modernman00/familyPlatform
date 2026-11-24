@@ -15,12 +15,118 @@ import {
 export { getPostImageUrl, getPostImageVariantUrl, isGifMedia };
 
 export const TEXT_STAGE_CATALOG = [
-    { slug: 'grand_announcement', label: 'Grand', badge: '📣 FAMILY ANNOUNCEMENT', themeClass: 'grand_announcement' },
-    { slug: 'aurora_prism', label: 'Aurora', badge: '✨ MILESTONE MOMENT', themeClass: 'aurora_prism' },
-    { slug: 'heirloom_velvet', label: 'Heirloom', badge: '📜 HERITAGE CHRONICLE', themeClass: 'heirloom_velvet' },
-    { slug: 'dynasty_holo', label: 'Dynasty', badge: '🏰 OFFICIAL SANCTUARY', themeClass: 'dynasty_holo' },
-    { slug: 'cyber_glass', label: 'Roundtable', badge: '💬 FAMILY ROUNDTABLE', themeClass: 'cyber_glass' },
-    { slug: 'alert_pulse', label: 'Governance', badge: '🗳️ FAMILY GOVERNANCE', themeClass: 'alert_pulse' },
+    {
+        slug: 'starlight_bokeh',
+        label: 'Starlight',
+        badge: null,
+        category: 'scenic',
+        themeClass: 'starlight_bokeh',
+        swatch: 'radial-gradient(circle at 30% 30%, #38bdf8 0%, #0369a1 45%, #020817 100%)',
+    },
+    {
+        slug: 'golden_ember',
+        label: 'Fireflies',
+        badge: null,
+        category: 'scenic',
+        themeClass: 'golden_ember',
+        swatch: 'radial-gradient(circle at 30% 30%, #fbbf24 0%, #b45309 48%, #140802 100%)',
+    },
+    {
+        slug: 'sunset_horizon',
+        label: 'Sunset',
+        badge: null,
+        category: 'scenic',
+        themeClass: 'sunset_horizon',
+        swatch: 'linear-gradient(135deg, #312e81 0%, #be185d 52%, #c2410c 100%)',
+    },
+    {
+        slug: 'emerald_canopy',
+        label: 'Forest',
+        badge: null,
+        category: 'scenic',
+        themeClass: 'emerald_canopy',
+        swatch: 'radial-gradient(circle at 32% 28%, #34d399 0%, #047857 48%, #021810 100%)',
+    },
+    {
+        slug: 'ocean_biolum',
+        label: 'Deep Ocean',
+        badge: null,
+        category: 'scenic',
+        themeClass: 'ocean_biolum',
+        swatch: 'radial-gradient(circle at 32% 30%, #22d3ee 0%, #0e7490 48%, #020c1b 100%)',
+    },
+    {
+        slug: 'rose_stardust',
+        label: 'Rose Velvet',
+        badge: null,
+        category: 'scenic',
+        themeClass: 'rose_stardust',
+        swatch: 'radial-gradient(circle at 30% 28%, #f472b6 0%, #9d174d 48%, #230514 100%)',
+    },
+    {
+        slug: 'northern_sky',
+        label: 'Aurora Sky',
+        badge: null,
+        category: 'scenic',
+        themeClass: 'northern_sky',
+        swatch: 'linear-gradient(135deg, #020617 0%, #059669 50%, #6366f1 100%)',
+    },
+    {
+        slug: 'royal_parchment',
+        label: 'Royal Noir',
+        badge: null,
+        category: 'scenic',
+        themeClass: 'royal_parchment',
+        swatch: 'linear-gradient(135deg, #09090b 0%, #292524 60%, #d97706 100%)',
+    },
+    {
+        slug: 'grand_announcement',
+        label: 'Grand',
+        badge: '📣 FAMILY ANNOUNCEMENT',
+        category: 'stage',
+        themeClass: 'grand_announcement',
+        swatch: 'linear-gradient(135deg, #b45309 0%, #f59e0b 100%)',
+    },
+    {
+        slug: 'aurora_prism',
+        label: 'Prism',
+        badge: '✨ MILESTONE MOMENT',
+        category: 'stage',
+        themeClass: 'aurora_prism',
+        swatch: 'linear-gradient(135deg, #7c3aed 0%, #ec4899 100%)',
+    },
+    {
+        slug: 'heirloom_velvet',
+        label: 'Heirloom',
+        badge: '📜 HERITAGE CHRONICLE',
+        category: 'stage',
+        themeClass: 'heirloom_velvet',
+        swatch: 'linear-gradient(135deg, #4c0519 0%, #9f1239 100%)',
+    },
+    {
+        slug: 'dynasty_holo',
+        label: 'Dynasty',
+        badge: '🏰 OFFICIAL SANCTUARY',
+        category: 'stage',
+        themeClass: 'dynasty_holo',
+        swatch: 'linear-gradient(135deg, #065f46 0%, #10b981 100%)',
+    },
+    {
+        slug: 'cyber_glass',
+        label: 'Roundtable',
+        badge: '💬 FAMILY ROUNDTABLE',
+        category: 'stage',
+        themeClass: 'cyber_glass',
+        swatch: 'linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)',
+    },
+    {
+        slug: 'alert_pulse',
+        label: 'Governance',
+        badge: '🗳️ FAMILY GOVERNANCE',
+        category: 'stage',
+        themeClass: 'alert_pulse',
+        swatch: 'linear-gradient(135deg, #991b1b 0%, #e11d48 100%)',
+    },
 ];
 
 export function decodeHtml(str) {
@@ -480,12 +586,28 @@ export function extractRawMedia(raw, cleanMsg = '') {
     } else if (lp && lp.is_video && (lp.video_url || lp.url)) {
         const rawVidUrl = lp.video_url || lp.url;
         const proxiedUrl = lp.proxied_video_url || '';
+        const isIg = Boolean(
+            lp.is_instagram
+            || String(lp.domain || lp.url || '').toLowerCase().includes('instagram.com')
+            || String(lp.domain || lp.url || '').toLowerCase().includes('instagr.am')
+        );
+        const lpRatio = typeof lp.aspect_ratio === 'string' && lp.aspect_ratio.trim()
+            ? lp.aspect_ratio.trim()
+            : (isIg ? '9 / 16' : null);
         if (proxiedUrl && isVideoPath(proxiedUrl)) {
             pushVideoDesc({
                 type: 'direct',
-                originalUrl: rawVidUrl,
+                provider: isIg ? 'instagram' : 'direct',
+                videoId: lp.ig_shortcode ? `ig_${lp.ig_shortcode}` : undefined,
+                originalUrl: lp.url || rawVidUrl,
                 embedUrl: proxiedUrl,
                 thumbnailUrl: lp.image || lp.photo_url || null,
+                posterUrl: lp.image || lp.photo_url || null,
+                aspect_ratio: lpRatio || undefined,
+                isShort: Boolean(isIg || (lpRatio && /^9\s*\/\s*16/.test(lpRatio))),
+                sourceUrl: lp.url || null,
+                sourceTitle: lp.title || null,
+                sourceDescription: lp.description || null,
             });
         } else {
             const parsed = formatVideoDescriptor(rawVidUrl);
@@ -725,6 +847,28 @@ export function isEmojiOnlyMessage(text, arEmoji = null) {
 }
 
 /**
+ * Extracts previewable HTTP/HTTPS URLs from post text, normalising scheme-less
+ * domains (e.g. www.idecideapp.com or idecideapp.com) with https://.
+ */
+export function extractPreviewableUrls(text, max = 6) {
+    if (!text || typeof text !== 'string') return [];
+    const pattern = /(https?:\/\/[^\s<>"'`]+)|(?:^|[\s(\[{"'])(www\.[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:\/[^\s<>"'`]*)?)|(?:^|[\s(\[{"'])([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9-]{1,63})*\.(?:com|org|net|io|app|dev|co\.uk|org\.uk|uk|edu|gov|ai|me|info|biz|tv|co)(?:\/[^\s<>"'`]*)?)(?![a-z0-9@._-])/gi;
+    const urls = [];
+    const seen = new Set();
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+        const raw = match[1] ? match[1] : `https://${match[2] || match[3] || ''}`;
+        const cleaned = raw.replace(/:[a-z0-9_]+_3d:.*$/i, '').replace(/[.,;:!?)]+$/, '');
+        if (cleaned && cleaned !== 'https://' && !seen.has(cleaned)) {
+            seen.add(cleaned);
+            urls.push(cleaned);
+            if (urls.length >= max) break;
+        }
+    }
+    return urls;
+}
+
+/**
  * Tokenizes post/comment text into plain text, markdown/relative links, #hashtags, @mentions,
  * 3D living family emojis (:id_3d:), Me-stickers (:me_reaction@uid:), and URLs for safe JSX rendering.
  */
@@ -734,7 +878,7 @@ export function tokenizeRichText(text, arEmoji = null) {
         clean = (clean ? `${clean} ` : '') + `:${arEmoji}:`;
     }
     if (!clean) return [];
-    const regex = /(:me_(?:hello|laugh|wow|love|nod|dance|point|clap)@[A-Za-z0-9_-]{1,64}:|:[a-z0-9_]+_3d:|\[[^\]\n]+\]\((?:https?:\/\/|\/)[^\s)]+\)|https?:\/\/[^\s<>"']+|(?:^|\s)\/[A-Za-z0-9_/?=&#.-]+|#[A-Za-z0-9_]+|@[A-Za-z0-9_.-]+(?:\s+[A-Za-z0-9_.-]+)?)/gi;
+    const regex = /(:me_(?:hello|laugh|wow|love|nod|dance|point|clap)@[A-Za-z0-9_-]{1,64}:|:[a-z0-9_]+_3d:|\[[^\]\n]+\]\((?:https?:\/\/|\/)[^\s)]+\)|https?:\/\/[^\s<>"']+|(?<![@/\w.-])www\.[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:\/[^\s<>"'`]*)?|(?<![@/\w.-])[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9-]{1,63})*\.(?:com|org|net|io|app|dev|co\.uk|org\.uk|uk|edu|gov|ai|me|info|biz|tv|co)(?:\/[^\s<>"'`]*)?(?![a-z0-9@._-])|(?:^|\s)\/[A-Za-z0-9_/?=&#.-]+|#[A-Za-z0-9_]+|@[A-Za-z0-9_.-]+(?:\s+[A-Za-z0-9_.-]+)?)/gi;
     const tokens = [];
     let lastIndex = 0;
     let match;
@@ -767,6 +911,8 @@ export function tokenizeRichText(text, arEmoji = null) {
             }
         } else if (token.startsWith('http://') || token.startsWith('https://')) {
             tokens.push({ type: 'url', value: token });
+        } else if (/^(?:www\.[a-z0-9-]+(?:\.[a-z0-9-]+)+|[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9-]{1,63})*\.(?:com|org|net|io|app|dev|co\.uk|org\.uk|uk|edu|gov|ai|me|info|biz|tv|co))(?:\/[^\s<>"'`]*)?$/i.test(token)) {
+            tokens.push({ type: 'url', value: `https://${token}`, label: token });
         } else if (/^\s*\//.test(token)) {
             const leadingSpace = token.match(/^\s*/)[0];
             const path = token.slice(leadingSpace.length);
@@ -783,4 +929,154 @@ export function tokenizeRichText(text, arEmoji = null) {
         tokens.push({ type: 'text', value: clean.slice(lastIndex) });
     }
     return tokens;
+}
+
+export const ARCADE_GAME_PROFILES = {
+    kinzip: {
+        slug: 'kinzip',
+        name: 'KinZip',
+        tag: 'Connect the Dots',
+        icon: 'bi-bezier2',
+        accent: '#818cf8',
+        accentDeep: '#4338ca',
+        glow: 'rgba(129, 140, 248, 0.34)',
+    },
+    kingrid: {
+        slug: 'kingrid',
+        name: 'KinGrid',
+        tag: 'Number Puzzle',
+        icon: 'bi-grid-3x3-gap-fill',
+        accent: '#38bdf8',
+        accentDeep: '#0284c7',
+        glow: 'rgba(56, 189, 248, 0.34)',
+    },
+    kinword: {
+        slug: 'kinword',
+        name: 'KinWord',
+        tag: 'Word Groups',
+        icon: 'bi-collection-fill',
+        accent: '#fbbf24',
+        accentDeep: '#b45309',
+        glow: 'rgba(251, 191, 36, 0.30)',
+    },
+    kinpulse: {
+        slug: 'kinpulse',
+        name: 'KinPulse',
+        tag: 'Memory Pattern',
+        icon: 'bi-soundwave',
+        accent: '#f472b6',
+        accentDeep: '#be185d',
+        glow: 'rgba(244, 114, 182, 0.34)',
+    },
+    wordie: {
+        slug: 'wordie',
+        name: 'Wordie',
+        tag: '5-Letter Word',
+        icon: 'bi-alphabet-uppercase',
+        accent: '#34d399',
+        accentDeep: '#059669',
+        glow: 'rgba(52, 211, 153, 0.32)',
+    },
+    cheeseboard: {
+        slug: 'cheeseboard',
+        name: 'Cheeseboard',
+        tag: 'Queens Territory',
+        icon: 'bi-award-fill',
+        accent: '#c084fc',
+        accentDeep: '#7e22ce',
+        glow: 'rgba(192, 132, 252, 0.34)',
+    },
+    chess: {
+        slug: 'chess',
+        name: 'Family Chess',
+        tag: 'Classic 8x8 Strategy',
+        icon: 'bi-shield-shaded',
+        accent: '#fbbf24',
+        accentDeep: '#4338ca',
+        glow: 'rgba(251, 191, 36, 0.30)',
+    },
+    ayo: {
+        slug: 'ayo',
+        name: 'Ayò Olópon',
+        tag: 'Heritage Strategy',
+        icon: 'bi-gem',
+        accent: '#f59e0b',
+        accentDeep: '#92400e',
+        glow: 'rgba(245, 158, 11, 0.32)',
+    },
+    minesweeper: {
+        slug: 'minesweeper',
+        name: 'Minesweeper',
+        tag: 'Safe Path Logic',
+        icon: 'bi-bullseye',
+        accent: '#f87171',
+        accentDeep: '#b91c1c',
+        glow: 'rgba(248, 113, 113, 0.32)',
+    },
+};
+
+const ARCADE_GAME_MATCHERS = [
+    { key: 'kingrid', re: /\bkingrid\b/i },
+    { key: 'kinword', re: /\bkinword\b/i },
+    { key: 'kinpulse', re: /\bkinpulse\b/i },
+    { key: 'wordie', re: /\bwordie\b/i },
+    { key: 'cheeseboard', re: /\bcheeseboard(?:\s*\(queens\))?/i },
+    { key: 'chess', re: /\bfamily\s+chess\b/i },
+    { key: 'ayo', re: /ay[oò]\s+ol[oó]pon/i },
+    { key: 'minesweeper', re: /\bminesweeper\b/i },
+    { key: 'kinzip', re: /\bkinzip\b/i },
+];
+
+/**
+ * Extracts structured Family Arcade Challenge metadata from a feed post.
+ * Recognises both standard share-to-feed posts and pasted /arcade/share/<token> links.
+ */
+export function getArcadeChallengeMeta(post) {
+    const raw = decodeHtml(stripStyleToken(String(post?.postMessage || '')));
+    if (!raw) return null;
+
+    const urlMatch = raw.match(/(?:https?:\/\/[^\s<>"']+)?\/arcade\/share\/([a-f0-9]{16,64})/i);
+    if (!urlMatch || !urlMatch[1]) return null;
+
+    const token = urlMatch[1];
+    const shareUrl = `/arcade/share/${encodeURIComponent(token)}`;
+    const cardImageUrl = `/arcade/card/${encodeURIComponent(token)}.jpg?v=3`;
+
+    let gameProfile = {
+        slug: 'arcade',
+        name: 'Family Arcade',
+        tag: 'Family Challenge',
+        icon: 'bi-controller',
+        accent: '#38bdf8',
+        accentDeep: '#1d4ed8',
+        glow: 'rgba(56, 189, 248, 0.32)',
+    };
+    for (const matcher of ARCADE_GAME_MATCHERS) {
+        if (matcher.re.test(raw)) {
+            gameProfile = ARCADE_GAME_PROFILES[matcher.key];
+            break;
+        }
+    }
+
+    const scoreMatch = raw.match(/scored\s+([\d,]+)\s*pts?\b/i);
+    const scoreNum = scoreMatch ? Number.parseInt(scoreMatch[1].replace(/,/g, ''), 10) : null;
+    const scoreFormatted = Number.isFinite(scoreNum) ? scoreNum.toLocaleString('en-GB') : null;
+
+    const timeMatch = raw.match(/\((\d+(?:\.\d+)?s)\)/i);
+    const timeLabel = timeMatch ? timeMatch[1] : null;
+
+    let promptText = 'Think you can beat my time? Tap below to race my score.';
+    if (/think you can beat my time\?/i.test(raw)) {
+        promptText = 'Think you can beat my time? Step up to the board.';
+    }
+
+    return {
+        token,
+        shareUrl,
+        cardImageUrl,
+        scoreFormatted,
+        timeLabel,
+        game: gameProfile,
+        promptText,
+    };
 }

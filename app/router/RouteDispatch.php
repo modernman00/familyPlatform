@@ -48,6 +48,7 @@ final class RouteDispatch
         // Whitelist of controllers that do NOT require authentication.
         $publicControllers = [
             'App\controller\Index',
+            'App\controller\PublicLivingAvatarController',
             'App\controller\LoginController',
             'App\controller\RegisterController',
             'App\controller\ForgotPasswordController',

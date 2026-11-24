@@ -255,8 +255,8 @@ export const feedStageAndPolls = {
         async cyclePostStage(post, ev = null) {
             if (!post || !post.post_no) return;
             const order = this.hasFamilyTreeCall(post)
-                ? ['dynasty_holo', 'cyber_glass', 'alert_pulse', 'grand_announcement', 'aurora_prism', 'heirloom_velvet']
-                : ['cyber_glass', 'alert_pulse', 'grand_announcement', 'dynasty_holo', 'aurora_prism', 'heirloom_velvet'];
+                ? ['dynasty_holo', 'starlight_bokeh', 'golden_ember', 'sunset_horizon', 'emerald_canopy', 'ocean_biolum', 'rose_stardust', 'northern_sky', 'royal_parchment', 'cyber_glass', 'alert_pulse', 'grand_announcement', 'aurora_prism', 'heirloom_velvet']
+                : ['starlight_bokeh', 'golden_ember', 'sunset_horizon', 'emerald_canopy', 'ocean_biolum', 'rose_stardust', 'northern_sky', 'royal_parchment', 'cyber_glass', 'alert_pulse', 'grand_announcement', 'dynasty_holo', 'aurora_prism', 'heirloom_velvet'];
             const current = post.post_style || null;
             const idx = current ? order.indexOf(current) : -1;
             const nextSlug = order[(idx + 1) % order.length];

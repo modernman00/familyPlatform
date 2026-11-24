@@ -564,7 +564,7 @@ class FeedRepository
         $batchExternalUrls = [];
         foreach ($rows as $rItem) {
             $rMsg = (string)($rItem['postMessage'] ?? ($rItem['content'] ?? ''));
-            if ($rMsg !== '' && (str_contains($rMsg, 'http://') || str_contains($rMsg, 'https://'))) {
+            if (\App\services\LinkPreviewService::containsPotentialUrl($rMsg)) {
                 foreach (\App\services\LinkPreviewService::extractAllPreviewableUrls($rMsg, 6) as $extU) {
                     $batchExternalUrls[] = \App\services\LinkPreviewService::recoverTruncatedPartyPlatformUrl($extU, $rMsg);
                 }
@@ -603,7 +603,7 @@ class FeedRepository
 
             // Hydrate OpenGraph link preview (from fast cache or auto-recovery)
             $msg = (string)($post['postMessage'] ?? ($post['content'] ?? ''));
-            $hasExternalUrl = $msg !== '' && (str_contains($msg, 'http://') || str_contains($msg, 'https://'));
+            $hasExternalUrl = \App\services\LinkPreviewService::containsPotentialUrl($msg);
             $post['link_preview'] = $hasExternalUrl ? \App\services\LinkPreviewService::getPreviewForPostText($msg) : null;
 
             // Promote linked photos (Google Photos, iCloud, direct image links) to native post images (Multi-Image Support)

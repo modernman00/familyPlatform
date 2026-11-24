@@ -3180,6 +3180,177 @@ video.feed-post-video::-webkit-media-controls-play-button,
   border-color: rgba(253, 230, 138, 0.48);
 }
 
+/* ==========================================================================
+   ✨ Scenic & Atmospheric Post Backdrops (Starlight Bokeh & Curated Scenes)
+   ========================================================================== */
+.fp-text-stage--scenic {
+  min-height: 332px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8, 36px) var(--space-6, 28px);
+}
+
+@media (max-width: 576px) {
+  .fp-text-stage--scenic {
+    min-height: 284px;
+    padding: var(--space-6, 28px) var(--space-4, 20px);
+  }
+}
+
+.fp-text-stage--composer.fp-text-stage--scenic {
+  min-height: 224px;
+  padding: var(--space-6, 24px) var(--space-4, 20px) !important;
+}
+
+.fp-text-stage--scenic .fp-text-stage__grid {
+  display: none;
+}
+
+.fp-text-stage--scenic .fp-text-stage__body {
+  max-width: 32ch;
+  margin-inline: auto;
+  text-wrap: balance;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.82), 0 1px 4px rgba(0, 0, 0, 0.68);
+}
+
+.fp-text-stage__bokeh {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  animation: fpScenicBokehBreathe 9s ease-in-out infinite alternate;
+}
+
+@keyframes fpScenicBokehBreathe {
+  0% { opacity: 0.92; transform: scale(1); }
+  100% { opacity: 1; transform: scale(1.025); }
+}
+
+/* 7. Starlight Bokeh (Midnight Sapphire & Luminous Cyan Optical Bokeh + Stardust) */
+.fp-text-stage--starlight_bokeh {
+  background:
+    radial-gradient(ellipse 68% 52% at 50% 50%, rgba(1, 7, 18, 0.52) 0%, transparent 100%),
+    radial-gradient(circle at 18% 22%, rgba(14, 165, 233, 0.28) 0%, transparent 42%),
+    radial-gradient(circle at 84% 78%, rgba(2, 132, 199, 0.32) 0%, transparent 46%),
+    radial-gradient(circle at 72% 20%, rgba(56, 189, 248, 0.18) 0%, transparent 36%),
+    radial-gradient(circle at 24% 82%, rgba(3, 105, 161, 0.26) 0%, transparent 44%),
+    linear-gradient(155deg, #010612 0%, #031630 48%, #01050d 100%);
+  background-color: #020817;
+  border-color: rgba(56, 189, 248, 0.36);
+}
+.fp-text-stage--starlight_bokeh .fp-text-stage__orb--a {
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.42) 0%, rgba(2, 132, 199, 0.1) 70%);
+}
+.fp-text-stage--starlight_bokeh .fp-text-stage__orb--b {
+  background: radial-gradient(circle, rgba(34, 211, 238, 0.35) 0%, transparent 72%);
+}
+.fp-text-stage--starlight_bokeh .fp-text-stage__bokeh {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 600' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3CradialGradient id='b1'%3E%3Cstop offset='0%25' stop-color='%23e0f2fe' stop-opacity='0.95'/%3E%3Cstop offset='35%25' stop-color='%2338bdf8' stop-opacity='0.65'/%3E%3Cstop offset='100%25' stop-color='%230284c7' stop-opacity='0'/%3E%3C/radialGradient%3E%3CradialGradient id='b2'%3E%3Cstop offset='0%25' stop-color='%2338bdf8' stop-opacity='0.38'/%3E%3Cstop offset='65%25' stop-color='%230369a1' stop-opacity='0.18'/%3E%3Cstop offset='100%25' stop-color='%230369a1' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='96' cy='62' r='28' fill='url(%23b2)'/%3E%3Ccircle cx='712' cy='108' r='42' fill='url(%23b2)'/%3E%3Ccircle cx='664' cy='518' r='36' fill='url(%23b2)'/%3E%3Ccircle cx='142' cy='492' r='34' fill='url(%23b2)'/%3E%3Ccircle cx='490' cy='84' r='26' fill='url(%23b2)'/%3E%3Ccircle cx='318' cy='536' r='30' fill='url(%23b2)'/%3E%3Ccircle cx='88' cy='48' r='9' fill='url(%23b1)'/%3E%3Ccircle cx='158' cy='116' r='7' fill='url(%23b1)'/%3E%3Ccircle cx='248' cy='82' r='6' fill='url(%23b1)'/%3E%3Ccircle cx='618' cy='96' r='8' fill='url(%23b1)'/%3E%3Ccircle cx='726' cy='214' r='9' fill='url(%23b1)'/%3E%3Ccircle cx='686' cy='442' r='11' fill='url(%23b1)'/%3E%3Ccircle cx='574' cy='524' r='10' fill='url(%23b1)'/%3E%3Ccircle cx='116' cy='428' r='9' fill='url(%23b1)'/%3E%3Ccircle cx='228' cy='512' r='8' fill='url(%23b1)'/%3E%3Ccircle cx='406' cy='488' r='7' fill='url(%23b1)'/%3E%3Cg fill='%237dd3fc'%3E%3Ccircle cx='54' cy='138' r='2.2' opacity='0.85'/%3E%3Ccircle cx='128' cy='174' r='1.8' opacity='0.75'/%3E%3Ccircle cx='194' cy='64' r='2.5' opacity='0.9'/%3E%3Ccircle cx='286' cy='128' r='1.9' opacity='0.7'/%3E%3Ccircle cx='356' cy='72' r='2.1' opacity='0.8'/%3E%3Ccircle cx='442' cy='118' r='1.6' opacity='0.65'/%3E%3Ccircle cx='538' cy='62' r='2.4' opacity='0.88'/%3E%3Ccircle cx='668' cy='152' r='2.0' opacity='0.8'/%3E%3Ccircle cx='748' cy='82' r='2.6' opacity='0.9'/%3E%3Ccircle cx='74' cy='286' r='1.8' opacity='0.7'/%3E%3Ccircle cx='138' cy='342' r='2.4' opacity='0.85'/%3E%3Ccircle cx='68' cy='518' r='2.6' opacity='0.9'/%3E%3Ccircle cx='184' cy='456' r='2.1' opacity='0.8'/%3E%3Ccircle cx='278' cy='474' r='1.7' opacity='0.72'/%3E%3Ccircle cx='348' cy='548' r='2.3' opacity='0.85'/%3E%3Ccircle cx='472' cy='516' r='2.5' opacity='0.9'/%3E%3Ccircle cx='526' cy='458' r='1.9' opacity='0.75'/%3E%3Ccircle cx='632' cy='478' r='2.4' opacity='0.88'/%3E%3Ccircle cx='738' cy='386' r='2.2' opacity='0.82'/%3E%3Ccircle cx='754' cy='532' r='2.8' opacity='0.92'/%3E%3Ccircle cx='698' cy='312' r='1.7' opacity='0.7'/%3E%3C/g%3E%3Cg fill='%23ffffff'%3E%3Ccircle cx='112' cy='88' r='1.4' opacity='0.95'/%3E%3Ccircle cx='216' cy='144' r='1.2' opacity='0.85'/%3E%3Ccircle cx='588' cy='138' r='1.5' opacity='0.92'/%3E%3Ccircle cx='704' cy='178' r='1.3' opacity='0.88'/%3E%3Ccircle cx='96' cy='384' r='1.5' opacity='0.9'/%3E%3Ccircle cx='164' cy='538' r='1.4' opacity='0.92'/%3E%3Ccircle cx='596' cy='492' r='1.6' opacity='0.95'/%3E%3Ccircle cx='716' cy='496' r='1.4' opacity='0.9'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* 8. Golden Fireflies (Warm Obsidian Dusk & Champagne-Amber Bokeh Sparks) */
+.fp-text-stage--golden_ember {
+  background:
+    radial-gradient(ellipse 68% 52% at 50% 50%, rgba(12, 5, 1, 0.48) 0%, transparent 100%),
+    radial-gradient(circle at 18% 24%, rgba(245, 158, 11, 0.30) 0%, transparent 45%),
+    radial-gradient(circle at 82% 78%, rgba(217, 119, 6, 0.32) 0%, transparent 48%),
+    linear-gradient(150deg, #0c0501 0%, #261003 50%, #090401 100%);
+  background-color: #0c0501;
+  border-color: rgba(251, 191, 36, 0.44);
+}
+.fp-text-stage--golden_ember .fp-text-stage__bokeh {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 600' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3CradialGradient id='g1'%3E%3Cstop offset='0%25' stop-color='%23fef9c3' stop-opacity='0.95'/%3E%3Cstop offset='40%25' stop-color='%23fbbf24' stop-opacity='0.65'/%3E%3Cstop offset='100%25' stop-color='%23b45309' stop-opacity='0'/%3E%3C/radialGradient%3E%3CradialGradient id='g2'%3E%3Cstop offset='0%25' stop-color='%23f59e0b' stop-opacity='0.34'/%3E%3Cstop offset='100%25' stop-color='%2378350f' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='118' cy='92' r='36' fill='url(%23g2)'/%3E%3Ccircle cx='692' cy='124' r='44' fill='url(%23g2)'/%3E%3Ccircle cx='658' cy='498' r='38' fill='url(%23g2)'/%3E%3Ccircle cx='146' cy='486' r='34' fill='url(%23g2)'/%3E%3Ccircle cx='94' cy='68' r='9' fill='url(%23g1)'/%3E%3Ccircle cx='212' cy='112' r='7' fill='url(%23g1)'/%3E%3Ccircle cx='638' cy='88' r='8' fill='url(%23g1)'/%3E%3Ccircle cx='718' cy='232' r='10' fill='url(%23g1)'/%3E%3Ccircle cx='674' cy='456' r='11' fill='url(%23g1)'/%3E%3Ccircle cx='548' cy='528' r='9' fill='url(%23g1)'/%3E%3Ccircle cx='124' cy='434' r='8' fill='url(%23g1)'/%3E%3Ccircle cx='254' cy='518' r='9' fill='url(%23g1)'/%3E%3Cg fill='%23fde68a'%3E%3Ccircle cx='68' cy='154' r='2.3' opacity='0.88'/%3E%3Ccircle cx='178' cy='72' r='2.0' opacity='0.8'/%3E%3Ccircle cx='324' cy='86' r='2.2' opacity='0.78'/%3E%3Ccircle cx='518' cy='74' r='2.4' opacity='0.85'/%3E%3Ccircle cx='742' cy='112' r='2.6' opacity='0.9'/%3E%3Ccircle cx='82' cy='324' r='2.0' opacity='0.75'/%3E%3Ccircle cx='92' cy='526' r='2.5' opacity='0.9'/%3E%3Ccircle cx='364' cy='536' r='2.2' opacity='0.82'/%3E%3Ccircle cx='612' cy='484' r='2.4' opacity='0.88'/%3E%3Ccircle cx='746' cy='512' r='2.7' opacity='0.92'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* 9. Sunset Horizon (Twilight Dusk Sky, Warm Horizon Glow & Distant Ridge) */
+.fp-text-stage--sunset_horizon {
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 48%, rgba(23, 21, 59, 0.40) 0%, transparent 100%),
+    radial-gradient(circle at 50% 96%, rgba(251, 146, 60, 0.38) 0%, transparent 48%),
+    linear-gradient(180deg, #17153b 0%, #4c1d95 36%, #9d174d 72%, #7c2d12 100%);
+  background-color: #17153b;
+  border-color: rgba(249, 168, 212, 0.42);
+}
+.fp-text-stage--sunset_horizon .fp-text-stage__bokeh {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 600' preserveAspectRatio='xMidYMid slice'%3E%3Cg fill='%23fef3c7'%3E%3Ccircle cx='92' cy='68' r='1.8' opacity='0.85'/%3E%3Ccircle cx='218' cy='48' r='1.5' opacity='0.75'/%3E%3Ccircle cx='362' cy='62' r='2.0' opacity='0.88'/%3E%3Ccircle cx='528' cy='44' r='1.6' opacity='0.8'/%3E%3Ccircle cx='684' cy='76' r='2.1' opacity='0.9'/%3E%3Ccircle cx='744' cy='132' r='1.5' opacity='0.7'/%3E%3Ccircle cx='138' cy='128' r='1.4' opacity='0.68'/%3E%3C/g%3E%3Cpath d='M0 548 Q160 502 310 534 T620 518 T800 542 L800 600 L0 600 Z' fill='%230f0a1e' fill-opacity='0.52'/%3E%3Cpath d='M0 568 Q220 536 430 562 T800 554 L800 600 L0 600 Z' fill='%23090514' fill-opacity='0.72'/%3E%3C/svg%3E");
+}
+
+/* 10. Enchanted Forest (Deep Botanical Woodland & Bioluminescent Jade Bokeh) */
+.fp-text-stage--emerald_canopy {
+  background:
+    radial-gradient(ellipse 68% 52% at 50% 50%, rgba(1, 17, 11, 0.48) 0%, transparent 100%),
+    radial-gradient(circle at 20% 20%, rgba(52, 211, 153, 0.28) 0%, transparent 46%),
+    radial-gradient(circle at 82% 80%, rgba(16, 185, 129, 0.30) 0%, transparent 48%),
+    linear-gradient(150deg, #01140e 0%, #064e3b 50%, #022117 100%);
+  background-color: #01140e;
+  border-color: rgba(110, 231, 183, 0.42);
+}
+.fp-text-stage--emerald_canopy .fp-text-stage__bokeh {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 600' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3CradialGradient id='e1'%3E%3Cstop offset='0%25' stop-color='%23ecfdf5' stop-opacity='0.95'/%3E%3Cstop offset='40%25' stop-color='%2334d399' stop-opacity='0.6'/%3E%3Cstop offset='100%25' stop-color='%23059669' stop-opacity='0'/%3E%3C/radialGradient%3E%3CradialGradient id='e2'%3E%3Cstop offset='0%25' stop-color='%2334d399' stop-opacity='0.32'/%3E%3Cstop offset='100%25' stop-color='%23064e3b' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='108' cy='86' r='36' fill='url(%23e2)'/%3E%3Ccircle cx='702' cy='118' r='42' fill='url(%23e2)'/%3E%3Ccircle cx='668' cy='506' r='38' fill='url(%23e2)'/%3E%3Ccircle cx='134' cy='494' r='34' fill='url(%23e2)'/%3E%3Ccircle cx='92' cy='64' r='9' fill='url(%23e1)'/%3E%3Ccircle cx='226' cy='96' r='7' fill='url(%23e1)'/%3E%3Ccircle cx='644' cy='92' r='8' fill='url(%23e1)'/%3E%3Ccircle cx='724' cy='248' r='9' fill='url(%23e1)'/%3E%3Ccircle cx='682' cy='462' r='10' fill='url(%23e1)'/%3E%3Ccircle cx='122' cy='446' r='8' fill='url(%23e1)'/%3E%3Cg fill='%23a7f3d0'%3E%3Ccircle cx='74' cy='168' r='2.2' opacity='0.85'/%3E%3Ccircle cx='298' cy='76' r='2.0' opacity='0.78'/%3E%3Ccircle cx='512' cy='68' r='2.3' opacity='0.85'/%3E%3Ccircle cx='738' cy='142' r='2.4' opacity='0.88'/%3E%3Ccircle cx='88' cy='524' r='2.5' opacity='0.9'/%3E%3Ccircle cx='382' cy='538' r='2.1' opacity='0.8'/%3E%3Ccircle cx='596' cy='518' r='2.4' opacity='0.88'/%3E%3Ccircle cx='742' cy='518' r='2.6' opacity='0.9'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* 11. Deep Ocean Glow (Abyssal Sea & Turquoise Bioluminescent Shimmer) */
+.fp-text-stage--ocean_biolum {
+  background:
+    radial-gradient(ellipse 68% 52% at 50% 50%, rgba(1, 8, 20, 0.50) 0%, transparent 100%),
+    radial-gradient(circle at 18% 22%, rgba(34, 211, 238, 0.28) 0%, transparent 45%),
+    radial-gradient(circle at 84% 80%, rgba(6, 182, 212, 0.30) 0%, transparent 48%),
+    linear-gradient(155deg, #010814 0%, #083344 52%, #041e2e 100%);
+  background-color: #010814;
+  border-color: rgba(103, 232, 249, 0.42);
+}
+.fp-text-stage--ocean_biolum .fp-text-stage__bokeh {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 600' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3CradialGradient id='o1'%3E%3Cstop offset='0%25' stop-color='%23ecfeff' stop-opacity='0.95'/%3E%3Cstop offset='40%25' stop-color='%2322d3ee' stop-opacity='0.65'/%3E%3Cstop offset='100%25' stop-color='%230891b2' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Cpath d='M-40 120 Q200 60 440 130 T840 90' fill='none' stroke='%2322d3ee' stroke-opacity='0.12' stroke-width='28'/%3E%3Cpath d='M-40 490 Q240 430 480 500 T840 460' fill='none' stroke='%2338bdf8' stroke-opacity='0.12' stroke-width='24'/%3E%3Ccircle cx='104' cy='82' r='8' fill='url(%23o1)'/%3E%3Ccircle cx='688' cy='106' r='9' fill='url(%23o1)'/%3E%3Ccircle cx='712' cy='468' r='10' fill='url(%23o1)'/%3E%3Ccircle cx='126' cy='482' r='9' fill='url(%23o1)'/%3E%3Cg fill='%2367e8f9'%3E%3Ccircle cx='66' cy='188' r='2.2' opacity='0.85'/%3E%3Ccircle cx='186' cy='68' r='2.0' opacity='0.8'/%3E%3Ccircle cx='348' cy='78' r='1.9' opacity='0.75'/%3E%3Ccircle cx='562' cy='72' r='2.3' opacity='0.85'/%3E%3Ccircle cx='746' cy='192' r='2.4' opacity='0.88'/%3E%3Ccircle cx='84' cy='412' r='2.1' opacity='0.8'/%3E%3Ccircle cx='248' cy='532' r='2.4' opacity='0.88'/%3E%3Ccircle cx='528' cy='524' r='2.2' opacity='0.84'/%3E%3Ccircle cx='654' cy='536' r='2.5' opacity='0.9'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* 12. Rose Velvet (Deep Mulberry Plum & Champagne-Rose Bokeh — Strictly Crisp White Text) */
+.fp-text-stage--rose_stardust {
+  background:
+    radial-gradient(ellipse 68% 52% at 50% 50%, rgba(22, 3, 14, 0.48) 0%, transparent 100%),
+    radial-gradient(circle at 18% 22%, rgba(244, 114, 182, 0.28) 0%, transparent 45%),
+    radial-gradient(circle at 82% 80%, rgba(251, 191, 36, 0.22) 0%, transparent 48%),
+    linear-gradient(150deg, #1f0411 0%, #4c0519 50%, #17030e 100%);
+  background-color: #1f0411;
+  color: #ffffff !important;
+  border-color: rgba(249, 168, 212, 0.45);
+}
+.fp-text-stage--rose_stardust .fp-text-stage__bokeh {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 600' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3CradialGradient id='r1'%3E%3Cstop offset='0%25' stop-color='%23fff1f2' stop-opacity='0.95'/%3E%3Cstop offset='42%25' stop-color='%23f472b6' stop-opacity='0.6'/%3E%3Cstop offset='100%25' stop-color='%239d174d' stop-opacity='0'/%3E%3C/radialGradient%3E%3CradialGradient id='r2'%3E%3Cstop offset='0%25' stop-color='%23f9a8d4' stop-opacity='0.3'/%3E%3Cstop offset='100%25' stop-color='%23831843' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='112' cy='88' r='36' fill='url(%23r2)'/%3E%3Ccircle cx='696' cy='116' r='42' fill='url(%23r2)'/%3E%3Ccircle cx='668' cy='502' r='36' fill='url(%23r2)'/%3E%3Ccircle cx='138' cy='492' r='34' fill='url(%23r2)'/%3E%3Ccircle cx='92' cy='66' r='8' fill='url(%23r1)'/%3E%3Ccircle cx='648' cy='88' r='9' fill='url(%23r1)'/%3E%3Ccircle cx='716' cy='454' r='10' fill='url(%23r1)'/%3E%3Ccircle cx='122' cy='448' r='9' fill='url(%23r1)'/%3E%3Cg fill='%23fce79a'%3E%3Ccircle cx='72' cy='164' r='2.1' opacity='0.85'/%3E%3Ccircle cx='228' cy='74' r='2.0' opacity='0.8'/%3E%3Ccircle cx='526' cy='68' r='2.2' opacity='0.85'/%3E%3Ccircle cx='742' cy='162' r='2.4' opacity='0.88'/%3E%3Ccircle cx='92' cy='524' r='2.4' opacity='0.9'/%3E%3Ccircle cx='418' cy='536' r='2.1' opacity='0.82'/%3E%3Ccircle cx='612' cy='516' r='2.5' opacity='0.9'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* 13. Aurora Sky (Polar Midnight, Northern Lights Curtains & Crisp Starfield) */
+.fp-text-stage--northern_sky {
+  background:
+    radial-gradient(ellipse 68% 50% at 50% 52%, rgba(2, 6, 23, 0.48) 0%, transparent 100%),
+    radial-gradient(ellipse 90% 42% at 25% 15%, rgba(16, 185, 129, 0.34) 0%, transparent 60%),
+    radial-gradient(ellipse 85% 40% at 78% 22%, rgba(56, 189, 248, 0.30) 0%, transparent 58%),
+    radial-gradient(ellipse 75% 40% at 65% 88%, rgba(139, 92, 246, 0.28) 0%, transparent 58%),
+    linear-gradient(165deg, #020617 0%, #09152b 52%, #031c1a 100%);
+  background-color: #020617;
+  border-color: rgba(52, 211, 153, 0.42);
+}
+.fp-text-stage--northern_sky .fp-text-stage__bokeh {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 600' preserveAspectRatio='xMidYMid slice'%3E%3Cpath d='M-50 90 Q180 10 420 105 T850 65' fill='none' stroke='%2334d399' stroke-opacity='0.22' stroke-width='44'/%3E%3Cpath d='M-50 140 Q240 60 510 145 T850 110' fill='none' stroke='%2338bdf8' stroke-opacity='0.16' stroke-width='32'/%3E%3Cg fill='%23ffffff'%3E%3Ccircle cx='64' cy='58' r='1.6' opacity='0.9'/%3E%3Ccircle cx='152' cy='96' r='1.4' opacity='0.8'/%3E%3Ccircle cx='264' cy='52' r='1.8' opacity='0.92'/%3E%3Ccircle cx='392' cy='74' r='1.3' opacity='0.75'/%3E%3Ccircle cx='544' cy='48' r='1.7' opacity='0.88'/%3E%3Ccircle cx='678' cy='82' r='1.9' opacity='0.94'/%3E%3Ccircle cx='748' cy='146' r='1.5' opacity='0.82'/%3E%3Ccircle cx='88' cy='488' r='1.7' opacity='0.85'/%3E%3Ccircle cx='236' cy='536' r='1.5' opacity='0.8'/%3E%3Ccircle cx='588' cy='522' r='1.8' opacity='0.88'/%3E%3Ccircle cx='726' cy='494' r='1.6' opacity='0.86'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* 14. Royal Noir & Gold (Editorial Onyx Silk, Subtle Gold Frame & 24k Dust) */
+.fp-text-stage--royal_parchment {
+  background:
+    radial-gradient(circle at 16% 18%, rgba(251, 191, 36, 0.18) 0%, transparent 44%),
+    radial-gradient(circle at 84% 82%, rgba(217, 119, 6, 0.20) 0%, transparent 46%),
+    linear-gradient(145deg, #09090b 0%, #18181b 50%, #14110f 100%);
+  background-color: #09090b;
+  border-color: rgba(251, 191, 36, 0.52);
+}
+.fp-text-stage--royal_parchment .fp-text-stage__bokeh {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 600' preserveAspectRatio='xMidYMid slice'%3E%3Crect x='22' y='22' width='756' height='556' rx='16' fill='none' stroke='%23fbbf24' stroke-opacity='0.28' stroke-width='1.5'/%3E%3Cg fill='%23fde68a'%3E%3Ccircle cx='76' cy='74' r='2.2' opacity='0.85'/%3E%3Ccircle cx='724' cy='74' r='2.2' opacity='0.85'/%3E%3Ccircle cx='76' cy='526' r='2.2' opacity='0.85'/%3E%3Ccircle cx='724' cy='526' r='2.2' opacity='0.85'/%3E%3Ccircle cx='164' cy='96' r='1.6' opacity='0.7'/%3E%3Ccircle cx='638' cy='108' r='1.8' opacity='0.75'/%3E%3Ccircle cx='148' cy='492' r='1.7' opacity='0.72'/%3E%3Ccircle cx='652' cy='488' r='1.9' opacity='0.78'/%3E%3C/g%3E%3C/svg%3E");
+}
+
 /* Translucent 3D Grid & Floating Orbs */
 .fp-text-stage__grid {
   position: absolute;
@@ -3281,6 +3452,12 @@ video.feed-post-video::-webkit-media-controls-play-button,
   font-size: var(--text-lg, 1.2rem);
   font-weight: 700;
   line-height: 1.48;
+}
+
+.fp-text-stage__body--extended {
+  font-size: var(--text-base, 1.05rem);
+  font-weight: 600;
+  line-height: 1.56;
 }
 
 .fp-text-stage__body a,
@@ -3397,11 +3574,27 @@ video.feed-post-video::-webkit-media-controls-play-button,
 
 .fp-stage-converter__row {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
-  gap: 8px;
-  overflow-x: visible;
+  gap: var(--space-2, 8px);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
   padding: 4px 2px;
+}
+
+.fp-stage-converter__row::-webkit-scrollbar {
+  display: none;
+}
+
+.fp-stage-converter__dot {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.28);
 }
 
 /* Deterministic Feed Post Media Stage & Fallback */
@@ -3506,6 +3699,7 @@ video.feed-post-video::-webkit-media-controls-play-button,
 
 @media (prefers-reduced-motion: reduce) {
   .fp-text-stage,
+  .fp-text-stage__bokeh,
   .fp-stage-badge__pulse,
   .fp-text-stage__cta,
   .fp-stage-converter__trigger,
@@ -4248,6 +4442,20 @@ body.dark-theme .composer-prompt__text,
     inset 0 -2px 3px rgba(76, 29, 149, 0.45);
 }
 
+.composer-pill-btn--backdrop {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  color: #0369a1;
+  border: 1px solid rgba(2, 132, 199, 0.26);
+}
+.composer-pill-icon--backdrop {
+  background: linear-gradient(145deg, #38bdf8 0%, #0284c7 52%, #0f172a 100%);
+  box-shadow:
+    0 2px 0 #082f49,
+    0 4px 10px rgba(2, 132, 199, 0.34),
+    inset 0 1.5px 2px rgba(255, 255, 255, 0.68),
+    inset 0 -2px 3px rgba(8, 47, 73, 0.45);
+}
+
 .composer-pill-btn--thennow {
   background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
   color: #8a1019;
@@ -4333,6 +4541,16 @@ html.dark-mode .composer-pill-btn--video {
   background: linear-gradient(135deg, rgba(168, 85, 247, 0.20) 0%, rgba(107, 33, 168, 0.24) 100%);
   color: #e9d5ff;
   border-color: rgba(192, 132, 252, 0.36);
+}
+
+body.dark-mode .composer-pill-btn--backdrop,
+body.dark-theme .composer-pill-btn--backdrop,
+[data-bs-theme="dark"] .composer-pill-btn--backdrop,
+html.dark .composer-pill-btn--backdrop,
+html.dark-mode .composer-pill-btn--backdrop {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.20) 0%, rgba(3, 105, 161, 0.26) 100%);
+  color: #bae6fd;
+  border-color: rgba(125, 211, 252, 0.38);
 }
 
 body.dark-mode .composer-pill-btn--thennow,
@@ -4563,6 +4781,117 @@ html.dark-mode .composer-pill-btn--journal {
   overflow: hidden;
 }
 
+.link-preview-card__media--portrait {
+  aspect-ratio: 4 / 5;
+  max-height: 460px;
+}
+
+.instagram-native-source-bar {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #0f172a;
+}
+
+.instagram-native-source-bar__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(163, 22, 33, 0.09);
+  color: #a31621;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  flex-shrink: 0;
+}
+
+.instagram-native-source-bar__title {
+  color: #0f172a;
+  font-size: var(--text-sm, 0.875rem);
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.instagram-native-source-bar__desc {
+  color: #475569;
+  font-size: var(--text-xs, 0.78rem);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-top: 2px;
+}
+
+.instagram-native-source-bar__cta {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 14px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #a31621 0%, #8a1019 100%);
+  color: #ffffff !important;
+  font-size: var(--text-xs, 0.78rem);
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.instagram-native-source-bar__cta:hover {
+  filter: brightness(1.06);
+  color: #ffffff !important;
+}
+
+.instagram-native-source-bar__cta:active {
+  transform: scale(0.98);
+}
+
+[data-bs-theme="dark"] .instagram-native-source-bar,
+[data-theme="dark"] .instagram-native-source-bar,
+body.dark-mode .instagram-native-source-bar,
+body.dark-theme .instagram-native-source-bar,
+html.dark .instagram-native-source-bar,
+html.dark-mode .instagram-native-source-bar {
+  background-color: #162032;
+  border-color: rgba(148, 163, 184, 0.24);
+  color: #f8fafc;
+}
+
+[data-bs-theme="dark"] .instagram-native-source-bar__icon,
+[data-theme="dark"] .instagram-native-source-bar__icon,
+body.dark-mode .instagram-native-source-bar__icon,
+body.dark-theme .instagram-native-source-bar__icon,
+html.dark .instagram-native-source-bar__icon,
+html.dark-mode .instagram-native-source-bar__icon {
+  background: rgba(251, 113, 133, 0.16);
+  color: #fda4af;
+}
+
+[data-bs-theme="dark"] .instagram-native-source-bar__title,
+[data-theme="dark"] .instagram-native-source-bar__title,
+body.dark-mode .instagram-native-source-bar__title,
+body.dark-theme .instagram-native-source-bar__title,
+html.dark .instagram-native-source-bar__title,
+html.dark-mode .instagram-native-source-bar__title {
+  color: #f8fafc;
+}
+
+[data-bs-theme="dark"] .instagram-native-source-bar__desc,
+[data-theme="dark"] .instagram-native-source-bar__desc,
+body.dark-mode .instagram-native-source-bar__desc,
+body.dark-theme .instagram-native-source-bar__desc,
+html.dark .instagram-native-source-bar__desc,
+html.dark-mode .instagram-native-source-bar__desc {
+  color: #cbd5e1;
+}
+
 .link-preview-card__play-badge {
   position: absolute;
   top: 50%;
@@ -4706,6 +5035,296 @@ html.dark-mode .link-preview-card {
   --lp-divider: rgba(148, 163, 184, 0.16);
   --lp-icon-bg: rgba(255, 255, 255, 0.08);
   --lp-icon-color: #e2e8f0;
+}
+
+/* ==========================================================================
+   🎮 Family Arcade Challenge Card (Flagship Feed Card)
+   ========================================================================== */
+.fp-arcade-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg, 18px);
+  padding: var(--space-4, 16px) var(--space-4, 18px);
+  color: #f8fafc;
+  background:
+    radial-gradient(circle at 12% 14%, var(--fp-arcade-glow, rgba(244, 114, 182, 0.32)) 0%, transparent 52%),
+    radial-gradient(circle at 88% 86%, rgba(56, 189, 248, 0.18) 0%, transparent 55%),
+    linear-gradient(145deg, #0f172a 0%, #172033 58%, #0b1120 100%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.fp-arcade-card__glow {
+  position: absolute;
+  inset: -40% auto auto -20%;
+  width: 240px;
+  height: 240px;
+  border-radius: 999px;
+  background: var(--fp-arcade-glow, rgba(244, 114, 182, 0.28));
+  filter: blur(48px);
+  pointer-events: none;
+}
+
+.fp-arcade-card__grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 24px 24px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.45), transparent 85%);
+  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.45), transparent 85%);
+  pointer-events: none;
+}
+
+.fp-arcade-card__top {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-2, 8px);
+  margin-bottom: var(--space-3, 12px);
+}
+
+.fp-arcade-card__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #fde68a;
+  font-size: var(--text-xs, 0.75rem);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.fp-arcade-card__tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #e2e8f0;
+  font-size: var(--text-xs, 0.75rem);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.fp-arcade-card__hero {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3, 12px);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-3, 12px);
+}
+
+.fp-arcade-card__identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3, 12px);
+  min-width: 0;
+  flex: 1 1 220px;
+}
+
+.fp-arcade-card__emblem {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md, 14px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 1.35rem;
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--fp-arcade-accent, #f472b6) 0%, var(--fp-arcade-accent-deep, #be185d) 100%);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.fp-arcade-card__titles {
+  min-width: 0;
+}
+
+.fp-arcade-card__game {
+  margin: 0 0 2px 0;
+  font-size: var(--text-lg, 1.25rem);
+  font-weight: 800;
+  line-height: 1.2;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.fp-arcade-card__prompt {
+  margin: 0;
+  font-size: var(--text-sm, 0.875rem);
+  line-height: 1.4;
+  color: #cbd5e1;
+}
+
+.fp-arcade-card__stats {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2, 8px);
+  flex-shrink: 0;
+}
+
+.fp-arcade-card__stat {
+  min-width: 84px;
+  padding: 8px 12px;
+  border-radius: var(--radius-md, 12px);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.fp-arcade-card__stat-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  color: #94a3b8;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+.fp-arcade-card__stat-value {
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+}
+
+.fp-arcade-card__stat-unit {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  margin-left: 3px;
+}
+
+.fp-arcade-card__preview-link {
+  position: relative;
+  z-index: 1;
+  display: block;
+  margin-bottom: var(--space-3, 12px);
+  border-radius: var(--radius-md, 12px);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: #0b1120;
+}
+
+.fp-arcade-card__preview-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1200 / 630;
+  object-fit: cover;
+}
+
+.fp-arcade-card__actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2, 8px);
+}
+
+.fp-arcade-card__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: var(--tap-min, 44px);
+  min-width: var(--tap-min, 44px);
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--fp-arcade-accent-deep, #be185d) 0%, #0f172a 140%);
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  color: #ffffff !important;
+  font-size: var(--text-sm, 0.875rem);
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+@media (hover: hover) {
+  .fp-arcade-card__cta:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+  }
+}
+
+.fp-arcade-card__cta:active {
+  transform: scale(0.98);
+}
+
+.fp-arcade-card__cta:focus-visible,
+.fp-arcade-card__secondary:focus-visible {
+  outline: 2px solid #fde68a;
+  outline-offset: 2px;
+}
+
+.fp-arcade-card__secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: var(--tap-min, 44px);
+  min-width: var(--tap-min, 44px);
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #f8fafc;
+  font-size: var(--text-sm, 0.875rem);
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+@media (hover: hover) {
+  .fp-arcade-card__secondary:hover {
+    background: rgba(255, 255, 255, 0.18);
+  }
+}
+
+.fp-arcade-card__secondary:active {
+  transform: scale(0.98);
+}
+
+@media (max-width: 576px) {
+  .fp-arcade-card__stats {
+    width: 100%;
+  }
+  .fp-arcade-card__stat {
+    flex: 1 1 0;
+  }
+  .fp-arcade-card__cta {
+    flex: 1 1 auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fp-arcade-card__cta,
+  .fp-arcade-card__secondary {
+    transition: none !important;
+  }
 }
 
 

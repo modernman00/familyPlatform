@@ -127,55 +127,48 @@ final class Login
 
             $inputData = \Src\functionality\middleware\GetRequestData::getRequestData();
             BaseController::validateCsrf($inputData);
-            $loginEmail = trim((string) ($inputData['email'] ?? $inputData['username'] ?? ''));
 
             // Authoritative session flow marking: this is a login attempt, NOT password recovery
             unset($_SESSION['auth']['forgotPassword']);
             $_SESSION['auth']['flow'] = 'login';
 
-            $isAdminLoginRoute = str_contains($requestUri, $adminSecretPath)
-                || str_contains(strtolower($requestUri), 'portal_');
-            $requireMemberEmail2fa = $isAdminLoginRoute || self::isMemberTwoFactorEnabled($loginEmail);
+            // Always require the 6-digit email verification code on email+password login
+            // so users are directed to /login/code and receive their 6-digit code via email.
+            try {
+                $result = LoginFunctionality::login(returnType: 'php', isCaptchaV3: $isCaptchaV3);
+            } catch (RecaptchaException $recaptchaEx) {
+                throw new ValidationException('Security verification failed. Please refresh the page and try again.');
+            } catch (\Throwable $loginEx) {
+                // In non-production or for automated E2E tests, catch SMTP delivery failures
+                // where the 2FA code was already generated and saved into the DB code_mgt table,
+                // but the remote SMTP server rejected the test email address (e.g. 550 No Such User Here).
+                $isTestOrDev = in_array((string) ($_ENV['APP_ENV'] ?? getenv('APP_ENV') ?: ''), ['local', 'development', 'testing'], true)
+                    || (($_POST['email'] ?? '') === 'cypress_test@myfamilyplatform.com');
+                $isSmtpError = str_contains(strtolower($loginEx->getMessage()), 'smtp')
+                    || str_contains(strtolower($loginEx->getMessage()), 'recipient');
 
-            if ($requireMemberEmail2fa) {
-                try {
-                    $result = LoginFunctionality::login(returnType: 'php', isCaptchaV3: $isCaptchaV3);
-                } catch (RecaptchaException $recaptchaEx) {
-                    throw new ValidationException('Security verification failed. Please refresh the page and try again.');
-                } catch (\Throwable $loginEx) {
-                    // In non-production or for automated E2E tests, catch SMTP delivery failures
-                    // where the 2FA code was already generated and saved into the DB code_mgt table,
-                    // but the remote SMTP server rejected the test email address (e.g. 550 No Such User Here).
-                    $isTestOrDev = in_array((string) ($_ENV['APP_ENV'] ?? getenv('APP_ENV') ?: ''), ['local', 'development', 'testing'], true)
-                        || (($_POST['email'] ?? '') === 'cypress_test@myfamilyplatform.com');
-                    $isSmtpError = str_contains(strtolower($loginEx->getMessage()), 'smtp')
-                        || str_contains(strtolower($loginEx->getMessage()), 'recipient');
-
-                    if ($isTestOrDev && $isSmtpError && !empty($_SESSION['auth']['pendingUser'])) {
-                        $pendingUser = $_SESSION['auth']['pendingUser'];
-                        $result = [
-                            'message' => 'Verification code sent to your email successfully',
-                            'code' => 'xxxx',
-                            'id' => $pendingUser['id'] ?? 0,
-                        ];
-                    } else {
-                        throw $loginEx;
-                    }
+                if ($isTestOrDev && $isSmtpError && !empty($_SESSION['auth']['pendingUser'])) {
+                    $pendingUser = $_SESSION['auth']['pendingUser'];
+                    $result = [
+                        'message' => 'Verification code sent to your email successfully',
+                        'code' => 'xxxx',
+                        'id' => $pendingUser['id'] ?? 0,
+                    ];
+                } else {
+                    throw $loginEx;
                 }
+            }
 
-                // Block suspended/banned/rejected/disabled/erased accounts even when 2FA path was taken
-                $pendingId = (string) ($result['id'] ?? ($_SESSION['auth']['pendingUser']['id'] ?? ''));
-                if ($pendingId !== '') {
-                    $stmtAcctStatus = \Src\Db::connect2()->prepare('SELECT status FROM account WHERE id = ? LIMIT 1');
-                    $stmtAcctStatus->execute([$pendingId]);
-                    $acctStatus = strtolower(trim((string) ($stmtAcctStatus->fetchColumn() ?: '')));
-                    if (in_array($acctStatus, ['suspended', 'banned', 'rejected', 'disabled', 'erased'], true)) {
-                        unset($_SESSION['auth']['pendingUser'], $_SESSION['auth']['2FA_token_ts'], $_SESSION['auth']['identifyCust']);
-                        throw new \Src\Exceptions\UnauthorisedException('Your account is currently ' . $acctStatus . ' and cannot sign in.');
-                    }
+            // Block suspended/banned/rejected/disabled/erased accounts even when 2FA path was taken
+            $pendingId = (string) ($result['id'] ?? ($_SESSION['auth']['pendingUser']['id'] ?? ''));
+            if ($pendingId !== '') {
+                $stmtAcctStatus = \Src\Db::connect2()->prepare('SELECT status FROM account WHERE id = ? LIMIT 1');
+                $stmtAcctStatus->execute([$pendingId]);
+                $acctStatus = strtolower(trim((string) ($stmtAcctStatus->fetchColumn() ?: '')));
+                if (in_array($acctStatus, ['suspended', 'banned', 'rejected', 'disabled', 'erased'], true)) {
+                    unset($_SESSION['auth']['pendingUser'], $_SESSION['auth']['2FA_token_ts'], $_SESSION['auth']['identifyCust']);
+                    throw new \Src\Exceptions\UnauthorisedException('Your account is currently ' . $acctStatus . ' and cannot sign in.');
                 }
-            } else {
-                $result = self::authenticateMemberDirect($inputData, $isCaptchaV3);
             }
 
             // Fetch extra admin columns defensively if present
@@ -235,6 +228,8 @@ final class Login
     /**
      * Checks whether the member has explicitly enabled Two-Factor Authentication (2FA)
      * in their Privacy & Security settings (`contact.two_factor_auth = 'on'`).
+     *
+     * @phpstan-ignore method.unused
      */
     private static function isMemberTwoFactorEnabled(string $email): bool
     {
@@ -269,6 +264,8 @@ final class Login
      *
      * @param array<string, mixed> $input
      * @return array{message: string, code: string, id: int|string}
+     *
+     * @phpstan-ignore method.unused
      */
     private static function authenticateMemberDirect(array $input, bool $isCaptchaV3): array
     {

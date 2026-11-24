@@ -11,7 +11,8 @@ mix
   .js('resources/asset/js/apps/organogram/index.jsx', 'js/organogram-app.js')
   .js('resources/asset/js/apps/feed/index.jsx', 'js/feed-app.js')
   .js('resources/asset/js/apps/profile/index.jsx', 'js/profile-app.js')
-  .js('resources/asset/js/apps/arcade/index.jsx', 'js/arcade-app.js');
+  .js('resources/asset/js/apps/arcade/index.jsx', 'js/arcade-app.js')
+  .js('resources/asset/js/components/livingPhotoAvatar.js', 'js/atg-living-photo-avatar.js');
 
 if (fs.existsSync(path.resolve(__dirname, 'resources/asset/js/apps/account-settings/index.jsx'))) {
   mix.js('resources/asset/js/apps/account-settings/index.jsx', 'js/account-settings-app.js');

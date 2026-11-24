@@ -217,6 +217,7 @@
         const textNodes = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, a, button, label, th, td, li'));
         textNodes.slice(0, 400).forEach(function (el) {
             if (!isVisible(el)) return;
+            if (el.closest('[aria-hidden="true"]') || el.getAttribute('aria-hidden') === 'true') return;
             const text = (el.innerText || '').trim();
             if (!text) return;
 

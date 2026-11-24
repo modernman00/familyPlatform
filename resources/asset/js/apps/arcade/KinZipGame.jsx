@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef, useMemo } from 'preact/hooks';
-import { playArcadeSfx, formatElapsedMs, kinZipEdgeKey, findKinZipHintStep } from './arcadeEngine';
+import { formatElapsedMs, kinZipEdgeKey, findKinZipHintStep } from './arcadeEngine';
+import { triggerHaptic } from './hooks/useSoundEffects';
 import styles from './ArcadeShell.module.css';
 
-export function KinZipGame({ puzzle, onProgress, onComplete, submitting }) {
+export function KinZipGame({ puzzle, onProgress, onComplete, submitting, sound }) {
     const size = puzzle?.size || 6;
     const totalCells = size * size;
     const checkpoints = puzzle?.checkpoints || [];
@@ -13,12 +14,17 @@ export function KinZipGame({ puzzle, onProgress, onComplete, submitting }) {
     const [hintCell, setHintCell] = useState(null);
     const [elapsedMs, setElapsedMs] = useState(0);
     const [isDragging, setIsDragging] = useState(false);
+    const [rippleNodeKey, setRippleNodeKey] = useState(null);
+    const [wallHit, setWallHit] = useState(null);
     const [statusNote, setStatusNote] = useState('Start at dot 1, then tap or drag through every square in order (1 → 2 → 3…) without crossing gold walls.');
 
     const startTimeRef = useRef(Date.now());
     const replayRef = useRef([]);
     const completedRef = useRef(false);
     const gridRef = useRef(null);
+    const dragRafRef = useRef(null);
+    const lastDragTargetRef = useRef('');
+    const wallHitTimerRef = useRef(null);
 
     const wallSet = useMemo(() => {
         const s = new Set();
@@ -99,7 +105,8 @@ export function KinZipGame({ puzzle, onProgress, onComplete, submitting }) {
         completedRef.current = true;
         const finalMs = Date.now() - startTimeRef.current;
         setElapsedMs(finalMs);
-        playArcadeSfx('complete');
+        triggerHaptic(20);
+        sound?.playVictory?.();
         setStatusNote('Brilliant! Every cell and dot connected!');
         if (onComplete) {
             onComplete({
@@ -119,12 +126,12 @@ export function KinZipGame({ puzzle, onProgress, onComplete, submitting }) {
 
         const existingIdx = path.findIndex(([pr, pc]) => pr === r && pc === c);
         if (existingIdx !== -1) {
-            // Backtrack if user taps an earlier cell (not the current tip)
             if (existingIdx < path.length - 1) {
                 const sliced = path.slice(0, existingIdx + 1);
                 setPath(sliced);
                 replayRef.current.push({ t: Date.now() - startTimeRef.current, op: 'back', len: sliced.length });
-                playArcadeSfx('tick');
+                triggerHaptic(10);
+                sound?.playTap?.();
             }
             return;
         }
@@ -132,13 +139,16 @@ export function KinZipGame({ puzzle, onProgress, onComplete, submitting }) {
         if (path.length === 0) {
             if (cpMap.get(`${r},${c}`) !== 1) {
                 setStatusNote('Start on dot 1 first.');
-                playArcadeSfx('error');
+                triggerHaptic(18);
+                sound?.playError?.();
                 return;
             }
             const nextPath = [[r, c]];
             setPath(nextPath);
+            setRippleNodeKey(`${r},${c}`);
             replayRef.current.push({ t: Date.now() - startTimeRef.current, r, c });
-            playArcadeSfx('connect', 1);
+            triggerHaptic(14);
+            sound?.playConnect?.(1);
             setStatusNote('Keep going — connect dot 2 next.');
             return;
         }
@@ -149,21 +159,33 @@ export function KinZipGame({ puzzle, onProgress, onComplete, submitting }) {
         }
         if (wallSet.has(kinZipEdgeKey(lr, lc, r, c))) {
             setStatusNote('Blocked by a wall — route around it.');
-            playArcadeSfx('error');
+            triggerHaptic(18);
+            sound?.playError?.();
+            const side = r < lr ? 'top' : r > lr ? 'bottom' : c < lc ? 'left' : 'right';
+            setWallHit({ r: lr, c: lc, side });
+            if (wallHitTimerRef.current) window.clearTimeout(wallHitTimerRef.current);
+            wallHitTimerRef.current = window.setTimeout(() => setWallHit(null), 120);
             return;
         }
 
         const cellCp = cpMap.get(`${r},${c}`);
         if (cellCp !== undefined && cellCp !== nextExpectedCheckpoint) {
             setStatusNote(`Visit dot ${nextExpectedCheckpoint} before dot ${cellCp}.`);
-            playArcadeSfx('error');
+            triggerHaptic(18);
+            sound?.playError?.();
             return;
         }
 
         const nextPath = [...path, [r, c]];
         setPath(nextPath);
         replayRef.current.push({ t: Date.now() - startTimeRef.current, r, c });
-        playArcadeSfx('connect', nextPath.length);
+        triggerHaptic(12);
+        if (cellCp !== undefined) {
+            setRippleNodeKey(`${r},${c}`);
+            sound?.playConnect?.(cellCp);
+        } else {
+            sound?.playTap?.();
+        }
         setStatusNote(
             nextPath.length === totalCells
                 ? 'Grid filled!'
@@ -180,16 +202,23 @@ export function KinZipGame({ puzzle, onProgress, onComplete, submitting }) {
         if (x < 0 || y < 0 || x >= rect.width || y >= rect.height) return;
         const c = Math.floor((x / rect.width) * size);
         const r = Math.floor((y / rect.height) * size);
-        if (r >= 0 && r < size && c >= 0 && c < size) {
+        if (r < 0 || r >= size || c < 0 || c >= size) return;
+        const targetKey = `${r},${c}`;
+        if (lastDragTargetRef.current === targetKey) return;
+        lastDragTargetRef.current = targetKey;
+        if (dragRafRef.current) window.cancelAnimationFrame(dragRafRef.current);
+        dragRafRef.current = window.requestAnimationFrame(() => {
+            dragRafRef.current = null;
             tryStepTo(r, c);
-        }
+        });
     };
 
     const handleUndo = () => {
         if (path.length === 0 || completedRef.current) return;
         const next = path.slice(0, -1);
         setPath(next);
-        playArcadeSfx('tick');
+        triggerHaptic(10);
+        sound?.playTap?.();
     };
 
     const maxHints = 3;
@@ -199,14 +228,16 @@ export function KinZipGame({ puzzle, onProgress, onComplete, submitting }) {
         setPath([]);
         setHintCell(null);
         setStatusNote('Board reset. Start on dot 1.');
-        playArcadeSfx('tick');
+        triggerHaptic(10);
+        sound?.playTap?.();
     };
 
     const handleHint = () => {
         if (completedRef.current) return;
         if (hintsUsed >= maxHints) {
             setStatusNote(`Maximum ${maxHints} hints used for this puzzle. You can do this!`);
-            playArcadeSfx('error');
+            triggerHaptic(16);
+            sound?.playError?.();
             return;
         }
         const nextStep = findKinZipHintStep(puzzle, path);
@@ -223,7 +254,8 @@ export function KinZipGame({ puzzle, onProgress, onComplete, submitting }) {
             }
         } else {
             setStatusNote('Try undoing a few steps — a dot or corner may be blocked.');
-            playArcadeSfx('error');
+            triggerHaptic(16);
+            sound?.playError?.();
         }
     };
 
@@ -300,6 +332,8 @@ export function KinZipGame({ puzzle, onProgress, onComplete, submitting }) {
                         const wallBottom = r + 1 < size && wallSet.has(kinZipEdgeKey(r, c, r + 1, c));
                         const wallLeft = c > 0 && wallSet.has(kinZipEdgeKey(r, c, r, c - 1));
                         const wallRight = c + 1 < size && wallSet.has(kinZipEdgeKey(r, c, r, c + 1));
+                        const isHitCell = wallHit && wallHit.r === r && wallHit.c === c;
+                        const hasRipple = rippleNodeKey === key;
 
                         return (
                             <button
@@ -314,6 +348,10 @@ export function KinZipGame({ puzzle, onProgress, onComplete, submitting }) {
                                     wallBottom ? styles.wallBottom : '',
                                     wallLeft ? styles.wallLeft : '',
                                     wallRight ? styles.wallRight : '',
+                                    isHitCell && wallHit.side === 'top' ? styles.wallHitTop : '',
+                                    isHitCell && wallHit.side === 'bottom' ? styles.wallHitBottom : '',
+                                    isHitCell && wallHit.side === 'left' ? styles.wallHitLeft : '',
+                                    isHitCell && wallHit.side === 'right' ? styles.wallHitRight : '',
                                 ].filter(Boolean).join(' ')}
                                 onPointerDown={(e) => {
                                     e.preventDefault();
@@ -324,14 +362,24 @@ export function KinZipGame({ puzzle, onProgress, onComplete, submitting }) {
                                             // Ignore unsupported capture (e.g. synthetic test events)
                                         }
                                     }
+                                    lastDragTargetRef.current = key;
                                     setIsDragging(true);
                                     tryStepTo(r, c);
                                 }}
                                 aria-label={`Row ${r + 1} Column ${c + 1}${cpNum ? `, Dot ${cpNum}` : ''}${isVisited ? ', visited' : ''}`}
                             >
                                 {cpNum !== undefined && (
-                                    <span className={`${styles.zipDot} ${isVisited ? styles.zipDotActive : ''}`}>
-                                        {cpNum}
+                                    <span className={styles.zipDotWrap}>
+                                        {hasRipple && (
+                                            <span
+                                                className={styles.zipNodeRipple}
+                                                onAnimationEnd={() => setRippleNodeKey(null)}
+                                                aria-hidden="true"
+                                            />
+                                        )}
+                                        <span className={`${styles.zipDot} ${isVisited ? styles.zipDotActive : ''}`}>
+                                            {cpNum}
+                                        </span>
                                     </span>
                                 )}
                             </button>

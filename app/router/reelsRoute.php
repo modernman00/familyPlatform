@@ -69,5 +69,11 @@ $router->map('POST', '/api/reels/r2-proxy-upload', 'App\controller\members\Reels
 // Sovereign Kinship Video Studio 12-Module Server Fallback & Validation API
 $router->map('POST', '/api/family-studio/process-module', 'App\controller\members\ReelsController@studioProcessModule', 'family_studio_process_module_api');
 
+// ATG Sovereign Cinematic Engine: Director Mode (member-only; session + CSRF enforced)
+$router->map('GET', '/director-mode', 'App\controller\members\DirectorModeController@page', 'family_director_mode');
+$router->map('GET', '/member/director-mode', 'App\controller\members\DirectorModeController@page', 'family_director_mode_alias');
+$router->map('POST', '/api/director-mode/plan', 'App\controller\members\DirectorModeController@plan', 'family_director_mode_plan_api');
+$router->map('POST', '/api/director-mode/render', 'App\controller\members\DirectorModeController@render', 'family_director_mode_render_api');
+
 
 

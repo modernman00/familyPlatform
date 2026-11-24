@@ -31,25 +31,34 @@
   <!-- Post Text (Prominent for Text-Only Posts & 3D Futuristic Translucent Stage Cards) -->
   <template x-if="!post.two_truths && !hasPollArena(post) && (getMediaCaption(post) || post.ar_emoji || getPostStageMeta(post)) && (!post.images || post.images.length === 0) && !post.video && (!post.videos || post.videos.length === 0) && !post.comparison">
     <div class="post-content px-1 mb-3">
-      <!-- 1. 3D Futuristic & Translucent Stage Card (when post_style is active) -->
+      <!-- 1. Scenic Backdrops & 3D Futuristic Translucent Stage Card (when post_style is active) -->
       <template x-if="getPostStageMeta(post)">
-        <div class="fp-text-stage" :class="'fp-text-stage--' + (post.post_style || getPostStageMeta(post).slug)" data-testid="feed-text-stage-card">
+        <div class="fp-text-stage"
+             :class="'fp-text-stage--' + (post.post_style || getPostStageMeta(post).slug) + (getPostStageMeta(post).category === 'scenic' ? ' fp-text-stage--scenic' : '')"
+             data-testid="feed-text-stage-card">
           <div class="fp-text-stage__orb fp-text-stage__orb--a" aria-hidden="true"></div>
           <div class="fp-text-stage__orb fp-text-stage__orb--b" aria-hidden="true"></div>
-          <div class="fp-text-stage__grid" aria-hidden="true"></div>
+          <template x-if="getPostStageMeta(post).category === 'scenic'">
+            <div class="fp-text-stage__bokeh" aria-hidden="true"></div>
+          </template>
+          <template x-if="getPostStageMeta(post).category !== 'scenic'">
+            <div class="fp-text-stage__grid" aria-hidden="true"></div>
+          </template>
 
-          <div class="fp-text-stage__header">
-            <span class="fp-stage-badge">
-              <template x-if="(post.post_style || getPostStageMeta(post).slug) === 'alert_pulse'">
-                <span class="fp-stage-badge__pulse" aria-hidden="true"></span>
-              </template>
-              <span x-text="getPostStageMeta(post).badge"></span>
-            </span>
-          </div>
+          <template x-if="getPostStageMeta(post).badge">
+            <div class="fp-text-stage__header">
+              <span class="fp-stage-badge">
+                <template x-if="(post.post_style || getPostStageMeta(post).slug) === 'alert_pulse'">
+                  <span class="fp-stage-badge__pulse" aria-hidden="true"></span>
+                </template>
+                <span x-text="getPostStageMeta(post).badge"></span>
+              </span>
+            </div>
+          </template>
 
           <template x-if="getMediaCaption(post)">
             <div class="fp-text-stage__body"
-                 :class="(getMediaCaption(post) || '').length <= 95 ? 'fp-text-stage__body--hero' : 'fp-text-stage__body--prose'"
+                 :class="(getMediaCaption(post) || '').length <= 120 ? 'fp-text-stage__body--hero' : ((getMediaCaption(post) || '').length <= 260 ? 'fp-text-stage__body--prose' : 'fp-text-stage__body--extended')"
                  x-html="renderHashtags(getMediaCaption(post), post.ar_emoji)"></div>
           </template>
 

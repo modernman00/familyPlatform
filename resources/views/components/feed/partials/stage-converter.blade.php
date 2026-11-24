@@ -7,14 +7,14 @@
                     class="fp-stage-converter__trigger"
                     :disabled="!!convertingStagePosts[post.post_no]"
                     @click.stop="cyclePostStage(post, $event)"
-                    title="One-tap convert this post into a 3D futuristic stage">
+                    title="Cycle through scenic post backdrops and 3D stages">
               <template x-if="convertingStagePosts[post.post_no]">
                 <span class="spinner-border spinner-border-sm" role="status" style="width: 13px; height: 13px; border-width: 2px;"></span>
               </template>
               <template x-if="!convertingStagePosts[post.post_no]">
-                <i class="bi bi-magic"></i>
+                <i class="bi bi-stars"></i>
               </template>
-              <span x-text="post.post_style ? '✨ Next 3D Stage' : '✨ Convert to 3D Stage'"></span>
+              <span x-text="post.post_style ? '✨ Next Backdrop' : '✨ Add Backdrop'"></span>
             </button>
 
             <template x-for="st in textStageCatalog" :key="st.slug">
@@ -23,8 +23,11 @@
                       :class="post.post_style === st.slug ? 'is-active' : ''"
                       :disabled="!!convertingStagePosts[post.post_no]"
                       @click.stop="setPostStage(post, st.slug, $event)"
-                      :title="'Convert post to ' + st.label">
-                <span x-text="st.label"></span>
+                      :title="'Apply ' + (st.shortLabel || st.label) + ' post backdrop'">
+                <template x-if="st.swatch">
+                  <span class="fp-stage-converter__dot" :style="'background:' + st.swatch" aria-hidden="true"></span>
+                </template>
+                <span x-text="st.shortLabel || st.label"></span>
               </button>
             </template>
 

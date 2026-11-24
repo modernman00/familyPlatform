@@ -1917,6 +1917,36 @@ final class KinWhisperService
 
         if ($type === 'video') {
             VideoAutoTrimService::optimiseMp4FastStart($destination);
+        } elseif ($ext === 'heic') {
+            $jpgFilename = preg_replace('/\.heic$/i', '.jpg', $filename) ?? ($filename . '.jpg');
+            $jpgDestination = $targetDir . '/' . $jpgFilename;
+            $converted = false;
+
+            if (class_exists('\Imagick')) {
+                try {
+                    $imagick = new \Imagick($destination);
+                    $imagick->setImageFormat('jpeg');
+                    $imagick->setImageCompressionQuality(88);
+                    $converted = $imagick->writeImage($jpgDestination);
+                    $imagick->clear();
+                    $imagick->destroy();
+                } catch (\Throwable $e) {
+                    error_log('[KinWhisperService::uploadMediaWhisper HEIC Imagick] ' . $e->getMessage());
+                    $converted = false;
+                }
+            } elseif (PHP_OS_FAMILY === 'Darwin' && is_executable('/usr/bin/sips')) {
+                $cmd = '/usr/bin/sips -s format jpeg ' . escapeshellarg($destination) . ' --out ' . escapeshellarg($jpgDestination) . ' >/dev/null 2>&1';
+                @exec($cmd, $out, $code);
+                $converted = ($code === 0 && is_file($jpgDestination) && filesize($jpgDestination) > 0);
+            }
+
+            if ($converted && is_file($jpgDestination)) {
+                @unlink($destination);
+                $filename = $jpgFilename;
+                $destination = $jpgDestination;
+                $ext = 'jpg';
+                $mime = 'image/jpeg';
+            }
         }
 
         $origName = basename(strip_tags((string)($file['name'] ?? 'attachment.' . $ext)));
@@ -1924,7 +1954,7 @@ final class KinWhisperService
             'url' => '/public/storage/whispers/media/' . $filename,
             'name' => $origName,
             'type' => $type,
-            'size' => (int)$file['size'],
+            'size' => (int)(@filesize($destination) ?: ($file['size'] ?? 0)),
             'mime' => $mime,
         ];
     }

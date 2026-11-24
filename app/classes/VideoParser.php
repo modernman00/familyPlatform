@@ -94,8 +94,22 @@ final class VideoParser
             ];
         }
 
-        // 3d. Already-proxied /resources/videos/external-stream?url=... or legacy /member/stream-video?url=...
-        if (preg_match('/^\/(?:resources\/videos\/external-stream|member\/stream-video)\?url=([^\s"\'<>&#]+)/i', $trimmed, $proxyMatches) === 1) {
+        // 3d. Already-proxied /resources/videos/external-stream?(url|ig)=... or legacy /member/stream-video?url=...
+        if (preg_match('/^\/(?:resources\/videos\/external-stream|member\/stream-video)\?(?:url=([^\s"\'<>&#]+)|ig=([A-Za-z0-9_-]{5,24}))/i', $trimmed, $proxyMatches) === 1) {
+            $igCode = $proxyMatches[2] ?? '';
+            if ($igCode !== '') {
+                return [
+                    'type' => 'direct',
+                    'videoId' => 'ig_' . $igCode,
+                    'thumbnailUrl' => null,
+                    'embedUrl' => $trimmed,
+                    'originalUrl' => 'https://www.instagram.com/reel/' . $igCode . '/',
+                    'isShort' => true,
+                    'aspect_ratio' => '9 / 16',
+                    'trimStart' => null,
+                    'trimEnd' => null,
+                ];
+            }
             $decodedInner = rawurldecode($proxyMatches[1]);
             $thumb = (stripos($decodedInner, 'googleusercontent.com') !== false)
                 ? (string)preg_replace('/=[^\/=?#]+$/i', '=s1600-no', $decodedInner)

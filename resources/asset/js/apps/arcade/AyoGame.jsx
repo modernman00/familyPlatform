@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'preact/hooks';
-import { playArcadeSfx, formatElapsedMs } from './arcadeEngine';
+import { formatElapsedMs } from './arcadeEngine';
+import { createGameSfx } from './hooks/useSoundEffects';
 import styles from './ArcadeShell.module.css';
 
 /**
@@ -25,7 +26,8 @@ const YORUBA_PROVERBS = [
     'Bí a bá ta ayò, a ó mọ ọlọ́gbọ́n — In the rhythm of the seeds, masters emerge.',
 ];
 
-export function AyoGame({ puzzle, onProgress, onComplete, submitting }) {
+export function AyoGame({ puzzle, onProgress, onComplete, submitting, sound }) {
+    const playArcadeSfx = createGameSfx(sound);
     // 12 pits starting with 4 seeds each (48 total)
     const initialPits = useMemo(() => Array(12).fill(4), [puzzle?.seedKey]);
 

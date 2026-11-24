@@ -32,8 +32,28 @@ export function parseVideoUrl(url) {
   const trimmed = url.trim();
   if (!trimmed) return null;
 
-  // 0. Already-proxied sovereign stream URL (/resources/videos/external-stream?url=... or /member/stream-video?url=...)
-  if (trimmed.startsWith('/resources/videos/external-stream?url=') || trimmed.startsWith('/member/stream-video?url=')) {
+  // 0. Already-proxied sovereign stream URL (/resources/videos/external-stream?(url|ig)=... or /member/stream-video?url=...)
+  if (
+    trimmed.startsWith('/resources/videos/external-stream?url=')
+    || trimmed.startsWith('/resources/videos/external-stream?ig=')
+    || trimmed.startsWith('/member/stream-video?url=')
+  ) {
+    if (trimmed.startsWith('/resources/videos/external-stream?ig=')) {
+      const igQuery = trimmed.split('?ig=')[1] || '';
+      const igCode = decodeURIComponent(igQuery.split('&')[0] || '');
+      return {
+        type: 'direct',
+        provider: 'instagram',
+        videoId: igCode ? `ig_${igCode}` : null,
+        thumbnailUrl: null,
+        embedUrl: trimmed,
+        originalUrl: igCode ? `https://www.instagram.com/reel/${igCode}/` : trimmed,
+        isShort: true,
+        aspect_ratio: '9 / 16',
+        trimStart: null,
+        trimEnd: null,
+      };
+    }
     const rawQuery = trimmed.split('?url=')[1] || '';
     const rawParam = rawQuery.split('&')[0] || '';
     let decoded = rawParam;

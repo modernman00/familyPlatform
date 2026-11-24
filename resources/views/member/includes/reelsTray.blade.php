@@ -16,11 +16,20 @@
                 <div class="reel-tray-subtitle" style="font-size: 0.72rem;">Short-form milestones, celebrations &amp; oral history</div>
             </div>
         </div>
-        <div class="d-flex align-items-center gap-2">
-            <button type="button" class="btn btn-sm btn-light rounded-pill fw-bold px-3 py-1 border d-inline-flex align-items-center justify-content-center reel-tray-new-btn" data-bs-toggle="modal" data-bs-target="#createReelModal" style="font-size: 0.75rem; min-height: 44px; min-width: 44px;">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <button type="button"
+                    id="generateWeeklyFunFactsBtn"
+                    data-spin="true"
+                    class="btn btn-sm btn-outline-primary rounded-pill fw-bold px-3 py-1 d-inline-flex align-items-center justify-content-center gap-1"
+                    style="font-size: 0.75rem; min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0;"
+                    title="Generate this week’s animated Family Fun Facts presentation">
+                <i class="bi bi-sparkles" aria-hidden="true"></i>
+                <span>Fun Facts</span>
+            </button>
+            <button type="button" class="btn btn-sm btn-light rounded-pill fw-bold px-3 py-1 border d-inline-flex align-items-center justify-content-center reel-tray-new-btn" data-bs-toggle="modal" data-bs-target="#createReelModal" style="font-size: 0.75rem; min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0;">
                 <i class="bi bi-plus-circle-fill text-primary me-1"></i>New
             </button>
-            <a href="/reels" class="text-decoration-none small fw-bold d-inline-flex align-items-center gap-1 reel-tray-watch-link" style="color: var(--brand-primary, #a31621); min-height: 44px; min-width: 44px;">
+            <a href="/reels" class="text-decoration-none small fw-bold d-inline-flex align-items-center gap-1 reel-tray-watch-link" style="color: var(--brand-primary, #a31621); min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0;">
                 <span>Watch All</span> <i class="bi bi-chevron-right" style="font-size: 0.75rem;"></i>
             </a>
         </div>
@@ -155,3 +164,39 @@
         @endforelse
     </div>
 </div>
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
+(function () {
+    const btn = document.getElementById('generateWeeklyFunFactsBtn');
+    if (!btn) return;
+    btn.addEventListener('click', async function () {
+        if (window.ScoreTenantSpinner) {
+            window.ScoreTenantSpinner.start(btn);
+        }
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+                          document.querySelector('input[name="token"]')?.value || '';
+        try {
+            const res = await fetch('/api/weekly-reel/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({ token: csrfToken })
+            });
+            const payload = await res.json();
+            if (window.ScoreTenantSpinner) {
+                window.ScoreTenantSpinner.stop(btn);
+            }
+            if (payload && payload.success) {
+                window.location.reload();
+            } else if (window.Swal) {
+                Swal.fire({ title: 'Could not generate Fun Facts', text: payload?.error || 'Please try again shortly.', icon: 'warning' });
+            }
+        } catch (err) {
+            if (window.ScoreTenantSpinner) {
+                window.ScoreTenantSpinner.stop(btn);
+            }
+        }
+    });
+})();
+</script>

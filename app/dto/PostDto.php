@@ -15,6 +15,14 @@ use JsonSerializable;
 final class PostDto implements JsonSerializable
 {
     public const array ALLOWED_TEXT_STYLES = [
+        'starlight_bokeh',
+        'golden_ember',
+        'sunset_horizon',
+        'emerald_canopy',
+        'ocean_biolum',
+        'rose_stardust',
+        'northern_sky',
+        'royal_parchment',
         'cyber_glass',
         'alert_pulse',
         'grand_announcement',
@@ -187,7 +195,7 @@ final class PostDto implements JsonSerializable
         /** @var array<string, mixed>|null $linkPreview */
         $linkPreview = isset($row['link_preview']) && is_array($row['link_preview']) ? $row['link_preview'] : null;
         $alreadyHydratedLinkPreview = array_key_exists('link_preview', $row);
-        if ($linkPreview === null && !$alreadyHydratedLinkPreview && !empty($message) && (str_contains($message, 'http://') || str_contains($message, 'https://'))) {
+        if ($linkPreview === null && !$alreadyHydratedLinkPreview && \App\services\LinkPreviewService::containsPotentialUrl((string)$message)) {
             $linkPreview = \App\services\LinkPreviewService::getPreviewForPostText($message);
         }
 
@@ -254,7 +262,46 @@ final class PostDto implements JsonSerializable
                 $linkPreview = $extractedAssets['preview'];
             }
 
-            if (!empty($extractedAssets['cleaned_message'])) {
+            $urlsToStripIg = [];
+            // Promote verified Instagram Reel/video streams into native in-feed video descriptors
+            if (empty($rowVideos) && is_array($linkPreview) && !empty($linkPreview['is_instagram']) && !empty($linkPreview['is_video']) && !empty($linkPreview['proxied_video_url'])) {
+                $igHook = self::deriveHookFromMessage($message);
+                $igShortcode = isset($linkPreview['ig_shortcode']) && is_string($linkPreview['ig_shortcode'])
+                    ? trim($linkPreview['ig_shortcode'])
+                    : '';
+                $igDesc = [
+                    'type' => 'direct',
+                    'provider' => 'instagram',
+                    'videoId' => $igShortcode !== '' ? ('ig_' . $igShortcode) : null,
+                    'thumbnailUrl' => isset($linkPreview['image']) && is_string($linkPreview['image']) ? $linkPreview['image'] : null,
+                    'posterUrl' => isset($linkPreview['image']) && is_string($linkPreview['image']) ? $linkPreview['image'] : null,
+                    'embedUrl' => (string)$linkPreview['proxied_video_url'],
+                    'originalUrl' => (string)($linkPreview['url'] ?? ''),
+                    'hlsUrl' => null,
+                    'trimStart' => null,
+                    'trimEnd' => null,
+                    'hook' => $igHook ?? (isset($linkPreview['title']) && is_string($linkPreview['title']) ? $linkPreview['title'] : null),
+                    'hookText' => $igHook,
+                    'aspectMode' => 'reel',
+                    'aspect_ratio' => isset($linkPreview['aspect_ratio']) && is_string($linkPreview['aspect_ratio']) ? $linkPreview['aspect_ratio'] : '9 / 16',
+                    'isShort' => true,
+                    'sourceLabel' => 'Instagram',
+                    'sourceUrl' => (string)($linkPreview['url'] ?? ''),
+                    'sourceTitle' => isset($linkPreview['title']) && is_string($linkPreview['title']) ? $linkPreview['title'] : null,
+                ];
+                $rowVideos = [$igDesc];
+                $row['videos'] = $rowVideos;
+                $row['video'] = $igDesc;
+                $urlsToStripIg = array_values(array_filter([
+                    isset($linkPreview['original_url']) && is_string($linkPreview['original_url']) ? $linkPreview['original_url'] : '',
+                    isset($linkPreview['url']) && is_string($linkPreview['url']) ? $linkPreview['url'] : '',
+                ]));
+            }
+
+            if ($urlsToStripIg !== []) {
+                $baseCleaned = !empty($extractedAssets['cleaned_message']) ? $extractedAssets['cleaned_message'] : $message;
+                $row['displayMessage'] = \App\services\LinkPreviewService::cleanPhotoLinkFromMessage($baseCleaned, $urlsToStripIg);
+            } elseif (!empty($extractedAssets['cleaned_message'])) {
                 $row['displayMessage'] = $extractedAssets['cleaned_message'];
             } elseif (!empty($finalImages) || !empty($finalVideos)) {
                 $row['displayMessage'] = \App\services\LinkPreviewService::cleanPhotoLinkFromMessage(

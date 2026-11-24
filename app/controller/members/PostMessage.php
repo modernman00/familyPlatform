@@ -493,7 +493,7 @@ final class PostMessage
     public static function deleteComment(int|string $commentNo): void
     {
         try {
-            CheckToken::tokenCheck();
+            \App\controller\BaseController::validateCsrf();
 
             $userId = (string)($_SESSION['id'] ?? '');
             $commentNo = self::asIdentifier(Utility::checkInput((string)$commentNo));
@@ -559,7 +559,10 @@ final class PostMessage
     public static function updateComment(int|string $commentNo): void
     {
         try {
-            CheckToken::tokenCheck();
+            $rawInput = file_get_contents('php://input');
+            $input = json_decode($rawInput !== false ? $rawInput : '', true);
+            $input = is_array($input) ? $input : [];
+            \App\controller\BaseController::validateCsrf($input);
 
             $userId = (string)($_SESSION['id'] ?? '');
             $commentNo = self::asIdentifier(Utility::checkInput((string)$commentNo));
@@ -577,10 +580,6 @@ final class PostMessage
                 throw new ForbiddenException('You can only edit your own comments.');
             }
 
-            // PHP only populates $_POST for the literal POST verb — PUT bodies
-            // have to be read manually, so the frontend sends JSON for edits.
-            $rawInput = file_get_contents('php://input');
-            $input = json_decode($rawInput !== false ? $rawInput : '', true) ?? [];
             $cleanComment = \App\services\LinkPreviewService::sanitizePostMessage((string)($input['comment'] ?? ''));
 
             // Sovereign Content Safety & Abuse Guardrail Gate (ATG Pod 1 & Marcus SecOps)
@@ -611,7 +610,7 @@ final class PostMessage
     public static function deletePost(int|string $postNo): void
     {
         try {
-            CheckToken::tokenCheck();
+            \App\controller\BaseController::validateCsrf();
 
             $userId = (string)($_SESSION['id'] ?? '');
             $postNo = self::asIdentifier(Utility::checkInput((string)$postNo));
@@ -675,7 +674,12 @@ final class PostMessage
     public static function updatePost(int|string $postNo): void
     {
         try {
-            CheckToken::tokenCheck();
+            // PHP only populates $_POST for the literal POST verb — PUT bodies
+            // have to be read manually, so the frontend sends JSON for edits.
+            $rawInput = file_get_contents('php://input');
+            $input = json_decode($rawInput !== false ? $rawInput : '', true);
+            $input = is_array($input) ? $input : [];
+            \App\controller\BaseController::validateCsrf($input);
 
             $userId = $_SESSION['id'];
             $postNo = self::asIdentifier(Utility::checkInput($postNo));
@@ -686,10 +690,6 @@ final class PostMessage
                 throw new ForbiddenException('You can only edit your own posts.');
             }
 
-            // PHP only populates $_POST for the literal POST verb — PUT bodies
-            // have to be read manually, so the frontend sends JSON for edits.
-            $rawInput = file_get_contents('php://input');
-            $input = json_decode($rawInput !== false ? $rawInput : '', true) ?? [];
             $existingRawMessage = (string)($post['postMessage'] ?? '');
             $incomingMessage = array_key_exists('postMessage', $input)
                 ? (string)$input['postMessage']
@@ -759,7 +759,7 @@ final class PostMessage
     public static function repostPost(int|string $postNo): void
     {
         try {
-            CheckToken::tokenCheck();
+            \App\controller\BaseController::validateCsrf();
 
             $userId = (string)($_SESSION['id'] ?? '');
             if ($userId === '') {

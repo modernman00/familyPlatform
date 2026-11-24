@@ -78,6 +78,7 @@
                     <div id="composerStep1" class="composer-step-view">
 
                     <div id="composerEditorStageWrapper" class="composer-editor-wrapper position-relative w-100">
+                        <div id="composerStageBokehLayer" class="fp-text-stage__bokeh d-none" aria-hidden="true"></div>
                         <div id="composerStageHeaderBadge" class="d-none mb-2">
                             <span id="composerStageHeaderPill" class="fp-stage-badge">
                                 <span id="composerStageHeaderText">🔮 3D HOLOGRAM STAGE</span>
@@ -89,7 +90,7 @@
                             role="textbox"
                             aria-multiline="true"
                             data-placeholder="{{ __('feed.share_prompt', 'Share a moment with your family...') }}"
-                            style="min-height: 58px; max-height: 220px; overflow-y: auto; outline: none; white-space: pre-wrap; word-break: break-word; font-size: 1.05rem; line-height: 1.55; color: var(--text-main, #0f172a);"></div>
+                            style="min-height: 58px; max-height: 220px; overflow-y: auto; outline: none; white-space: pre-wrap; word-break: break-word; font-size: 1.05rem; line-height: 1.55; color: var(--text-main, #0f172a); position: relative; z-index: 2;"></div>
                         <textarea class="d-none" data-emoji-target
                             placeholder="{{ __('feed.share_prompt', 'Share a moment with your family...') }}" name="postMessage" id="postMessage"
                             rows="2"></textarea>
@@ -104,21 +105,53 @@
                         </div>
                     </div>
 
-                    <!-- 3D Futuristic & Translucent Text Stage Studio Strip -->
-                    <div id="composerTextStageBar" class="composer-stage-studio mt-2 mb-2" role="region" aria-label="3D Text Post Stage Designer">
+                    <!-- Scenic Post Backdrops & 3D Milestone Stage Studio Strip -->
+                    <div id="composerTextStageBar" class="composer-stage-studio mt-2 mb-2" role="region" aria-label="Scenic Post Backdrops and 3D Stage Designer">
                         <div class="d-flex align-items-center justify-content-between mb-1.5 px-1">
                             <span class="small fw-bold d-inline-flex align-items-center gap-1" style="font-size: 0.76rem; color: var(--text-muted-aa, #475569); letter-spacing: 0.02em;">
                                 <i class="bi bi-stars text-warning"></i>
-                                <span>3D Text Stage Design</span>
+                                <span>Post Backdrop &amp; Stage</span>
                             </span>
-                            <button type="button" id="composerSmartStageSuggestBtn" class="btn btn-sm rounded-pill d-none py-0.5 px-2.5 fw-bold" style="font-size: 0.72rem; background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: #ffffff; border: none; min-height: 28px; white-space: nowrap; flex-shrink: 0;">
+                            <button type="button" id="composerSmartStageSuggestBtn" class="btn btn-sm rounded-pill d-none py-0.5 px-2.5 fw-bold" style="font-size: 0.72rem; background: linear-gradient(135deg, #0284c7 0%, #059669 100%); color: #ffffff; border: none; min-height: 28px; white-space: nowrap; flex-shrink: 0;">
                                 ✨ Smart Match
                             </button>
                         </div>
-                        <div class="composer-stage-studio__row" role="radiogroup" aria-label="Choose 3D text stage style">
+                        <div class="composer-stage-studio__row" role="radiogroup" aria-label="Choose post background or 3D stage style">
                             <button type="button" class="composer-stage-pill is-active" data-stage-slug="" onclick="window.__setComposerTextStage('')" aria-pressed="true" title="Standard clean text post">
                                 <span class="composer-stage-pill__dot composer-stage-pill__dot--plain">Aa</span>
                                 <span>Plain</span>
+                            </button>
+                            <button type="button" class="composer-stage-pill" data-stage-slug="starlight_bokeh" onclick="window.__setComposerTextStage('starlight_bokeh')" aria-pressed="false" title="Midnight Sapphire &amp; Cyan Starlight Bokeh Backdrop">
+                                <span class="composer-stage-pill__dot composer-stage-pill__dot--starlight">✨</span>
+                                <span>Starlight Bokeh</span>
+                            </button>
+                            <button type="button" class="composer-stage-pill" data-stage-slug="golden_ember" onclick="window.__setComposerTextStage('golden_ember')" aria-pressed="false" title="Warm Obsidian &amp; Golden Fireflies Bokeh Backdrop">
+                                <span class="composer-stage-pill__dot composer-stage-pill__dot--fireflies">🔥</span>
+                                <span>Golden Fireflies</span>
+                            </button>
+                            <button type="button" class="composer-stage-pill" data-stage-slug="sunset_horizon" onclick="window.__setComposerTextStage('sunset_horizon')" aria-pressed="false" title="Twilight Dusk &amp; Sunset Horizon Backdrop">
+                                <span class="composer-stage-pill__dot composer-stage-pill__dot--sunset">🌅</span>
+                                <span>Sunset Horizon</span>
+                            </button>
+                            <button type="button" class="composer-stage-pill" data-stage-slug="emerald_canopy" onclick="window.__setComposerTextStage('emerald_canopy')" aria-pressed="false" title="Deep Botanical Woodland &amp; Jade Bokeh Backdrop">
+                                <span class="composer-stage-pill__dot composer-stage-pill__dot--forest">🌿</span>
+                                <span>Enchanted Forest</span>
+                            </button>
+                            <button type="button" class="composer-stage-pill" data-stage-slug="ocean_biolum" onclick="window.__setComposerTextStage('ocean_biolum')" aria-pressed="false" title="Midnight Sea &amp; Bioluminescent Glow Backdrop">
+                                <span class="composer-stage-pill__dot composer-stage-pill__dot--ocean">🌊</span>
+                                <span>Deep Ocean</span>
+                            </button>
+                            <button type="button" class="composer-stage-pill" data-stage-slug="rose_stardust" onclick="window.__setComposerTextStage('rose_stardust')" aria-pressed="false" title="Deep Mulberry Velvet &amp; Rose Stardust Backdrop">
+                                <span class="composer-stage-pill__dot composer-stage-pill__dot--rose">🌸</span>
+                                <span>Rose Velvet</span>
+                            </button>
+                            <button type="button" class="composer-stage-pill" data-stage-slug="northern_sky" onclick="window.__setComposerTextStage('northern_sky')" aria-pressed="false" title="Polar Midnight &amp; Northern Lights Backdrop">
+                                <span class="composer-stage-pill__dot composer-stage-pill__dot--northern">🌌</span>
+                                <span>Aurora Sky</span>
+                            </button>
+                            <button type="button" class="composer-stage-pill" data-stage-slug="royal_parchment" onclick="window.__setComposerTextStage('royal_parchment')" aria-pressed="false" title="Editorial Onyx Silk &amp; 24k Gold Dust Backdrop">
+                                <span class="composer-stage-pill__dot composer-stage-pill__dot--royal">👑</span>
+                                <span>Royal Noir</span>
                             </button>
                             <button type="button" class="composer-stage-pill" data-stage-slug="dynasty_holo" onclick="window.__setComposerTextStage('dynasty_holo')" aria-pressed="false" title="Translucent 3D Emerald Dynasty Tree Stage">
                                 <span class="composer-stage-pill__dot composer-stage-pill__dot--dynasty">🌳</span>
@@ -132,15 +165,15 @@
                                 <span class="composer-stage-pill__dot composer-stage-pill__dot--alert">🚨</span>
                                 <span>Alert Trigger</span>
                             </button>
-                            <button type="button" class="composer-stage-pill" data-stage-slug="grand_announcement" onclick="window.__setComposerTextStage('grand_announcement')" aria-pressed="false" title="3D Royal Gold & Obsidian Broadcast Announcement">
+                            <button type="button" class="composer-stage-pill" data-stage-slug="grand_announcement" onclick="window.__setComposerTextStage('grand_announcement')" aria-pressed="false" title="3D Royal Gold &amp; Obsidian Broadcast Announcement">
                                 <span class="composer-stage-pill__dot composer-stage-pill__dot--announce">📣</span>
                                 <span>Announcement</span>
                             </button>
                             <button type="button" class="composer-stage-pill" data-stage-slug="aurora_prism" onclick="window.__setComposerTextStage('aurora_prism')" aria-pressed="false" title="Iridescent 3D Futuristic Aurora Prism Stage">
-                                <span class="composer-stage-pill__dot composer-stage-pill__dot--prism">🌌</span>
+                                <span class="composer-stage-pill__dot composer-stage-pill__dot--prism">💎</span>
                                 <span>Aurora Prism</span>
                             </button>
-                            <button type="button" class="composer-stage-pill" data-stage-slug="heirloom_velvet" onclick="window.__setComposerTextStage('heirloom_velvet')" aria-pressed="false" title="Deep Velvet & Gold Leaf Family Decree Stage">
+                            <button type="button" class="composer-stage-pill" data-stage-slug="heirloom_velvet" onclick="window.__setComposerTextStage('heirloom_velvet')" aria-pressed="false" title="Deep Velvet &amp; Gold Leaf Family Decree Stage">
                                 <span class="composer-stage-pill__dot composer-stage-pill__dot--velvet">🏛️</span>
                                 <span>Royal Velvet</span>
                             </button>
@@ -1009,10 +1042,20 @@ window.openComposerWithTrivia = function(type = 'guess_who') {
         modalEl.addEventListener('hidden.bs.modal', resetLinkPreview);
     }
 
+    function extractFirstComposerUrl(text) {
+        if (!text || typeof text !== 'string') return null;
+        const pattern = /(https?:\/\/[^\s<>"'`]+)|(?:^|[\s(\[{"'])(www\.[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:\/[^\s<>"'`]*)?)|(?:^|[\s(\[{"'])([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9-]{1,63})*\.(?:com|org|net|io|app|dev|co\.uk|org\.uk|uk|edu|gov|ai|me|info|biz|tv|co)(?:\/[^\s<>"'`]*)?)(?![a-z0-9@._-])/i;
+        const match = text.match(pattern);
+        if (!match) return null;
+        const raw = match[1] ? match[1] : ('https://' + (match[2] || match[3] || ''));
+        const cleaned = raw.replace(/:[a-z0-9_]+_3d:.*$/i, '').replace(/[.,;:!?)]+$/, '');
+        return (cleaned && cleaned !== 'https://') ? cleaned : null;
+    }
+
     function checkAndUnfurlLink(immediate = false) {
         const val = (editor ? editor.innerText : '') || (textarea ? textarea.value : '');
-        const urlMatch = val.match(/(https?:\/\/[^\s<>"']+)/i);
-        if (!urlMatch || !urlMatch[1]) {
+        const url = extractFirstComposerUrl(val);
+        if (!url) {
             if (previewDebounceTimer) clearTimeout(previewDebounceTimer);
             if (activePreviewController) {
                 try { activePreviewController.abort(); } catch (_) {}
@@ -1023,9 +1066,7 @@ window.openComposerWithTrivia = function(type = 'guess_who') {
             inFlightUrl = null;
             return;
         }
-
-        const url = urlMatch[1].replace(/:[a-z0-9_]+_3d:.*$/i, '').replace(/[.,;:!?)]+$/, '');
-        if (!url || url === dismissedUrl || url === lastFetchedUrl || url === inFlightUrl) {
+        if (url === dismissedUrl || url === lastFetchedUrl || url === inFlightUrl) {
             return;
         }
 
@@ -2062,31 +2103,77 @@ window.selectPostAudience = function(scope, label, iconClass, famCode) {
     }
 })();
 
-// ── 3D Futuristic & Translucent Text Stage Studio Controller ─────────────────
+// ── Scenic Backdrops & 3D Milestone Stage Studio Controller ──────────────────
 (function() {
     const STAGE_META = {
+        starlight_bokeh: {
+            badge: null,
+            category: 'scenic',
+            label: '✨ Starlight Bokeh',
+        },
+        golden_ember: {
+            badge: null,
+            category: 'scenic',
+            label: '🔥 Golden Fireflies',
+        },
+        sunset_horizon: {
+            badge: null,
+            category: 'scenic',
+            label: '🌅 Sunset Horizon',
+        },
+        emerald_canopy: {
+            badge: null,
+            category: 'scenic',
+            label: '🌿 Enchanted Forest',
+        },
+        ocean_biolum: {
+            badge: null,
+            category: 'scenic',
+            label: '🌊 Deep Ocean',
+        },
+        rose_stardust: {
+            badge: null,
+            category: 'scenic',
+            label: '🌸 Rose Velvet',
+        },
+        northern_sky: {
+            badge: null,
+            category: 'scenic',
+            label: '🌌 Aurora Sky',
+        },
+        royal_parchment: {
+            badge: null,
+            category: 'scenic',
+            label: '👑 Royal Noir',
+        },
         dynasty_holo: {
             badge: '🌳 DYNASTY LINEAGE CALL',
+            category: 'stage',
             label: '🌳 Dynasty Tree',
         },
         cyber_glass: {
             badge: '🔮 3D HOLOGRAM STAGE',
+            category: 'stage',
             label: '🔮 3D Holo Glass',
         },
         alert_pulse: {
             badge: '🚨 FAMILY ALERT TRIGGER',
+            category: 'stage',
             label: '🚨 Alert Trigger',
         },
         grand_announcement: {
             badge: '📣 OFFICIAL BROADCAST',
+            category: 'stage',
             label: '📣 Announcement',
         },
         aurora_prism: {
             badge: '🌌 FUTURISTIC PRISM',
-            label: '🌌 Aurora Prism',
+            category: 'stage',
+            label: '💎 Aurora Prism',
         },
         heirloom_velvet: {
             badge: '🏛️ HEIRLOOM DECREE',
+            category: 'stage',
             label: '🏛️ Royal Velvet',
         },
     };
@@ -2100,6 +2187,7 @@ window.selectPostAudience = function(scope, label, iconClass, famCode) {
         const editor = document.getElementById('postMessageEditor');
         const badgeWrap = document.getElementById('composerStageHeaderBadge');
         const badgeText = document.getElementById('composerStageHeaderText');
+        const bokehLayer = document.getElementById('composerStageBokehLayer');
 
         if (input) input.value = cleanSlug;
 
@@ -2113,21 +2201,34 @@ window.selectPostAudience = function(scope, label, iconClass, famCode) {
         if (!wrapper || !editor) return;
 
         const previewContainer = document.getElementById('composerLinkPreviewContainer');
-        wrapper.classList.remove('fp-text-stage', 'fp-text-stage--composer', ...ALL_CLASSES);
+        wrapper.classList.remove('fp-text-stage', 'fp-text-stage--composer', 'fp-text-stage--scenic', ...ALL_CLASSES);
         if (cleanSlug) {
+            const meta = STAGE_META[cleanSlug];
+            const isScenic = meta.category === 'scenic';
             wrapper.classList.add('fp-text-stage', 'fp-text-stage--composer', 'fp-text-stage--' + cleanSlug);
+            if (isScenic) {
+                wrapper.classList.add('fp-text-stage--scenic');
+            }
+            if (bokehLayer) {
+                bokehLayer.classList.toggle('d-none', !isScenic);
+            }
             editor.style.color = '#ffffff';
-            editor.style.fontWeight = '700';
-            editor.style.fontSize = '1.22rem';
+            editor.style.fontWeight = isScenic ? '800' : '700';
+            editor.style.fontSize = isScenic ? '1.35rem' : '1.22rem';
             editor.style.textAlign = 'center';
             if (badgeWrap && badgeText) {
-                badgeText.textContent = STAGE_META[cleanSlug].badge;
-                badgeWrap.classList.remove('d-none');
+                if (meta.badge) {
+                    badgeText.textContent = meta.badge;
+                    badgeWrap.classList.remove('d-none');
+                } else {
+                    badgeWrap.classList.add('d-none');
+                }
             }
             if (previewContainer) {
                 previewContainer.classList.add('fp-text-stage__composer-preview');
             }
         } else {
+            if (bokehLayer) bokehLayer.classList.add('d-none');
             editor.style.color = 'var(--text-main, #0f172a)';
             editor.style.fontWeight = '';
             editor.style.fontSize = '1.05rem';
@@ -2174,8 +2275,8 @@ window.selectPostAudience = function(scope, label, iconClass, famCode) {
                 suggestBtn.textContent = '📣 Try 3D Announcement Stage';
                 suggestBtn.classList.remove('d-none');
             } else if (val.length >= 12 && val.length <= 180) {
-                suggestedSlug = 'cyber_glass';
-                suggestBtn.textContent = '🔮 Convert to 3D Holo Stage';
+                suggestedSlug = 'starlight_bokeh';
+                suggestBtn.textContent = '✨ Try Starlight Bokeh Backdrop';
                 suggestBtn.classList.remove('d-none');
             } else {
                 suggestBtn.classList.add('d-none');
@@ -2249,6 +2350,30 @@ window.selectPostAudience = function(scope, label, iconClass, famCode) {
     background: #e2e8f0;
     color: #0f172a;
     font-weight: 800;
+}
+.composer-stage-pill__dot--starlight {
+    background: radial-gradient(circle at 30% 30%, #38bdf8 0%, #0369a1 45%, #020817 100%);
+}
+.composer-stage-pill__dot--fireflies {
+    background: radial-gradient(circle at 30% 30%, #fbbf24 0%, #b45309 48%, #140802 100%);
+}
+.composer-stage-pill__dot--sunset {
+    background: linear-gradient(135deg, #312e81 0%, #be185d 52%, #c2410c 100%);
+}
+.composer-stage-pill__dot--forest {
+    background: radial-gradient(circle at 32% 28%, #34d399 0%, #047857 48%, #021810 100%);
+}
+.composer-stage-pill__dot--ocean {
+    background: radial-gradient(circle at 32% 30%, #22d3ee 0%, #0e7490 48%, #020c1b 100%);
+}
+.composer-stage-pill__dot--rose {
+    background: radial-gradient(circle at 30% 28%, #f472b6 0%, #9d174d 48%, #230514 100%);
+}
+.composer-stage-pill__dot--northern {
+    background: linear-gradient(135deg, #020617 0%, #059669 50%, #6366f1 100%);
+}
+.composer-stage-pill__dot--royal {
+    background: linear-gradient(135deg, #09090b 0%, #292524 60%, #d97706 100%);
 }
 .composer-stage-pill__dot--dynasty {
     background: linear-gradient(135deg, #065f46, #10b981);

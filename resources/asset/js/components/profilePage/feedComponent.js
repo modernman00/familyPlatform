@@ -122,52 +122,144 @@ export function profileFeed(opts = {}) {
         stagePickerOpen: {},
         textStageCatalog: [
             {
+                slug: 'starlight_bokeh',
+                shortLabel: 'Starlight',
+                label: '✨ Starlight Bokeh',
+                badge: null,
+                category: 'scenic',
+                icon: 'bi-stars',
+                accent: '#38bdf8',
+                swatch: 'radial-gradient(circle at 30% 30%, #38bdf8 0%, #0369a1 45%, #020817 100%)',
+            },
+            {
+                slug: 'golden_ember',
+                shortLabel: 'Fireflies',
+                label: '🔥 Golden Fireflies',
+                badge: null,
+                category: 'scenic',
+                icon: 'bi-fire',
+                accent: '#fbbf24',
+                swatch: 'radial-gradient(circle at 30% 30%, #fbbf24 0%, #b45309 48%, #140802 100%)',
+            },
+            {
+                slug: 'sunset_horizon',
+                shortLabel: 'Sunset',
+                label: '🌅 Sunset Horizon',
+                badge: null,
+                category: 'scenic',
+                icon: 'bi-sunrise-fill',
+                accent: '#f472b6',
+                swatch: 'linear-gradient(135deg, #312e81 0%, #be185d 52%, #c2410c 100%)',
+            },
+            {
+                slug: 'emerald_canopy',
+                shortLabel: 'Forest',
+                label: '🌿 Enchanted Forest',
+                badge: null,
+                category: 'scenic',
+                icon: 'bi-tree-fill',
+                accent: '#34d399',
+                swatch: 'radial-gradient(circle at 32% 28%, #34d399 0%, #047857 48%, #021810 100%)',
+            },
+            {
+                slug: 'ocean_biolum',
+                shortLabel: 'Deep Ocean',
+                label: '🌊 Deep Ocean',
+                badge: null,
+                category: 'scenic',
+                icon: 'bi-water',
+                accent: '#22d3ee',
+                swatch: 'radial-gradient(circle at 32% 30%, #22d3ee 0%, #0e7490 48%, #020c1b 100%)',
+            },
+            {
+                slug: 'rose_stardust',
+                shortLabel: 'Rose Velvet',
+                label: '🌸 Rose Velvet',
+                badge: null,
+                category: 'scenic',
+                icon: 'bi-flower1',
+                accent: '#f9a8d4',
+                swatch: 'radial-gradient(circle at 30% 28%, #f472b6 0%, #9d174d 48%, #230514 100%)',
+            },
+            {
+                slug: 'northern_sky',
+                shortLabel: 'Aurora Sky',
+                label: '🌌 Aurora Sky',
+                badge: null,
+                category: 'scenic',
+                icon: 'bi-moon-stars-fill',
+                accent: '#34d399',
+                swatch: 'linear-gradient(135deg, #020617 0%, #059669 50%, #6366f1 100%)',
+            },
+            {
+                slug: 'royal_parchment',
+                shortLabel: 'Royal Noir',
+                label: '👑 Royal Noir',
+                badge: null,
+                category: 'scenic',
+                icon: 'bi-gem',
+                accent: '#fbbf24',
+                swatch: 'linear-gradient(135deg, #09090b 0%, #292524 60%, #d97706 100%)',
+            },
+            {
                 slug: 'dynasty_holo',
                 shortLabel: 'Dynasty Tree',
                 label: '🌳 Dynasty Tree',
                 badge: '🌳 DYNASTY LINEAGE CALL',
+                category: 'stage',
                 icon: 'bi-diagram-3-fill',
                 accent: '#34d399',
+                swatch: 'linear-gradient(135deg, #065f46 0%, #10b981 100%)',
             },
             {
                 slug: 'cyber_glass',
                 shortLabel: '3D Holo',
                 label: '🔮 3D Holo Glass',
                 badge: '🔮 3D HOLOGRAM STAGE',
+                category: 'stage',
                 icon: 'bi-layers-half',
                 accent: '#38bdf8',
+                swatch: 'linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%)',
             },
             {
                 slug: 'alert_pulse',
                 shortLabel: 'Alert Trigger',
                 label: '🚨 Alert Trigger',
                 badge: '🚨 FAMILY ALERT TRIGGER',
+                category: 'stage',
                 icon: 'bi-broadcast-pin',
                 accent: '#fce79a',
+                swatch: 'linear-gradient(135deg, #991b1b 0%, #e11d48 100%)',
             },
             {
                 slug: 'grand_announcement',
                 shortLabel: 'Announcement',
                 label: '📣 Announcement',
                 badge: '📣 OFFICIAL BROADCAST',
+                category: 'stage',
                 icon: 'bi-megaphone-fill',
                 accent: '#fbbf24',
+                swatch: 'linear-gradient(135deg, #b45309 0%, #f59e0b 100%)',
             },
             {
                 slug: 'aurora_prism',
                 shortLabel: 'Aurora Prism',
-                label: '🌌 Aurora Prism',
+                label: '💎 Aurora Prism',
                 badge: '🌌 FUTURISTIC PRISM',
+                category: 'stage',
                 icon: 'bi-stars',
                 accent: '#e879f9',
+                swatch: 'linear-gradient(135deg, #7c3aed 0%, #ec4899 100%)',
             },
             {
                 slug: 'heirloom_velvet',
                 shortLabel: 'Royal Velvet',
                 label: '🏛️ Royal Velvet',
                 badge: '🏛️ HEIRLOOM DECREE',
+                category: 'stage',
                 icon: 'bi-award-fill',
                 accent: '#fde68a',
+                swatch: 'linear-gradient(135deg, #4c0519 0%, #9f1239 100%)',
             },
         ],
         csrfOptions: {
@@ -938,10 +1030,15 @@ export function profileFeed(opts = {}) {
                 return `<span class="${liveEmojiClass}" role="button" tabindex="0" onclick="event.stopPropagation(); window.AtgEmojiEngine && window.AtgEmojiEngine.tapLive(this, '${emojiId}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}"><img src="/public/img/emoji/${emojiId}.svg?v=20261107a" onerror="this.src='/img/emoji/${emojiId}.svg?v=20261107a'" class="atg-3d-emoji" loading="lazy" width="26" height="26" alt="${emojiId}" title="Tap to play · tap again for 3D / AR"></span>`;
             });
 
-            // Linkify URLs into secure clickable links
-            safeText = safeText.replace(/(https?:\/\/[^\s<>"']+)/gi, (match) => {
-                const cleanHref = match.replace(/[.,;:!?)]+$/, '');
-                return `<a href="${cleanHref}" target="_blank" rel="noopener noreferrer" class="text-primary fw-medium text-decoration-underline" style="word-break: break-all;" onclick="event.stopPropagation();">${cleanHref}</a>`;
+            // Linkify URLs (including scheme-less www. and common-TLD domains) into secure clickable links
+            safeText = safeText.replace(/(https?:\/\/[^\s<>"'`]+)|(?:(^|[\s(\[{"']))((?:www\.[a-z0-9-]+(?:\.[a-z0-9-]+)+|[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9-]{1,63})*\.(?:com|org|net|io|app|dev|co\.uk|org\.uk|uk|edu|gov|ai|me|info|biz|tv|co))(?:\/[^\s<>"'`]*)?)(?![a-z0-9@._-])/gi, (match, fullUrl, prefix, bareDomain) => {
+                if (fullUrl) {
+                    const cleanHref = fullUrl.replace(/[.,;:!?)]+$/, '');
+                    return `<a href="${cleanHref}" target="_blank" rel="noopener noreferrer" class="text-primary fw-medium text-decoration-underline" style="word-break: break-all;" onclick="event.stopPropagation();">${cleanHref}</a>`;
+                }
+                const cleanLabel = (bareDomain || '').replace(/[.,;:!?)]+$/, '');
+                const cleanHref = `https://${cleanLabel}`;
+                return `${prefix || ''}<a href="${cleanHref}" target="_blank" rel="noopener noreferrer" class="text-primary fw-medium text-decoration-underline" style="word-break: break-all;" onclick="event.stopPropagation();">${cleanLabel}</a>`;
             });
 
             // Highlight @First Last mentions as chips
@@ -2509,9 +2606,10 @@ export function profileFeed(opts = {}) {
                     if (link_preview !== undefined) {
                         post.link_preview = link_preview;
                     } else if (post.postMessage && !post.video) {
-                        const urlMatch = post.postMessage.match(/(https?:\/\/[^\s<>"']+)/i);
-                        if (urlMatch && urlMatch[1]) {
-                            this.lazyFetchLinkPreview(post, urlMatch[1]);
+                        const urlMatch = post.postMessage.match(/(https?:\/\/[^\s<>"'`]+)|(?:^|[\s(\[{"'])(www\.[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:\/[^\s<>"'`]*)?)|(?:^|[\s(\[{"'])([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9-]{1,63})*\.(?:com|org|net|io|app|dev|co\.uk|org\.uk|uk|edu|gov|ai|me|info|biz|tv|co)(?:\/[^\s<>"'`]*)?)(?![a-z0-9@._-])/i);
+                        const extracted = urlMatch ? (urlMatch[1] || `https://${urlMatch[2] || urlMatch[3]}`) : '';
+                        if (extracted && extracted !== 'https://') {
+                            this.lazyFetchLinkPreview(post, extracted.replace(/[.,;:!?)]+$/, ''));
                         }
                     }
                 }
@@ -3415,9 +3513,10 @@ export function profileFeed(opts = {}) {
                         if (data?.link_preview !== undefined) {
                             post.link_preview = data.link_preview;
                         } else if (post.postMessage && !post.video) {
-                            const urlMatch = post.postMessage.match(/(https?:\/\/[^\s<>"']+)/i);
-                            if (urlMatch && urlMatch[1]) {
-                                this.lazyFetchLinkPreview(post, urlMatch[1]);
+                            const urlMatch = post.postMessage.match(/(https?:\/\/[^\s<>"'`]+)|(?:^|[\s(\[{"'])(www\.[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:\/[^\s<>"'`]*)?)|(?:^|[\s(\[{"'])([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9-]{1,63})*\.(?:com|org|net|io|app|dev|co\.uk|org\.uk|uk|edu|gov|ai|me|info|biz|tv|co)(?:\/[^\s<>"'`]*)?)(?![a-z0-9@._-])/i);
+                            const extracted = urlMatch ? (urlMatch[1] || `https://${urlMatch[2] || urlMatch[3]}`) : '';
+                            if (extracted && extracted !== 'https://') {
+                                this.lazyFetchLinkPreview(post, extracted.replace(/[.,;:!?)]+$/, ''));
                             }
                         }
                     }

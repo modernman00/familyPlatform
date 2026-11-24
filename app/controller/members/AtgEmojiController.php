@@ -9,6 +9,7 @@ use App\model\Post;
 use App\services\AtgEmojiService;
 use App\services\AtgPhotoAvatarEngine;
 use App\services\AvatarStickerService;
+use App\services\TalkingAvatarNeuralService;
 use Exception;
 use InvalidArgumentException;
 use Src\ApiResponse;
@@ -598,5 +599,151 @@ final class AtgEmojiController extends BaseController
                 ['success' => false]
             ), JSON_UNESCAPED_SLASHES);
         }
+    }
+
+    /**
+     * Queue a Tier-B in-house neural talking-avatar HD video render.
+     * Route: POST /api/emoji/talking-avatar/render
+     */
+    public function renderTalkingAvatar(): void
+    {
+        header('Content-Type: application/json; charset=UTF-8');
+        header('Cache-Control: private, no-store');
+        header('X-Content-Type-Options: nosniff');
+
+        try {
+            if ($this->userId === '' || !AvatarStickerService::isValidUserId($this->userId)) {
+                http_response_code(401);
+                echo json_encode(array_merge(
+                    ApiResponse::toErrorEnvelope('Authentication required to generate a talking avatar.', 'AUTH_REQUIRED'),
+                    ['success' => false]
+                ), JSON_UNESCAPED_SLASHES);
+                return;
+            }
+
+            $rawInput = (string)file_get_contents('php://input');
+            $input = json_decode($rawInput, true);
+            $input = is_array($input) ? $input : [];
+
+            $clientToken = (string)($input['csrf_token'] ?? $input['token'] ?? $_SERVER['HTTP_X_CSRF_TOKEN'] ?? $_SERVER['HTTP_X_XSRF_TOKEN'] ?? $_POST['token'] ?? '');
+            $sessionToken = (string)($_SESSION['token'] ?? '');
+            if ($sessionToken !== '' && !hash_equals($sessionToken, $clientToken)) {
+                http_response_code(403);
+                echo json_encode(array_merge(
+                    ApiResponse::toErrorEnvelope('Invalid security token. Please refresh the page and try again.', 'CSRF_MISMATCH'),
+                    ['success' => false]
+                ), JSON_UNESCAPED_SLASHES);
+                return;
+            }
+
+            try {
+                Limiter::limit('atg_talking_avatar:' . $this->userId, 'post');
+            } catch (TooManyRequestsException $rateEx) {
+                http_response_code(429);
+                echo json_encode(array_merge(
+                    ApiResponse::toErrorEnvelope($rateEx->getMessage(), 'RATE_LIMITED'),
+                    ['success' => false]
+                ), JSON_UNESCAPED_SLASHES);
+                return;
+            }
+
+            $svc = new TalkingAvatarNeuralService();
+            $result = $svc->enqueueRender($this->userId, $input);
+
+            try {
+                AuditLogger::log('atg_talking_avatar_render', [
+                    'user_id'        => $this->userId,
+                    'job_id'         => $result['job_id'],
+                    'status'         => $result['status'],
+                    'sidecar_online' => $result['sidecar_online'],
+                ]);
+            } catch (\Throwable) {
+                // Non-blocking audit log
+            }
+
+            http_response_code($result['sidecar_online'] ? 202 : 200);
+            echo json_encode(array_merge(
+                ApiResponse::toSuccessEnvelope($result, $result['message']),
+                ['success' => true]
+            ), JSON_UNESCAPED_SLASHES);
+        } catch (InvalidArgumentException $valEx) {
+            http_response_code(422);
+            echo json_encode(array_merge(
+                ApiResponse::toErrorEnvelope($valEx->getMessage(), 'VALIDATION_ERROR'),
+                ['success' => false]
+            ), JSON_UNESCAPED_SLASHES);
+        } catch (\Throwable $e) {
+            error_log('[AtgEmojiController::renderTalkingAvatar] ' . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(array_merge(
+                ApiResponse::toErrorEnvelope('Could not queue your talking avatar video. Please try again.', 'SERVER_ERROR'),
+                ['success' => false]
+            ), JSON_UNESCAPED_SLASHES);
+        }
+    }
+
+    /**
+     * Poll owner-scoped status of a Tier-B neural talking-avatar job.
+     * Route: GET /api/emoji/talking-avatar/status/[:jobId]
+     */
+    public function talkingAvatarStatus(string $jobId = ''): void
+    {
+        header('Content-Type: application/json; charset=UTF-8');
+        header('Cache-Control: private, no-store');
+        header('X-Content-Type-Options: nosniff');
+
+        if ($this->userId === '' || !AvatarStickerService::isValidUserId($this->userId)) {
+            http_response_code(401);
+            echo json_encode(array_merge(
+                ApiResponse::toErrorEnvelope('Authentication required.', 'AUTH_REQUIRED'),
+                ['success' => false]
+            ), JSON_UNESCAPED_SLASHES);
+            return;
+        }
+
+        $svc = new TalkingAvatarNeuralService();
+        $status = $svc->getJobStatus($this->userId, $jobId);
+        if ($status === null) {
+            http_response_code(404);
+            echo json_encode(array_merge(
+                ApiResponse::toErrorEnvelope('Talking avatar job not found.', 'NOT_FOUND'),
+                ['success' => false]
+            ), JSON_UNESCAPED_SLASHES);
+            return;
+        }
+
+        echo json_encode(array_merge(
+            ApiResponse::toSuccessEnvelope($status, 'Job status retrieved.'),
+            ['success' => true]
+        ), JSON_UNESCAPED_SLASHES);
+    }
+
+    /**
+     * Stream an owner-scoped neural talking-avatar MP4 from private storage.
+     * Route: GET /api/emoji/talking-avatar/video/[:jobId]
+     */
+    public function streamTalkingAvatarVideo(string $jobId): void
+    {
+        if ($this->userId === '' || !AvatarStickerService::isValidUserId($this->userId)) {
+            http_response_code(401);
+            header('Content-Type: application/json; charset=UTF-8');
+            echo json_encode(ApiResponse::toErrorEnvelope('Authentication required.', 'AUTH_REQUIRED'), JSON_UNESCAPED_SLASHES);
+            return;
+        }
+
+        $svc = new TalkingAvatarNeuralService();
+        $path = $svc->getVideoFilePath($this->userId, $jobId);
+        if ($path === null) {
+            http_response_code(404);
+            header('Content-Type: application/json; charset=UTF-8');
+            echo json_encode(ApiResponse::toErrorEnvelope('Video not found.', 'NOT_FOUND'), JSON_UNESCAPED_SLASHES);
+            return;
+        }
+
+        header('Content-Type: video/mp4');
+        header('Content-Length: ' . (string)filesize($path));
+        header('Cache-Control: private, max-age=3600');
+        header('X-Content-Type-Options: nosniff');
+        readfile($path);
     }
 }

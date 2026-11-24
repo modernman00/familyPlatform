@@ -486,21 +486,58 @@ final class ServeImgController {
     public function StreamExternalVideo(): never
     {
         $targetUrl = (string)($_GET['url'] ?? '');
+        $igShortcode = trim((string)($_GET['ig'] ?? ''));
         $signature = (string)($_GET['sig'] ?? '');
 
-        if ($targetUrl === '' || $signature === '') {
-            http_response_code(400);
-            header('Content-Type: text/plain');
-            echo 'Target video URL and cryptographic signature are required.';
-            exit;
-        }
+        if ($igShortcode !== '') {
+            if ($signature === '' || preg_match('/^[A-Za-z0-9_-]{5,24}$/', $igShortcode) !== 1) {
+                http_response_code(400);
+                header('Content-Type: text/plain');
+                echo 'Valid Instagram shortcode and cryptographic signature are required.';
+                exit;
+            }
 
-        // 1. HMAC Verification (Constant-Time)
-        if (!\App\services\LinkPreviewService::verifyStreamSignature($targetUrl, $signature)) {
-            http_response_code(403);
-            header('Content-Type: text/plain');
-            echo 'Access denied: invalid or tampered video stream signature.';
-            exit;
+            if (!\App\services\LinkPreviewService::verifyStreamSignature('ig:' . $igShortcode, $signature)) {
+                http_response_code(403);
+                header('Content-Type: text/plain');
+                echo 'Access denied: invalid or tampered video stream signature.';
+                exit;
+            }
+
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
+
+            $igCacheFile = 'ig_' . $igShortcode . '.mp4';
+            $igCachePath = __DIR__ . '/../../resources/videos/posts/' . $igCacheFile;
+            if (is_file($igCachePath) && filesize($igCachePath) > 4096) {
+                $this->StreamPostVideo($igCacheFile);
+            }
+
+            $resolvedIgStream = \App\services\LinkPreviewService::resolveFreshInstagramVideoStream($igShortcode, false);
+            if ($resolvedIgStream === null || !\App\services\LinkPreviewService::isInstagramCdnUrl($resolvedIgStream)) {
+                http_response_code(404);
+                header('Content-Type: text/plain');
+                echo 'Instagram video stream unavailable.';
+                exit;
+            }
+
+            $targetUrl = $resolvedIgStream;
+        } else {
+            if ($targetUrl === '' || $signature === '') {
+                http_response_code(400);
+                header('Content-Type: text/plain');
+                echo 'Target video URL and cryptographic signature are required.';
+                exit;
+            }
+
+            // 1. HMAC Verification (Constant-Time)
+            if (!\App\services\LinkPreviewService::verifyStreamSignature($targetUrl, $signature)) {
+                http_response_code(403);
+                header('Content-Type: text/plain');
+                echo 'Access denied: invalid or tampered video stream signature.';
+                exit;
+            }
         }
 
         // 2. Strict SSRF Hardening (Dr. Viktor Kovács & Marcus Gate)
@@ -516,7 +553,8 @@ final class ServeImgController {
         }
 
         $isGoogleHost = preg_match('#^(?:[a-zA-Z0-9_-]+\.)?(?:googleusercontent\.com|googlevideo\.com)$#i', $host) === 1;
-        if (!$isGoogleHost) {
+        $isInstagramHost = \App\services\LinkPreviewService::isInstagramCdnUrl($targetUrl);
+        if (!$isGoogleHost && !$isInstagramHost) {
             http_response_code(403);
             header('Content-Type: text/plain');
             echo 'Access denied: untrusted remote media host.';
@@ -529,7 +567,7 @@ final class ServeImgController {
         }
 
         // 3b. Sovereign Local SSD Cache Fast-Path (ATG Zero-Latency & Token-Expiry Shield)
-        $cacheFileName = 'ext_' . md5($targetUrl) . '.mp4';
+        $cacheFileName = $igShortcode !== '' ? ('ig_' . $igShortcode . '.mp4') : ('ext_' . md5($targetUrl) . '.mp4');
         $cacheFilePath = __DIR__ . '/../../resources/videos/posts/' . $cacheFileName;
         if (is_file($cacheFilePath) && filesize($cacheFilePath) > 4096) {
             $this->StreamPostVideo($cacheFileName);
@@ -543,7 +581,7 @@ final class ServeImgController {
                 : [$targetUrl, preg_replace('/=m37$/i', '=m22', $targetUrl)];
 
             foreach ($candidates as $candidateUrl) {
-                if (!is_string($candidateUrl)) {
+                if (empty($candidateUrl)) {
                     continue;
                 }
                 $probe = curl_init();
@@ -607,6 +645,13 @@ final class ServeImgController {
         }
 
         $currentUpstreamStatus = 200;
+
+        if ($effectiveTargetUrl === '') {
+            http_response_code(400);
+            header('Content-Type: text/plain');
+            echo 'Invalid target stream URL.';
+            exit;
+        }
 
         curl_setopt_array($ch, [
             CURLOPT_URL => $effectiveTargetUrl,

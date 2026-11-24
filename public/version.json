@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Feat(studio,ui): Super-HD Living Photo & PiP, white theme & navbar polish, and arcade engagement cron",
+    "title": "Fix(milestones): omit age from Family Historian birthday posts",
     "notes": [
+        "Fix(milestones): omit age from Family Historian birthday posts",
         "Feat(studio,ui): Super-HD Living Photo & PiP, white theme & navbar polish, and arcade engagement cron",
-        "Test(auth): isolate CSRF session state in FamilyCodeApprovalFlowTest",
-        "Feat(studio): implement Floating PiP for Living Photo and Living Heirloom"
+        "Test(auth): isolate CSRF session state in FamilyCodeApprovalFlowTest"
     ],
     "released_at": "2026-11-23",
-    "commit": "fb61ed5e"
+    "commit": "fdb9ba5c"
 }

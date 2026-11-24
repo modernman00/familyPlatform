@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
-import { playArcadeSfx, formatElapsedMs } from './arcadeEngine';
+import { formatElapsedMs } from './arcadeEngine';
+import { createGameSfx } from './hooks/useSoundEffects';
 import styles from './ArcadeShell.module.css';
 
 const PAD_COLOURS = [
@@ -8,7 +9,8 @@ const PAD_COLOURS = [
     '#0d9488', '#c2410c', '#854d0e',
 ];
 
-export function KinPulseGame({ puzzle, onProgress, onComplete, submitting }) {
+export function KinPulseGame({ puzzle, onProgress, onComplete, submitting, sound }) {
+    const playArcadeSfx = createGameSfx(sound);
     const sequence = puzzle?.sequence || [];
     const maxRounds = puzzle?.maxRounds || sequence.length || 8;
 
@@ -133,7 +135,8 @@ export function KinPulseGame({ puzzle, onProgress, onComplete, submitting }) {
                 setUserStep(nextStep);
             }
         } else {
-            playArcadeSfx('error');
+            triggerHaptic(18);
+            sound?.playError?.();
             setMistakes((m) => m + 1);
             setStatusNote('Wrong pad! Replaying this round...');
             const tRetry = window.setTimeout(() => playSequenceForRound(round), 650);

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
-import { playArcadeSfx, formatElapsedMs } from './arcadeEngine';
+import { formatElapsedMs } from './arcadeEngine';
+import { createGameSfx } from './hooks/useSoundEffects';
 import styles from './ArcadeShell.module.css';
 
 const KEYBOARD_ROWS = [
@@ -8,7 +9,8 @@ const KEYBOARD_ROWS = [
     ['ENTER', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 'DEL'],
 ];
 
-export function WordieGame({ puzzle, onProgress, onComplete, submitting }) {
+export function WordieGame({ puzzle, onProgress, onComplete, submitting, sound }) {
+    const playArcadeSfx = createGameSfx(sound);
     const wordLength = puzzle?.wordLength || 5;
     const maxGuesses = puzzle?.maxGuesses || 6;
     const targetWord = (puzzle?.targetWord || (puzzle?.targetWordHash ? atob(puzzle.targetWordHash) : 'HEART')).toUpperCase();

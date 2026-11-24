@@ -129,7 +129,13 @@ export const feedPostNormalizer = {
 
             // Progressive enhancement: lazy unfurl link preview(s) in parallel if server hasn't pre-hydrated all links
             if (normalized.postMessage) {
-                const allUrlMatches = normalized.postMessage.match(/https?:\/\/[^\s<>"']+/gi) || [];
+                const urlRe = /(https?:\/\/[^\s<>"'`]+)|(?:^|[\s(\[{"'])(www\.[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:\/[^\s<>"'`]*)?)|(?:^|[\s(\[{"'])([a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9-]{1,63})*\.(?:com|org|net|io|app|dev|co\.uk|org\.uk|uk|edu|gov|ai|me|info|biz|tv|co)(?:\/[^\s<>"'`]*)?)(?![a-z0-9@._-])/gi;
+                const allUrlMatches = [];
+                let urlM;
+                while ((urlM = urlRe.exec(normalized.postMessage)) !== null) {
+                    const rawU = urlM[1] ? urlM[1] : `https://${urlM[2] || urlM[3] || ''}`;
+                    if (rawU && rawU !== 'https://') allUrlMatches.push(rawU);
+                }
                 const uniqueUrls = Array.from(new Set(allUrlMatches.map(u => u.replace(/[.,;!?)]+$/, '')))).filter(u => {
                     if (/\.(?:jpe?g|png|webp|avif|gif)(?:\?.*)?$/i.test(u)) return false;
                     if (parseVideoUrl(u)) return false;

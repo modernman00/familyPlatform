@@ -9,33 +9,218 @@
 @endsection
 
 @section('content')
+  <style>
+    .hero-section.family-video-hero {
+      position: relative;
+      overflow: hidden;
+      background-color: #12080c;
+      color: #ffffff;
+      padding: 6rem 0 4.5rem;
+      min-height: 82vh;
+      display: flex;
+      align-items: center;
+    }
+    .family-video-hero .hero-bg-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      overflow: hidden;
+      background-color: #12080c;
+    }
+    .family-video-hero .hero-bg-video {
+      display: none;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      opacity: 0.64;
+      filter: saturate(1.15) brightness(0.92) contrast(1.05);
+    }
+    .family-video-hero .hero-bg-mobile-img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      opacity: 0.56;
+      filter: saturate(1.12) brightness(0.9) contrast(1.04);
+    }
+    @media (min-width: 768px) {
+      .family-video-hero .hero-bg-video {
+        display: block;
+      }
+      .family-video-hero .hero-bg-mobile-img {
+        display: none;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .family-video-hero .hero-bg-video {
+        display: none !important;
+      }
+      .family-video-hero .hero-bg-mobile-img {
+        display: block !important;
+      }
+      .family-video-hero .hero-video-toggle-btn {
+        display: none !important;
+      }
+    }
+    .family-video-hero .hero-bg-scrim {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      background: radial-gradient(circle at 35% 30%, rgba(18, 8, 12, 0.35) 0%, rgba(18, 8, 12, 0.62) 60%, rgba(18, 8, 12, 0.88) 100%),
+                  linear-gradient(180deg, rgba(18, 8, 12, 0.42) 0%, rgba(18, 8, 12, 0.68) 65%, rgba(18, 8, 12, 0.92) 100%);
+      pointer-events: none;
+    }
+    .family-video-hero .hero-foreground {
+      position: relative;
+      z-index: 5;
+    }
+    .family-video-hero .hero-privacy-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(255, 247, 237, 0.14);
+      color: #fde68a;
+      border: 1px solid rgba(253, 230, 138, 0.38);
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .family-video-hero .hero-title {
+      color: #ffffff !important;
+      text-shadow: 0 2px 20px rgba(0, 0, 0, 0.82);
+    }
+    .family-video-hero .hero-title span {
+      color: #fde68a !important;
+      text-shadow: 0 2px 18px rgba(0, 0, 0, 0.78);
+    }
+    .family-video-hero .hero-subtitle {
+      color: #f1f5f9 !important;
+      text-shadow: 0 1px 14px rgba(0, 0, 0, 0.82);
+    }
+    .family-video-hero .btn-hero-login {
+      background-color: rgba(255, 255, 255, 0.14);
+      color: #ffffff !important;
+      border: 1.5px solid rgba(255, 255, 255, 0.48);
+      border-radius: 12px;
+      padding: 0.5rem 1.25rem;
+      font-weight: 600;
+      min-height: 48px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      flex-shrink: 0;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: all 0.18s ease;
+    }
+    .family-video-hero .btn-hero-login:hover {
+      background-color: rgba(255, 255, 255, 0.24);
+      border-color: #ffffff;
+      color: #ffffff !important;
+      transform: translateY(-1px);
+    }
+    .family-video-hero .hero-trust-row {
+      color: #f1f5f9 !important;
+      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.75);
+    }
+    .family-video-hero .hero-video-toggle-btn {
+      position: absolute;
+      top: 1.25rem;
+      right: 1.5rem;
+      left: auto !important;
+      width: auto !important;
+      max-width: fit-content !important;
+      z-index: 15;
+      min-height: 44px;
+      min-width: 44px;
+      padding: 0.45rem 1rem;
+      border-radius: 9999px;
+      background: rgba(18, 8, 12, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.26);
+      color: #f8fafc;
+      font-size: 0.78rem;
+      font-weight: 600;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      white-space: nowrap;
+      flex-shrink: 0;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+      transition: transform 0.15s ease, background-color 0.2s ease, border-color 0.2s ease;
+    }
+    @media (min-width: 768px) {
+      .family-video-hero .hero-video-toggle-btn {
+        display: inline-flex;
+      }
+    }
+    .family-video-hero .hero-video-toggle-btn:hover {
+      background: rgba(34, 14, 20, 0.92);
+      border-color: rgba(253, 230, 138, 0.6);
+    }
+    .family-video-hero .hero-video-toggle-btn:active {
+      transform: scale(0.98);
+    }
+    .family-video-hero .hero-video-toggle-btn:focus-visible {
+      outline: 2px solid #fde68a;
+      outline-offset: 2px;
+    }
+  </style>
+
   <!-- Hero Section -->
-  <section class="hero-section">
-    <div class="container">
+  <section class="hero-section family-video-hero" data-surface="dark" x-data="{ videoPaused: false, toggleHeroVideo() { const v = this.$refs.familyHeroVideo; if (!v) return; if (v.paused) { v.play(); this.videoPaused = false; } else { v.pause(); this.videoPaused = true; } } }">
+    <div class="hero-bg-layer" aria-hidden="true">
+      <video x-ref="familyHeroVideo" id="familyHeroVideo" class="hero-bg-video" autoplay muted loop playsinline preload="metadata" poster="/public/media/family-hero-mobile.jpg">
+        <source src="/public/media/family-hero.mp4" type="video/mp4">
+      </video>
+      <img class="hero-bg-mobile-img" src="/public/media/family-hero-mobile.jpg" alt="" loading="eager" decoding="async">
+      <div class="hero-bg-scrim"></div>
+    </div>
+
+    <button type="button"
+            class="hero-video-toggle-btn"
+            id="familyHeroVideoToggleBtn"
+            x-cloak
+            @click="toggleHeroVideo()"
+            :aria-pressed="videoPaused ? 'true' : 'false'"
+            :aria-label="videoPaused ? 'Play background family heritage video' : 'Pause background family heritage video'"
+            :title="videoPaused ? 'Play background family heritage video' : 'Pause background family heritage video'">
+      <i class="fas" :class="videoPaused ? 'fa-play' : 'fa-pause'" aria-hidden="true"></i>
+      <span x-text="videoPaused ? 'Play ambient video' : 'Pause ambient video'">Pause ambient video</span>
+    </button>
+
+    <div class="container hero-foreground">
       <div class="row align-items-center">
         <div class="col-lg-6 mb-5 mb-lg-0 pe-lg-5">
-          <div class="badge rounded-pill px-3 py-2 mb-3 fw-bold text-uppercase tracking-wider" style="background: rgba(184,32,44, 0.12); color: var(--brand-primary, #a31621); font-size: 0.8rem; letter-spacing: 0.05em;">
+          <div class="badge rounded-pill px-3 py-2 mb-3 fw-bold text-uppercase tracking-wider hero-privacy-pill">
             🛡️ 100% Private 
           </div>
           <h1 class="hero-title">Private Family Social Network &amp; <br><span>Living Heritage Tree.</span></h1>
           <p class="hero-subtitle">Connect generations, preserve precious memories, and celebrate life milestones in a secure, private haven designed exclusively for your family.</p>
           <div class="d-flex gap-3 flex-column flex-sm-row">
 @if(\class_exists('\Src\functionality\SignIn') && \Src\functionality\SignIn::isLoggedIn('users'))
-            <a href="/profilePage" class="btn btn-brand btn-lg shadow-sm">Go to Family Dashboard</a>
+            <a href="/profilePage" class="btn btn-brand btn-lg shadow-sm" style="min-height: 48px;">Go to Family Dashboard</a>
 @else
-            <a href="/register" class="btn btn-brand btn-lg shadow-sm">Create Family Network</a>
-            <a href="/login" class="btn btn-brand-outline btn-lg">Log In</a>
+            <a href="/register" class="btn btn-brand btn-lg shadow-sm" style="min-height: 48px;">Create Family Network</a>
+            <a href="/login" class="btn btn-hero-login btn-lg">Log In</a>
 @endif
           </div>
-          <div class="d-flex align-items-center gap-4 mt-4 pt-2 text-muted small">
+          <div class="d-flex align-items-center gap-4 mt-4 pt-2 small hero-trust-row flex-wrap">
             <div class="d-flex align-items-center gap-1">
               <i class="bi bi-shield-check text-success"></i> End-to-End Private
             </div>
             <div class="d-flex align-items-center gap-1">
-              <i class="bi bi-heart-pulse-fill text-danger"></i> Milestone Memories
+              <i class="bi bi-heart-pulse-fill text-warning"></i> Milestone Memories
             </div>
             <div class="d-flex align-items-center gap-1">
-              <i class="bi bi-diagram-3-fill text-primary"></i> Living Family Tree
+              <i class="bi bi-diagram-3-fill text-info"></i> Living Family Tree
             </div>
           </div>
         </div>
@@ -67,7 +252,7 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
             </div>
             <h3 class="feature-title">Private Family Trees</h3>
-            <p class="text-muted">Visualize your family history with dynamic family trees. See exactly how everyone is connected across generations.</p>
+            <p class="text-muted">Visualise your family history with dynamic family trees. See exactly how everyone is connected across generations.</p>
           </div>
         </div>
         <div class="col-md-4">

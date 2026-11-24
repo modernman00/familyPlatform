@@ -9,6 +9,7 @@ import {
 import { KinZipGame } from './KinZipGame';
 import { KinGridGame } from './KinGridGame';
 import { KinWordGame } from './KinWordGame';
+import { triggerHaptic, useSoundEffects } from './hooks/useSoundEffects';
 import { WordieGame } from './WordieGame';
 import { CheeseboardGame } from './CheeseboardGame';
 import { AyoGame } from './AyoGame';
@@ -366,5 +367,67 @@ describe('Family Arcade Engine & Components', () => {
         const previewImg = getByAltText(/KinZip \(Connect the Dots\) — medium difficulty share card preview/i);
         expect(previewImg).toBeTruthy();
         expect(previewImg.getAttribute('src')).toContain('/arcade/card/game-kinzip.jpg?v=3&difficulty=medium');
+    });
+
+    it('renders KinZip node ripple on dot 1 and flashes gold wall on collision', () => {
+        const puzzle = {
+            seedKey: 'zip-wall-ripple',
+            difficulty: 'easy',
+            size: 3,
+            checkpoints: [{ num: 1, r: 0, c: 0 }, { num: 2, r: 2, c: 2 }],
+            walls: [[0, 0, 0, 1]],
+        };
+        const soundMock = { playTap: vi.fn(), playConnect: vi.fn(), playError: vi.fn(), playVictory: vi.fn() };
+        const { getByRole, container } = render(
+            <KinZipGame puzzle={puzzle} onProgress={() => {}} onComplete={() => {}} submitting={false} sound={soundMock} />
+        );
+
+        const cell00 = getByRole('button', { name: /Row 1 Column 1, Dot 1/i });
+        fireEvent.pointerDown(cell00);
+        expect(soundMock.playConnect).toHaveBeenCalledWith(1);
+        expect(container.querySelector('[class*="zipNodeRipple"]')).toBeTruthy();
+
+        const cell01 = getByRole('button', { name: /Row 1 Column 2/i });
+        fireEvent.pointerDown(cell01);
+        expect(soundMock.playError).toHaveBeenCalled();
+        expect(cell00.className).toMatch(/wallHitRight/);
+    });
+
+    it('validates KinGrid inequalities live and persists useSoundEffects mute state', () => {
+        const puzzle = {
+            seedKey: 'grid-ineq-live',
+            difficulty: 'easy',
+            size: 3,
+            givens: [{ r: 0, c: 0, v: 2 }],
+            inequalities: [{ r1: 0, c1: 0, op: '>', r2: 0, c2: 1 }],
+        };
+        const soundMock = { playTap: vi.fn(), playConnect: vi.fn(), playError: vi.fn(), playRowComplete: vi.fn(), playVictory: vi.fn() };
+        const { getByRole, container } = render(
+            <KinGridGame puzzle={puzzle} onProgress={() => {}} onComplete={() => {}} submitting={false} sound={soundMock} />
+        );
+
+        const cell01 = getByRole('button', { name: /Row 1 Column 2/i });
+        fireEvent.click(cell01);
+        fireEvent.click(getByRole('button', { name: '3' })); // 2 > 3 is invalid
+        expect(soundMock.playError).toHaveBeenCalled();
+        expect(container.querySelector('[class*="ineqInvalid"]')).toBeTruthy();
+
+        fireEvent.click(getByRole('button', { name: '1' })); // 2 > 1 is satisfied
+        expect(container.querySelector('[class*="ineqSatisfied"]')).toBeTruthy();
+
+        function SoundHarness() {
+            const s = useSoundEffects();
+            return (
+                <button type="button" onClick={s.toggleSound}>
+                    {s.soundEnabled ? 'SOUND_ON' : 'SOUND_OFF'}
+                </button>
+            );
+        }
+        const { getByText } = render(<SoundHarness />);
+        expect(getByText('SOUND_ON')).toBeTruthy();
+        fireEvent.click(getByText('SOUND_ON'));
+        expect(getByText('SOUND_OFF')).toBeTruthy();
+        expect(localStorage.getItem('fp_arcade_sound_enabled')).toBe('false');
+        expect(() => triggerHaptic(12)).not.toThrow();
     });
 });
