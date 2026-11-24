@@ -6,7 +6,7 @@ namespace App\controller\members;
 
 use App\controller\BaseController;
 use App\services\TwoTruthsGameService;
-use Src\{CheckToken, CorsHandler, Limiter};
+use Src\{CheckToken, CorsHandler, Db, Limiter};
 
 /**
  * TwoTruthsGameController
@@ -51,7 +51,7 @@ final class TwoTruthsGameController extends BaseController
             Limiter::limit($userId . ':two_truths_get');
             \releaseSessionLock();
 
-            $userName = trim((string)(($_SESSION['firstName'] ?? '') . ' ' . ($_SESSION['lastName'] ?? '')));
+            $userName = self::resolveSessionName(Db::connect2())['fullName'];
 
             // Fetch active game or seed starter game if none exists
             $game = TwoTruthsGameService::ensureStarterGameIfEmpty($familyCode, $userId, $userName);
@@ -114,7 +114,7 @@ final class TwoTruthsGameController extends BaseController
                 return;
             }
 
-            $userName = trim((string)(($_SESSION['firstName'] ?? '') . ' ' . ($_SESSION['lastName'] ?? '')));
+            $userName = self::resolveSessionName(Db::connect2())['fullName'];
 
             $result = TwoTruthsGameService::castVote(
                 gameId: $gameId,
@@ -168,7 +168,7 @@ final class TwoTruthsGameController extends BaseController
                 return;
             }
 
-            $userName = trim((string)(($_SESSION['firstName'] ?? '') . ' ' . ($_SESSION['lastName'] ?? '')));
+            $userName = self::resolveSessionName(Db::connect2())['fullName'];
 
             $result = TwoTruthsGameService::createGame(
                 famCode: $familyCode,

@@ -10,6 +10,7 @@
 
 <!-- Navbar -->
 @include('layouts.nav')
+@include('partials.seasonal-theme-chrome')
 
 @yield('content')
 

@@ -41,6 +41,22 @@
           <template x-if="getPostStageMeta(post).category === 'scenic'">
             <div class="fp-text-stage__bokeh" aria-hidden="true"></div>
           </template>
+          <template x-if="(post.post_style || getPostStageMeta(post).slug) === 'solar_galaxy'">
+            <div class="fp-cosmos-orrery" aria-hidden="true">
+              <div class="fp-cosmos-galaxy fp-cosmos-galaxy--primary"></div>
+              <div class="fp-cosmos-galaxy fp-cosmos-galaxy--distant"></div>
+              <div class="fp-cosmos-comet"></div>
+              <div class="fp-cosmos-system">
+                <div class="fp-cosmos-sun"></div>
+                <div class="fp-cosmos-orbit fp-cosmos-orbit--1"><div class="fp-cosmos-planet fp-cosmos-planet--mercury"></div></div>
+                <div class="fp-cosmos-orbit fp-cosmos-orbit--2"><div class="fp-cosmos-planet fp-cosmos-planet--venus"></div></div>
+                <div class="fp-cosmos-orbit fp-cosmos-orbit--3"><div class="fp-cosmos-planet fp-cosmos-planet--earth"><div class="fp-cosmos-moon-orbit"><div class="fp-cosmos-moon"></div></div></div></div>
+                <div class="fp-cosmos-orbit fp-cosmos-orbit--4"><div class="fp-cosmos-planet fp-cosmos-planet--mars"></div></div>
+                <div class="fp-cosmos-orbit fp-cosmos-orbit--5"><div class="fp-cosmos-planet fp-cosmos-planet--saturn"><div class="fp-cosmos-saturn-ring"></div></div></div>
+                <div class="fp-cosmos-orbit fp-cosmos-orbit--6"><div class="fp-cosmos-planet fp-cosmos-planet--neptune"></div></div>
+              </div>
+            </div>
+          </template>
           <template x-if="getPostStageMeta(post).category !== 'scenic'">
             <div class="fp-text-stage__grid" aria-hidden="true"></div>
           </template>

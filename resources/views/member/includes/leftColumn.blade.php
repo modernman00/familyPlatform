@@ -119,8 +119,8 @@
             </p>
 
             <!-- Family Code Headline & Tonal Pill(s) (Headline with Married - XXX and Birth - XXX badges) -->
-            <div class="family-code-container d-flex flex-column align-items-center gap-2 mb-3 w-100" style="background:#faf6f0;border:1px solid #e6dfd5;border-radius:14px;padding:10px 14px;margin-bottom:1rem !important;" id="leftColumnDualFamilyCodes" role="group" aria-label="{{ __('profile.family_codes', 'Married and Birth Family Codes') }}">
-                <span class="family-code-headline text-uppercase fw-bold mb-1.5" style="font-size: 0.72rem; letter-spacing: 0.08em; color: var(--text-muted, #64748b);">
+            <div class="family-code-container d-flex flex-column align-items-center gap-1 mb-2 w-100" style="background:#faf6f0;border:1px solid #e6dfd5;border-radius:14px;padding:8px 12px;" id="leftColumnDualFamilyCodes" role="group" aria-label="{{ __('profile.family_codes', 'Married and Birth Family Codes') }}">
+                <span class="family-code-headline text-uppercase fw-bold mb-1" style="font-size: 0.72rem; letter-spacing: 0.08em; color: var(--text-muted, #64748b);">
                     <i class="bi bi-qr-code me-1 opacity-75"></i>{{ $leftMarriedCode !== '' ? __('profile.family_codes_headline', 'Family Codes') : __('profile.family_code_headline', 'Family Code') }}
                 </span>
                 <div class="d-flex flex-row flex-wrap justify-content-center align-items-center gap-1.5 w-100">
@@ -151,7 +151,7 @@
                     ? \App\services\KinWhisperService::getUnreadWhisperCount((string)$_SESSION['id'])
                     : 0;
             @endphp
-            <div class="w-100 px-2 mb-4" style="margin-bottom:1.5rem !important;" id="leftColumnKinWhispersPortal">
+            <div class="w-100 px-2 mb-2" id="leftColumnKinWhispersPortal">
                 <a href="/kin-whispers" class="btn w-100 d-inline-flex align-items-center justify-content-between text-decoration-none position-relative shadow-sm"
                    style="background: linear-gradient(135deg, #8b121c 0%, #a31621 60%, #be202e 100%); color: #ffffff !important; border: 1.5px solid rgba(212, 175, 55, 0.75); border-radius: 12px; padding: 10px 14px; min-height: 44px; white-space: nowrap; flex-shrink: 0; box-shadow: 0 4px 14px rgba(163, 22, 33, 0.28); transition: transform 0.15s ease, box-shadow 0.15s ease;"
                    title="{{ __('nav.whisper', 'FamChat — Private, artifact-anchored family messages and voice dedications') }}">
@@ -173,7 +173,7 @@
             </div>
 
             {{-- Always-available Profile Tour Trigger (visible on all viewports & states) --}}
-            <div class="w-100 px-2 mb-3">
+            <div class="w-100 px-2 mb-2">
                 <button type="button"
                         id="profileTourCardBtn"
                         data-profile-tour-trigger="true"

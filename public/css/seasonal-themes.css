@@ -1,0 +1,452 @@
+/*
+ * FamilyPlatform Multi-Festival Dynamic Seasonal Design System (v2.0)
+ * - Supports Christmas, New Year, Lunar New Year, Valentine's Day, Mother's Day,
+ *   Easter, Father's Day, Eid al-Fitr, Eid al-Adha, and Diwali.
+ * - Strictly honours WCAG AA (4.5:1+), Red Surface Rule, 44x44px tap targets, and prefers-reduced-motion.
+ */
+
+/* ==========================================================================
+   1. CHRISTMAS TOKEN OVERRIDES (20 Nov - 30 Dec)
+   ========================================================================== */
+html[data-seasonal-theme="christmas"]:not([data-seasonal-opt-out="1"]) {
+  --canvas-ground: #faf8f5;
+  --surface-bg: #faf8f5;
+  --surface-secondary: #f5f2ec;
+  --border-subtle: rgba(20, 83, 45, 0.11);
+  --brand-primary: #991b1b;
+  --brand-primary-hover: #7f1d1d;
+  --brand-primary-rgb: 153, 27, 27;
+  --brand-primary-glow: rgba(153, 27, 27, 0.18);
+  --brand-primary-gradient: linear-gradient(135deg, #991b1b 0%, #7f1d1d 100%);
+  --accent-gold: #d4af37;
+  --accent-gold-light: #fef3c7;
+  --seasonal-garland-gradient: linear-gradient(90deg, #991b1b 0%, #d4af37 35%, #14532d 68%, #991b1b 100%);
+  --seasonal-ribbon-bg: linear-gradient(135deg, #7f1d1d 0%, #991b1b 52%, #14532d 100%);
+  --seasonal-ribbon-border: rgba(212, 175, 55, 0.45);
+  --seasonal-ribbon-text: #ffffff;
+  --seasonal-ribbon-subtext: #fef3c7;
+  --seasonal-pill-bg: rgba(255, 255, 255, 0.16);
+  --seasonal-pill-bg-hover: rgba(255, 255, 255, 0.26);
+  --seasonal-pill-border: rgba(254, 243, 199, 0.35);
+}
+
+html[data-seasonal-theme="christmas"]:not([data-seasonal-opt-out="1"]).dark,
+html[data-seasonal-theme="christmas"]:not([data-seasonal-opt-out="1"]).dark-mode,
+html[data-seasonal-theme="christmas"]:not([data-seasonal-opt-out="1"]) body.dark-mode:not(.public-layout):not([data-surface="light"]) {
+  --canvas-ground: #060a0f;
+  --surface-card: #101720;
+  --surface-elevated: #182230;
+  --card-bg: #101720;
+  --card: #101720;
+  --border-subtle: rgba(212, 175, 55, 0.18);
+  --brand-primary: #fb7185;
+  --brand-primary-hover: #fda4af;
+  --brand-primary-rgb: 251, 113, 133;
+  --seasonal-ribbon-bg: linear-gradient(135deg, #450a0a 0%, #7f1d1d 55%, #052e16 100%);
+  --seasonal-ribbon-border: rgba(251, 191, 36, 0.42);
+}
+
+/* ==========================================================================
+   2. NEW YEAR TOKEN OVERRIDES (31 Dec - 2 Jan)
+   ========================================================================== */
+html[data-seasonal-theme="new_year"]:not([data-seasonal-opt-out="1"]) {
+  --canvas-ground: #fbfaf6;
+  --surface-bg: #fbfaf6;
+  --surface-secondary: #f4f1ea;
+  --border-subtle: rgba(30, 27, 75, 0.11);
+  --brand-primary: #1e1b4b;
+  --brand-primary-hover: #312e81;
+  --brand-primary-rgb: 30, 27, 75;
+  --brand-primary-glow: rgba(212, 175, 55, 0.24);
+  --brand-primary-gradient: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+  --accent-gold: #d97706;
+  --accent-gold-light: #fef3c7;
+  --seasonal-garland-gradient: linear-gradient(90deg, #1e1b4b 0%, #fbbf24 40%, #312e81 72%, #d97706 100%);
+  --seasonal-ribbon-bg: linear-gradient(135deg, #0f172a 0%, #1e1b4b 56%, #4338ca 100%);
+  --seasonal-ribbon-border: rgba(251, 191, 36, 0.55);
+  --seasonal-ribbon-text: #ffffff;
+  --seasonal-ribbon-subtext: #fde68a;
+  --seasonal-pill-bg: rgba(255, 255, 255, 0.14);
+  --seasonal-pill-bg-hover: rgba(255, 255, 255, 0.24);
+  --seasonal-pill-border: rgba(253, 230, 138, 0.4);
+}
+
+html[data-seasonal-theme="new_year"]:not([data-seasonal-opt-out="1"]).dark,
+html[data-seasonal-theme="new_year"]:not([data-seasonal-opt-out="1"]).dark-mode,
+html[data-seasonal-theme="new_year"]:not([data-seasonal-opt-out="1"]) body.dark-mode:not(.public-layout):not([data-surface="light"]) {
+  --canvas-ground: #050612;
+  --surface-card: #0e1124;
+  --surface-elevated: #171c38;
+  --card-bg: #0e1124;
+  --card: #0e1124;
+  --border-subtle: rgba(251, 191, 36, 0.2);
+  --brand-primary: #fbbf24;
+  --brand-primary-hover: #fcd34d;
+  --brand-primary-rgb: 251, 191, 36;
+  --seasonal-ribbon-bg: linear-gradient(135deg, #090b1a 0%, #1e1b4b 60%, #312e81 100%);
+  --seasonal-ribbon-border: rgba(251, 191, 36, 0.5);
+}
+
+/* ==========================================================================
+   3. MAJOR FESTIVALS TOKEN OVERRIDES (2-3 Day Windows)
+   ========================================================================== */
+/* Lunar New Year: Imperial Vermilion & Gold */
+html[data-seasonal-theme="lunar_new_year"]:not([data-seasonal-opt-out="1"]) {
+  --canvas-ground: #fdf9f3;
+  --surface-bg: #fdf9f3;
+  --brand-primary: #b91c1c;
+  --brand-primary-hover: #991b1b;
+  --seasonal-garland-gradient: linear-gradient(90deg, #b91c1c 0%, #fbbf24 50%, #991b1b 100%);
+  --seasonal-ribbon-bg: linear-gradient(135deg, #991b1b 0%, #b91c1c 58%, #b45309 100%);
+  --seasonal-ribbon-border: rgba(251, 191, 36, 0.55);
+  --seasonal-ribbon-text: #ffffff;
+  --seasonal-ribbon-subtext: #fef3c7;
+  --seasonal-pill-bg: rgba(255, 255, 255, 0.16);
+  --seasonal-pill-bg-hover: rgba(255, 255, 255, 0.26);
+  --seasonal-pill-border: rgba(254, 243, 199, 0.4);
+}
+
+/* Valentine's Day & Mother's Day: Rose & Champagne */
+html[data-seasonal-theme="valentines"]:not([data-seasonal-opt-out="1"]),
+html[data-seasonal-theme="mothers_day"]:not([data-seasonal-opt-out="1"]) {
+  --canvas-ground: #fdf7f9;
+  --surface-bg: #fdf7f9;
+  --brand-primary: #be123c;
+  --brand-primary-hover: #9f1239;
+  --seasonal-garland-gradient: linear-gradient(90deg, #be123c 0%, #f472b6 50%, #9d174d 100%);
+  --seasonal-ribbon-bg: linear-gradient(135deg, #881337 0%, #be123c 55%, #9d174d 100%);
+  --seasonal-ribbon-border: rgba(251, 207, 232, 0.45);
+  --seasonal-ribbon-text: #ffffff;
+  --seasonal-ribbon-subtext: #fce7f3;
+  --seasonal-pill-bg: rgba(255, 255, 255, 0.16);
+  --seasonal-pill-bg-hover: rgba(255, 255, 255, 0.26);
+  --seasonal-pill-border: rgba(252, 231, 243, 0.4);
+}
+
+/* Easter: Spring Lavender, Sage & Gold */
+html[data-seasonal-theme="easter"]:not([data-seasonal-opt-out="1"]) {
+  --canvas-ground: #f9f8fc;
+  --surface-bg: #f9f8fc;
+  --brand-primary: #6d28d9;
+  --brand-primary-hover: #5b21b6;
+  --seasonal-garland-gradient: linear-gradient(90deg, #6d28d9 0%, #10b981 50%, #f59e0b 100%);
+  --seasonal-ribbon-bg: linear-gradient(135deg, #4c1d95 0%, #6d28d9 58%, #047857 100%);
+  --seasonal-ribbon-border: rgba(253, 230, 138, 0.45);
+  --seasonal-ribbon-text: #ffffff;
+  --seasonal-ribbon-subtext: #fef3c7;
+  --seasonal-pill-bg: rgba(255, 255, 255, 0.16);
+  --seasonal-pill-bg-hover: rgba(255, 255, 255, 0.26);
+  --seasonal-pill-border: rgba(254, 243, 199, 0.4);
+}
+
+/* Father's Day: Heritage Navy & Emerald */
+html[data-seasonal-theme="fathers_day"]:not([data-seasonal-opt-out="1"]) {
+  --canvas-ground: #f6f8fc;
+  --surface-bg: #f6f8fc;
+  --brand-primary: #1e3a8a;
+  --brand-primary-hover: #1e40af;
+  --seasonal-garland-gradient: linear-gradient(90deg, #1e3a8a 0%, #0f766e 50%, #d97706 100%);
+  --seasonal-ribbon-bg: linear-gradient(135deg, #172554 0%, #1e3a8a 58%, #0f766e 100%);
+  --seasonal-ribbon-border: rgba(253, 230, 138, 0.45);
+  --seasonal-ribbon-text: #ffffff;
+  --seasonal-ribbon-subtext: #fef3c7;
+  --seasonal-pill-bg: rgba(255, 255, 255, 0.16);
+  --seasonal-pill-bg-hover: rgba(255, 255, 255, 0.26);
+  --seasonal-pill-border: rgba(254, 243, 199, 0.4);
+}
+
+/* Eid al-Fitr & Eid al-Adha: Emerald, Teal & Champagne Gold */
+html[data-seasonal-theme="eid_fitr"]:not([data-seasonal-opt-out="1"]),
+html[data-seasonal-theme="eid_adha"]:not([data-seasonal-opt-out="1"]) {
+  --canvas-ground: #f5faf7;
+  --surface-bg: #f5faf7;
+  --brand-primary: #065f46;
+  --brand-primary-hover: #064e3b;
+  --seasonal-garland-gradient: linear-gradient(90deg, #065f46 0%, #fbbf24 50%, #0f766e 100%);
+  --seasonal-ribbon-bg: linear-gradient(135deg, #022c22 0%, #065f46 56%, #0f766e 100%);
+  --seasonal-ribbon-border: rgba(251, 191, 36, 0.5);
+  --seasonal-ribbon-text: #ffffff;
+  --seasonal-ribbon-subtext: #fef3c7;
+  --seasonal-pill-bg: rgba(255, 255, 255, 0.16);
+  --seasonal-pill-bg-hover: rgba(255, 255, 255, 0.26);
+  --seasonal-pill-border: rgba(254, 243, 199, 0.4);
+}
+
+/* Diwali: Deep Plum, Saffron & Marigold Gold */
+html[data-seasonal-theme="diwali"]:not([data-seasonal-opt-out="1"]) {
+  --canvas-ground: #fcf8f3;
+  --surface-bg: #fcf8f3;
+  --brand-primary: #7c2d12;
+  --brand-primary-hover: #9a3412;
+  --seasonal-garland-gradient: linear-gradient(90deg, #581c87 0%, #f59e0b 50%, #9a3412 100%);
+  --seasonal-ribbon-bg: linear-gradient(135deg, #3b0764 0%, #581c87 52%, #9a3412 100%);
+  --seasonal-ribbon-border: rgba(251, 191, 36, 0.55);
+  --seasonal-ribbon-text: #ffffff;
+  --seasonal-ribbon-subtext: #fde68a;
+  --seasonal-pill-bg: rgba(255, 255, 255, 0.16);
+  --seasonal-pill-bg-hover: rgba(255, 255, 255, 0.26);
+  --seasonal-pill-border: rgba(253, 230, 138, 0.45);
+}
+
+/* ==========================================================================
+   4. SHARED CHROME, TOP GARLAND HAIRLINE & CONTRAST GUARDS
+   ========================================================================== */
+html[data-seasonal-theme]:not([data-seasonal-theme="standard"]):not([data-seasonal-opt-out="1"]) body {
+  background-color: var(--canvas-ground);
+}
+
+html[data-seasonal-theme]:not([data-seasonal-theme="standard"]):not([data-seasonal-opt-out="1"]) .doc-center-header h1 {
+  color: #ffffff;
+}
+
+html[data-seasonal-theme]:not([data-seasonal-theme="standard"]):not([data-seasonal-opt-out="1"]) .brand-navbar-stitch,
+html[data-seasonal-theme]:not([data-seasonal-theme="standard"]):not([data-seasonal-opt-out="1"]) .public-navbar {
+  border-top: 3px solid transparent;
+  background-image: linear-gradient(var(--nav-frosted-bg, rgba(255, 255, 255, 0.9)), var(--nav-frosted-bg, rgba(255, 255, 255, 0.9))),
+    var(--seasonal-garland-gradient);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+html[data-seasonal-theme]:not([data-seasonal-theme="standard"]):not([data-seasonal-opt-out="1"]) body.dark-mode .brand-navbar-stitch {
+  background-image: linear-gradient(rgba(16, 23, 32, 0.92), rgba(16, 23, 32, 0.92)),
+    var(--seasonal-garland-gradient);
+}
+
+/* ==========================================================================
+   5. SEASONAL RIBBON & ACCESSIBLE USER CONTROLS
+   ========================================================================== */
+.seasonal-ribbon-wrap {
+  width: 100%;
+  padding: 8px 16px 0;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 20;
+}
+
+.seasonal-ribbon {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 12px 14px 10px;
+  border-radius: 14px;
+  background: var(--seasonal-ribbon-bg);
+  border: 1px solid var(--seasonal-ribbon-border);
+  color: var(--seasonal-ribbon-text);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 26px -10px rgba(15, 23, 42, 0.38);
+}
+
+.seasonal-fairy-lights {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 16px;
+  pointer-events: none;
+}
+
+.seasonal-fairy-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  animation: seasonal-fairy-glow 3.2s ease-in-out infinite;
+}
+
+.seasonal-fairy-dot:nth-child(even) {
+  animation-delay: 1.6s;
+}
+
+.seasonal-fairy-dot--gold {
+  background: #fde047;
+  box-shadow: 0 0 8px 1px rgba(253, 224, 71, 0.85);
+}
+
+.seasonal-fairy-dot--crimson {
+  background: #fca5a5;
+  box-shadow: 0 0 8px 1px rgba(248, 113, 113, 0.85);
+}
+
+.seasonal-fairy-dot--pine {
+  background: #86efac;
+  box-shadow: 0 0 8px 1px rgba(74, 222, 128, 0.85);
+}
+
+@keyframes seasonal-fairy-glow {
+  0%, 100% { opacity: 0.45; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+.seasonal-ribbon__identity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1 1 240px;
+}
+
+.seasonal-ribbon__icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.16);
+  color: var(--seasonal-ribbon-subtext);
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.seasonal-ribbon__copy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  min-width: 0;
+}
+
+.seasonal-ribbon__title {
+  font-weight: 700;
+  font-size: 0.9rem;
+  line-height: 1.3;
+  color: #ffffff;
+}
+
+.seasonal-ribbon__sub {
+  font-size: 0.8rem;
+  line-height: 1.35;
+  color: var(--seasonal-ribbon-subtext);
+}
+
+.seasonal-ribbon__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.seasonal-ribbon__btn {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 12px;
+  border-radius: 9999px;
+  border: 1px solid var(--seasonal-pill-border);
+  background: var(--seasonal-pill-bg);
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: background-color 150ms ease, transform 120ms ease;
+}
+
+.seasonal-ribbon__btn:hover {
+  background: var(--seasonal-pill-bg-hover);
+  color: #ffffff;
+}
+
+.seasonal-ribbon__btn:active {
+  transform: scale(0.98);
+}
+
+.seasonal-ribbon__btn:focus-visible,
+.seasonal-restore-pill:focus-visible {
+  outline: 2px solid #fef3c7;
+  outline-offset: 2px;
+}
+
+.seasonal-ribbon__btn--icon {
+  padding: 0;
+  width: 44px;
+}
+
+.seasonal-restore-wrap {
+  position: fixed;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  left: 16px;
+  z-index: 1020;
+}
+
+.seasonal-restore-pill {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 14px;
+  border-radius: 9999px;
+  border: 1px solid rgba(212, 175, 55, 0.5);
+  background: #1e293b;
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   6. AMBIENT PARTICLE CANVAS & REDUCED-MOTION GUARDS
+   ========================================================================== */
+#seasonalAmbientCanvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 990;
+  opacity: 0.82;
+}
+
+html[data-seasonal-opt-out="1"] #seasonalAmbientCanvas,
+html[data-seasonal-fx="off"] #seasonalAmbientCanvas,
+html[data-seasonal-theme="standard"] #seasonalAmbientCanvas {
+  display: none !important;
+}
+
+html[data-seasonal-opt-out="1"] #seasonalRibbonWrap,
+html[data-seasonal-dismissed="1"] #seasonalRibbonWrap {
+  display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #seasonalAmbientCanvas {
+    display: none !important;
+  }
+  .seasonal-fairy-dot {
+    animation: none !important;
+  }
+  .seasonal-ribbon__btn {
+    transition: none;
+  }
+}
+
+@media (max-width: 576px) {
+  .seasonal-ribbon-wrap {
+    padding: 8px 10px 0;
+  }
+  .seasonal-ribbon {
+    padding: 12px 10px 8px;
+  }
+  .seasonal-restore-wrap {
+    bottom: calc(74px + env(safe-area-inset-bottom, 0px));
+    left: 10px;
+  }
+}

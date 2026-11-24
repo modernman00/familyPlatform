@@ -346,7 +346,7 @@ final class FamilyArcadeTest extends TestCase
         $postNo = (int) ($json['postNo'] ?? 0);
         $this->assertGreaterThan(0, $postNo);
 
-        $stmt = $this->db->prepare('SELECT post_no, id, postFamCode, post_status, post_time, date_deleted, postMessage FROM post WHERE post_no = ? LIMIT 1');
+        $stmt = $this->db->prepare('SELECT post_no, id, fullName, postFamCode, post_status, post_time, date_deleted, postMessage FROM post WHERE post_no = ? LIMIT 1');
         $stmt->execute([$postNo]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -354,6 +354,29 @@ final class FamilyArcadeTest extends TestCase
         $this->assertSame('published', $row['post_status']);
         $this->assertNull($row['date_deleted']);
         $this->assertSame($this->testFamCode, $row['postFamCode']);
+        $this->assertNotSame($this->userA, $row['fullName']);
         $this->assertStringContainsString('1132 pts in KinWord', (string) $row['postMessage']);
+    }
+
+    public function testPostDtoNeverExposesRawUserIdAsAuthorName(): void
+    {
+        $dtoWithPersonal = \App\dto\PostDto::fromDatabaseRow([
+            'post_no' => 999999,
+            'id' => '318422WALLY',
+            'fullName' => '318422WALLY',
+            'personalFullName' => 'Wally Olaogun',
+            'postMessage' => 'Test arcade post',
+            'postFamCode' => $this->testFamCode,
+        ]);
+        $this->assertSame('Wally Olaogun', $dtoWithPersonal->fullName);
+
+        $dtoWithoutPersonal = \App\dto\PostDto::fromDatabaseRow([
+            'post_no' => 999998,
+            'id' => '318422WALLY',
+            'fullName' => '318422WALLY',
+            'postMessage' => 'Test arcade post',
+            'postFamCode' => $this->testFamCode,
+        ]);
+        $this->assertSame('Family Member', $dtoWithoutPersonal->fullName);
     }
 }

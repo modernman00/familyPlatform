@@ -109,6 +109,7 @@
   <noscript><link rel="stylesheet" href="/public/css/outfit.css?v={{ assetVersion('css/outfit.css') }}"></noscript>
   <link href="/public/css/landing.css" rel="stylesheet">
   <link href="/public/css/standards-v21.css?v={{ assetVersion('css/standards-v21.css') }}" rel="stylesheet">
+  @include('partials.seasonal-theme-head')
   <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js" integrity="sha384-kW+oWsYx3YpxvjtZjFXqazFpA7UP/MbiY4jvs+RWZo2+N94PFZ36T6TFkc9O3qoB" crossorigin="anonymous"></script>
   
 @if(($_ENV['APP_ENV'] ?? '') !== 'local')
@@ -230,6 +231,7 @@
   @include('includes.public_nav')
 
   <div class="content-wrapper" style="padding-top: calc(80px + env(safe-area-inset-top, 0px));">
+    @include('partials.seasonal-theme-chrome')
     @yield('content')
   </div>
 

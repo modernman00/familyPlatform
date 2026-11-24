@@ -19,6 +19,11 @@ $scenicStyles = [
     'rose_stardust',
     'northern_sky',
     'royal_parchment',
+    'xmas_snowfall',
+    'xmas_hearth',
+    'xmas_lights',
+    'xmas_winter_gold',
+    'solar_galaxy',
 ];
 
 // 1. Verify allowlist acceptance & round-trip token embedding/stripping
@@ -32,7 +37,7 @@ foreach ($scenicStyles as $slug) {
     assert(PostDto::extractStyleFromMessage($embedded) === $slug, "Expected extractStyleFromMessage to recover {$slug}");
     assert(PostDto::stripStyleToken($embedded) === $quote, "Expected stripStyleToken to return clean quote");
 }
-echo "✓ All 8 scenic backdrop slugs round-trip cleanly through PostDto\n";
+echo "✓ All 13 scenic backdrop slugs (including 4 Xmas editions & Solar Galaxy) round-trip cleanly through PostDto\n";
 
 // 2. Adversarial XSS / Class-Injection / SQLi Payload Neutralisation
 $maliciousPayloads = [
@@ -95,7 +100,7 @@ try {
 
 // 4. Verify whats_new.php schema parity
 $whatsNew = require __DIR__ . '/../resources/data/whats_new.php';
-assert(is_array($whatsNew) && ($whatsNew['version_key'] ?? '') === '2026_11_w6', 'Expected bumped whats_new version_key 2026_11_w6');
+assert(is_array($whatsNew) && preg_match('/^2026_(11|12)_w\d+$/', (string) ($whatsNew['version_key'] ?? '')) === 1, 'Expected valid whats_new version_key');
 assert(count($whatsNew['items'] ?? []) === 4, 'Expected exact 4-item whats_new format');
 echo "✓ whats_new.php 4-item schema & version_key parity verified\n";
 

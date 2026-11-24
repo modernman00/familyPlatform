@@ -108,6 +108,11 @@ No deliverable may be marked complete without providing the **Empirical Proof Ca
     - Before designing, proposing, or implementing **any** video, image, photo, poster, canvas, audio, or media feature, the agent **MUST** inspect all existing capabilities in `shared-js-lib` (`SovereignNleEngine.js`, `SovereignNleWorkspace.js`, `SovereignVideoStudioClient.js`, `AtgUniversalPosterEngine.js`, `CardCanvasGenerator.js`, `HyperReality3DEngine.js`, `LivingHeirloomAnimator.js`, `WebRtcPhotoboothMesh.js`, `VisualSupremacyRuntime.js`, `data/studio_how_to_use.json`) and `shared-lib` (`src/Media/SovereignVideoJobHandler.php`, `src/Media/SovereignMediaEngine.php`, `src/Media/UniversalPosterStudioController.php`, `src/Media/UniversalPosterSynthesisService.php`, `src/Media/ShortsAndDubbingEngine.php`, `src/Media/R2StorageService.php`, `src/Explainer/SovereignVideoRenderer.php`).
     - Reuse, extend, and surface existing shared-library primitives instead of duplicating media/canvas logic inside app-local Blade views or controllers, and sync updates across all consuming apps.
     - Never use robotic browser `speechSynthesis` / `SpeechSynthesisUtterance` voiceovers; use on-screen captions paired with deterministic Web Audio motion SFX (`synthesiseMotionSfx()`).
+16. **Graphify-First Architecture & Precedent Lookup (Tier 2 & Tier 3)**:
+    - Before running broad codebase searches (`rg`/`grep`) or reading multiple files during Stage 2 (Deep Researcher) or blast-radius/ripple-effect reviews, check if `graphify-out/` exists.
+    - **When `graphify-out/` exists:** Activate the `graphify` skill (or read `graphify-out/GRAPH_REPORT.md` and `graphify-out/wiki/index.md`) first to locate God nodes, shared-lib precedents, and cross-module dependencies—then read only the specific target files needed for the edit.
+    - **When to skip:** Do NOT invoke Graphify for Tier 1 single-file/copy fixes or when debugging runtime/test/gate failures (`autonomous_gate.sh`, `preflight.sh`, Playwright).
+    - **Keep it current:** If `graphify-out/` is missing or stale after major structural changes, run `graphify update . && graphify export wiki` (or rely on the installed `post-commit` hook).
 
 ### 🚨 Critical Defensive Traps & Fatal Patterns
 - **Trap A: PHP `readonly` Constructor Trap (PHP 8.1+)**:

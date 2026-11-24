@@ -689,13 +689,13 @@ body.dark-theme :is(.public-layout, [data-surface="light"], .surface-light, .sti
 }
 
 /* 🛡️ Inviolable Contrast Safeguard: Prevent dark-on-dark & dark-on-red in .public-layout dark/accent surfaces */
-:is(body, html) :is(.public-layout, [data-surface="light"], .surface-light) :is(.text-white, [data-surface="dark"], .surface-dark, .bg-dark, .bg-danger, header[style*="linear-gradient"]:not([data-surface="light"]), section[style*="linear-gradient"]:not([data-surface="light"]):not(.bg-white), div[style*="linear-gradient"]:not([data-surface="light"]):not(.bg-white), .card[style*="linear-gradient"]:not([data-surface="light"]):not(.bg-white)) :is(h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6, .feature-title, .stitch-title),
+:is(body, html) :is(.public-layout, [data-surface="light"], .surface-light) :is(.text-white, [data-surface="dark"], .surface-dark, .bg-dark, .bg-danger, .doc-center-header, header[style*="linear-gradient"]:not([data-surface="light"]), section[style*="linear-gradient"]:not([data-surface="light"]):not(.bg-white), div[style*="linear-gradient"]:not([data-surface="light"]):not(.bg-white), .card[style*="linear-gradient"]:not([data-surface="light"]):not(.bg-white)) :is(h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6, .feature-title, .stitch-title),
 :is(body, html) :is(.public-layout, [data-surface="light"], .surface-light) :is(h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6, .feature-title, .stitch-title):is(.text-white, [style*="color: #ffffff"], [style*="color: rgb(255, 255, 255)"], [style*="color: #fff"]) {
   color: #ffffff !important;
 }
 
-:is(body, html) :is(.public-layout, [data-surface="light"], .surface-light) :is(.text-white, [data-surface="dark"], .surface-dark, .bg-dark, .bg-danger, section[style*="linear-gradient"]:not([data-surface="light"]):not(.bg-white), div[style*="linear-gradient"]:not([data-surface="light"]):not(.bg-white), .card[style*="linear-gradient"]:not([data-surface="light"]):not(.bg-white)) :is(.text-muted, .text-secondary, p:not(.text-dark)) {
-  color: rgba(255, 255, 255, 0.9) !important;
+:is(body, html) :is(.public-layout, [data-surface="light"], .surface-light) :is(.text-white, [data-surface="dark"], .surface-dark, .bg-dark, .bg-danger, .doc-center-header, section[style*="linear-gradient"]:not([data-surface="light"]):not(.bg-white), div[style*="linear-gradient"]:not([data-surface="light"]):not(.bg-white), .card[style*="linear-gradient"]:not([data-surface="light"]):not(.bg-white)) :is(.text-muted, .text-secondary, .text-white-50, p:not(.text-dark)) {
+  color: rgba(255, 255, 255, 0.92) !important;
 }
 
 /* Dark-Mode Tabs, Nav Pills & Secondary Buttons */
@@ -2705,7 +2705,7 @@ body.dark-mode .mention-autocomplete__item--active,
     background: linear-gradient(135deg, rgba(163, 22, 33, 0.05) 0%, rgba(225, 29, 72, 0.06) 50%, rgba(245, 158, 11, 0.08) 100%);
     border: 1px solid rgba(163, 22, 33, 0.15);
     border-radius: 16px;
-    padding: 12px 10px !important;
+    padding: 8px 10px !important;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
   }
   body.dark-mode .profile-quick-actions,
@@ -2958,10 +2958,10 @@ body.dark-theme .ig-story-count-badge {
   .feed-post-card .post-media-stage a,
   .feed-post-card .post-media-first-img {
     border-radius: 0 !important;
-    max-height: 600px !important;
+    max-height: 760px !important;
     width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
+    height: auto !important;
+    object-fit: contain !important;
   }
 
   .feed-post-card .feed-video-breakout,

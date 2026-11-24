@@ -1389,8 +1389,8 @@ final class FamilyArcadeService
                     MAX(s.score) AS best_score,
                     MIN(s.elapsed_ms) AS best_time_ms,
                     COUNT(*) AS games_played,
-                    COALESCE(NULLIF(TRIM(CONCAT(COALESCE(p.firstName, ''), ' ', COALESCE(p.lastName, ''))), ''), s.user_id) AS full_name,
-                    COALESCE(p.firstName, s.user_id) AS first_name
+                    COALESCE(NULLIF(TRIM(CONCAT(COALESCE(p.firstName, ''), ' ', COALESCE(p.lastName, ''))), ''), 'Family Member') AS full_name,
+                    COALESCE(NULLIF(TRIM(p.firstName), ''), 'Family Member') AS first_name
              FROM family_arcade_scores s
              LEFT JOIN personal p ON p.id = s.user_id
              WHERE s.fam_code IN (%s)%s
@@ -1658,7 +1658,7 @@ final class FamilyArcadeService
         try {
             $stmt = $db->prepare(
                 "SELECT b.badge_key, b.badge_title, b.user_id, b.score, b.awarded_at,
-                        COALESCE(NULLIF(TRIM(CONCAT(COALESCE(p.firstName, ''), ' ', COALESCE(p.lastName, ''))), ''), b.user_id) AS full_name
+                        COALESCE(NULLIF(TRIM(CONCAT(COALESCE(p.firstName, ''), ' ', COALESCE(p.lastName, ''))), ''), 'Family Member') AS full_name
                  FROM family_arcade_badges b
                  LEFT JOIN personal p ON p.id = b.user_id
                  WHERE b.fam_code = ? AND b.period_key = 'all_time'

@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(milestones): omit age from Family Historian birthday posts",
+    "title": "Test(director-mode): guard shared-js-lib parity check when npm package lags",
     "notes": [
+        "Test(director-mode): guard shared-js-lib parity check when npm package lags",
         "Fix(milestones): omit age from Family Historian birthday posts",
-        "Feat(studio,ui): Super-HD Living Photo & PiP, white theme & navbar polish, and arcade engagement cron",
-        "Test(auth): isolate CSRF session state in FamilyCodeApprovalFlowTest"
+        "Feat(studio,ui): Super-HD Living Photo & PiP, white theme & navbar polish, and arcade engagement cron"
     ],
-    "released_at": "2026-11-23",
-    "commit": "fdb9ba5c"
+    "released_at": "2026-11-24",
+    "commit": "23d3fb71"
 }

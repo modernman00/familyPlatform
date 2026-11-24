@@ -214,17 +214,31 @@ export class AtgLivingPhotoAvatarStage {
   }
 
   async _decodeImage(url) {
-    const img = new Image();
-    img.decoding = 'async';
-    if (/^https?:\/\//i.test(url) && !url.startsWith(window.location.origin)) {
-      img.crossOrigin = 'anonymous';
-    }
-    await new Promise((resolve, reject) => {
-      img.onload = resolve;
+    const loadImg = (src, withCors) => new Promise((resolve, reject) => {
+      const img = new Image();
+      img.decoding = 'async';
+      if (withCors) img.crossOrigin = 'anonymous';
+      img.onload = () => resolve(img);
       img.onerror = reject;
-      img.src = url;
+      img.src = src;
     });
-    return img;
+
+    const isCrossOrigin = typeof window !== 'undefined'
+      && /^https?:\/\//i.test(url)
+      && !url.startsWith(window.location.origin);
+
+    if (!isCrossOrigin) {
+      return loadImg(url, false);
+    }
+
+    // Use <img> (governed by img-src, avoiding connect-src CSP errors from fetch()).
+    // Try anonymous CORS first for clean canvas export, then fall back to non-CORS
+    // so the 60fps canvas animation still renders if the host/cache lacks CORS headers.
+    try {
+      return await loadImg(url, true);
+    } catch (_) {
+      return loadImg(url, false);
+    }
   }
 
   async loadPhotoUrl(url) {

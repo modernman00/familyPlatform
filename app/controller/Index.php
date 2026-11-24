@@ -13,7 +13,9 @@ final class Index
             \Src\functionality\SignIn::rehydrateSession();
         }
 
-        $isAdmin = (!empty($_SESSION['auth']['type']) && in_array((string) $_SESSION['auth']['type'], ['admin', 'super_admin'], true));
+        $isAdmin = (!empty($_SESSION['auth']['type'])
+            && in_array((string) $_SESSION['auth']['type'], ['admin', 'super_admin'], true)
+            && !empty($_SESSION['auth']['2fa_passed']));
         if ($isAdmin) {
             redirect(admin_url('/dashboard'));
             return;

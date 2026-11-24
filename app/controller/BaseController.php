@@ -639,6 +639,67 @@ class BaseController
     }
 
     /**
+     * Resolve the signed-in member's display name from session keys (`fName`/`lName`/`fullName`),
+     * with an optional DB lookup fallback to `personal` so raw user IDs never leak into UI or posts.
+     *
+     * @return array{firstName: string, lastName: string, fullName: string}
+     */
+    protected static function resolveSessionName(?\PDO $db = null): array
+    {
+        $userId = trim((string) ($_SESSION['id'] ?? ''));
+        $firstName = trim((string) ($_SESSION['fName'] ?? $_SESSION['firstName'] ?? ''));
+        $lastName = trim((string) ($_SESSION['lName'] ?? $_SESSION['lastName'] ?? ''));
+        $fullName = trim("{$firstName} {$lastName}");
+
+        if ($fullName === '' || ($userId !== '' && strcasecmp($fullName, $userId) === 0)) {
+            $sessionFull = trim((string) ($_SESSION['fullName'] ?? ''));
+            if ($sessionFull !== '' && ($userId === '' || strcasecmp($sessionFull, $userId) !== 0)) {
+                $fullName = $sessionFull;
+                if ($firstName === '') {
+                    $parts = preg_split('/\s+/', $sessionFull, 2) ?: [];
+                    $firstName = (string) ($parts[0] ?? '');
+                    $lastName = $lastName !== '' ? $lastName : (string) ($parts[1] ?? '');
+                }
+            } else {
+                $fullName = '';
+            }
+        }
+
+        if ($fullName === '' && $db !== null && $userId !== '') {
+            try {
+                $stmt = $db->prepare('SELECT firstName, lastName FROM personal WHERE id = ? LIMIT 1');
+                $stmt->execute([$userId]);
+                $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+                if (is_array($row)) {
+                    $firstName = trim((string) ($row['firstName'] ?? ''));
+                    $lastName = trim((string) ($row['lastName'] ?? ''));
+                    $fullName = trim("{$firstName} {$lastName}");
+                    if ($fullName !== '') {
+                        $_SESSION['fName'] = $firstName;
+                        $_SESSION['lName'] = $lastName;
+                        $_SESSION['fullName'] = $fullName;
+                    }
+                }
+            } catch (\Throwable) {
+                // Non-fatal fallback below
+            }
+        }
+
+        if ($fullName === '' || ($userId !== '' && strcasecmp($fullName, $userId) === 0)) {
+            $fullName = 'Family Member';
+        }
+        if ($firstName === '' || ($userId !== '' && strcasecmp($firstName, $userId) === 0)) {
+            $firstName = $fullName;
+        }
+
+        return [
+            'firstName' => $firstName,
+            'lastName' => $lastName,
+            'fullName' => $fullName,
+        ];
+    }
+
+    /**
      * Format main person's data from multiple tables
      * @param array $data
      * @return array

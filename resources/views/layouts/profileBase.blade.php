@@ -173,6 +173,7 @@
        /recaptcha/enterprise/pat. Member pages don't call grecaptcha, so it's removed. --}}
   <link rel="stylesheet" href="/public/css/main.css?v={{ assetVersion('css/main.css') }}">
   <link rel="stylesheet" href="/public/css/standards-v21.css?v={{ assetVersion('css/standards-v21.css') }}">
+  @include('partials.seasonal-theme-head')
   <link rel="preload" href="/public/css/profile-photo-viewer.css?v={{ assetVersion('css/profile-photo-viewer.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <noscript><link rel="stylesheet" href="/public/css/profile-photo-viewer.css?v={{ assetVersion('css/profile-photo-viewer.css') }}"></noscript>
   <link rel="preload" href="/public/css/atg-emoji.css?v={{ assetVersion('css/atg-emoji.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -212,6 +213,7 @@
   @include('partials.pwa-splash')
 
   @include('layouts.navbar')
+  @include('partials.seasonal-theme-chrome')
 
   <main id="main-content" role="main">
     @yield('content')

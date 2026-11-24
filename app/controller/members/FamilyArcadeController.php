@@ -32,11 +32,10 @@ final class FamilyArcadeController extends BaseController
         }
 
         $famCode = (string) ($_SESSION['famCode'] ?? '');
-        $firstName = (string) ($_SESSION['firstName'] ?? '');
-        $lastName = (string) ($_SESSION['lastName'] ?? '');
-        $fullName = trim("{$firstName} {$lastName}") ?: $userId;
-
         $db = Db::connect2();
+        $resolvedName = self::resolveSessionName($db);
+        $firstName = $resolvedName['firstName'];
+        $fullName = $resolvedName['fullName'];
         $dailyDate = date('Y-m-d');
         $dailyGame = FamilyArcadeService::getDailyFeaturedGame($dailyDate);
         $requestedGame = isset($_GET['game']) && is_string($_GET['game'])
@@ -294,7 +293,7 @@ final class FamilyArcadeController extends BaseController
                 $challengeToken,
             ]);
 
-            $playerName = trim((string) (($_SESSION['firstName'] ?? '') . ' ' . ($_SESSION['lastName'] ?? ''))) ?: $userId;
+            $playerName = self::resolveSessionName($db)['fullName'];
             $badgeResult = FamilyArcadeService::updateBadgesAndNotify(
                 $db,
                 $famCode,
@@ -554,9 +553,7 @@ final class FamilyArcadeController extends BaseController
             $stmt->execute([$userId, $progress, $userId, $userId, $userId, $progress, $raceToken, $famCode]);
 
             $famSlug = preg_replace('/[^a-zA-Z0-9_-]/', '', $famCode) ?: 'default';
-            $firstName = trim((string) ($_SESSION['firstName'] ?? ''));
-            $lastName = trim((string) ($_SESSION['lastName'] ?? ''));
-            $fullName = trim("{$firstName} {$lastName}") ?: $userId;
+            $fullName = self::resolveSessionName($db)['fullName'];
             if (class_exists(SovereignBroadcaster::class)) {
                 (new SovereignBroadcaster($db))->trigger(
                     "private-family-{$famSlug}",
@@ -640,7 +637,7 @@ final class FamilyArcadeController extends BaseController
                 default => 'KinZip',
             };
             $secs = round(((int) $scoreRow['elapsed_ms']) / 1000, 1);
-            $fullName = trim((string) (($_SESSION['firstName'] ?? '') . ' ' . ($_SESSION['lastName'] ?? ''))) ?: $userId;
+            $fullName = self::resolveSessionName($db)['fullName'];
             $profileImg = (string) ($_SESSION['profilePics'] ?? '');
             $shareUrl = '/arcade/share/' . $challengeToken;
 

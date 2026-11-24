@@ -22,10 +22,10 @@
  * }
  */
 return [
-    'version_key' => '2026_11_w7',
+    'version_key' => '2026_11_w9',
     'badge' => 'What’s New',
-    'title' => 'Native Instagram Reels, Scenic Backdrops & fresh family updates',
-    'summary' => 'Paste Instagram Reels for native 720p HD playback with clean uncropped posters and real captions, frame quotes over Starlight Bokeh, and play daily games in the Family Arcade.',
+    'title' => 'Dynamic Festive Xmas & New Year Look, Living Backdrops & Family Arcade',
+    'summary' => 'Enjoy our automatic festive Christmas look until 30 December (followed by a champagne New Year celebration from 31 December to 2 January), plus 4 festive Xmas backdrops and daily games.',
     'primary_cta' => [
         'label' => 'Share a Moment',
         'url' => '/profilePage',
@@ -34,14 +34,14 @@ return [
     'playbook_url' => '/playbook',
     'items' => [
         [
-            'title' => 'Native Instagram Reels & Rich Previews',
-            'description' => 'Paste any Instagram Reel or post link to play 720p HD video directly in your feed with clean, uncropped posters and real creator captions.',
-            'icon' => 'bi-play-circle-fill',
-            'color' => '#2563eb',
+            'title' => 'Multi-Festival Dynamic Seasonal Look',
+            'description' => 'FamilyPlatform automatically celebrates major global & family festivals — Christmas (until 30 Dec), New Year (31 Dec–2 Jan), Eid, Diwali, Lunar New Year, Easter, Valentine’s, Mother’s & Father’s Day — with 1-tap Pause FX & Standard Look controls.',
+            'icon' => 'bi-snow2',
+            'color' => '#991b1b',
         ],
         [
-            'title' => 'Scenic Post Backdrops (Starlight & More)',
-            'description' => 'Tap Backdrop (Aa) when posting — or restyle any text post in one tap — with Starlight Bokeh, Golden Fireflies, Sunset Horizon, Enchanted Forest, and Royal Noir.',
+            'title' => 'Living Backdrops, Xmas & Solar Galaxy',
+            'description' => 'Backdrops now animate with twinkling stars, rising fireflies, orbiting Solar System planets & galaxies, plus 4 festive Xmas scenes: Snowfall, Cosy Hearth, Fairy Lights, and Winter Gold.',
             'icon' => 'bi-stars',
             'color' => '#0284c7',
         ],

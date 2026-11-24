@@ -423,6 +423,16 @@
                 <i class="bi bi-wifi-off me-1"></i> Offline Cached Mode
             </div>
 
+            <!-- Mobile Quick-View Pill (1-tap Fit Tree or switch to mobile-friendly Outline) -->
+            <div class="d-flex d-md-none align-items-center gap-2 position-absolute" style="top: 16px; left: 66px; z-index: 105;">
+                <button type="button" class="btn btn-sm d-inline-flex align-items-center gap-1 fw-semibold text-white" onclick="if (window.family && typeof window.family.fit === 'function') window.family.fit('family', null, true);" title="Fit family in screen" style="min-height: 44px; padding: 0 14px; border-radius: 999px; background: rgba(15, 23, 42, 0.88); border: 1px solid rgba(255, 255, 255, 0.22); backdrop-filter: blur(12px); white-space: nowrap; flex-shrink: 0;">
+                    <i class="bi bi-fullscreen-exit" aria-hidden="true"></i><span>Fit</span>
+                </button>
+                <button type="button" class="btn btn-sm d-inline-flex align-items-center gap-1 fw-semibold text-white" onclick="switchTreeViewMode('pedigree')" title="Switch to mobile-friendly Outline view" style="min-height: 44px; padding: 0 14px; border-radius: 999px; background: rgba(15, 23, 42, 0.88); border: 1px solid rgba(245, 158, 11, 0.45); backdrop-filter: blur(12px); white-space: nowrap; flex-shrink: 0;">
+                    <i class="bi bi-list-nested text-warning" aria-hidden="true"></i><span>Outline</span>
+                </button>
+            </div>
+
             <!-- Instructions Guide -->
             <button class="instructions-toggle" id="instructionsToggle" title="View Navigation Guide">
                 <i class="bi bi-question-circle"></i>
@@ -1385,7 +1395,7 @@
 
 @include('member.includes.treeAccessModals')
 @include('component.swalAlert')
-<script src="/public/js/vendor/kinshiptree.js?v=12.0"></script>
+<script src="/public/js/vendor/kinshiptree.js?v=12.1"></script>
 <script nonce="{{ csp_nonce($nonce ?? null) }}">
     window.__ROOT_USER_ID__ = '{{ $data['id'] ?? '' }}';
     window.__LOGGED_IN_USER_ID__ = '{{ $_SESSION['id'] ?? '' }}';
@@ -1813,8 +1823,8 @@
              * ~60% of the node. Sized for mobile (190x290) vs desktop (250x340).
              * ------------------------------------------------------------ */
             const isMobileScreen = window.innerWidth < 768;
-            const NODE_W = isMobileScreen ? 190 : 250;
-            const NODE_H = isMobileScreen ? 290 : 340;
+            const NODE_W = isMobileScreen ? 176 : 250;
+            const NODE_H = isMobileScreen ? 248 : 340;
             const CX = NODE_W / 2;
 
             const initialRootId = String(graphData.root_node_id || getGraphNodeId(window.__ROOT_USER_ID__, '') || (familyTreeNodes[0] ? familyTreeNodes[0].id : ''));

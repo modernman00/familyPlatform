@@ -9,6 +9,7 @@ import {
     normalizePost,
 } from './feedUtils';
 import styles from './FeedShell.module.css';
+import CosmicOrrery from './CosmicOrrery';
 
 const QUICK_EMOJIS = ['❤️', '🎉', '🙏', '😂', '🏡', '✨'];
 
@@ -254,6 +255,7 @@ export function PostComposer({ bootstrap, onOptimisticInsert, onReplaceOptimisti
                         {selectedStyle && files.length === 0 && (
                             <div className="fp-text-stage__bokeh" aria-hidden="true" />
                         )}
+                        {selectedStyle === 'solar_galaxy' && files.length === 0 && <CosmicOrrery />}
                         <textarea
                             ref={composerRef}
                             rows={hasDraft || selectedStyle ? 3 : 1}

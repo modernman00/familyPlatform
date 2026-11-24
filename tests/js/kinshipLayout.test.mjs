@@ -214,4 +214,36 @@ for (let i = 0; i < 300; i++) {
     assert.equal(expandedOut.nodes.some(n => n.id === '70') && expandedOut.nodes.some(n => n.id === '6009'), true, 'In-law branch nodes visible when spouse expanded');
 }
 
-console.log(`kinshipLayout: regression + safety net + multi-union + inlaw-collapse + ${checked} random families OK`);
+// ── Regression: Stepmother (former union, 0 children) + Biological Parents -> Child centering & drop-stem ──
+{
+    const stepmotherCase = {
+        nodes: [
+            { id: 25605, name: 'Yomi Olaogun', gender: 'Male' },
+            { id: 26683, name: 'Emma Dice', gender: 'Female' },
+            { id: 26993, name: 'Iyabo Olaogun', gender: 'Female' },
+            { id: 25604, name: 'Wally Olaogun', gender: 'Other' },
+        ],
+        unions: [
+            { id: 5371, partner_1_id: 25605, partner_2_id: 26683, is_current: 0 },
+            { id: 5471, partner_1_id: 25605, partner_2_id: 26993, is_current: 1 },
+        ],
+        children: [
+            { union_id: 5471, child_id: 25604 },
+        ],
+    };
+    const { engine, out } = layout(stepmotherCase, 25604);
+    assertInvariants(stepmotherCase, out, engine, 'stepmother-centering');
+    const byId = new Map(out.nodes.map(n => [String(n.id), n]));
+    const yomi = byId.get('25605');
+    const iyabo = byId.get('26993');
+    const wally = byId.get('25604');
+    const bioMidX = (Math.min(yomi.x, iyabo.x) + Math.max(yomi.x, iyabo.x) + engine.nodeWidth) / 2;
+    const wallyMidX = wally.x + engine.nodeWidth / 2;
+    assert.ok(Math.abs(wallyMidX - bioMidX) < 1, `Wally (${wallyMidX}) should be centered under Yomi+Iyabo (${bioMidX}), not under Emma+Yomi`);
+    const stem = out.links.find(l => l.type === 'parent_child_stem' && l.id === 'link_stem_u_5471');
+    assert.ok(stem, 'Adjacent biological couple must emit a vertical drop-stem from marriage ring to child junction');
+    const formerPartnerLink = out.links.find(l => l.type === 'partner' && (l.from === '25605' && l.to === '26683'));
+    assert.equal(formerPartnerLink?.isDivorced, true, 'Former partner union (is_current: 0) must render as former/dashed, not active wedding ring');
+}
+
+console.log(`kinshipLayout: regression + safety net + multi-union + inlaw-collapse + stepmother + ${checked} random families OK`);

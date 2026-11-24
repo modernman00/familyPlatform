@@ -23,6 +23,7 @@ export function LightboxModal({
     const [commentDraft, setCommentDraft] = useState('');
     const [submitting, setSubmitting] = useState(false);
     const [animateHere, setAnimateHere] = useState(false);
+    const [animStatus, setAnimStatus] = useState('idle');
     const [exportBusy, setExportBusy] = useState(false);
     const touchStartX = useRef(null);
     const liveViewportRef = useRef(null);
@@ -40,9 +41,15 @@ export function LightboxModal({
                 liveStageRef.current.destroy();
                 liveStageRef.current = null;
             }
+            setAnimStatus('idle');
             return undefined;
         }
         const photoUrl = images[index] || images[0];
+        if (!photoUrl) {
+            setAnimStatus('error');
+            return undefined;
+        }
+        setAnimStatus('loading');
         const stage = new AtgLivingPhotoAvatarStage({
             canvas: liveCanvasRef.current,
             viewport: liveViewportRef.current,
@@ -50,12 +57,20 @@ export function LightboxModal({
         });
         liveStageRef.current = stage;
         let cancelled = false;
-        stage.init().then((ok) => {
-            if (!cancelled && ok) {
-                stage.start();
-                stage.triggerReaction('smile', { playSound: false });
-            }
-        });
+        stage.init()
+            .then((ok) => {
+                if (cancelled) return;
+                if (ok) {
+                    setAnimStatus('ready');
+                    stage.start();
+                    stage.triggerReaction('hello', { playSound: false });
+                } else {
+                    setAnimStatus('error');
+                }
+            })
+            .catch(() => {
+                if (!cancelled) setAnimStatus('error');
+            });
         return () => {
             cancelled = true;
             stage.destroy();
@@ -187,13 +202,44 @@ export function LightboxModal({
                 >
                     {animateHere ? (
                         <div className="d-flex flex-column align-items-center gap-2 w-100">
-                            <div
-                                ref={liveViewportRef}
-                                style={{ width: 280, height: 280, borderRadius: '50%', position: 'relative', cursor: 'grab' }}
-                                title="Tap to react · drag to tilt"
-                            >
-                                <canvas ref={liveCanvasRef} width={512} height={512} style={{ width: '100%', height: '100%', borderRadius: '50%' }} />
-                            </div>
+                            {animStatus === 'error' ? (
+                                <div className="d-flex flex-column align-items-center gap-2 text-center">
+                                    <img
+                                        src={currentSrc}
+                                        alt={`Family photo ${index + 1}`}
+                                        style={{ maxWidth: '100%', maxHeight: '46vh', objectFit: 'contain', borderRadius: 10 }}
+                                    />
+                                    <div className="small text-warning fw-semibold">
+                                        Could not initialise live canvas animation for this photo.
+                                    </div>
+                                </div>
+                            ) : (
+                                <div
+                                    ref={liveViewportRef}
+                                    style={{
+                                        width: 280,
+                                        height: 280,
+                                        borderRadius: '50%',
+                                        position: 'relative',
+                                        cursor: 'grab',
+                                        background: '#0f172a',
+                                        border: '2px solid rgba(251, 191, 36, 0.45)',
+                                        overflow: 'hidden',
+                                    }}
+                                    title="Tap to react · drag to tilt"
+                                >
+                                    <canvas ref={liveCanvasRef} width={512} height={512} style={{ width: '100%', height: '100%', borderRadius: '50%', display: 'block' }} />
+                                    {animStatus === 'loading' && (
+                                        <div
+                                            className="position-absolute top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center gap-2"
+                                            style={{ background: 'rgba(15, 23, 42, 0.78)', color: '#ffffff' }}
+                                        >
+                                            <span className="spinner-border spinner-border-sm text-warning" role="status" aria-hidden="true" />
+                                            <span className="small fw-semibold">Animating…</span>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                             <div className="d-flex flex-wrap justify-content-center gap-2">
                                 {[
                                     { key: 'laugh', label: '😂 Laugh' },
@@ -206,6 +252,7 @@ export function LightboxModal({
                                         type="button"
                                         className="btn btn-sm btn-outline-light rounded-pill px-3"
                                         style={{ minHeight: '44px', whiteSpace: 'nowrap', flexShrink: 0 }}
+                                        disabled={animStatus !== 'ready'}
                                         onClick={() => liveStageRef.current?.triggerReaction(act.key, { playSound: true })}
                                     >
                                         {act.label}
@@ -215,11 +262,17 @@ export function LightboxModal({
                                     type="button"
                                     className="btn btn-sm btn-warning rounded-pill px-3 fw-semibold"
                                     style={{ minHeight: '44px', whiteSpace: 'nowrap', flexShrink: 0 }}
-                                    disabled={exportBusy}
+                                    disabled={exportBusy || animStatus !== 'ready'}
                                     onClick={async () => {
                                         if (!liveStageRef.current || exportBusy) return;
                                         setExportBusy(true);
-                                        try { await liveStageRef.current.downloadAnimatedVideo(); } finally { setExportBusy(false); }
+                                        try {
+                                            await liveStageRef.current.downloadAnimatedVideo();
+                                        } catch {
+                                            notifyToast('Video export is unavailable for this photo.', 'error');
+                                        } finally {
+                                            setExportBusy(false);
+                                        }
                                     }}
                                 >
                                     {exportBusy ? 'Recording…' : '⬇️ Download MP4'}
@@ -228,11 +281,17 @@ export function LightboxModal({
                                     type="button"
                                     className="btn btn-sm btn-outline-info rounded-pill px-3 fw-semibold"
                                     style={{ minHeight: '44px', whiteSpace: 'nowrap', flexShrink: 0 }}
-                                    disabled={exportBusy}
+                                    disabled={exportBusy || animStatus !== 'ready'}
                                     onClick={async () => {
                                         if (!liveStageRef.current || exportBusy) return;
                                         setExportBusy(true);
-                                        try { await liveStageRef.current.shareAnimatedVideo(); } finally { setExportBusy(false); }
+                                        try {
+                                            await liveStageRef.current.shareAnimatedVideo();
+                                        } catch {
+                                            notifyToast('Could not share animated video.', 'error');
+                                        } finally {
+                                            setExportBusy(false);
+                                        }
                                     }}
                                 >
                                     📤 Share

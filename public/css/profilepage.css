@@ -1724,7 +1724,7 @@ body.dark-mode .family-code-value--birth {
     background: linear-gradient(135deg, rgba(163, 22, 33, 0.04) 0%, rgba(225, 29, 72, 0.05) 50%, rgba(245, 158, 11, 0.06) 100%);
     border: 1px solid rgba(163, 22, 33, 0.12);
     border-radius: 16px;
-    padding: 12px 10px !important;
+    padding: 8px 10px !important;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
   }
   body.dark-mode .profile-quick-actions,
@@ -3224,11 +3224,81 @@ video.feed-post-video::-webkit-media-controls-play-button,
   background-position: center;
   background-repeat: no-repeat;
   animation: fpScenicBokehBreathe 9s ease-in-out infinite alternate;
+  will-change: transform, opacity;
+}
+
+.fp-text-stage__bokeh::before,
+.fp-text-stage__bokeh::after {
+  content: '';
+  position: absolute;
+  inset: -18%;
+  pointer-events: none;
+  background-repeat: repeat;
+  will-change: transform, opacity;
 }
 
 @keyframes fpScenicBokehBreathe {
-  0% { opacity: 0.92; transform: scale(1); }
-  100% { opacity: 1; transform: scale(1.025); }
+  0% { opacity: 0.9; transform: scale(1) translate3d(0, 0, 0); }
+  50% { opacity: 1; transform: scale(1.028) translate3d(0.6%, -0.5%, 0); }
+  100% { opacity: 0.94; transform: scale(1.015) translate3d(-0.6%, 0.5%, 0); }
+}
+
+@keyframes fpStarTwinkle {
+  0%, 100% { opacity: 0.45; transform: scale(0.98) translate3d(0, 0, 0); }
+  50% { opacity: 1; transform: scale(1.03) translate3d(1%, -1%, 0); }
+}
+
+@keyframes fpBokehDrift {
+  0% { opacity: 0.72; transform: translate3d(-2%, 2%, 0) scale(1); }
+  50% { opacity: 0.96; transform: translate3d(2%, -2.5%, 0) scale(1.04); }
+  100% { opacity: 0.78; transform: translate3d(4%, 1%, 0) scale(1.01); }
+}
+
+@keyframes fpFireflyRise {
+  0% { opacity: 0.25; transform: translate3d(-1.5%, 10%, 0) scale(0.95); }
+  35% { opacity: 0.95; transform: translate3d(2%, 2%, 0) scale(1.03); }
+  70% { opacity: 0.85; transform: translate3d(-1.5%, -6%, 0) scale(1.01); }
+  100% { opacity: 0.2; transform: translate3d(1.5%, -14%, 0) scale(0.96); }
+}
+
+@keyframes fpSnowFallSlow {
+  0% { transform: translate3d(-2%, -12%, 0); opacity: 0.78; }
+  50% { transform: translate3d(2.5%, 0%, 0); opacity: 0.96; }
+  100% { transform: translate3d(-1.5%, 12%, 0); opacity: 0.78; }
+}
+
+@keyframes fpSnowFallFast {
+  0% { transform: translate3d(2%, -16%, 0); opacity: 0.65; }
+  50% { transform: translate3d(-2.5%, 0%, 0); opacity: 0.92; }
+  100% { transform: translate3d(2%, 16%, 0); opacity: 0.65; }
+}
+
+@keyframes fpFairyTwinkle {
+  0%, 100% { opacity: 0.58; transform: scale(0.99); }
+  40% { opacity: 1; transform: scale(1.025); }
+  70% { opacity: 0.72; transform: scale(1.01); }
+}
+
+@keyframes fpAuroraWave {
+  0% { opacity: 0.72; transform: translate3d(-3%, 0, 0) skewX(-2deg) scaleY(0.97); }
+  50% { opacity: 1; transform: translate3d(3%, -2%, 0) skewX(2deg) scaleY(1.06); }
+  100% { opacity: 0.78; transform: translate3d(-2%, 1.5%, 0) skewX(-1deg) scaleY(1); }
+}
+
+@keyframes fpOceanCurrent {
+  0% { opacity: 0.65; transform: translate3d(-2%, 1%, 0) scale(1); }
+  50% { opacity: 0.95; transform: translate3d(2.5%, -1.5%, 0) scale(1.04); }
+  100% { opacity: 0.65; transform: translate3d(-2%, 1%, 0) scale(1); }
+}
+
+@keyframes fpStageOrbFloatA {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.62; }
+  50% { transform: translate3d(-16px, 14px, 0) scale(1.14); opacity: 0.88; }
+}
+
+@keyframes fpStageOrbFloatB {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.58; }
+  50% { transform: translate3d(18px, -14px, 0) scale(1.16); opacity: 0.85; }
 }
 
 /* 7. Starlight Bokeh (Midnight Sapphire & Luminous Cyan Optical Bokeh + Stardust) */
@@ -3252,6 +3322,16 @@ video.feed-post-video::-webkit-media-controls-play-button,
 .fp-text-stage--starlight_bokeh .fp-text-stage__bokeh {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 600' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3CradialGradient id='b1'%3E%3Cstop offset='0%25' stop-color='%23e0f2fe' stop-opacity='0.95'/%3E%3Cstop offset='35%25' stop-color='%2338bdf8' stop-opacity='0.65'/%3E%3Cstop offset='100%25' stop-color='%230284c7' stop-opacity='0'/%3E%3C/radialGradient%3E%3CradialGradient id='b2'%3E%3Cstop offset='0%25' stop-color='%2338bdf8' stop-opacity='0.38'/%3E%3Cstop offset='65%25' stop-color='%230369a1' stop-opacity='0.18'/%3E%3Cstop offset='100%25' stop-color='%230369a1' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='96' cy='62' r='28' fill='url(%23b2)'/%3E%3Ccircle cx='712' cy='108' r='42' fill='url(%23b2)'/%3E%3Ccircle cx='664' cy='518' r='36' fill='url(%23b2)'/%3E%3Ccircle cx='142' cy='492' r='34' fill='url(%23b2)'/%3E%3Ccircle cx='490' cy='84' r='26' fill='url(%23b2)'/%3E%3Ccircle cx='318' cy='536' r='30' fill='url(%23b2)'/%3E%3Ccircle cx='88' cy='48' r='9' fill='url(%23b1)'/%3E%3Ccircle cx='158' cy='116' r='7' fill='url(%23b1)'/%3E%3Ccircle cx='248' cy='82' r='6' fill='url(%23b1)'/%3E%3Ccircle cx='618' cy='96' r='8' fill='url(%23b1)'/%3E%3Ccircle cx='726' cy='214' r='9' fill='url(%23b1)'/%3E%3Ccircle cx='686' cy='442' r='11' fill='url(%23b1)'/%3E%3Ccircle cx='574' cy='524' r='10' fill='url(%23b1)'/%3E%3Ccircle cx='116' cy='428' r='9' fill='url(%23b1)'/%3E%3Ccircle cx='228' cy='512' r='8' fill='url(%23b1)'/%3E%3Ccircle cx='406' cy='488' r='7' fill='url(%23b1)'/%3E%3Cg fill='%237dd3fc'%3E%3Ccircle cx='54' cy='138' r='2.2' opacity='0.85'/%3E%3Ccircle cx='128' cy='174' r='1.8' opacity='0.75'/%3E%3Ccircle cx='194' cy='64' r='2.5' opacity='0.9'/%3E%3Ccircle cx='286' cy='128' r='1.9' opacity='0.7'/%3E%3Ccircle cx='356' cy='72' r='2.1' opacity='0.8'/%3E%3Ccircle cx='442' cy='118' r='1.6' opacity='0.65'/%3E%3Ccircle cx='538' cy='62' r='2.4' opacity='0.88'/%3E%3Ccircle cx='668' cy='152' r='2.0' opacity='0.8'/%3E%3Ccircle cx='748' cy='82' r='2.6' opacity='0.9'/%3E%3Ccircle cx='74' cy='286' r='1.8' opacity='0.7'/%3E%3Ccircle cx='138' cy='342' r='2.4' opacity='0.85'/%3E%3Ccircle cx='68' cy='518' r='2.6' opacity='0.9'/%3E%3Ccircle cx='184' cy='456' r='2.1' opacity='0.8'/%3E%3Ccircle cx='278' cy='474' r='1.7' opacity='0.72'/%3E%3Ccircle cx='348' cy='548' r='2.3' opacity='0.85'/%3E%3Ccircle cx='472' cy='516' r='2.5' opacity='0.9'/%3E%3Ccircle cx='526' cy='458' r='1.9' opacity='0.75'/%3E%3Ccircle cx='632' cy='478' r='2.4' opacity='0.88'/%3E%3Ccircle cx='738' cy='386' r='2.2' opacity='0.82'/%3E%3Ccircle cx='754' cy='532' r='2.8' opacity='0.92'/%3E%3Ccircle cx='698' cy='312' r='1.7' opacity='0.7'/%3E%3C/g%3E%3Cg fill='%23ffffff'%3E%3Ccircle cx='112' cy='88' r='1.4' opacity='0.95'/%3E%3Ccircle cx='216' cy='144' r='1.2' opacity='0.85'/%3E%3Ccircle cx='588' cy='138' r='1.5' opacity='0.92'/%3E%3Ccircle cx='704' cy='178' r='1.3' opacity='0.88'/%3E%3Ccircle cx='96' cy='384' r='1.5' opacity='0.9'/%3E%3Ccircle cx='164' cy='538' r='1.4' opacity='0.92'/%3E%3Ccircle cx='596' cy='492' r='1.6' opacity='0.95'/%3E%3Ccircle cx='716' cy='496' r='1.4' opacity='0.9'/%3E%3C/g%3E%3C/svg%3E");
 }
+.fp-text-stage--starlight_bokeh .fp-text-stage__bokeh::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='260' viewBox='0 0 320 260'%3E%3Cg fill='%23ffffff'%3E%3Ccircle cx='44' cy='38' r='1.7' opacity='0.9'/%3E%3Ccircle cx='138' cy='72' r='1.3' opacity='0.75'/%3E%3Ccircle cx='242' cy='28' r='1.9' opacity='0.95'/%3E%3Ccircle cx='294' cy='112' r='1.4' opacity='0.8'/%3E%3Ccircle cx='86' cy='178' r='1.6' opacity='0.88'/%3E%3Ccircle cx='192' cy='214' r='1.8' opacity='0.92'/%3E%3Ccircle cx='274' cy='232' r='1.3' opacity='0.78'/%3E%3C/g%3E%3Cg fill='%237dd3fc'%3E%3Ccircle cx='24' cy='118' r='2.1' opacity='0.75'/%3E%3Ccircle cx='164' cy='134' r='2.3' opacity='0.82'/%3E%3Ccircle cx='226' cy='168' r='1.9' opacity='0.7'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 320px 260px;
+  animation: fpStarTwinkle 4.6s ease-in-out infinite;
+}
+.fp-text-stage--starlight_bokeh .fp-text-stage__bokeh::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='320' viewBox='0 0 420 320'%3E%3Cdefs%3E%3CradialGradient id='sb'%3E%3Cstop offset='0%25' stop-color='%23bae6fd' stop-opacity='0.65'/%3E%3Cstop offset='55%25' stop-color='%2338bdf8' stop-opacity='0.22'/%3E%3Cstop offset='100%25' stop-color='%230284c7' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='78' cy='64' r='18' fill='url(%23sb)'/%3E%3Ccircle cx='332' cy='96' r='24' fill='url(%23sb)'/%3E%3Ccircle cx='244' cy='252' r='20' fill='url(%23sb)'/%3E%3Ccircle cx='116' cy='238' r='14' fill='url(%23sb)'/%3E%3C/svg%3E");
+  background-size: 420px 320px;
+  animation: fpBokehDrift 14s ease-in-out infinite alternate;
+}
 
 /* 8. Golden Fireflies (Warm Obsidian Dusk & Champagne-Amber Bokeh Sparks) */
 .fp-text-stage--golden_ember {
@@ -3266,6 +3346,16 @@ video.feed-post-video::-webkit-media-controls-play-button,
 .fp-text-stage--golden_ember .fp-text-stage__bokeh {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 600' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3CradialGradient id='g1'%3E%3Cstop offset='0%25' stop-color='%23fef9c3' stop-opacity='0.95'/%3E%3Cstop offset='40%25' stop-color='%23fbbf24' stop-opacity='0.65'/%3E%3Cstop offset='100%25' stop-color='%23b45309' stop-opacity='0'/%3E%3C/radialGradient%3E%3CradialGradient id='g2'%3E%3Cstop offset='0%25' stop-color='%23f59e0b' stop-opacity='0.34'/%3E%3Cstop offset='100%25' stop-color='%2378350f' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='118' cy='92' r='36' fill='url(%23g2)'/%3E%3Ccircle cx='692' cy='124' r='44' fill='url(%23g2)'/%3E%3Ccircle cx='658' cy='498' r='38' fill='url(%23g2)'/%3E%3Ccircle cx='146' cy='486' r='34' fill='url(%23g2)'/%3E%3Ccircle cx='94' cy='68' r='9' fill='url(%23g1)'/%3E%3Ccircle cx='212' cy='112' r='7' fill='url(%23g1)'/%3E%3Ccircle cx='638' cy='88' r='8' fill='url(%23g1)'/%3E%3Ccircle cx='718' cy='232' r='10' fill='url(%23g1)'/%3E%3Ccircle cx='674' cy='456' r='11' fill='url(%23g1)'/%3E%3Ccircle cx='548' cy='528' r='9' fill='url(%23g1)'/%3E%3Ccircle cx='124' cy='434' r='8' fill='url(%23g1)'/%3E%3Ccircle cx='254' cy='518' r='9' fill='url(%23g1)'/%3E%3Cg fill='%23fde68a'%3E%3Ccircle cx='68' cy='154' r='2.3' opacity='0.88'/%3E%3Ccircle cx='178' cy='72' r='2.0' opacity='0.8'/%3E%3Ccircle cx='324' cy='86' r='2.2' opacity='0.78'/%3E%3Ccircle cx='518' cy='74' r='2.4' opacity='0.85'/%3E%3Ccircle cx='742' cy='112' r='2.6' opacity='0.9'/%3E%3Ccircle cx='82' cy='324' r='2.0' opacity='0.75'/%3E%3Ccircle cx='92' cy='526' r='2.5' opacity='0.9'/%3E%3Ccircle cx='364' cy='536' r='2.2' opacity='0.82'/%3E%3Ccircle cx='612' cy='484' r='2.4' opacity='0.88'/%3E%3Ccircle cx='746' cy='512' r='2.7' opacity='0.92'/%3E%3C/g%3E%3C/svg%3E");
 }
+.fp-text-stage--golden_ember .fp-text-stage__bokeh::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='280' viewBox='0 0 320 280'%3E%3Cdefs%3E%3CradialGradient id='ff'%3E%3Cstop offset='0%25' stop-color='%23fef9c3' stop-opacity='0.98'/%3E%3Cstop offset='45%25' stop-color='%23fbbf24' stop-opacity='0.6'/%3E%3Cstop offset='100%25' stop-color='%23d97706' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='54' cy='210' r='6' fill='url(%23ff)'/%3E%3Ccircle cx='148' cy='112' r='5' fill='url(%23ff)'/%3E%3Ccircle cx='248' cy='188' r='7' fill='url(%23ff)'/%3E%3Ccircle cx='294' cy='66' r='5' fill='url(%23ff)'/%3E%3Ccircle cx='98' cy='46' r='4' fill='url(%23ff)'/%3E%3C/svg%3E");
+  background-size: 320px 280px;
+  animation: fpFireflyRise 7.5s ease-in-out infinite;
+}
+.fp-text-stage--golden_ember .fp-text-stage__bokeh::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='380' height='320' viewBox='0 0 380 320'%3E%3Cg fill='%23fde68a'%3E%3Ccircle cx='48' cy='96' r='1.9' opacity='0.85'/%3E%3Ccircle cx='186' cy='48' r='2.1' opacity='0.9'/%3E%3Ccircle cx='284' cy='144' r='1.7' opacity='0.8'/%3E%3Ccircle cx='122' cy='264' r='2.2' opacity='0.92'/%3E%3Ccircle cx='336' cy='248' r='1.8' opacity='0.85'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 380px 320px;
+  animation: fpFireflyRise 11s ease-in-out infinite reverse;
+}
 
 /* 9. Sunset Horizon (Twilight Dusk Sky, Warm Horizon Glow & Distant Ridge) */
 .fp-text-stage--sunset_horizon {
@@ -3278,6 +3368,11 @@ video.feed-post-video::-webkit-media-controls-play-button,
 }
 .fp-text-stage--sunset_horizon .fp-text-stage__bokeh {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 600' preserveAspectRatio='xMidYMid slice'%3E%3Cg fill='%23fef3c7'%3E%3Ccircle cx='92' cy='68' r='1.8' opacity='0.85'/%3E%3Ccircle cx='218' cy='48' r='1.5' opacity='0.75'/%3E%3Ccircle cx='362' cy='62' r='2.0' opacity='0.88'/%3E%3Ccircle cx='528' cy='44' r='1.6' opacity='0.8'/%3E%3Ccircle cx='684' cy='76' r='2.1' opacity='0.9'/%3E%3Ccircle cx='744' cy='132' r='1.5' opacity='0.7'/%3E%3Ccircle cx='138' cy='128' r='1.4' opacity='0.68'/%3E%3C/g%3E%3Cpath d='M0 548 Q160 502 310 534 T620 518 T800 542 L800 600 L0 600 Z' fill='%230f0a1e' fill-opacity='0.52'/%3E%3Cpath d='M0 568 Q220 536 430 562 T800 554 L800 600 L0 600 Z' fill='%23090514' fill-opacity='0.72'/%3E%3C/svg%3E");
+}
+.fp-text-stage--sunset_horizon .fp-text-stage__bokeh::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='340' height='220' viewBox='0 0 340 220'%3E%3Cg fill='%23fef3c7'%3E%3Ccircle cx='42' cy='34' r='1.5' opacity='0.88'/%3E%3Ccircle cx='148' cy='52' r='1.8' opacity='0.92'/%3E%3Ccircle cx='262' cy='28' r='1.4' opacity='0.8'/%3E%3Ccircle cx='308' cy='78' r='1.7' opacity='0.86'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 340px 220px;
+  animation: fpStarTwinkle 5.4s ease-in-out infinite;
 }
 
 /* 10. Enchanted Forest (Deep Botanical Woodland & Bioluminescent Jade Bokeh) */
@@ -3293,6 +3388,11 @@ video.feed-post-video::-webkit-media-controls-play-button,
 .fp-text-stage--emerald_canopy .fp-text-stage__bokeh {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 600' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3CradialGradient id='e1'%3E%3Cstop offset='0%25' stop-color='%23ecfdf5' stop-opacity='0.95'/%3E%3Cstop offset='40%25' stop-color='%2334d399' stop-opacity='0.6'/%3E%3Cstop offset='100%25' stop-color='%23059669' stop-opacity='0'/%3E%3C/radialGradient%3E%3CradialGradient id='e2'%3E%3Cstop offset='0%25' stop-color='%2334d399' stop-opacity='0.32'/%3E%3Cstop offset='100%25' stop-color='%23064e3b' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='108' cy='86' r='36' fill='url(%23e2)'/%3E%3Ccircle cx='702' cy='118' r='42' fill='url(%23e2)'/%3E%3Ccircle cx='668' cy='506' r='38' fill='url(%23e2)'/%3E%3Ccircle cx='134' cy='494' r='34' fill='url(%23e2)'/%3E%3Ccircle cx='92' cy='64' r='9' fill='url(%23e1)'/%3E%3Ccircle cx='226' cy='96' r='7' fill='url(%23e1)'/%3E%3Ccircle cx='644' cy='92' r='8' fill='url(%23e1)'/%3E%3Ccircle cx='724' cy='248' r='9' fill='url(%23e1)'/%3E%3Ccircle cx='682' cy='462' r='10' fill='url(%23e1)'/%3E%3Ccircle cx='122' cy='446' r='8' fill='url(%23e1)'/%3E%3Cg fill='%23a7f3d0'%3E%3Ccircle cx='74' cy='168' r='2.2' opacity='0.85'/%3E%3Ccircle cx='298' cy='76' r='2.0' opacity='0.78'/%3E%3Ccircle cx='512' cy='68' r='2.3' opacity='0.85'/%3E%3Ccircle cx='738' cy='142' r='2.4' opacity='0.88'/%3E%3Ccircle cx='88' cy='524' r='2.5' opacity='0.9'/%3E%3Ccircle cx='382' cy='538' r='2.1' opacity='0.8'/%3E%3Ccircle cx='596' cy='518' r='2.4' opacity='0.88'/%3E%3Ccircle cx='742' cy='518' r='2.6' opacity='0.9'/%3E%3C/g%3E%3C/svg%3E");
 }
+.fp-text-stage--emerald_canopy .fp-text-stage__bokeh::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='340' height='280' viewBox='0 0 340 280'%3E%3Cdefs%3E%3CradialGradient id='ef'%3E%3Cstop offset='0%25' stop-color='%23ecfdf5' stop-opacity='0.95'/%3E%3Cstop offset='50%25' stop-color='%2334d399' stop-opacity='0.45'/%3E%3Cstop offset='100%25' stop-color='%23059669' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='68' cy='192' r='5' fill='url(%23ef)'/%3E%3Ccircle cx='186' cy='96' r='6' fill='url(%23ef)'/%3E%3Ccircle cx='286' cy='214' r='5' fill='url(%23ef)'/%3E%3Ccircle cx='124' cy='54' r='4' fill='url(%23ef)'/%3E%3C/svg%3E");
+  background-size: 340px 280px;
+  animation: fpFireflyRise 9s ease-in-out infinite;
+}
 
 /* 11. Deep Ocean Glow (Abyssal Sea & Turquoise Bioluminescent Shimmer) */
 .fp-text-stage--ocean_biolum {
@@ -3306,6 +3406,16 @@ video.feed-post-video::-webkit-media-controls-play-button,
 }
 .fp-text-stage--ocean_biolum .fp-text-stage__bokeh {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 600' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3CradialGradient id='o1'%3E%3Cstop offset='0%25' stop-color='%23ecfeff' stop-opacity='0.95'/%3E%3Cstop offset='40%25' stop-color='%2322d3ee' stop-opacity='0.65'/%3E%3Cstop offset='100%25' stop-color='%230891b2' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Cpath d='M-40 120 Q200 60 440 130 T840 90' fill='none' stroke='%2322d3ee' stroke-opacity='0.12' stroke-width='28'/%3E%3Cpath d='M-40 490 Q240 430 480 500 T840 460' fill='none' stroke='%2338bdf8' stroke-opacity='0.12' stroke-width='24'/%3E%3Ccircle cx='104' cy='82' r='8' fill='url(%23o1)'/%3E%3Ccircle cx='688' cy='106' r='9' fill='url(%23o1)'/%3E%3Ccircle cx='712' cy='468' r='10' fill='url(%23o1)'/%3E%3Ccircle cx='126' cy='482' r='9' fill='url(%23o1)'/%3E%3Cg fill='%2367e8f9'%3E%3Ccircle cx='66' cy='188' r='2.2' opacity='0.85'/%3E%3Ccircle cx='186' cy='68' r='2.0' opacity='0.8'/%3E%3Ccircle cx='348' cy='78' r='1.9' opacity='0.75'/%3E%3Ccircle cx='562' cy='72' r='2.3' opacity='0.85'/%3E%3Ccircle cx='746' cy='192' r='2.4' opacity='0.88'/%3E%3Ccircle cx='84' cy='412' r='2.1' opacity='0.8'/%3E%3Ccircle cx='248' cy='532' r='2.4' opacity='0.88'/%3E%3Ccircle cx='528' cy='524' r='2.2' opacity='0.84'/%3E%3Ccircle cx='654' cy='536' r='2.5' opacity='0.9'/%3E%3C/g%3E%3C/svg%3E");
+}
+.fp-text-stage--ocean_biolum .fp-text-stage__bokeh::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='260' viewBox='0 0 360 260'%3E%3Cg fill='%2367e8f9'%3E%3Ccircle cx='56' cy='210' r='2.4' opacity='0.75'/%3E%3Ccircle cx='158' cy='140' r='1.8' opacity='0.65'/%3E%3Ccircle cx='274' cy='196' r='2.6' opacity='0.8'/%3E%3Ccircle cx='318' cy='78' r='2.0' opacity='0.7'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 360px 260px;
+  animation: fpFireflyRise 10s ease-in-out infinite;
+}
+.fp-text-stage--ocean_biolum .fp-text-stage__bokeh::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='480' height='320' viewBox='0 0 480 320'%3E%3Cpath d='M-20 80 Q120 35 260 85 T500 65' fill='none' stroke='%2322d3ee' stroke-opacity='0.14' stroke-width='20'/%3E%3Cpath d='M-20 240 Q140 195 280 245 T500 225' fill='none' stroke='%2338bdf8' stroke-opacity='0.12' stroke-width='18'/%3E%3C/svg%3E");
+  background-size: 480px 320px;
+  animation: fpOceanCurrent 12s ease-in-out infinite;
 }
 
 /* 12. Rose Velvet (Deep Mulberry Plum & Champagne-Rose Bokeh — Strictly Crisp White Text) */
@@ -3322,6 +3432,11 @@ video.feed-post-video::-webkit-media-controls-play-button,
 .fp-text-stage--rose_stardust .fp-text-stage__bokeh {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 600' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3CradialGradient id='r1'%3E%3Cstop offset='0%25' stop-color='%23fff1f2' stop-opacity='0.95'/%3E%3Cstop offset='42%25' stop-color='%23f472b6' stop-opacity='0.6'/%3E%3Cstop offset='100%25' stop-color='%239d174d' stop-opacity='0'/%3E%3C/radialGradient%3E%3CradialGradient id='r2'%3E%3Cstop offset='0%25' stop-color='%23f9a8d4' stop-opacity='0.3'/%3E%3Cstop offset='100%25' stop-color='%23831843' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='112' cy='88' r='36' fill='url(%23r2)'/%3E%3Ccircle cx='696' cy='116' r='42' fill='url(%23r2)'/%3E%3Ccircle cx='668' cy='502' r='36' fill='url(%23r2)'/%3E%3Ccircle cx='138' cy='492' r='34' fill='url(%23r2)'/%3E%3Ccircle cx='92' cy='66' r='8' fill='url(%23r1)'/%3E%3Ccircle cx='648' cy='88' r='9' fill='url(%23r1)'/%3E%3Ccircle cx='716' cy='454' r='10' fill='url(%23r1)'/%3E%3Ccircle cx='122' cy='448' r='9' fill='url(%23r1)'/%3E%3Cg fill='%23fce79a'%3E%3Ccircle cx='72' cy='164' r='2.1' opacity='0.85'/%3E%3Ccircle cx='228' cy='74' r='2.0' opacity='0.8'/%3E%3Ccircle cx='526' cy='68' r='2.2' opacity='0.85'/%3E%3Ccircle cx='742' cy='162' r='2.4' opacity='0.88'/%3E%3Ccircle cx='92' cy='524' r='2.4' opacity='0.9'/%3E%3Ccircle cx='418' cy='536' r='2.1' opacity='0.82'/%3E%3Ccircle cx='612' cy='516' r='2.5' opacity='0.9'/%3E%3C/g%3E%3C/svg%3E");
 }
+.fp-text-stage--rose_stardust .fp-text-stage__bokeh::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='260' viewBox='0 0 320 260'%3E%3Cg fill='%23fce79a'%3E%3Ccircle cx='48' cy='52' r='1.8' opacity='0.85'/%3E%3Ccircle cx='178' cy='96' r='2.0' opacity='0.9'/%3E%3Ccircle cx='274' cy='44' r='1.6' opacity='0.78'/%3E%3Ccircle cx='112' cy='214' r='1.9' opacity='0.88'/%3E%3Ccircle cx='248' cy='198' r='2.1' opacity='0.92'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 320px 260px;
+  animation: fpStarTwinkle 5.2s ease-in-out infinite;
+}
 
 /* 13. Aurora Sky (Polar Midnight, Northern Lights Curtains & Crisp Starfield) */
 .fp-text-stage--northern_sky {
@@ -3337,6 +3452,17 @@ video.feed-post-video::-webkit-media-controls-play-button,
 .fp-text-stage--northern_sky .fp-text-stage__bokeh {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 600' preserveAspectRatio='xMidYMid slice'%3E%3Cpath d='M-50 90 Q180 10 420 105 T850 65' fill='none' stroke='%2334d399' stroke-opacity='0.22' stroke-width='44'/%3E%3Cpath d='M-50 140 Q240 60 510 145 T850 110' fill='none' stroke='%2338bdf8' stroke-opacity='0.16' stroke-width='32'/%3E%3Cg fill='%23ffffff'%3E%3Ccircle cx='64' cy='58' r='1.6' opacity='0.9'/%3E%3Ccircle cx='152' cy='96' r='1.4' opacity='0.8'/%3E%3Ccircle cx='264' cy='52' r='1.8' opacity='0.92'/%3E%3Ccircle cx='392' cy='74' r='1.3' opacity='0.75'/%3E%3Ccircle cx='544' cy='48' r='1.7' opacity='0.88'/%3E%3Ccircle cx='678' cy='82' r='1.9' opacity='0.94'/%3E%3Ccircle cx='748' cy='146' r='1.5' opacity='0.82'/%3E%3Ccircle cx='88' cy='488' r='1.7' opacity='0.85'/%3E%3Ccircle cx='236' cy='536' r='1.5' opacity='0.8'/%3E%3Ccircle cx='588' cy='522' r='1.8' opacity='0.88'/%3E%3Ccircle cx='726' cy='494' r='1.6' opacity='0.86'/%3E%3C/g%3E%3C/svg%3E");
 }
+.fp-text-stage--northern_sky .fp-text-stage__bokeh::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 600' preserveAspectRatio='none'%3E%3Cpath d='M-60 110 Q180 20 420 120 T860 75' fill='none' stroke='%2334d399' stroke-opacity='0.24' stroke-width='52'/%3E%3Cpath d='M-60 465 Q240 390 500 475 T860 440' fill='none' stroke='%23818cf8' stroke-opacity='0.18' stroke-width='40'/%3E%3C/svg%3E");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  animation: fpAuroraWave 11s ease-in-out infinite alternate;
+}
+.fp-text-stage--northern_sky .fp-text-stage__bokeh::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='240' viewBox='0 0 320 240'%3E%3Cg fill='%23ffffff'%3E%3Ccircle cx='42' cy='38' r='1.5' opacity='0.9'/%3E%3Ccircle cx='168' cy='64' r='1.3' opacity='0.78'/%3E%3Ccircle cx='268' cy='28' r='1.7' opacity='0.95'/%3E%3Ccircle cx='96' cy='188' r='1.5' opacity='0.85'/%3E%3Ccircle cx='236' cy='204' r='1.4' opacity='0.82'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 320px 240px;
+  animation: fpStarTwinkle 4.8s ease-in-out infinite;
+}
 
 /* 14. Royal Noir & Gold (Editorial Onyx Silk, Subtle Gold Frame & 24k Dust) */
 .fp-text-stage--royal_parchment {
@@ -3349,6 +3475,439 @@ video.feed-post-video::-webkit-media-controls-play-button,
 }
 .fp-text-stage--royal_parchment .fp-text-stage__bokeh {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 600' preserveAspectRatio='xMidYMid slice'%3E%3Crect x='22' y='22' width='756' height='556' rx='16' fill='none' stroke='%23fbbf24' stroke-opacity='0.28' stroke-width='1.5'/%3E%3Cg fill='%23fde68a'%3E%3Ccircle cx='76' cy='74' r='2.2' opacity='0.85'/%3E%3Ccircle cx='724' cy='74' r='2.2' opacity='0.85'/%3E%3Ccircle cx='76' cy='526' r='2.2' opacity='0.85'/%3E%3Ccircle cx='724' cy='526' r='2.2' opacity='0.85'/%3E%3Ccircle cx='164' cy='96' r='1.6' opacity='0.7'/%3E%3Ccircle cx='638' cy='108' r='1.8' opacity='0.75'/%3E%3Ccircle cx='148' cy='492' r='1.7' opacity='0.72'/%3E%3Ccircle cx='652' cy='488' r='1.9' opacity='0.78'/%3E%3C/g%3E%3C/svg%3E");
+}
+.fp-text-stage--royal_parchment .fp-text-stage__bokeh::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='260' viewBox='0 0 320 260'%3E%3Cg fill='%23fde68a'%3E%3Ccircle cx='54' cy='66' r='1.8' opacity='0.85'/%3E%3Ccircle cx='164' cy='122' r='1.5' opacity='0.72'/%3E%3Ccircle cx='268' cy='52' r='2.0' opacity='0.9'/%3E%3Ccircle cx='104' cy='218' r='1.7' opacity='0.82'/%3E%3Ccircle cx='252' cy='204' r='1.9' opacity='0.88'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 320px 260px;
+  animation: fpStarTwinkle 5.6s ease-in-out infinite;
+}
+
+/* ==========================================================================
+   🎄 Festive Christmas (Xmas) Animated Backdrops
+   ========================================================================== */
+
+/* 15. Festive Snowfall (Alpine Midnight Spruce & Multi-Depth Falling Snow) */
+.fp-text-stage--xmas_snowfall {
+  background:
+    radial-gradient(ellipse 68% 52% at 50% 50%, rgba(3, 18, 34, 0.52) 0%, transparent 100%),
+    radial-gradient(circle at 18% 20%, rgba(186, 230, 253, 0.24) 0%, transparent 44%),
+    radial-gradient(circle at 82% 80%, rgba(56, 189, 248, 0.28) 0%, transparent 48%),
+    linear-gradient(160deg, #041527 0%, #0a3454 50%, #04212e 100%);
+  background-color: #041527;
+  color: #ffffff !important;
+  border-color: rgba(186, 230, 253, 0.45);
+}
+.fp-text-stage--xmas_snowfall .fp-text-stage__orb--a {
+  background: radial-gradient(circle, rgba(224, 242, 254, 0.44) 0%, rgba(56, 189, 248, 0.12) 70%);
+}
+.fp-text-stage--xmas_snowfall .fp-text-stage__orb--b {
+  background: radial-gradient(circle, rgba(125, 211, 252, 0.36) 0%, transparent 72%);
+}
+.fp-text-stage--xmas_snowfall .fp-text-stage__bokeh {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 600' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3CradialGradient id='sn0'%3E%3Cstop offset='0%25' stop-color='%23ffffff' stop-opacity='0.95'/%3E%3Cstop offset='45%25' stop-color='%23bae6fd' stop-opacity='0.5'/%3E%3Cstop offset='100%25' stop-color='%2338bdf8' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='96' cy='78' r='24' fill='url(%23sn0)' opacity='0.4'/%3E%3Ccircle cx='704' cy='112' r='30' fill='url(%23sn0)' opacity='0.35'/%3E%3Ccircle cx='652' cy='492' r='26' fill='url(%23sn0)' opacity='0.38'/%3E%3Ccircle cx='144' cy='484' r='22' fill='url(%23sn0)' opacity='0.35'/%3E%3Cpath d='M0 556 Q140 520 310 546 T620 532 T800 552 L800 600 L0 600 Z' fill='%23e0f2fe' fill-opacity='0.12'/%3E%3C/svg%3E");
+}
+.fp-text-stage--xmas_snowfall .fp-text-stage__bokeh::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='220' viewBox='0 0 260 220'%3E%3Cg fill='%23ffffff'%3E%3Ccircle cx='32' cy='28' r='3.2' opacity='0.88'/%3E%3Ccircle cx='118' cy='62' r='2.6' opacity='0.78'/%3E%3Ccircle cx='204' cy='34' r='3.5' opacity='0.92'/%3E%3Ccircle cx='74' cy='132' r='2.8' opacity='0.82'/%3E%3Ccircle cx='168' cy='154' r='3.4' opacity='0.9'/%3E%3Ccircle cx='238' cy='118' r='2.5' opacity='0.75'/%3E%3Ccircle cx='48' cy='198' r='3.0' opacity='0.85'/%3E%3Ccircle cx='192' cy='204' r='2.7' opacity='0.8'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 260px 220px;
+  animation: fpSnowFallSlow 10s linear infinite;
+}
+.fp-text-stage--xmas_snowfall .fp-text-stage__bokeh::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='180' viewBox='0 0 200 180'%3E%3Cg fill='%23e0f2fe'%3E%3Ccircle cx='24' cy='44' r='1.7' opacity='0.78'/%3E%3Ccircle cx='88' cy='20' r='1.5' opacity='0.7'/%3E%3Ccircle cx='146' cy='58' r='1.9' opacity='0.85'/%3E%3Ccircle cx='54' cy='116' r='1.6' opacity='0.75'/%3E%3Ccircle cx='122' cy='138' r='1.8' opacity='0.82'/%3E%3Ccircle cx='182' cy='104' r='1.4' opacity='0.68'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 200px 180px;
+  animation: fpSnowFallFast 6.8s linear infinite;
+}
+
+/* 16. Cosy Hearth (Crimson & Mahogany Glow, Twinkling Gold Fairy Lights & Rising Embers — Strictly White/Gold Text) */
+.fp-text-stage--xmas_hearth {
+  background:
+    radial-gradient(ellipse 68% 52% at 50% 50%, rgba(28, 4, 8, 0.48) 0%, transparent 100%),
+    radial-gradient(circle at 22% 18%, rgba(251, 191, 36, 0.28) 0%, transparent 44%),
+    radial-gradient(circle at 50% 94%, rgba(245, 158, 11, 0.34) 0%, transparent 48%),
+    linear-gradient(155deg, #2b040c 0%, #6b0f1a 48%, #380710 100%);
+  background-color: #2b040c;
+  color: #ffffff !important;
+  border-color: rgba(253, 224, 71, 0.48);
+}
+.fp-text-stage--xmas_hearth .fp-text-stage__orb--a {
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.46) 0%, rgba(220, 38, 38, 0.14) 70%);
+}
+.fp-text-stage--xmas_hearth .fp-text-stage__orb--b {
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.42) 0%, transparent 72%);
+}
+.fp-text-stage--xmas_hearth .fp-text-stage__bokeh {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 600' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3CradialGradient id='xh1'%3E%3Cstop offset='0%25' stop-color='%23fef9c3' stop-opacity='0.96'/%3E%3Cstop offset='40%25' stop-color='%23fbbf24' stop-opacity='0.65'/%3E%3Cstop offset='100%25' stop-color='%23b45309' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Cpath d='M-20 28 Q200 92 400 38 T820 34' fill='none' stroke='%23fde68a' stroke-opacity='0.28' stroke-width='2'/%3E%3Ccircle cx='78' cy='52' r='11' fill='url(%23xh1)'/%3E%3Ccircle cx='186' cy='68' r='9' fill='url(%23xh1)'/%3E%3Ccircle cx='308' cy='54' r='12' fill='url(%23xh1)'/%3E%3Ccircle cx='448' cy='46' r='10' fill='url(%23xh1)'/%3E%3Ccircle cx='584' cy='66' r='11' fill='url(%23xh1)'/%3E%3Ccircle cx='706' cy='48' r='12' fill='url(%23xh1)'/%3E%3C/svg%3E");
+}
+.fp-text-stage--xmas_hearth .fp-text-stage__bokeh::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='260' viewBox='0 0 320 260'%3E%3Cdefs%3E%3CradialGradient id='xhb'%3E%3Cstop offset='0%25' stop-color='%23fef3c7' stop-opacity='0.95'/%3E%3Cstop offset='50%25' stop-color='%23f59e0b' stop-opacity='0.5'/%3E%3Cstop offset='100%25' stop-color='%23b45309' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='48' cy='218' r='5' fill='url(%23xhb)'/%3E%3Ccircle cx='144' cy='152' r='4' fill='url(%23xhb)'/%3E%3Ccircle cx='236' cy='204' r='6' fill='url(%23xhb)'/%3E%3Ccircle cx='288' cy='86' r='4.5' fill='url(%23xhb)'/%3E%3C/svg%3E");
+  background-size: 320px 260px;
+  animation: fpFireflyRise 8.2s ease-in-out infinite;
+}
+.fp-text-stage--xmas_hearth .fp-text-stage__bokeh::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='280' viewBox='0 0 360 280'%3E%3Cg fill='%23fef08a'%3E%3Ccircle cx='62' cy='42' r='2.1' opacity='0.88'/%3E%3Ccircle cx='172' cy='68' r='1.8' opacity='0.8'/%3E%3Ccircle cx='286' cy='38' r='2.3' opacity='0.92'/%3E%3Ccircle cx='116' cy='228' r='2.0' opacity='0.85'/%3E%3Ccircle cx='318' cy='214' r='2.2' opacity='0.88'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 360px 280px;
+  animation: fpFairyTwinkle 3.8s ease-in-out infinite;
+}
+
+/* 17. Fairy Lights (Deep Pine Velvet & Multi-Colour Festive Bokeh Bulbs) */
+.fp-text-stage--xmas_lights {
+  background:
+    radial-gradient(ellipse 68% 52% at 50% 50%, rgba(2, 16, 12, 0.56) 0%, transparent 100%),
+    radial-gradient(circle at 18% 22%, rgba(239, 68, 68, 0.24) 0%, transparent 42%),
+    radial-gradient(circle at 82% 24%, rgba(251, 191, 36, 0.26) 0%, transparent 44%),
+    radial-gradient(circle at 78% 82%, rgba(16, 185, 129, 0.26) 0%, transparent 46%),
+    linear-gradient(155deg, #041b15 0%, #092c24 48%, #16091f 100%);
+  background-color: #041b15;
+  color: #ffffff !important;
+  border-color: rgba(253, 224, 71, 0.45);
+}
+.fp-text-stage--xmas_lights .fp-text-stage__orb--a {
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.4) 0%, rgba(239, 68, 68, 0.14) 70%);
+}
+.fp-text-stage--xmas_lights .fp-text-stage__orb--b {
+  background: radial-gradient(circle, rgba(52, 211, 153, 0.36) 0%, transparent 72%);
+}
+.fp-text-stage--xmas_lights .fp-text-stage__bokeh {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 600' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3CradialGradient id='xl_g'%3E%3Cstop offset='0%25' stop-color='%23fef9c3' stop-opacity='0.96'/%3E%3Cstop offset='42%25' stop-color='%23fbbf24' stop-opacity='0.65'/%3E%3Cstop offset='100%25' stop-color='%23d97706' stop-opacity='0'/%3E%3C/radialGradient%3E%3CradialGradient id='xl_r'%3E%3Cstop offset='0%25' stop-color='%23ffe4e6' stop-opacity='0.95'/%3E%3Cstop offset='42%25' stop-color='%23f43f5e' stop-opacity='0.65'/%3E%3Cstop offset='100%25' stop-color='%23be123c' stop-opacity='0'/%3E%3C/radialGradient%3E%3CradialGradient id='xl_e'%3E%3Cstop offset='0%25' stop-color='%23ecfdf5' stop-opacity='0.95'/%3E%3Cstop offset='42%25' stop-color='%2334d399' stop-opacity='0.65'/%3E%3Cstop offset='100%25' stop-color='%23059669' stop-opacity='0'/%3E%3C/radialGradient%3E%3CradialGradient id='xl_b'%3E%3Cstop offset='0%25' stop-color='%23e0f2fe' stop-opacity='0.95'/%3E%3Cstop offset='42%25' stop-color='%2338bdf8' stop-opacity='0.65'/%3E%3Cstop offset='100%25' stop-color='%230284c7' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='88' cy='72' r='22' fill='url(%23xl_g)'/%3E%3Ccircle cx='212' cy='96' r='18' fill='url(%23xl_r)'/%3E%3Ccircle cx='612' cy='82' r='22' fill='url(%23xl_e)'/%3E%3Ccircle cx='718' cy='116' r='20' fill='url(%23xl_b)'/%3E%3Ccircle cx='116' cy='484' r='22' fill='url(%23xl_e)'/%3E%3Ccircle cx='248' cy='524' r='18' fill='url(%23xl_g)'/%3E%3Ccircle cx='648' cy='498' r='24' fill='url(%23xl_r)'/%3E%3Ccircle cx='726' cy='432' r='18' fill='url(%23xl_g)'/%3E%3C/svg%3E");
+}
+.fp-text-stage--xmas_lights .fp-text-stage__bokeh::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='340' height='260' viewBox='0 0 340 260'%3E%3Cg%3E%3Ccircle cx='44' cy='48' r='3.5' fill='%23fde047' opacity='0.92'/%3E%3Ccircle cx='138' cy='82' r='3.2' fill='%23fb7185' opacity='0.88'/%3E%3Ccircle cx='238' cy='38' r='3.5' fill='%2334d399' opacity='0.9'/%3E%3Ccircle cx='298' cy='124' r='3.0' fill='%237dd3fc' opacity='0.88'/%3E%3Ccircle cx='86' cy='214' r='3.4' fill='%23fb7185' opacity='0.9'/%3E%3Ccircle cx='216' cy='202' r='3.6' fill='%23fde047' opacity='0.95'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 340px 260px;
+  animation: fpFairyTwinkle 3.4s ease-in-out infinite;
+}
+.fp-text-stage--xmas_lights .fp-text-stage__bokeh::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='380' height='300' viewBox='0 0 380 300'%3E%3Cg%3E%3Ccircle cx='76' cy='112' r='2.4' fill='%237dd3fc' opacity='0.82'/%3E%3Ccircle cx='188' cy='42' r='2.6' fill='%23fde047' opacity='0.88'/%3E%3Ccircle cx='292' cy='188' r='2.5' fill='%2334d399' opacity='0.85'/%3E%3Ccircle cx='144' cy='256' r='2.4' fill='%23fb7185' opacity='0.84'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 380px 300px;
+  animation: fpBokehDrift 13s ease-in-out infinite alternate;
+}
+
+/* 18. Winter Gold (Deep Emerald-Obsidian & 24k Champagne Gold Snowflakes) */
+.fp-text-stage--xmas_winter_gold {
+  background:
+    radial-gradient(ellipse 68% 52% at 50% 50%, rgba(4, 18, 12, 0.54) 0%, transparent 100%),
+    radial-gradient(circle at 20% 20%, rgba(253, 224, 71, 0.24) 0%, transparent 45%),
+    radial-gradient(circle at 82% 82%, rgba(217, 119, 6, 0.26) 0%, transparent 48%),
+    linear-gradient(155deg, #03140d 0%, #062e1e 50%, #141007 100%);
+  background-color: #03140d;
+  color: #ffffff !important;
+  border-color: rgba(253, 224, 71, 0.52);
+}
+.fp-text-stage--xmas_winter_gold .fp-text-stage__orb--a {
+  background: radial-gradient(circle, rgba(254, 240, 138, 0.44) 0%, rgba(202, 138, 4, 0.14) 70%);
+}
+.fp-text-stage--xmas_winter_gold .fp-text-stage__orb--b {
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.36) 0%, transparent 72%);
+}
+.fp-text-stage--xmas_winter_gold .fp-text-stage__bokeh {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 600' preserveAspectRatio='xMidYMid slice'%3E%3Crect x='20' y='20' width='760' height='560' rx='18' fill='none' stroke='%23fde047' stroke-opacity='0.24' stroke-width='1.5'/%3E%3Cg fill='%23fef08a'%3E%3Ccircle cx='88' cy='72' r='3' opacity='0.88'/%3E%3Ccircle cx='712' cy='72' r='3' opacity='0.88'/%3E%3Ccircle cx='88' cy='528' r='3' opacity='0.88'/%3E%3Ccircle cx='712' cy='528' r='3' opacity='0.88'/%3E%3C/g%3E%3C/svg%3E");
+}
+.fp-text-stage--xmas_winter_gold .fp-text-stage__bokeh::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='220' viewBox='0 0 260 220'%3E%3Cg fill='%23fef08a'%3E%3Ccircle cx='38' cy='32' r='2.8' opacity='0.88'/%3E%3Ccircle cx='124' cy='68' r='2.2' opacity='0.78'/%3E%3Ccircle cx='214' cy='42' r='3.0' opacity='0.92'/%3E%3Ccircle cx='76' cy='144' r='2.4' opacity='0.84'/%3E%3Ccircle cx='178' cy='172' r='2.8' opacity='0.9'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 260px 220px;
+  animation: fpSnowFallSlow 11s linear infinite;
+}
+.fp-text-stage--xmas_winter_gold .fp-text-stage__bokeh::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='260' viewBox='0 0 320 260'%3E%3Cg fill='%23ffffff'%3E%3Ccircle cx='62' cy='54' r='1.6' opacity='0.92'/%3E%3Ccircle cx='182' cy='96' r='1.4' opacity='0.82'/%3E%3Ccircle cx='274' cy='46' r='1.8' opacity='0.95'/%3E%3Ccircle cx='118' cy='214' r='1.5' opacity='0.88'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 320px 260px;
+  animation: fpStarTwinkle 4.4s ease-in-out infinite;
+}
+
+/* ==========================================================================
+   🪐 19. Solar Galaxy (Deep-Space Nebula, Spiral Galaxies & 3D Moving Planets)
+   ========================================================================== */
+.fp-text-stage--solar_galaxy {
+  background:
+    radial-gradient(ellipse 64% 50% at 50% 50%, rgba(2, 4, 16, 0.56) 0%, transparent 100%),
+    radial-gradient(circle at 18% 22%, rgba(99, 102, 241, 0.28) 0%, transparent 46%),
+    radial-gradient(circle at 82% 24%, rgba(192, 38, 211, 0.24) 0%, transparent 44%),
+    radial-gradient(circle at 78% 82%, rgba(14, 165, 233, 0.26) 0%, transparent 48%),
+    linear-gradient(155deg, #02030d 0%, #070b24 48%, #0f0726 100%);
+  background-color: #02030d;
+  color: #ffffff !important;
+  border-color: rgba(129, 140, 248, 0.45);
+}
+.fp-text-stage--solar_galaxy .fp-text-stage__orb--a {
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.34) 0%, rgba(168, 85, 247, 0.14) 70%);
+}
+.fp-text-stage--solar_galaxy .fp-text-stage__orb--b {
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.32) 0%, rgba(99, 102, 241, 0.12) 72%);
+}
+.fp-text-stage--solar_galaxy .fp-text-stage__bokeh {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 600' preserveAspectRatio='xMidYMid slice'%3E%3Cdefs%3E%3CradialGradient id='sg_neb1'%3E%3Cstop offset='0%25' stop-color='%23c084fc' stop-opacity='0.34'/%3E%3Cstop offset='55%25' stop-color='%234f46e5' stop-opacity='0.14'/%3E%3Cstop offset='100%25' stop-color='%2302030d' stop-opacity='0'/%3E%3C/radialGradient%3E%3CradialGradient id='sg_neb2'%3E%3Cstop offset='0%25' stop-color='%2338bdf8' stop-opacity='0.28'/%3E%3Cstop offset='60%25' stop-color='%230284c7' stop-opacity='0.1'/%3E%3Cstop offset='100%25' stop-color='%2302030d' stop-opacity='0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Cellipse cx='660' cy='115' rx='140' ry='70' transform='rotate(-22 660 115)' fill='url(%23sg_neb1)'/%3E%3Cellipse cx='140' cy='485' rx='135' ry='64' transform='rotate(18 140 485)' fill='url(%23sg_neb2)'/%3E%3C/svg%3E");
+}
+.fp-text-stage--solar_galaxy .fp-text-stage__bokeh::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='260' viewBox='0 0 320 260'%3E%3Cg fill='%23ffffff'%3E%3Ccircle cx='34' cy='28' r='1.4' opacity='0.92'/%3E%3Ccircle cx='98' cy='72' r='1.1' opacity='0.72'/%3E%3Ccircle cx='164' cy='34' r='1.7' opacity='0.95'/%3E%3Ccircle cx='238' cy='62' r='1.2' opacity='0.8'/%3E%3Ccircle cx='292' cy='24' r='1.5' opacity='0.88'/%3E%3Ccircle cx='58' cy='144' r='1.3' opacity='0.82'/%3E%3Ccircle cx='138' cy='168' r='1.8' opacity='0.94'/%3E%3Ccircle cx='216' cy='132' r='1.1' opacity='0.74'/%3E%3Ccircle cx='278' cy='174' r='1.5' opacity='0.88'/%3E%3Ccircle cx='44' cy='224' r='1.6' opacity='0.9'/%3E%3Ccircle cx='188' cy='232' r='1.3' opacity='0.82'/%3E%3Ccircle cx='262' cy='238' r='1.2' opacity='0.78'/%3E%3C/g%3E%3Cg fill='%2393c5fd'%3E%3Ccircle cx='78' cy='108' r='1.9' opacity='0.78'/%3E%3Ccircle cx='252' cy='104' r='2.0' opacity='0.84'/%3E%3Ccircle cx='116' cy='204' r='1.8' opacity='0.76'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 320px 260px;
+  animation: fpStarTwinkle 4.4s ease-in-out infinite;
+}
+.fp-text-stage--solar_galaxy .fp-text-stage__bokeh::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='380' height='300' viewBox='0 0 380 300'%3E%3Cg fill='%23e9d5ff'%3E%3Ccircle cx='48' cy='64' r='1.3' opacity='0.82'/%3E%3Ccircle cx='178' cy='46' r='1.5' opacity='0.88'/%3E%3Ccircle cx='308' cy='88' r='1.4' opacity='0.85'/%3E%3Ccircle cx='112' cy='248' r='1.6' opacity='0.9'/%3E%3Ccircle cx='268' cy='226' r='1.3' opacity='0.8'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 380px 300px;
+  animation: fpBokehDrift 18s ease-in-out infinite alternate;
+}
+
+.fp-cosmos-orrery {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+/* Spiral Galaxies in Deep Space */
+.fp-cosmos-galaxy {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.fp-cosmos-galaxy--primary {
+  width: 220px;
+  height: 220px;
+  top: -62px;
+  right: -46px;
+  background:
+    radial-gradient(circle at center, rgba(254, 243, 199, 0.92) 0%, rgba(216, 180, 254, 0.55) 14%, rgba(99, 102, 241, 0.22) 38%, transparent 70%),
+    conic-gradient(from 0deg, transparent 0deg, rgba(168, 85, 247, 0.34) 45deg, transparent 105deg, rgba(56, 189, 248, 0.3) 180deg, transparent 245deg, rgba(232, 121, 249, 0.28) 310deg, transparent 360deg);
+  filter: blur(4px);
+  opacity: 0.72;
+  transform: rotateX(56deg) rotateZ(-20deg);
+  animation: fpCosmosGalaxySpin 48s linear infinite;
+}
+.fp-cosmos-galaxy--distant {
+  width: 150px;
+  height: 150px;
+  bottom: -44px;
+  left: -34px;
+  background:
+    radial-gradient(circle at center, rgba(224, 242, 254, 0.85) 0%, rgba(56, 189, 248, 0.42) 18%, rgba(67, 56, 202, 0.16) 46%, transparent 72%),
+    conic-gradient(from 40deg, transparent 0deg, rgba(56, 189, 248, 0.32) 60deg, transparent 140deg, rgba(129, 140, 248, 0.28) 230deg, transparent 320deg);
+  filter: blur(4px);
+  opacity: 0.58;
+  transform: rotateX(64deg) rotateZ(24deg);
+  animation: fpCosmosGalaxySpinReverse 64s linear infinite;
+}
+
+/* 3D Tilted Solar System Plane */
+.fp-cosmos-system {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 560px;
+  height: 560px;
+  margin-left: -280px;
+  margin-top: -280px;
+  transform: perspective(860px) rotateX(64deg) rotateZ(-12deg);
+  transform-style: preserve-3d;
+}
+
+/* Glowing Sun */
+.fp-cosmos-sun {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 34px;
+  height: 34px;
+  margin-left: -17px;
+  margin-top: -17px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 38%, #ffffff 0%, #fef08a 28%, #f59e0b 65%, #ea580c 100%);
+  box-shadow:
+    0 0 18px 4px rgba(253, 224, 71, 0.85),
+    0 0 42px 12px rgba(245, 158, 11, 0.52),
+    0 0 80px 24px rgba(234, 88, 12, 0.26);
+  transform: rotateX(-64deg);
+  animation: fpSolarCoronaPulse 4.2s ease-in-out infinite;
+}
+
+/* Concentric Orbital Rings */
+.fp-cosmos-orbit {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.05);
+  will-change: transform;
+}
+
+.fp-cosmos-orbit--1 {
+  width: 96px;
+  height: 96px;
+  margin-left: -48px;
+  margin-top: -48px;
+  animation: fpCosmosOrbit 6.5s linear infinite;
+}
+.fp-cosmos-orbit--2 {
+  width: 152px;
+  height: 152px;
+  margin-left: -76px;
+  margin-top: -76px;
+  animation: fpCosmosOrbit 10.5s linear infinite;
+  animation-delay: -3s;
+}
+.fp-cosmos-orbit--3 {
+  width: 224px;
+  height: 224px;
+  margin-left: -112px;
+  margin-top: -112px;
+  border-color: rgba(56, 189, 248, 0.22);
+  animation: fpCosmosOrbit 16s linear infinite;
+  animation-delay: -7s;
+}
+.fp-cosmos-orbit--4 {
+  width: 296px;
+  height: 296px;
+  margin-left: -148px;
+  margin-top: -148px;
+  animation: fpCosmosOrbit 23s linear infinite;
+  animation-delay: -11s;
+}
+.fp-cosmos-orbit--5 {
+  width: 392px;
+  height: 392px;
+  margin-left: -196px;
+  margin-top: -196px;
+  border-color: rgba(251, 191, 36, 0.2);
+  animation: fpCosmosOrbit 34s linear infinite;
+  animation-delay: -18s;
+}
+.fp-cosmos-orbit--6 {
+  width: 492px;
+  height: 492px;
+  margin-left: -246px;
+  margin-top: -246px;
+  animation: fpCosmosOrbit 48s linear infinite;
+  animation-delay: -26s;
+}
+
+/* Planets */
+.fp-cosmos-planet {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  border-radius: 50%;
+  transform: translate(50%, -50%) rotateX(-64deg);
+}
+.fp-cosmos-planet--mercury {
+  width: 7px;
+  height: 7px;
+  background: radial-gradient(circle at 30% 30%, #f1f5f9 0%, #94a3b8 65%, #334155 100%);
+  box-shadow: 0 0 6px rgba(226, 232, 240, 0.6);
+}
+.fp-cosmos-planet--venus {
+  width: 10px;
+  height: 10px;
+  background: radial-gradient(circle at 30% 30%, #fef9c3 0%, #f59e0b 68%, #78350f 100%);
+  box-shadow: 0 0 9px rgba(251, 191, 36, 0.72);
+}
+.fp-cosmos-planet--earth {
+  width: 13px;
+  height: 13px;
+  background:
+    radial-gradient(circle at 62% 58%, #34d399 0%, transparent 42%),
+    radial-gradient(circle at 32% 32%, #e0f2fe 0%, #38bdf8 38%, #1d4ed8 74%, #0f172a 100%);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.85);
+}
+.fp-cosmos-moon-orbit {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  animation: fpCosmosOrbit 2.8s linear infinite;
+}
+.fp-cosmos-moon {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 3.5px;
+  height: 3.5px;
+  margin-left: -1.75px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.9);
+}
+.fp-cosmos-planet--mars {
+  width: 10px;
+  height: 10px;
+  background: radial-gradient(circle at 32% 30%, #fecaca 0%, #ef4444 55%, #7f1d1d 100%);
+  box-shadow: 0 0 9px rgba(248, 113, 113, 0.7);
+}
+.fp-cosmos-planet--saturn {
+  width: 17px;
+  height: 17px;
+  background: radial-gradient(circle at 32% 30%, #fef3c7 0%, #eab308 58%, #713f12 100%);
+  box-shadow: 0 0 14px rgba(250, 204, 21, 0.7);
+}
+.fp-cosmos-saturn-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 34px;
+  height: 10px;
+  margin-left: -17px;
+  margin-top: -5px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(253, 230, 138, 0.78);
+  box-shadow: 0 0 6px rgba(251, 191, 36, 0.45);
+  transform: rotate(-18deg);
+}
+.fp-cosmos-planet--neptune {
+  width: 13px;
+  height: 13px;
+  background: radial-gradient(circle at 32% 30%, #bae6fd 0%, #0ea5e9 55%, #1e3a8a 100%);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.78);
+}
+
+/* Shooting Comet */
+.fp-cosmos-comet {
+  position: absolute;
+  top: 16%;
+  left: -18%;
+  width: 84px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(125, 211, 252, 0.45) 55%, #ffffff 100%);
+  border-radius: 999px;
+  box-shadow: 0 0 8px rgba(186, 230, 253, 0.85);
+  transform: rotate(22deg);
+  opacity: 0;
+  animation: fpCosmosComet 11s ease-in-out infinite;
+}
+
+@keyframes fpCosmosOrbit {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fpCosmosGalaxySpin {
+  from { transform: rotateX(56deg) rotateZ(-20deg) rotate(0deg); }
+  to { transform: rotateX(56deg) rotateZ(-20deg) rotate(360deg); }
+}
+
+@keyframes fpCosmosGalaxySpinReverse {
+  from { transform: rotateX(64deg) rotateZ(24deg) rotate(360deg); }
+  to { transform: rotateX(64deg) rotateZ(24deg) rotate(0deg); }
+}
+
+@keyframes fpSolarCoronaPulse {
+  0%, 100% {
+    transform: rotateX(-64deg) scale(1);
+    box-shadow:
+      0 0 18px 4px rgba(253, 224, 71, 0.85),
+      0 0 42px 12px rgba(245, 158, 11, 0.52),
+      0 0 80px 24px rgba(234, 88, 12, 0.26);
+  }
+  50% {
+    transform: rotateX(-64deg) scale(1.1);
+    box-shadow:
+      0 0 24px 6px rgba(254, 240, 138, 0.95),
+      0 0 54px 16px rgba(245, 158, 11, 0.65),
+      0 0 96px 30px rgba(234, 88, 12, 0.35);
+  }
+}
+
+@keyframes fpCosmosComet {
+  0%, 72% { opacity: 0; transform: translate3d(0, 0, 0) rotate(22deg); }
+  76% { opacity: 0.95; }
+  88% { opacity: 0; transform: translate3d(680px, 260px, 0) rotate(22deg); }
+  100% { opacity: 0; transform: translate3d(680px, 260px, 0) rotate(22deg); }
 }
 
 /* Translucent 3D Grid & Floating Orbs */
@@ -3380,6 +3939,8 @@ video.feed-post-video::-webkit-media-controls-play-button,
   top: -45px;
   right: -35px;
   background: radial-gradient(circle, rgba(255, 255, 255, 0.55) 0%, rgba(56, 189, 248, 0.15) 70%);
+  animation: fpStageOrbFloatA 14s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 
 .fp-text-stage__orb--b {
@@ -3388,6 +3949,8 @@ video.feed-post-video::-webkit-media-controls-play-button,
   bottom: -45px;
   left: -35px;
   background: radial-gradient(circle, rgba(252, 231, 154, 0.45) 0%, transparent 72%);
+  animation: fpStageOrbFloatB 18s ease-in-out infinite;
+  will-change: transform, opacity;
 }
 
 .fp-text-stage__header {
@@ -3699,7 +4262,15 @@ video.feed-post-video::-webkit-media-controls-play-button,
 
 @media (prefers-reduced-motion: reduce) {
   .fp-text-stage,
+  .fp-text-stage__orb,
   .fp-text-stage__bokeh,
+  .fp-text-stage__bokeh::before,
+  .fp-text-stage__bokeh::after,
+  .fp-cosmos-galaxy,
+  .fp-cosmos-sun,
+  .fp-cosmos-orbit,
+  .fp-cosmos-moon-orbit,
+  .fp-cosmos-comet,
   .fp-stage-badge__pulse,
   .fp-text-stage__cta,
   .fp-stage-converter__trigger,

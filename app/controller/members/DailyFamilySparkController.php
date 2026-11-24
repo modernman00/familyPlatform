@@ -7,6 +7,7 @@ namespace App\controller\members;
 use App\controller\BaseController;
 use App\services\DailyFamilySparkService;
 use Src\CorsHandler;
+use Src\Db;
 use Src\Limiter;
 
 /**
@@ -120,7 +121,7 @@ final class DailyFamilySparkController extends BaseController
                 return;
             }
 
-            $authorName = trim((string)(($_SESSION['firstName'] ?? '') . ' ' . ($_SESSION['lastName'] ?? '')));
+            $authorName = self::resolveSessionName(Db::connect2())['fullName'];
             $result = DailyFamilySparkService::submitResponse(
                 sparkId: $sparkId,
                 famCode: $familyCode,
@@ -192,7 +193,7 @@ final class DailyFamilySparkController extends BaseController
             $rawOptions = $input['options'] ?? [];
             $options = is_array($rawOptions) ? array_values(array_map(static fn ($v): string => (string)$v, $rawOptions)) : [];
 
-            $authorName = trim((string)(($_SESSION['firstName'] ?? '') . ' ' . ($_SESSION['lastName'] ?? '')));
+            $authorName = self::resolveSessionName(Db::connect2())['fullName'];
             $result = DailyFamilySparkService::createMemberSpark(
                 famCode: $familyCode,
                 userId: $userId,

@@ -555,7 +555,7 @@ export function FeedShell({ bootstrap = {} }) {
     }, []);
 
     const handleOpenLightbox = useCallback((images, index, p, startAnimated = false) => {
-        setLightboxState({ isOpen: true, images, index, postNo: p.post_no, startAnimated: Boolean(startAnimated) });
+        setLightboxState({ isOpen: true, images, index, postNo: p?.post_no ?? null, startAnimated: Boolean(startAnimated) });
     }, []);
 
     const handleOpenVideo = useCallback((videos, index) => {

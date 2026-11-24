@@ -79,6 +79,20 @@
 
                     <div id="composerEditorStageWrapper" class="composer-editor-wrapper position-relative w-100">
                         <div id="composerStageBokehLayer" class="fp-text-stage__bokeh d-none" aria-hidden="true"></div>
+                        <div id="composerStageCosmosLayer" class="fp-cosmos-orrery d-none" aria-hidden="true">
+                            <div class="fp-cosmos-galaxy fp-cosmos-galaxy--primary"></div>
+                            <div class="fp-cosmos-galaxy fp-cosmos-galaxy--distant"></div>
+                            <div class="fp-cosmos-comet"></div>
+                            <div class="fp-cosmos-system">
+                                <div class="fp-cosmos-sun"></div>
+                                <div class="fp-cosmos-orbit fp-cosmos-orbit--1"><div class="fp-cosmos-planet fp-cosmos-planet--mercury"></div></div>
+                                <div class="fp-cosmos-orbit fp-cosmos-orbit--2"><div class="fp-cosmos-planet fp-cosmos-planet--venus"></div></div>
+                                <div class="fp-cosmos-orbit fp-cosmos-orbit--3"><div class="fp-cosmos-planet fp-cosmos-planet--earth"><div class="fp-cosmos-moon-orbit"><div class="fp-cosmos-moon"></div></div></div></div>
+                                <div class="fp-cosmos-orbit fp-cosmos-orbit--4"><div class="fp-cosmos-planet fp-cosmos-planet--mars"></div></div>
+                                <div class="fp-cosmos-orbit fp-cosmos-orbit--5"><div class="fp-cosmos-planet fp-cosmos-planet--saturn"><div class="fp-cosmos-saturn-ring"></div></div></div>
+                                <div class="fp-cosmos-orbit fp-cosmos-orbit--6"><div class="fp-cosmos-planet fp-cosmos-planet--neptune"></div></div>
+                            </div>
+                        </div>
                         <div id="composerStageHeaderBadge" class="d-none mb-2">
                             <span id="composerStageHeaderPill" class="fp-stage-badge">
                                 <span id="composerStageHeaderText">🔮 3D HOLOGRAM STAGE</span>
@@ -152,6 +166,26 @@
                             <button type="button" class="composer-stage-pill" data-stage-slug="royal_parchment" onclick="window.__setComposerTextStage('royal_parchment')" aria-pressed="false" title="Editorial Onyx Silk &amp; 24k Gold Dust Backdrop">
                                 <span class="composer-stage-pill__dot composer-stage-pill__dot--royal">👑</span>
                                 <span>Royal Noir</span>
+                            </button>
+                            <button type="button" class="composer-stage-pill" data-stage-slug="xmas_snowfall" onclick="window.__setComposerTextStage('xmas_snowfall')" aria-pressed="false" title="Festive Alpine Snowfall &amp; Frost Bokeh Backdrop">
+                                <span class="composer-stage-pill__dot composer-stage-pill__dot--xmas-snow">❄️</span>
+                                <span>Snowfall</span>
+                            </button>
+                            <button type="button" class="composer-stage-pill" data-stage-slug="xmas_hearth" onclick="window.__setComposerTextStage('xmas_hearth')" aria-pressed="false" title="Cosy Christmas Hearth, Fairy Lights &amp; Embers Backdrop">
+                                <span class="composer-stage-pill__dot composer-stage-pill__dot--xmas-hearth">🎄</span>
+                                <span>Cosy Hearth</span>
+                            </button>
+                            <button type="button" class="composer-stage-pill" data-stage-slug="xmas_lights" onclick="window.__setComposerTextStage('xmas_lights')" aria-pressed="false" title="Festive Pine &amp; Multi-Colour Fairy Lights Backdrop">
+                                <span class="composer-stage-pill__dot composer-stage-pill__dot--xmas-lights">✨</span>
+                                <span>Fairy Lights</span>
+                            </button>
+                            <button type="button" class="composer-stage-pill" data-stage-slug="xmas_winter_gold" onclick="window.__setComposerTextStage('xmas_winter_gold')" aria-pressed="false" title="Emerald &amp; 24k Champagne Winter Gold Backdrop">
+                                <span class="composer-stage-pill__dot composer-stage-pill__dot--xmas-gold">🌟</span>
+                                <span>Winter Gold</span>
+                            </button>
+                            <button type="button" class="composer-stage-pill" data-stage-slug="solar_galaxy" onclick="window.__setComposerTextStage('solar_galaxy')" aria-pressed="false" title="Solar System, Spiral Galaxies &amp; Orbiting Planets Backdrop">
+                                <span class="composer-stage-pill__dot composer-stage-pill__dot--solar-galaxy">🪐</span>
+                                <span>Solar Galaxy</span>
                             </button>
                             <button type="button" class="composer-stage-pill" data-stage-slug="dynasty_holo" onclick="window.__setComposerTextStage('dynasty_holo')" aria-pressed="false" title="Translucent 3D Emerald Dynasty Tree Stage">
                                 <span class="composer-stage-pill__dot composer-stage-pill__dot--dynasty">🌳</span>
@@ -2146,6 +2180,31 @@ window.selectPostAudience = function(scope, label, iconClass, famCode) {
             category: 'scenic',
             label: '👑 Royal Noir',
         },
+        xmas_snowfall: {
+            badge: null,
+            category: 'scenic',
+            label: '❄️ Festive Snowfall',
+        },
+        xmas_hearth: {
+            badge: null,
+            category: 'scenic',
+            label: '🎄 Cosy Hearth',
+        },
+        xmas_lights: {
+            badge: null,
+            category: 'scenic',
+            label: '✨ Fairy Lights',
+        },
+        xmas_winter_gold: {
+            badge: null,
+            category: 'scenic',
+            label: '🌟 Winter Gold',
+        },
+        solar_galaxy: {
+            badge: null,
+            category: 'scenic',
+            label: '🪐 Solar Galaxy',
+        },
         dynasty_holo: {
             badge: '🌳 DYNASTY LINEAGE CALL',
             category: 'stage',
@@ -2188,6 +2247,7 @@ window.selectPostAudience = function(scope, label, iconClass, famCode) {
         const badgeWrap = document.getElementById('composerStageHeaderBadge');
         const badgeText = document.getElementById('composerStageHeaderText');
         const bokehLayer = document.getElementById('composerStageBokehLayer');
+        const cosmosLayer = document.getElementById('composerStageCosmosLayer');
 
         if (input) input.value = cleanSlug;
 
@@ -2212,6 +2272,9 @@ window.selectPostAudience = function(scope, label, iconClass, famCode) {
             if (bokehLayer) {
                 bokehLayer.classList.toggle('d-none', !isScenic);
             }
+            if (cosmosLayer) {
+                cosmosLayer.classList.toggle('d-none', cleanSlug !== 'solar_galaxy');
+            }
             editor.style.color = '#ffffff';
             editor.style.fontWeight = isScenic ? '800' : '700';
             editor.style.fontSize = isScenic ? '1.35rem' : '1.22rem';
@@ -2229,6 +2292,7 @@ window.selectPostAudience = function(scope, label, iconClass, famCode) {
             }
         } else {
             if (bokehLayer) bokehLayer.classList.add('d-none');
+            if (cosmosLayer) cosmosLayer.classList.add('d-none');
             editor.style.color = 'var(--text-main, #0f172a)';
             editor.style.fontWeight = '';
             editor.style.fontSize = '1.05rem';
@@ -2262,7 +2326,15 @@ window.selectPostAudience = function(scope, label, iconClass, famCode) {
                 suggestBtn.classList.add('d-none');
                 return;
             }
-            if (val.includes('family tree') || val.includes('branch') || val.includes('lineage')) {
+            if (val.includes('solar') || val.includes('galaxy') || val.includes('planet') || val.includes('cosmos') || val.includes('universe') || val.includes('space')) {
+                suggestedSlug = 'solar_galaxy';
+                suggestBtn.textContent = '🪐 Try Solar Galaxy Backdrop';
+                suggestBtn.classList.remove('d-none');
+            } else if (val.includes('xmas') || val.includes('christmas') || val.includes('fairy light') || val.includes('santa') || val.includes('festive') || val.includes('snow')) {
+                suggestedSlug = val.includes('snow') ? 'xmas_snowfall' : (val.includes('light') ? 'xmas_lights' : 'xmas_hearth');
+                suggestBtn.textContent = val.includes('snow') ? '❄️ Try Festive Snowfall Backdrop' : (val.includes('light') ? '✨ Try Fairy Lights Backdrop' : '🎄 Try Cosy Hearth Backdrop');
+                suggestBtn.classList.remove('d-none');
+            } else if (val.includes('family tree') || val.includes('branch') || val.includes('lineage')) {
                 suggestedSlug = 'dynasty_holo';
                 suggestBtn.textContent = '✨ Try 3D Dynasty Tree Stage';
                 suggestBtn.classList.remove('d-none');
@@ -2374,6 +2446,21 @@ window.selectPostAudience = function(scope, label, iconClass, famCode) {
 }
 .composer-stage-pill__dot--royal {
     background: linear-gradient(135deg, #09090b 0%, #292524 60%, #d97706 100%);
+}
+.composer-stage-pill__dot--xmas-snow {
+    background: radial-gradient(circle at 30% 28%, #e0f2fe 0%, #0284c7 45%, #06283d 100%);
+}
+.composer-stage-pill__dot--xmas-hearth {
+    background: radial-gradient(circle at 30% 30%, #fbbf24 0%, #b91c1c 48%, #3b0712 100%);
+}
+.composer-stage-pill__dot--xmas-lights {
+    background: linear-gradient(135deg, #064e3b 0%, #b91c1c 50%, #f59e0b 100%);
+}
+.composer-stage-pill__dot--xmas-gold {
+    background: radial-gradient(circle at 30% 28%, #fef08a 0%, #ca8a04 45%, #052e16 100%);
+}
+.composer-stage-pill__dot--solar-galaxy {
+    background: radial-gradient(circle at 35% 35%, #fde047 0%, #ea580c 26%, #4338ca 62%, #02030d 100%);
 }
 .composer-stage-pill__dot--dynasty {
     background: linear-gradient(135deg, #065f46, #10b981);
