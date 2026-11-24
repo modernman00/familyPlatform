@@ -6,6 +6,7 @@ import { HEIRLOOM_REACTIONS, getHeirloomGlassSvg } from '../../components/profil
 import { CommentThread } from './CommentThread';
 import { FeedVideoGallery } from './FeedVideoGallery';
 import { RichTextTokens } from './RichTextTokens';
+import CosmicOrrery from './CosmicOrrery';
 import {
     TEXT_STAGE_CATALOG,
     formatRelativeTime,
@@ -117,7 +118,11 @@ export const PostCard = memo(function PostCard({
         if (reactionLongPressTimerRef.current) clearTimeout(reactionLongPressTimerRef.current);
     }, []);
 
-    const authorName = post.fullName || `${post.firstName || ''} ${post.lastName || ''}`.trim() || 'Family Member';
+    const rawFullName = String(post.fullName || '').trim();
+    const fallbackName = `${post.firstName || ''} ${post.lastName || ''}`.trim();
+    const authorName = (rawFullName && (!post.id || rawFullName.toLowerCase() !== String(post.id).toLowerCase()))
+        ? rawFullName
+        : (fallbackName || 'Family Member');
     const stageMeta = getPostStageMeta(post);
     const pollMeta = hasPollArena(post) ? getPollArenaMeta(post) : null;
     const reactionList = Object.values(HEIRLOOM_REACTIONS).filter(
@@ -833,6 +838,7 @@ export const PostCard = memo(function PostCard({
                                 ) : (
                                     <div className="fp-text-stage__grid" aria-hidden="true" />
                                 )}
+                                {stageMeta.slug === 'solar_galaxy' && <CosmicOrrery />}
                                 {stageMeta.badge && (
                                     <div className="fp-text-stage__header">
                                         <span className="fp-stage-badge">
@@ -1092,7 +1098,7 @@ export const PostCard = memo(function PostCard({
                 </div>
             )}
 
-            {/* Single Photo (Classic Aura Stage — uncropped full render) */}
+            {/* Single Photo (Full-Width Natural Aspect — zero sidebars, uncropped) */}
             {images.length === 1 && !post.comparison && (() => {
                 const singleImgUrl = getPostImageUrl(images[0]) || images[0];
                 const isSingleBroken = Boolean(brokenPhotoUrls[images[0]] || brokenPhotoUrls[singleImgUrl]);
@@ -1104,7 +1110,10 @@ export const PostCard = memo(function PostCard({
                             <span>Photo unavailable</span>
                         </div>
                     ) : (
-                        <div className="position-relative feed-media-aura-container">
+                        <div
+                            className="position-relative feed-media-aura-container"
+                            style={{ width: '100%' }}
+                        >
                             <div className="feed-media-aura-backdrop" aria-hidden="true">
                                 <img src={singleImgUrl} alt="" loading="lazy" referrerPolicy="no-referrer" />
                             </div>
@@ -1115,7 +1124,6 @@ export const PostCard = memo(function PostCard({
                                     width: '100%',
                                     aspectRatio: 'auto',
                                     minHeight: '220px',
-                                    maxHeight: '640px',
                                     background: 'rgba(0,0,0,0.03)',
                                     display: 'flex',
                                     alignItems: 'center',
@@ -1128,7 +1136,7 @@ export const PostCard = memo(function PostCard({
                                     onClick={() => onOpenLightbox?.([singleImgUrl], 0, post)}
                                     onDblClick={() => onReactPost?.(post.post_no, 'love')}
                                     aria-label="View photo 1 of 1"
-                                    style={{ borderRadius: '12px', overflow: 'hidden', cursor: 'pointer', minHeight: '44px' }}
+                                    style={{ borderRadius: '12px', overflow: 'hidden', cursor: 'pointer', minHeight: '44px', width: '100%' }}
                                 >
                                     <img
                                         src={singleImgUrl}
@@ -1140,7 +1148,7 @@ export const PostCard = memo(function PostCard({
                                             borderRadius: '12px',
                                             width: '100%',
                                             height: 'auto',
-                                            maxHeight: '640px',
+                                            maxHeight: '1100px',
                                             objectFit: 'contain',
                                             display: 'block',
                                         }}
@@ -1158,6 +1166,7 @@ export const PostCard = memo(function PostCard({
                                         position: 'absolute',
                                         right: 12,
                                         bottom: 12,
+                                        zIndex: 5,
                                         minHeight: '44px',
                                         padding: '6px 14px',
                                         background: 'rgba(15, 23, 42, 0.86)',
@@ -1477,39 +1486,48 @@ export const PostCard = memo(function PostCard({
                         normalizedMedia={post.normalized_media}
                         onOpenVideo={onOpenVideo}
                     />
-                    {post.link_preview?.is_instagram && post.link_preview?.url && (
-                        <div
-                            className="instagram-native-source-bar mx-1 mb-3 p-2.5 rounded-3 d-flex align-items-center justify-content-between gap-2"
-                            data-testid="instagram-native-source-bar"
-                        >
-                            <div className="d-flex align-items-start gap-2.5 min-w-0 flex-grow-1">
-                                <span className="instagram-native-source-bar__icon" aria-hidden="true">
-                                    <i className="bi bi-instagram" />
-                                </span>
-                                <div className="min-w-0 flex-grow-1">
-                                    <div className="fw-bold instagram-native-source-bar__title" title={post.link_preview.title || 'Instagram Reel'}>
-                                        {post.link_preview.title || 'Instagram Reel'}
-                                    </div>
-                                    {post.link_preview.description
-                                        && post.link_preview.description !== 'Watch this reel on Instagram'
-                                        && post.link_preview.description !== 'Watch this video on Instagram' && (
-                                            <p className="mb-0 instagram-native-source-bar__desc" title={post.link_preview.description}>
-                                                {post.link_preview.description}
+                    {(post.link_preview?.is_instagram || post.link_preview?.is_facebook) && post.link_preview?.url && (() => {
+                        const isIgBar = Boolean(post.link_preview?.is_instagram);
+                        const barBrand = isIgBar ? 'Instagram' : 'Facebook';
+                        const barIcon = isIgBar ? 'bi-instagram' : 'bi-facebook';
+                        const barTestId = isIgBar ? 'instagram-native-source-bar' : 'facebook-native-source-bar';
+                        const descText = post.link_preview.description;
+                        const isGenericDesc = !descText
+                            || descText === `Watch this reel on ${barBrand}`
+                            || descText === `Watch this video on ${barBrand}`
+                            || descText === `View this post on ${barBrand}`;
+                        return (
+                            <div
+                                className="instagram-native-source-bar mx-1 mb-3 p-2.5 rounded-3 d-flex align-items-center justify-content-between gap-2"
+                                data-testid={barTestId}
+                            >
+                                <div className="d-flex align-items-start gap-2.5 min-w-0 flex-grow-1">
+                                    <span className="instagram-native-source-bar__icon" aria-hidden="true">
+                                        <i className={`bi ${barIcon}`} />
+                                    </span>
+                                    <div className="min-w-0 flex-grow-1">
+                                        <div className="fw-bold instagram-native-source-bar__title" title={post.link_preview.title || `${barBrand} Reel`}>
+                                            {post.link_preview.title || `${barBrand} Reel`}
+                                        </div>
+                                        {!isGenericDesc && (
+                                            <p className="mb-0 instagram-native-source-bar__desc" title={descText}>
+                                                {descText}
                                             </p>
                                         )}
+                                    </div>
                                 </div>
+                                <a
+                                    href={post.link_preview.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="instagram-native-source-bar__cta text-decoration-none"
+                                >
+                                    <span>Open Reel</span>
+                                    <i className="bi bi-box-arrow-up-right" style={{ fontSize: '0.72rem' }} aria-hidden="true" />
+                                </a>
                             </div>
-                            <a
-                                href={post.link_preview.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="instagram-native-source-bar__cta text-decoration-none"
-                            >
-                                <span>Open Reel</span>
-                                <i className="bi bi-box-arrow-up-right" style={{ fontSize: '0.72rem' }} aria-hidden="true" />
-                            </a>
-                        </div>
-                    )}
+                        );
+                    })()}
                 </>
             )}
 
@@ -1701,7 +1719,28 @@ export const PostCard = memo(function PostCard({
                     )}
                 </div>
 
-                <div>
+                <div className="d-flex align-items-center gap-2">
+                    {ownPost ? (
+                        <button
+                            type="button"
+                            className="btn btn-link btn-sm px-1 py-0 text-muted text-decoration-none d-inline-flex align-items-center justify-content-center gap-1 post-views-count"
+                            style={{ fontSize: '0.825rem', minWidth: '44px', minHeight: '44px', whiteSpace: 'nowrap', flexShrink: 0 }}
+                            title="Click to see who viewed your post"
+                            onClick={() => onOpenPostViewers?.(post)}
+                        >
+                            <i className="bi bi-eye text-primary" aria-hidden="true" />
+                            <span>{viewCount} {viewCount === 1 ? 'view' : 'views'}</span>
+                        </button>
+                    ) : (
+                        <span
+                            className="d-inline-flex align-items-center gap-1 text-muted post-views-count"
+                            style={{ fontSize: '0.825rem', whiteSpace: 'nowrap', flexShrink: 0 }}
+                            title={`${viewCount} family views`}
+                        >
+                            <i className="bi bi-eye text-secondary" aria-hidden="true" />
+                            <span>{viewCount} {viewCount === 1 ? 'view' : 'views'}</span>
+                        </span>
+                    )}
                     <button
                         type="button"
                         className={`btn btn-action-glyph btn-action-bookmark rounded-circle ${savedMemory ? 'is-saved' : ''}`}
@@ -1731,50 +1770,35 @@ export const PostCard = memo(function PostCard({
                 </div>
             </div>
 
-            {/* Social Proof & Engagement Meta */}
-            <div className="d-flex justify-content-between align-items-center px-1 pb-1 pt-1" style={{ fontSize: '0.85rem' }}>
-                <div>
-                    {post.post_likes > 0 && (
-                        <span className="d-inline-flex align-items-center gap-1 fw-bold" style={{ fontSize: '0.88rem', color: 'var(--text-main, #0f172a)' }}>
-                            <span
-                                className="d-inline-flex align-items-center justify-content-center"
-                                style={{ lineHeight: 1 }}
-                                dangerouslySetInnerHTML={{ __html: getHeirloomGlassSvg(post.user_reaction || 'love', 18) }}
-                            />
-                            <span>{post.post_likes}</span>
-                        </span>
-                    )}
+            {/* Social Proof & Engagement Meta (only shown when likes or comments exist) */}
+            {(post.post_likes > 0 || commentCount > 0) && (
+                <div className="d-flex justify-content-between align-items-center px-1 pb-1 pt-1" style={{ fontSize: '0.85rem' }}>
+                    <div>
+                        {post.post_likes > 0 && (
+                            <span className="d-inline-flex align-items-center gap-1 fw-bold" style={{ fontSize: '0.88rem', color: 'var(--text-main, #0f172a)' }}>
+                                <span
+                                    className="d-inline-flex align-items-center justify-content-center"
+                                    style={{ lineHeight: 1 }}
+                                    dangerouslySetInnerHTML={{ __html: getHeirloomGlassSvg(post.user_reaction || 'love', 18) }}
+                                />
+                                <span>{post.post_likes}</span>
+                            </span>
+                        )}
+                    </div>
+                    <div className="d-flex align-items-center gap-2 text-muted" style={{ fontSize: '0.825rem' }}>
+                        {commentCount > 0 && (
+                            <button
+                                type="button"
+                                className="btn btn-link btn-sm p-0 text-muted text-decoration-none"
+                                style={{ fontSize: '0.825rem', minHeight: '44px' }}
+                                onClick={() => setCommentsExpanded((v) => !v)}
+                            >
+                                {commentCount} {commentCount === 1 ? 'comment' : 'comments'}
+                            </button>
+                        )}
+                    </div>
                 </div>
-                <div className="d-flex align-items-center gap-2 text-muted" style={{ fontSize: '0.825rem' }}>
-                    {ownPost ? (
-                        <button
-                            type="button"
-                            className="btn btn-link btn-sm p-0 text-muted text-decoration-none d-inline-flex align-items-center gap-1 post-views-count"
-                            style={{ fontSize: '0.825rem', minHeight: '44px' }}
-                            title="Click to see who viewed your post"
-                            onClick={() => onOpenPostViewers?.(post)}
-                        >
-                            <i className="bi bi-eye text-primary" aria-hidden="true" />
-                            <span>{viewCount} {viewCount === 1 ? 'view' : 'views'}</span>
-                        </button>
-                    ) : (
-                        <span className="d-inline-flex align-items-center gap-1 post-views-count" title={`${viewCount} family views`}>
-                            <i className="bi bi-eye text-secondary" aria-hidden="true" />
-                            <span>{viewCount} {viewCount === 1 ? 'view' : 'views'}</span>
-                        </span>
-                    )}
-                    {commentCount > 0 && (
-                        <button
-                            type="button"
-                            className="btn btn-link btn-sm p-0 text-muted text-decoration-none"
-                            style={{ fontSize: '0.825rem', minHeight: '44px' }}
-                            onClick={() => setCommentsExpanded((v) => !v)}
-                        >
-                            • {commentCount} {commentCount === 1 ? 'comment' : 'comments'}
-                        </button>
-                    )}
-                </div>
-            </div>
+            )}
 
             {/* Instagram Inline Caption (for media posts without poll arena) */}
             {hasMedia && !pollMeta && hasRichBody && (

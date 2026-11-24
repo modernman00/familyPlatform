@@ -23,6 +23,11 @@ final class PostDto implements JsonSerializable
         'rose_stardust',
         'northern_sky',
         'royal_parchment',
+        'xmas_snowfall',
+        'xmas_hearth',
+        'xmas_lights',
+        'xmas_winter_gold',
+        'solar_galaxy',
         'cyber_glass',
         'alert_pulse',
         'grand_announcement',
@@ -149,12 +154,12 @@ final class PostDto implements JsonSerializable
         $postNo = (int)($row['post_no'] ?? 0);
         $id = (string)($row['id'] ?? '');
         $fullName = (string)($row['fullName'] ?? ($row['fullname'] ?? ''));
-        if ($fullName === '' || $fullName === 'Family Member') {
+        if ($fullName === '' || $fullName === 'Family Member' || ($id !== '' && strcasecmp($fullName, $id) === 0)) {
             if (!empty($row['personalFullName']) && is_string($row['personalFullName'])) {
                 $fullName = trim($row['personalFullName']);
             }
         }
-        if ($fullName === '') {
+        if ($fullName === '' || ($id !== '' && strcasecmp($fullName, $id) === 0)) {
             $fullName = 'Family Member';
         }
         $message = (string)($row['postMessage'] ?? ($row['content'] ?? ''));
@@ -262,17 +267,28 @@ final class PostDto implements JsonSerializable
                 $linkPreview = $extractedAssets['preview'];
             }
 
-            $urlsToStripIg = [];
-            // Promote verified Instagram Reel/video streams into native in-feed video descriptors
-            if (empty($rowVideos) && is_array($linkPreview) && !empty($linkPreview['is_instagram']) && !empty($linkPreview['is_video']) && !empty($linkPreview['proxied_video_url'])) {
-                $igHook = self::deriveHookFromMessage($message);
+            $urlsToStripSocial = [];
+            // Promote verified Instagram or Facebook Reel/video streams into native in-feed video descriptors
+            $isPromotableSocialVideo = empty($rowVideos)
+                && is_array($linkPreview)
+                && (!empty($linkPreview['is_instagram']) || !empty($linkPreview['is_facebook']))
+                && !empty($linkPreview['is_video'])
+                && !empty($linkPreview['proxied_video_url']);
+            if ($isPromotableSocialVideo) {
+                $socialHook = self::deriveHookFromMessage($message);
+                $isIgSocial = !empty($linkPreview['is_instagram']);
                 $igShortcode = isset($linkPreview['ig_shortcode']) && is_string($linkPreview['ig_shortcode'])
                     ? trim($linkPreview['ig_shortcode'])
                     : '';
-                $igDesc = [
+                $fbVideoId = isset($linkPreview['fb_video_id']) && is_string($linkPreview['fb_video_id'])
+                    ? trim($linkPreview['fb_video_id'])
+                    : '';
+                $socialDesc = [
                     'type' => 'direct',
-                    'provider' => 'instagram',
-                    'videoId' => $igShortcode !== '' ? ('ig_' . $igShortcode) : null,
+                    'provider' => $isIgSocial ? 'instagram' : 'facebook',
+                    'videoId' => $isIgSocial
+                        ? ($igShortcode !== '' ? ('ig_' . $igShortcode) : null)
+                        : ($fbVideoId !== '' ? ('fb_' . $fbVideoId) : null),
                     'thumbnailUrl' => isset($linkPreview['image']) && is_string($linkPreview['image']) ? $linkPreview['image'] : null,
                     'posterUrl' => isset($linkPreview['image']) && is_string($linkPreview['image']) ? $linkPreview['image'] : null,
                     'embedUrl' => (string)$linkPreview['proxied_video_url'],
@@ -280,27 +296,27 @@ final class PostDto implements JsonSerializable
                     'hlsUrl' => null,
                     'trimStart' => null,
                     'trimEnd' => null,
-                    'hook' => $igHook ?? (isset($linkPreview['title']) && is_string($linkPreview['title']) ? $linkPreview['title'] : null),
-                    'hookText' => $igHook,
+                    'hook' => $socialHook ?? (isset($linkPreview['title']) && is_string($linkPreview['title']) ? $linkPreview['title'] : null),
+                    'hookText' => $socialHook,
                     'aspectMode' => 'reel',
                     'aspect_ratio' => isset($linkPreview['aspect_ratio']) && is_string($linkPreview['aspect_ratio']) ? $linkPreview['aspect_ratio'] : '9 / 16',
                     'isShort' => true,
-                    'sourceLabel' => 'Instagram',
+                    'sourceLabel' => $isIgSocial ? 'Instagram' : 'Facebook',
                     'sourceUrl' => (string)($linkPreview['url'] ?? ''),
                     'sourceTitle' => isset($linkPreview['title']) && is_string($linkPreview['title']) ? $linkPreview['title'] : null,
                 ];
-                $rowVideos = [$igDesc];
+                $rowVideos = [$socialDesc];
                 $row['videos'] = $rowVideos;
-                $row['video'] = $igDesc;
-                $urlsToStripIg = array_values(array_filter([
+                $row['video'] = $socialDesc;
+                $urlsToStripSocial = array_values(array_filter([
                     isset($linkPreview['original_url']) && is_string($linkPreview['original_url']) ? $linkPreview['original_url'] : '',
                     isset($linkPreview['url']) && is_string($linkPreview['url']) ? $linkPreview['url'] : '',
                 ]));
             }
 
-            if ($urlsToStripIg !== []) {
+            if ($urlsToStripSocial !== []) {
                 $baseCleaned = !empty($extractedAssets['cleaned_message']) ? $extractedAssets['cleaned_message'] : $message;
-                $row['displayMessage'] = \App\services\LinkPreviewService::cleanPhotoLinkFromMessage($baseCleaned, $urlsToStripIg);
+                $row['displayMessage'] = \App\services\LinkPreviewService::cleanPhotoLinkFromMessage($baseCleaned, $urlsToStripSocial);
             } elseif (!empty($extractedAssets['cleaned_message'])) {
                 $row['displayMessage'] = $extractedAssets['cleaned_message'];
             } elseif (!empty($finalImages) || !empty($finalVideos)) {

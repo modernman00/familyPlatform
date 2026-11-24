@@ -32,10 +32,11 @@ export function parseVideoUrl(url) {
   const trimmed = url.trim();
   if (!trimmed) return null;
 
-  // 0. Already-proxied sovereign stream URL (/resources/videos/external-stream?(url|ig)=... or /member/stream-video?url=...)
+  // 0. Already-proxied sovereign stream URL (/resources/videos/external-stream?(url|ig|fb)=... or /member/stream-video?url=...)
   if (
     trimmed.startsWith('/resources/videos/external-stream?url=')
     || trimmed.startsWith('/resources/videos/external-stream?ig=')
+    || trimmed.startsWith('/resources/videos/external-stream?fb=')
     || trimmed.startsWith('/member/stream-video?url=')
   ) {
     if (trimmed.startsWith('/resources/videos/external-stream?ig=')) {
@@ -48,6 +49,22 @@ export function parseVideoUrl(url) {
         thumbnailUrl: null,
         embedUrl: trimmed,
         originalUrl: igCode ? `https://www.instagram.com/reel/${igCode}/` : trimmed,
+        isShort: true,
+        aspect_ratio: '9 / 16',
+        trimStart: null,
+        trimEnd: null,
+      };
+    }
+    if (trimmed.startsWith('/resources/videos/external-stream?fb=')) {
+      const fbQuery = trimmed.split('?fb=')[1] || '';
+      const fbId = decodeURIComponent(fbQuery.split('&')[0] || '');
+      return {
+        type: 'direct',
+        provider: 'facebook',
+        videoId: fbId ? `fb_${fbId}` : null,
+        thumbnailUrl: null,
+        embedUrl: trimmed,
+        originalUrl: fbId ? `https://www.facebook.com/reel/${fbId}/` : trimmed,
         isShort: true,
         aspect_ratio: '9 / 16',
         trimStart: null,
@@ -76,7 +93,7 @@ export function parseVideoUrl(url) {
 
   // 1. YouTube Matcher
   // Matches: youtube.com/watch?v=ID, youtube.com/watch?vID, youtu.be/ID, youtube.com/shorts/ID, youtube.com/embed/ID, youtube.com/live/ID
-  const ytRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?|shorts|live)\/|\S*?[?&]v[=_]?)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+  const ytRegex = /(?:https?:\/\/)?(?:www\.|m\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?|shorts|live)\/|\S*?[?&]v[=_]?)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
   const ytMatch = trimmed.match(ytRegex);
   if (ytMatch && ytMatch[1]) {
     return {
@@ -119,7 +136,7 @@ export function parseVideoUrl(url) {
   }
 
   // 3b. TikTok (tiktok.com/@user/video/ID or tiktok.com/embed/v2/ID) — embeddable player
-  const tiktokMatch = trimmed.match(/^https?:\/\/(?:www\.)?tiktok\.com\/(?:@[\w.-]+\/video\/|embed\/v2\/)(\d{8,25})/i);
+  const tiktokMatch = trimmed.match(/^https?:\/\/(?:www\.|m\.)?tiktok\.com\/(?:@[\w.-]+\/video\/|embed\/v2\/)(\d{8,25})/i);
   if (tiktokMatch) {
     return {
       type: 'tiktok',

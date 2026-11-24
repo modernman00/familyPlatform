@@ -654,6 +654,70 @@ describe('Profile Feed Preact Island (Phases 1–4)', () => {
         });
     });
 
+    it('promotes Facebook Reel link_preview to native portrait video player with source bar and falls back cleanly on stream error', async () => {
+        const fbNativeReelPost = {
+            post_no: '992',
+            id: 'u_1',
+            fullName: 'Wally Olaogun',
+            postMessage: 'https://www.facebook.com/share/r/1AGvntUbdm/',
+            post_likes: 0,
+            comments: [],
+            images: [],
+            videos: [],
+            link_preview: {
+                url: 'https://www.facebook.com/reel/1176514021862056/',
+                original_url: 'https://www.facebook.com/share/r/1AGvntUbdm/',
+                title: '41K views · 32 reactions | OpenArt AI',
+                description: 'Create Your Next Scene on OpenArt.',
+                image: '/public/uploads/link_previews/fb_clean_poster.jpg',
+                video_url: '/resources/videos/external-stream?fb=1176514021862056&sig=test_sig',
+                proxied_video_url: '/resources/videos/external-stream?fb=1176514021862056&sig=test_sig',
+                aspect_ratio: '9 / 16',
+                site_name: 'Facebook',
+                domain: 'facebook.com',
+                is_video: true,
+                is_social_video: true,
+                is_facebook: true,
+                fb_video_id: '1176514021862056',
+                cta_label: 'Watch on Facebook →',
+            },
+        };
+
+        globalThis.fetch = vi.fn(() =>
+            Promise.resolve({
+                ok: true,
+                status: 200,
+                headers: new Headers({ 'content-type': 'application/json' }),
+                json: async () => ({ status: 'success', tags: [] }),
+            })
+        );
+
+        const { container } = render(
+            <FeedShell
+                bootstrap={{
+                    ...baseBootstrap,
+                    initialPosts: [fbNativeReelPost],
+                    initialHasMore: false,
+                }}
+            />
+        );
+
+        const videoEl = container.querySelector('video');
+        expect(videoEl).toBeTruthy();
+        expect(videoEl.getAttribute('src')).toBe('/resources/videos/external-stream?fb=1176514021862056&sig=test_sig');
+        expect(videoEl.getAttribute('poster')).toBe('/public/uploads/link_previews/fb_clean_poster.jpg');
+        expect(container.querySelector('[data-testid="facebook-native-source-bar"]')).toBeTruthy();
+        expect(screen.getByText('Create Your Next Scene on OpenArt.')).toBeTruthy();
+
+        fireEvent.error(videoEl);
+        await waitFor(() => {
+            const fallbackCard = container.querySelector('[data-testid="facebook-video-fallback-card"]');
+            expect(fallbackCard).toBeTruthy();
+            expect(fallbackCard.querySelector('.link-preview-card__media--portrait')).toBeTruthy();
+            expect(fallbackCard.querySelector('.link-preview-card__play-badge')).toBeTruthy();
+        });
+    });
+
     it('renders Instagram fallback card in 4:5 portrait and suppresses duplicate play badge on cmp1 thumbnails', async () => {
         const igFallbackPost = {
             post_no: '992',
@@ -786,15 +850,75 @@ describe('Profile Feed Preact Island (Phases 1–4)', () => {
         const img = container.querySelector('img.post-media-first-img');
         expect(stage).toBeTruthy();
         expect(stage.style.aspectRatio).toBe('auto');
+        expect(stage.style.width).toBe('100%');
         expect(img).toBeTruthy();
+        expect(img.style.width).toBe('100%');
+        expect(img.style.height).toBe('auto');
         expect(img.style.objectFit).toBe('contain');
         expect(img.getAttribute('referrerpolicy') || img.referrerPolicy).toBe('no-referrer');
+
+        const animateBtn = container.querySelector('button[title*="Animate this photo"]');
+        expect(animateBtn).toBeTruthy();
+        fireEvent.click(animateBtn);
+        await waitFor(() => {
+            expect(screen.getByText('View Original')).toBeTruthy();
+            expect(screen.getByText('😂 Laugh')).toBeTruthy();
+        });
+        const closeLightboxBtn = screen.getByLabelText('Close lightbox');
+        fireEvent.click(closeLightboxBtn);
 
         fireEvent.error(img);
         await waitFor(() => {
             expect(container.querySelector('.post-media-stage__fallback')).toBeTruthy();
             expect(screen.getByText('Photo unavailable')).toBeTruthy();
         });
+    });
+
+    it('excludes YouTube URLs, mobile YouTube/TikTok URLs, and Facebook share URLs stored in post_img0 from images', () => {
+        const posts = [
+            {
+                post_no: '9901',
+                id: 'u_1',
+                fullName: 'Wally Olaogun',
+                postMessage: '',
+                post_img0: 'https://www.youtube.com/shorts/dQw4w9WgXcQ',
+                post_likes: 0,
+                comments: [],
+            },
+            {
+                post_no: '9902',
+                id: 'u_1',
+                fullName: 'Wally Olaogun',
+                postMessage: '',
+                post_img0: 'https://m.youtube.com/watch?v=dQw4w9WgXcQ',
+                post_likes: 0,
+                comments: [],
+            },
+            {
+                post_no: '9903',
+                id: 'u_1',
+                fullName: 'Wally Olaogun',
+                postMessage: '',
+                post_img0: 'https://www.facebook.com/share/r/1ABCdef234/',
+                post_likes: 0,
+                comments: [],
+            },
+        ];
+
+        const { container } = render(
+            <FeedShell
+                bootstrap={{
+                    currentUserId: 'u_1',
+                    currentUserName: 'Wally Olaogun',
+                    initialPosts: posts,
+                    initialHasMore: false,
+                }}
+            />
+        );
+
+        expect(container.querySelector('img.post-media-first-img')).toBeNull();
+        expect(screen.queryByText('Photo unavailable')).toBeNull();
+        expect(container.querySelector('.post-media-stage__fallback')).toBeNull();
     });
 
     it('renders 3D Living Family Emojis (:id_3d: & ar_emoji) and Me-Stickers (:me_reaction@uid:) interactively without raw token text', async () => {
@@ -1784,7 +1908,7 @@ describe('Profile Feed Preact Island (Phases 1–4)', () => {
     it('renders Family Arcade challenge posts as a branded challenge card without raw URL or 3D stage converter clutter', () => {
         const arcadePost = {
             post_no: '9912',
-            id: 'u_owner',
+            id: '318422WALLY',
             firstName: 'Wally',
             lastName: 'Olaogun',
             fullName: '318422WALLY',
@@ -1821,8 +1945,10 @@ describe('Profile Feed Preact Island (Phases 1–4)', () => {
         expect(acceptBtn.getAttribute('href')).toBe('/arcade/share/ec221fd6818ac2d9888003687a9b0c57');
         expect(acceptBtn.textContent).toContain('Accept Challenge');
 
-        // Must NOT expose raw /arcade/share/ path text or 3D stage converter pills
+        // Must NOT expose raw /arcade/share/ path text or 3D stage converter pills or raw user ID as author name
         expect(container.textContent).not.toContain('/arcade/share/ec221fd6818ac2d9888003687a9b0c57');
+        expect(container.textContent).not.toContain('318422WALLY');
+        expect(container.textContent).toContain('Wally Olaogun');
         expect(container.querySelector('[data-testid="infeed-stage-converter"]')).toBeNull();
     });
 
@@ -1939,5 +2065,87 @@ describe('Profile Feed Preact Island (Phases 1–4)', () => {
 
         // 3. Adversarial style injection falls back safely to plain text card
         expect(container.querySelector('#post9103 [data-testid="feed-text-stage-card"]')).toBeNull();
+    });
+
+    it('renders festive Xmas backdrops (xmas_snowfall, xmas_hearth, xmas_lights, xmas_winter_gold) as scenic cards', () => {
+        const xmasPosts = [
+            {
+                post_no: '9201',
+                id: 'u_owner',
+                firstName: 'Wally',
+                lastName: 'Olaogun',
+                postMessage: 'Are your Xmas lights out? [style:xmas_lights]',
+                images: [],
+                videos: [],
+                comments: [],
+            },
+            {
+                post_no: '9202',
+                id: 'u_owner',
+                firstName: 'Wally',
+                lastName: 'Olaogun',
+                postMessage: 'Cosy Christmas evening by the fire [style:xmas_hearth]',
+                images: [],
+                videos: [],
+                comments: [],
+            },
+        ];
+
+        const { container } = render(
+            <FeedShell
+                bootstrap={{
+                    ...baseBootstrap,
+                    userId: 'u_owner',
+                    initialPosts: xmasPosts,
+                    initialHasMore: false,
+                }}
+            />
+        );
+
+        const lightsCard = container.querySelector('#post9201 [data-testid="feed-text-stage-card"]');
+        expect(lightsCard).toBeTruthy();
+        expect(lightsCard.classList.contains('fp-text-stage--xmas_lights')).toBe(true);
+        expect(lightsCard.classList.contains('fp-text-stage--scenic')).toBe(true);
+        expect(lightsCard.querySelector('.fp-text-stage__bokeh')).toBeTruthy();
+        expect(lightsCard.textContent).toContain('Are your Xmas lights out?');
+        expect(lightsCard.textContent).not.toContain('[style:xmas_lights]');
+
+        const hearthCard = container.querySelector('#post9202 [data-testid="feed-text-stage-card"]');
+        expect(hearthCard).toBeTruthy();
+        expect(hearthCard.classList.contains('fp-text-stage--xmas_hearth')).toBe(true);
+        expect(hearthCard.classList.contains('fp-text-stage--scenic')).toBe(true);
+    });
+
+    it('renders Solar Galaxy backdrop with 3D cosmic orrery (sun, galaxies, and moving planet orbits)', () => {
+        const { container } = render(
+            <FeedShell
+                bootstrap={{
+                    ...baseBootstrap,
+                    userId: 'u_owner',
+                    initialPosts: [
+                        {
+                            post_no: '9301',
+                            id: 'u_owner',
+                            firstName: 'Wally',
+                            lastName: 'Olaogun',
+                            postMessage: 'Exploring the cosmos together [style:solar_galaxy]',
+                            images: [],
+                            videos: [],
+                            comments: [],
+                        },
+                    ],
+                    initialHasMore: false,
+                }}
+            />
+        );
+
+        const cosmosCard = container.querySelector('#post9301 [data-testid="feed-text-stage-card"]');
+        expect(cosmosCard).toBeTruthy();
+        expect(cosmosCard.classList.contains('fp-text-stage--solar_galaxy')).toBe(true);
+        expect(cosmosCard.classList.contains('fp-text-stage--scenic')).toBe(true);
+        expect(cosmosCard.querySelector('.fp-cosmos-orrery')).toBeTruthy();
+        expect(cosmosCard.querySelector('.fp-cosmos-sun')).toBeTruthy();
+        expect(cosmosCard.querySelectorAll('.fp-cosmos-orbit').length).toBe(6);
+        expect(cosmosCard.querySelector('.fp-cosmos-planet--saturn .fp-cosmos-saturn-ring')).toBeTruthy();
     });
 });

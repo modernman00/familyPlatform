@@ -5,6 +5,7 @@ import {
     formatVideoDescriptor,
     extractVideosFromText,
     cleanPostMessage,
+    parseVideoUrl,
 } from '../../components/profilePage/videoParser';
 import {
     getPostImageUrl,
@@ -78,6 +79,46 @@ export const TEXT_STAGE_CATALOG = [
         category: 'scenic',
         themeClass: 'royal_parchment',
         swatch: 'linear-gradient(135deg, #09090b 0%, #292524 60%, #d97706 100%)',
+    },
+    {
+        slug: 'xmas_snowfall',
+        label: 'Snowfall',
+        badge: null,
+        category: 'scenic',
+        themeClass: 'xmas_snowfall',
+        swatch: 'radial-gradient(circle at 30% 28%, #e0f2fe 0%, #0284c7 45%, #06283d 100%)',
+    },
+    {
+        slug: 'xmas_hearth',
+        label: 'Cosy Hearth',
+        badge: null,
+        category: 'scenic',
+        themeClass: 'xmas_hearth',
+        swatch: 'radial-gradient(circle at 30% 30%, #fbbf24 0%, #b91c1c 48%, #3b0712 100%)',
+    },
+    {
+        slug: 'xmas_lights',
+        label: 'Fairy Lights',
+        badge: null,
+        category: 'scenic',
+        themeClass: 'xmas_lights',
+        swatch: 'linear-gradient(135deg, #064e3b 0%, #b91c1c 50%, #f59e0b 100%)',
+    },
+    {
+        slug: 'xmas_winter_gold',
+        label: 'Winter Gold',
+        badge: null,
+        category: 'scenic',
+        themeClass: 'xmas_winter_gold',
+        swatch: 'radial-gradient(circle at 30% 28%, #fef08a 0%, #ca8a04 45%, #052e16 100%)',
+    },
+    {
+        slug: 'solar_galaxy',
+        label: 'Solar Galaxy',
+        badge: null,
+        category: 'scenic',
+        themeClass: 'solar_galaxy',
+        swatch: 'radial-gradient(circle at 35% 35%, #fde047 0%, #ea580c 26%, #4338ca 62%, #02030d 100%)',
     },
     {
         slug: 'grand_announcement',
@@ -305,6 +346,7 @@ export function isVideoPath(url) {
     if (clean.includes('/resources/videos/') || clean.includes('/external-stream')) return true;
     if (clean.includes('googleusercontent.com') && /=(m18|m22|m37|dv)/i.test(clean)) return true;
     if (clean.includes('googlevideo.com')) return true;
+    if (parseVideoUrl(clean) !== null) return true;
     return false;
 }
 
@@ -348,6 +390,7 @@ export function isDirectVideoDescriptor(vDesc) {
     if (vDesc.renderMode === 'native_video') return true;
     if (vDesc.renderMode === 'inline_iframe') return false;
     if (vDesc.type === 'direct' || Boolean(vDesc.isDirect)) return true;
+    if (typeof vDesc.type === 'string' && vDesc.type !== '' && vDesc.type !== 'direct') return false;
     const url = vDesc.videoSrc || vDesc.embedUrl || vDesc.originalUrl || '';
     return isVideoPath(url);
 }
@@ -483,8 +526,11 @@ export function extractRawMedia(raw, cleanMsg = '') {
         if (slot) pushImgCandidate(slot);
     }
 
+    const isNonImageShareUrl = (item) => typeof item === 'string'
+        && /^https?:\/\/(?:www\.|m\.|web\.)?facebook\.com\/share\/[a-z]+\/[^\s"'<>]+/i.test(item.trim());
+
     const images = rawImageSlots
-        .filter((item) => !isVideoPath(item))
+        .filter((item) => !isVideoPath(item) && !isNonImageShareUrl(item))
         .map((item) => normalizeMediaUrl(item))
         .filter(Boolean);
 
@@ -591,20 +637,28 @@ export function extractRawMedia(raw, cleanMsg = '') {
             || String(lp.domain || lp.url || '').toLowerCase().includes('instagram.com')
             || String(lp.domain || lp.url || '').toLowerCase().includes('instagr.am')
         );
+        const isFb = Boolean(
+            lp.is_facebook
+            || String(lp.domain || lp.url || '').toLowerCase().includes('facebook.com')
+            || String(lp.domain || lp.url || '').toLowerCase().includes('fb.watch')
+            || String(lp.domain || lp.url || '').toLowerCase().includes('fb.com')
+        );
         const lpRatio = typeof lp.aspect_ratio === 'string' && lp.aspect_ratio.trim()
             ? lp.aspect_ratio.trim()
-            : (isIg ? '9 / 16' : null);
+            : ((isIg || isFb) ? '9 / 16' : null);
         if (proxiedUrl && isVideoPath(proxiedUrl)) {
             pushVideoDesc({
                 type: 'direct',
-                provider: isIg ? 'instagram' : 'direct',
-                videoId: lp.ig_shortcode ? `ig_${lp.ig_shortcode}` : undefined,
+                provider: isIg ? 'instagram' : (isFb ? 'facebook' : 'direct'),
+                videoId: lp.ig_shortcode
+                    ? `ig_${lp.ig_shortcode}`
+                    : (lp.fb_video_id ? `fb_${lp.fb_video_id}` : undefined),
                 originalUrl: lp.url || rawVidUrl,
                 embedUrl: proxiedUrl,
                 thumbnailUrl: lp.image || lp.photo_url || null,
                 posterUrl: lp.image || lp.photo_url || null,
                 aspect_ratio: lpRatio || undefined,
-                isShort: Boolean(isIg || (lpRatio && /^9\s*\/\s*16/.test(lpRatio))),
+                isShort: Boolean(isIg || isFb || (lpRatio && /^9\s*\/\s*16/.test(lpRatio))),
                 sourceUrl: lp.url || null,
                 sourceTitle: lp.title || null,
                 sourceDescription: lp.description || null,

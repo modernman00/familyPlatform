@@ -487,6 +487,7 @@ final class ServeImgController {
     {
         $targetUrl = (string)($_GET['url'] ?? '');
         $igShortcode = trim((string)($_GET['ig'] ?? ''));
+        $fbVideoId = trim((string)($_GET['fb'] ?? ''));
         $signature = (string)($_GET['sig'] ?? '');
 
         if ($igShortcode !== '') {
@@ -523,6 +524,40 @@ final class ServeImgController {
             }
 
             $targetUrl = $resolvedIgStream;
+        } elseif ($fbVideoId !== '') {
+            if ($signature === '' || preg_match('/^\d{6,25}$/', $fbVideoId) !== 1) {
+                http_response_code(400);
+                header('Content-Type: text/plain');
+                echo 'Valid Facebook video ID and cryptographic signature are required.';
+                exit;
+            }
+
+            if (!\App\services\LinkPreviewService::verifyStreamSignature('fb:' . $fbVideoId, $signature)) {
+                http_response_code(403);
+                header('Content-Type: text/plain');
+                echo 'Access denied: invalid or tampered video stream signature.';
+                exit;
+            }
+
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
+
+            $fbCacheFile = 'fb_' . $fbVideoId . '.mp4';
+            $fbCachePath = __DIR__ . '/../../resources/videos/posts/' . $fbCacheFile;
+            if (is_file($fbCachePath) && filesize($fbCachePath) > 4096) {
+                $this->StreamPostVideo($fbCacheFile);
+            }
+
+            $resolvedFbStream = \App\services\LinkPreviewService::resolveFreshFacebookVideoStream($fbVideoId, false);
+            if ($resolvedFbStream === null || !\App\services\LinkPreviewService::isInstagramCdnUrl($resolvedFbStream)) {
+                http_response_code(404);
+                header('Content-Type: text/plain');
+                echo 'Facebook video stream unavailable.';
+                exit;
+            }
+
+            $targetUrl = $resolvedFbStream;
         } else {
             if ($targetUrl === '' || $signature === '') {
                 http_response_code(400);
@@ -567,7 +602,9 @@ final class ServeImgController {
         }
 
         // 3b. Sovereign Local SSD Cache Fast-Path (ATG Zero-Latency & Token-Expiry Shield)
-        $cacheFileName = $igShortcode !== '' ? ('ig_' . $igShortcode . '.mp4') : ('ext_' . md5($targetUrl) . '.mp4');
+        $cacheFileName = $igShortcode !== ''
+            ? ('ig_' . $igShortcode . '.mp4')
+            : ($fbVideoId !== '' ? ('fb_' . $fbVideoId . '.mp4') : ('ext_' . md5($targetUrl) . '.mp4'));
         $cacheFilePath = __DIR__ . '/../../resources/videos/posts/' . $cacheFileName;
         if (is_file($cacheFilePath) && filesize($cacheFilePath) > 4096) {
             $this->StreamPostVideo($cacheFileName);

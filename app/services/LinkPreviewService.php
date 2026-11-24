@@ -286,7 +286,7 @@ final class LinkPreviewService
                 }
 
                 // If it's a single Google Photos video (Instagram Reels stay in postMessage & hydrate via link_preview)
-                if (!empty($preview['is_video']) && !empty($preview['video_url']) && empty($preview['is_instagram'])) {
+                if (!empty($preview['is_video']) && !empty($preview['video_url']) && empty($preview['is_instagram']) && empty($preview['is_facebook'])) {
                     if (!in_array($preview['video_url'], $videos, true) && count($videos) < $max) {
                         $videos[] = (string)$preview['video_url'];
                     }
@@ -675,9 +675,17 @@ final class LinkPreviewService
                     && $allowNetworkFetch
                     && empty($extra['ig_v2']);
 
+                $isFacebookVideoCached = self::isFacebookVideoOrShareUrl($url)
+                    || self::isFacebookVideoOrShareUrl((string)($cached['canonical_url'] ?? ''))
+                    || self::extractFacebookVideoId($url) !== null
+                    || self::extractFacebookVideoId((string)($cached['canonical_url'] ?? '')) !== null;
+                $needsFacebookV2Upgrade = $isFacebookVideoCached
+                    && $allowNetworkFetch
+                    && empty($extra['fb_v2']);
+
                 $isFresh = !empty($cached['expires_at']) && strtotime((string)$cached['expires_at']) > time();
                 $hasRichContent = !empty($cached['image_url']) || !empty($cached['extra_data']) || !empty($cached['title']);
-                if (!$needsInstagramV2Upgrade && ($isFresh || $hasRichContent || !$allowNetworkFetch)) {
+                if (!$needsInstagramV2Upgrade && !$needsFacebookV2Upgrade && ($isFresh || $hasRichContent || !$allowNetworkFetch)) {
                     if ($extra !== []) {
                         $cached = array_merge($cached, $extra);
                     }
@@ -728,10 +736,25 @@ final class LinkPreviewService
 
         // 4. Extract OpenGraph and Twitter card metadata
         $ogData = ($html !== null && trim($html) !== '') ? self::parseMetadata($html, $url) : [];
+        if ($html !== null && self::isFacebookDomain($url)
+            && self::extractFacebookVideoId($url) === null
+            && self::extractFacebookVideoId((string)($ogData['canonical_url'] ?? '')) === null
+        ) {
+            $htmlFbId = self::extractFacebookVideoIdFromHtml($html);
+            if ($htmlFbId !== null) {
+                $ogData['fb_video_id'] = $htmlFbId;
+            }
+        }
         $igShortcode = self::extractInstagramShortcode($url)
             ?? self::extractInstagramShortcode((string)($ogData['canonical_url'] ?? ''));
         if ($igShortcode !== null) {
             $ogData = self::enrichWithInstagramEmbed($url, $igShortcode, $ogData);
+        } elseif (self::isFacebookVideoOrShareUrl($url)
+            || self::isFacebookVideoOrShareUrl((string)($ogData['canonical_url'] ?? ''))
+            || self::extractFacebookVideoId($url) !== null
+            || self::extractFacebookVideoId((string)($ogData['canonical_url'] ?? '')) !== null
+        ) {
+            $ogData = self::enrichWithFacebookVideo($url, $ogData);
         }
 
         if (empty($ogData['title']) && empty($ogData['image_url'])) {
@@ -777,6 +800,12 @@ final class LinkPreviewService
             }
             if (!empty($ogData['ig_shortcode'])) {
                 $extraDataArr['ig_shortcode'] = $ogData['ig_shortcode'];
+            }
+            if (!empty($ogData['fb_v2'])) {
+                $extraDataArr['fb_v2'] = true;
+            }
+            if (!empty($ogData['fb_video_id'])) {
+                $extraDataArr['fb_video_id'] = $ogData['fb_video_id'];
             }
             if ($frameBlocked) {
                 $extraDataArr['frame_blocked'] = true;
@@ -1829,9 +1858,20 @@ final class LinkPreviewService
             || self::isInstagramDomain($url)
             || self::isInstagramDomain($requestedUrl)
             || $igShortcode !== null;
+
+        $fbVideoId = !empty($data['fb_video_id']) && is_string($data['fb_video_id'])
+            ? trim($data['fb_video_id'])
+            : (self::extractFacebookVideoId($url) ?? self::extractFacebookVideoId($requestedUrl));
+        $isFacebook = self::isFacebookDomain($cleanDomain)
+            || self::isFacebookDomain($url)
+            || self::isFacebookDomain($requestedUrl)
+            || $fbVideoId !== null;
+
+        $isReelUrl = str_contains(strtolower($url . ' ' . $requestedUrl), '/reel')
+            || str_contains(strtolower($url . ' ' . $requestedUrl), '/share/r/');
         $aspectRatio = isset($data['aspect_ratio']) && is_string($data['aspect_ratio']) && trim($data['aspect_ratio']) !== ''
             ? trim($data['aspect_ratio'])
-            : ($isInstagram && (str_contains(strtolower($url . ' ' . $requestedUrl), '/reel') || $videoStreamUrl !== null) ? '9 / 16' : null);
+            : (($isInstagram || $isFacebook) && ($isReelUrl || $videoStreamUrl !== null) ? '9 / 16' : null);
 
         $parsedVideoEmbed = \App\classes\VideoParser::parseVideoUrl($url) ?? \App\classes\VideoParser::parseVideoUrl($requestedUrl);
         $frameBlocked = !empty($data['frame_blocked']);
@@ -1842,11 +1882,13 @@ final class LinkPreviewService
         $albumVideos = is_array($data['album_videos'] ?? null) ? array_values($data['album_videos']) : [];
         if ($isInstagram && $igShortcode !== null && $videoStreamUrl !== null) {
             $proxiedVideoUrl = self::getInstagramStreamProxyUrl($igShortcode);
+        } elseif ($isFacebook && $fbVideoId !== null && $videoStreamUrl !== null) {
+            $proxiedVideoUrl = self::getFacebookStreamProxyUrl($fbVideoId);
         } else {
             $proxiedVideoUrl = $videoStreamUrl !== null ? self::getProxiedVideoUrl($videoStreamUrl) : null;
         }
         $proxiedAlbumVideos = array_map(static fn(string $v): string => self::getProxiedVideoUrl($v), $albumVideos);
-        $renderMode = ($isInstagram && $proxiedVideoUrl !== null)
+        $renderMode = (($isInstagram || $isFacebook) && $proxiedVideoUrl !== null)
             ? 'native_video'
             : ($canEmbed ? 'inline_iframe' : 'external_card');
 
@@ -1913,7 +1955,7 @@ final class LinkPreviewService
             'description' => $description,
             'image' => $photoUrl !== '' ? $photoUrl : $rawImage,
             'photo_url' => $isPhotoLink ? ($photoUrl !== '' ? $photoUrl : $rawImage) : null,
-            'video_url' => ($isInstagram && $proxiedVideoUrl !== null) ? $proxiedVideoUrl : $videoStreamUrl,
+            'video_url' => (($isInstagram || $isFacebook) && $proxiedVideoUrl !== null) ? $proxiedVideoUrl : $videoStreamUrl,
             'embed_url' => $embedUrl,
             'frame_blocked' => $frameBlocked,
             'can_embed' => $canEmbed,
@@ -1924,6 +1966,8 @@ final class LinkPreviewService
             'is_social_video' => $isSocialVideo,
             'is_instagram' => $isInstagram,
             'ig_shortcode' => $igShortcode,
+            'is_facebook' => $isFacebook,
+            'fb_video_id' => $fbVideoId,
             'album_images' => $data['album_images'] ?? [],
             'album_videos' => $albumVideos,
             'proxied_album_videos' => $proxiedAlbumVideos,
@@ -2723,6 +2767,324 @@ final class LinkPreviewService
                 $extra['video_url'] = $freshUrl;
                 $extra['ig_v2'] = true;
                 $extra['ig_shortcode'] = $cleanCode;
+                $upd->execute([json_encode($extra, JSON_UNESCAPED_SLASHES), $now, (string)$row['url_hash']]);
+            }
+        } catch (Throwable) {
+        }
+
+        return $freshUrl;
+    }
+
+    /**
+     * Checks whether a URL or host belongs to Facebook / Meta video domains.
+     */
+    public static function isFacebookDomain(string $urlOrHost): bool
+    {
+        $trimmed = trim($urlOrHost);
+        if ($trimmed === '') {
+            return false;
+        }
+        $host = str_contains($trimmed, '://')
+            ? (string)(parse_url($trimmed, PHP_URL_HOST) ?? '')
+            : $trimmed;
+        $host = strtolower(trim($host));
+        if ($host === '') {
+            return false;
+        }
+        return $host === 'facebook.com'
+            || str_ends_with($host, '.facebook.com')
+            || $host === 'fb.watch'
+            || $host === 'fb.com'
+            || str_ends_with($host, '.fb.com');
+    }
+
+    /**
+     * Checks whether a URL is a Facebook video, reel, watch, or share-video link.
+     */
+    public static function isFacebookVideoOrShareUrl(string $url): bool
+    {
+        $trimmed = trim($url);
+        if ($trimmed === '' || !self::isFacebookDomain($trimmed)) {
+            return false;
+        }
+        return preg_match('#^https?://(?:www\.|m\.|web\.)?(?:facebook\.com/(?:[^/\s]+/videos/\d+|watch/?\?v=\d+|reel/\d+|share/[vr]/[^\s"\'<>]+|video\.php\?v=\d+)|fb\.watch/[^\s"\'<>]+|fb\.com/(?:watch|reel|share/[vr]|[^/\s]+/videos)/[^\s"\'<>]+)#i', $trimmed) === 1;
+    }
+
+    /**
+     * Extracts the numeric Facebook video or reel ID from canonical Facebook video URLs.
+     */
+    public static function extractFacebookVideoId(?string $url): ?string
+    {
+        if ($url === null || trim($url) === '') {
+            return null;
+        }
+        $trimmed = trim($url);
+        if (!self::isFacebookDomain($trimmed)) {
+            return null;
+        }
+        if (preg_match('~/(?:reel|videos)/(?:[^/\s?#]+/)?(\d{6,25})(?:[/?#]|$)~i', $trimmed, $m) === 1) {
+            return $m[1];
+        }
+        if (preg_match('~[?&]v=(\d{6,25})(?:&|$)~i', $trimmed, $m) === 1) {
+            return $m[1];
+        }
+        return null;
+    }
+
+    /**
+     * Extracts the numeric Facebook video ID from a page's oEmbed alternate link
+     * (used to resolve opaque /share/r/ and /share/v/ URLs without a redirect).
+     */
+    public static function extractFacebookVideoIdFromHtml(string $html): ?string
+    {
+        if (preg_match('~oembed_video\?url=([^"&\s]+)~i', $html, $m) === 1) {
+            return self::extractFacebookVideoId(rawurldecode($m[1]));
+        }
+        if (preg_match('~og:url"\s+content="(https://www\.facebook\.com/reel/\d{6,25}/?)"~i', $html, $m) === 1) {
+            return self::extractFacebookVideoId($m[1]);
+        }
+        return null;
+    }
+
+    /**
+     * Builds the HMAC-signed sovereign streaming proxy URL for a Facebook video ID.
+     */
+    public static function getFacebookStreamProxyUrl(string $videoId): string
+    {
+        $clean = trim($videoId);
+        if ($clean === '' || preg_match('/^\d{6,25}$/', $clean) !== 1) {
+            return '';
+        }
+        $localFile = 'fb_' . $clean . '.mp4';
+        $localPath = __DIR__ . '/../../resources/videos/posts/' . $localFile;
+        if (is_file($localPath) && filesize($localPath) > 4096) {
+            return '/resources/videos/posts/' . $localFile;
+        }
+        $sig = self::signStreamUrl('fb:' . $clean);
+        return '/resources/videos/external-stream?fb=' . rawurlencode($clean) . '&sig=' . $sig;
+    }
+
+    /**
+     * Pure parser for Facebook `/plugins/video.php` HTML payload.
+     * Extracts `hd_src` / `sd_src` CDN `.mp4` streams and dimensions without network I/O.
+     *
+     * @return array{video_url: ?string, aspect_ratio: ?string}
+     */
+    public static function parseFacebookPluginVideoHtml(string $html): array
+    {
+        $videoUrl = null;
+        $aspectRatio = null;
+
+        foreach (['hd_src_no_ratelimit', 'hd_src', 'sd_src_no_ratelimit', 'sd_src'] as $field) {
+            $marker = '"' . $field . '":';
+            $decoded = self::extractQuotedJsonAfterMarker($html, $marker);
+            if ($decoded === null || trim($decoded) === '') {
+                continue;
+            }
+            $candidate = self::decodeMetaUrl($decoded);
+            if ($candidate !== '' && self::isInstagramCdnUrl($candidate)) {
+                $videoUrl = $candidate;
+                break;
+            }
+        }
+
+        if (preg_match('/"(?:original_width|video_width)"\s*:\s*(\d+)\s*,.*?"(?:original_height|video_height)"\s*:\s*(\d+)/s', $html, $dm) === 1) {
+            $w = (int)$dm[1];
+            $h = (int)$dm[2];
+            if ($w >= 100 && $h >= 100) {
+                $aspectRatio = self::formatAspectRatio($w, $h);
+            }
+        }
+
+        return [
+            'video_url' => $videoUrl,
+            'aspect_ratio' => $aspectRatio,
+        ];
+    }
+
+    /**
+     * Fetches Facebook's official `/plugins/video.php` endpoint for a canonical video/reel URL
+     * to extract progressive `.mp4` CDN stream metadata.
+     *
+     * @return array{video_url: ?string, aspect_ratio: ?string}|null
+     */
+    public static function fetchFacebookPluginVideoMetadata(string $canonicalVideoUrl): ?array
+    {
+        $trimmed = trim($canonicalVideoUrl);
+        if ($trimmed === '' || !self::isFacebookDomain($trimmed)) {
+            return null;
+        }
+
+        $pluginUrl = 'https://www.facebook.com/plugins/video.php?href=' . rawurlencode($trimmed) . '&show_text=false&autoplay=0';
+        if (!self::isSafeUrl($pluginUrl)) {
+            return null;
+        }
+
+        $ch = curl_init();
+        if ($ch === false) {
+            return null;
+        }
+
+        $buffer = '';
+        $maxBytes = 524288; // 512 KB cap
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $pluginUrl,
+            CURLOPT_RETURNTRANSFER => false,
+            CURLOPT_FOLLOWLOCATION => false,
+            CURLOPT_TIMEOUT => 5,
+            CURLOPT_CONNECTTIMEOUT => 2,
+            CURLOPT_ENCODING => '',
+            CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+            CURLOPT_PROTOCOLS => CURLPROTO_HTTPS,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_USERAGENT => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            CURLOPT_HTTPHEADER => [
+                'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language: en-GB,en;q=0.9',
+            ],
+            CURLOPT_WRITEFUNCTION => static function ($chInstance, string $chunk) use (&$buffer, $maxBytes): int {
+                if (strlen($buffer) + strlen($chunk) > $maxBytes) {
+                    $remaining = $maxBytes - strlen($buffer);
+                    if ($remaining > 0) {
+                        $buffer .= substr($chunk, 0, $remaining);
+                    }
+                    return 0;
+                }
+                $buffer .= $chunk;
+                return strlen($chunk);
+            },
+        ]);
+
+        curl_exec($ch);
+        $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        if (\PHP_VERSION_ID < 80500) {
+            @curl_close($ch);
+        }
+
+        if ($buffer === '' || ($httpCode !== 200 && $httpCode !== 206 && $httpCode !== 0)) {
+            return null;
+        }
+
+        return self::parseFacebookPluginVideoHtml($buffer);
+    }
+
+    /**
+     * Enriches scraped Facebook OpenGraph metadata with progressive `.mp4` stream URLs
+     * from `/plugins/video.php` (including resolved `/share/r/` and `/share/v/` links).
+     *
+     * @param array<string, mixed> $ogData
+     * @return array<string, mixed>
+     */
+    private static function enrichWithFacebookVideo(string $url, array $ogData): array
+    {
+        $canonical = !empty($ogData['canonical_url']) && is_string($ogData['canonical_url'])
+            ? trim($ogData['canonical_url'])
+            : $url;
+        $fbVideoId = (!empty($ogData['fb_video_id']) && is_string($ogData['fb_video_id']) && preg_match('/^\d{6,25}$/', $ogData['fb_video_id']) === 1)
+            ? $ogData['fb_video_id']
+            : (self::extractFacebookVideoId($canonical) ?? self::extractFacebookVideoId($url));
+
+        $ogData['fb_v2'] = true;
+        $ogData['site_name'] = 'Facebook';
+        if (empty($ogData['domain'])) {
+            $ogData['domain'] = 'facebook.com';
+        }
+        if ($fbVideoId !== null) {
+            $ogData['fb_video_id'] = $fbVideoId;
+        }
+
+        $targetForPlugin = $fbVideoId !== null
+            ? (str_contains(strtolower($canonical . ' ' . $url), '/reel') || str_contains(strtolower($url), '/share/r/')
+                ? 'https://www.facebook.com/reel/' . $fbVideoId . '/'
+                : $canonical)
+            : $canonical;
+
+        $pluginMeta = (($_ENV['APP_ENV'] ?? '') === 'testing')
+            ? null
+            : self::fetchFacebookPluginVideoMetadata($targetForPlugin);
+
+        if (is_array($pluginMeta)) {
+            if (!empty($pluginMeta['video_url'])) {
+                $ogData['video_url'] = $pluginMeta['video_url'];
+            }
+            if (!empty($pluginMeta['aspect_ratio'])) {
+                $ogData['aspect_ratio'] = $pluginMeta['aspect_ratio'];
+            }
+        }
+
+        if (empty($ogData['aspect_ratio']) && (str_contains(strtolower($canonical . ' ' . $url), '/reel') || str_contains(strtolower($url), '/share/r/') || !empty($ogData['video_url']))) {
+            $ogData['aspect_ratio'] = '9 / 16';
+        }
+
+        return $ogData;
+    }
+
+    /**
+     * Resolves a fresh, non-expired Facebook `.mp4` CDN URL for `$videoId` on behalf of
+     * `ServeImgController::StreamExternalVideo()`.
+     */
+    public static function resolveFreshFacebookVideoStream(string $videoId, bool $forceRefresh = false): ?string
+    {
+        $cleanId = trim($videoId);
+        if ($cleanId === '' || preg_match('/^\d{6,25}$/', $cleanId) !== 1) {
+            return null;
+        }
+
+        $db = Db::connect2();
+        $canonicalHint = 'https://www.facebook.com/reel/' . $cleanId . '/';
+
+        if (!$forceRefresh) {
+            try {
+                $likePattern = '%' . $cleanId . '%';
+                $stmt = $db->prepare(
+                    "SELECT url_hash, canonical_url, extra_data FROM link_preview_cache
+                     WHERE (domain LIKE '%facebook%' OR domain LIKE '%fb.%') AND (canonical_url LIKE ? OR extra_data LIKE ?) AND extra_data IS NOT NULL
+                     ORDER BY fetched_at DESC LIMIT 3"
+                );
+                $stmt->execute([$likePattern, $likePattern]);
+                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                    if (!empty($row['canonical_url']) && is_string($row['canonical_url']) && self::isFacebookDomain($row['canonical_url'])) {
+                        $canonicalHint = trim($row['canonical_url']);
+                    }
+                    $extra = json_decode((string)($row['extra_data'] ?? ''), true);
+                    $cand = is_array($extra) && isset($extra['video_url']) && is_string($extra['video_url'])
+                        ? trim($extra['video_url'])
+                        : '';
+                    if ($cand !== '' && self::isInstagramCdnUrl($cand) && !self::isInstagramCdnUrlExpired($cand)) {
+                        return $cand;
+                    }
+                }
+            } catch (Throwable) {
+            }
+        }
+
+        $pluginMeta = self::fetchFacebookPluginVideoMetadata($canonicalHint);
+        $freshUrl = is_array($pluginMeta) && isset($pluginMeta['video_url'])
+            ? trim($pluginMeta['video_url'])
+            : '';
+        if ($freshUrl === '' || !self::isInstagramCdnUrl($freshUrl)) {
+            return null;
+        }
+
+        try {
+            $likePattern = '%' . $cleanId . '%';
+            $stmt = $db->prepare(
+                "SELECT url_hash, extra_data FROM link_preview_cache
+                 WHERE (domain LIKE '%facebook%' OR domain LIKE '%fb.%') AND (canonical_url LIKE ? OR extra_data LIKE ?) LIMIT 5"
+            );
+            $stmt->execute([$likePattern, $likePattern]);
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $upd = $db->prepare("UPDATE link_preview_cache SET extra_data = ?, fetched_at = ? WHERE url_hash = ?");
+            $now = date('Y-m-d H:i:s');
+            foreach ($rows as $row) {
+                $extra = json_decode((string)($row['extra_data'] ?? ''), true);
+                if (!is_array($extra)) {
+                    $extra = [];
+                }
+                $extra['video_url'] = $freshUrl;
+                $extra['fb_v2'] = true;
+                $extra['fb_video_id'] = $cleanId;
                 $upd->execute([json_encode($extra, JSON_UNESCAPED_SLASHES), $now, (string)$row['url_hash']]);
             }
         } catch (Throwable) {

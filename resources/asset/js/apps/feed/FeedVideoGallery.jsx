@@ -258,6 +258,8 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo, playerId }) {
         if (!el) return;
         if (
             !el.dataset.retried
+            && vid?.provider !== 'instagram'
+            && vid?.provider !== 'facebook'
             && fallbackOriginal
             && el.src !== fallbackOriginal
             && fallbackOriginal.startsWith('http')
@@ -304,31 +306,34 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo, playerId }) {
         }
     };
 
-    const instagramSourceUrl = vid?.provider === 'instagram'
-        ? (vid?.sourceUrl || (typeof fallbackOriginal === 'string' && fallbackOriginal.includes('instagram.com') ? fallbackOriginal : ''))
+    const isSocialProvider = vid?.provider === 'instagram' || vid?.provider === 'facebook';
+    const socialSourceUrl = isSocialProvider
+        ? (vid?.sourceUrl || (typeof fallbackOriginal === 'string' && (fallbackOriginal.includes('instagram.com') || fallbackOriginal.includes('facebook.com')) ? fallbackOriginal : ''))
         : '';
+    const socialPlatformLabel = vid?.provider === 'facebook' ? 'Facebook' : 'Instagram';
+    const socialFallbackTestId = vid?.provider === 'facebook' ? 'facebook-video-fallback-card' : 'instagram-video-fallback-card';
 
     return (
         <div ref={containerRef} className="video-embed-container feed-video-breakout mb-3 position-relative">
-            {streamFailed && instagramSourceUrl ? (
+            {streamFailed && socialSourceUrl ? (
                 <a
-                    href={instagramSourceUrl}
+                    href={socialSourceUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    data-testid="instagram-video-fallback-card"
+                    data-testid={socialFallbackTestId}
                     className="link-preview-card text-decoration-none rounded-3 overflow-hidden shadow-sm d-block"
                 >
                     {thumbUrl && (
                         <div className="link-preview-card__media link-preview-card__media--portrait">
                             <img
                                 src={thumbUrl}
-                                alt={vid?.sourceTitle || vid?.hook || 'Instagram Reel'}
+                                alt={vid?.sourceTitle || vid?.hook || `${socialPlatformLabel} Reel`}
                                 className="w-100 h-100 object-fit-cover"
                                 style={{ objectPosition: '50% 24%' }}
                                 loading="lazy"
                                 referrerPolicy="no-referrer"
                             />
-                            <span className="link-preview-card__platform-pill">Instagram</span>
+                            <span className="link-preview-card__platform-pill">{socialPlatformLabel}</span>
                             {!String(thumbUrl).includes('stp=cmp1_') && (
                                 <span className="link-preview-card__play-badge" aria-hidden="true">
                                     <i className="bi bi-play-fill" />
@@ -339,11 +344,11 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo, playerId }) {
                     <div className="p-3 link-preview-card__body d-flex align-items-center justify-content-between gap-2">
                         <div className="min-w-0">
                             <h6 className="fw-bold mb-0 link-preview-card__title">
-                                {vid?.sourceTitle || vid?.hook || 'Instagram Reel'}
+                                {vid?.sourceTitle || vid?.hook || `${socialPlatformLabel} Reel`}
                             </h6>
                         </div>
                         <span className="badge rounded-pill px-3 py-2 link-preview-card__cta d-inline-flex align-items-center">
-                            Watch on Instagram →
+                            {`Watch on ${socialPlatformLabel} →`}
                         </span>
                     </div>
                 </a>
@@ -366,15 +371,15 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo, playerId }) {
                             zIndex: 2,
                         }}
                     >
-                        {instagramSourceUrl && durationSec === 0 && (
+                        {socialSourceUrl && durationSec === 0 && (
                             <a
-                                href={instagramSourceUrl}
+                                href={socialSourceUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 onClick={(e) => e.stopPropagation()}
                                 className="position-absolute d-inline-flex align-items-center gap-1.5 text-decoration-none"
-                                title="Open original Reel on Instagram"
-                                aria-label="Open original Reel on Instagram"
+                                title={`Open original Reel on ${socialPlatformLabel}`}
+                                aria-label={`Open original Reel on ${socialPlatformLabel}`}
                                 style={{
                                     top: '10px',
                                     left: '10px',

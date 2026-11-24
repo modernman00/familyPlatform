@@ -24,7 +24,7 @@ final class VideoParser
 
         // 1. YouTube Matcher
         // Matches: youtube.com/watch?v=ID, youtu.be/ID, youtube.com/shorts/ID, youtube.com/embed/ID, youtube.com/live/ID
-        $ytRegex = '/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?|shorts|live)\/|\S*?[?&]v[=_]?)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i';
+        $ytRegex = '/(?:https?:\/\/)?(?:www\.|m\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?|shorts|live)\/|\S*?[?&]v[=_]?)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i';
         if (preg_match($ytRegex, $trimmed, $matches) === 1) {
             $videoId = $matches[1];
             return [
@@ -94,8 +94,8 @@ final class VideoParser
             ];
         }
 
-        // 3d. Already-proxied /resources/videos/external-stream?(url|ig)=... or legacy /member/stream-video?url=...
-        if (preg_match('/^\/(?:resources\/videos\/external-stream|member\/stream-video)\?(?:url=([^\s"\'<>&#]+)|ig=([A-Za-z0-9_-]{5,24}))/i', $trimmed, $proxyMatches) === 1) {
+        // 3d. Already-proxied /resources/videos/external-stream?(url|ig|fb)=... or legacy /member/stream-video?url=...
+        if (preg_match('/^\/(?:resources\/videos\/external-stream|member\/stream-video)\?(?:url=([^\s"\'<>&#]+)|ig=([A-Za-z0-9_-]{5,24})|fb=(\d{6,25}))/i', $trimmed, $proxyMatches) === 1) {
             $igCode = $proxyMatches[2] ?? '';
             if ($igCode !== '') {
                 return [
@@ -104,6 +104,20 @@ final class VideoParser
                     'thumbnailUrl' => null,
                     'embedUrl' => $trimmed,
                     'originalUrl' => 'https://www.instagram.com/reel/' . $igCode . '/',
+                    'isShort' => true,
+                    'aspect_ratio' => '9 / 16',
+                    'trimStart' => null,
+                    'trimEnd' => null,
+                ];
+            }
+            $fbId = $proxyMatches[3] ?? '';
+            if ($fbId !== '') {
+                return [
+                    'type' => 'direct',
+                    'videoId' => 'fb_' . $fbId,
+                    'thumbnailUrl' => null,
+                    'embedUrl' => $trimmed,
+                    'originalUrl' => 'https://www.facebook.com/reel/' . $fbId . '/',
                     'isShort' => true,
                     'aspect_ratio' => '9 / 16',
                     'trimStart' => null,
