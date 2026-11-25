@@ -26,6 +26,76 @@ export const isDocumentVisible = createSignal(
     typeof document !== 'undefined' ? document.visibilityState !== 'hidden' : true
 );
 
+const DEFAULT_CAPTION_STYLE = { size: 'medium', background: 'dark', position: 'bottom' };
+
+function readStoredCaptionsEnabled() {
+    if (typeof window === 'undefined') return false;
+    try {
+        return window.localStorage.getItem('fp_cc_enabled') === '1';
+    } catch {
+        return false;
+    }
+}
+
+function readStoredCaptionStyle() {
+    if (typeof window === 'undefined') return { ...DEFAULT_CAPTION_STYLE };
+    try {
+        const raw = window.localStorage.getItem('fp_cc_style');
+        if (!raw) return { ...DEFAULT_CAPTION_STYLE };
+        const parsed = JSON.parse(raw);
+        return {
+            size: ['small', 'medium', 'large'].includes(parsed?.size) ? parsed.size : 'medium',
+            background: ['dark', 'translucent', 'none'].includes(parsed?.background) ? parsed.background : 'dark',
+            position: ['bottom', 'top'].includes(parsed?.position) ? parsed.position : 'bottom',
+        };
+    } catch {
+        return { ...DEFAULT_CAPTION_STYLE };
+    }
+}
+
+export const isCaptionsEnabled = createSignal(readStoredCaptionsEnabled());
+export const captionStyle = createSignal(readStoredCaptionStyle());
+const subtitleCueCache = new Map();
+
+export function setCaptionsEnabled(enabled) {
+    const next = Boolean(enabled);
+    isCaptionsEnabled.value = next;
+    if (typeof window !== 'undefined') {
+        try {
+            window.localStorage.setItem('fp_cc_enabled', next ? '1' : '0');
+        } catch {
+            // Ignore storage quota/privacy errors
+        }
+    }
+}
+
+export function updateCaptionStyle(patch = {}) {
+    const cur = captionStyle.peek();
+    const next = {
+        size: ['small', 'medium', 'large'].includes(patch.size) ? patch.size : cur.size,
+        background: ['dark', 'translucent', 'none'].includes(patch.background) ? patch.background : cur.background,
+        position: ['bottom', 'top'].includes(patch.position) ? patch.position : cur.position,
+    };
+    captionStyle.value = next;
+    if (typeof window !== 'undefined') {
+        try {
+            window.localStorage.setItem('fp_cc_style', JSON.stringify(next));
+        } catch {
+            // Ignore storage errors
+        }
+    }
+}
+
+export function getCachedSubtitles(src) {
+    return src ? subtitleCueCache.get(String(src)) || null : null;
+}
+
+export function setCachedSubtitles(src, data) {
+    if (src && data) {
+        subtitleCueCache.set(String(src), data);
+    }
+}
+
 const DEBOUNCE_MS = 250;
 const INTERSECTION_THRESHOLDS = [0, 0.6, 0.85];
 

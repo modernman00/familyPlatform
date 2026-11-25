@@ -95,35 +95,37 @@ try {
         });
     }
 
-    document.addEventListener('click', async (e) => {
-        const submitBtn = e.target.closest('#submitPost, .submitPost');
-        const elementId = e.target.id;
+    const submitPostModalForm = async (triggerBtn = null) => {
+        const submitBtn = triggerBtn || document.getElementById('submitPost');
+        const confirmBtn = document.getElementById('composerConfirmShareBtn');
+        const step1SubmitBtn = document.getElementById('submitPost');
+        if (!submitBtn) return;
 
-        // SUBMIT THE NEW POST (from modal)
-        if (submitBtn) {
-            e.preventDefault();
-            if (submitBtn.disabled || submitBtn.getAttribute('aria-busy') === 'true') {
-                return;
-            }
+        if (submitBtn.getAttribute('data-submitting') === 'true') {
+            return;
+        }
 
-            const formExtra = id('formPostMessageModal');
-            if (!formExtra) return;
+        const formExtra = id('formPostMessageModal');
+        if (!formExtra) return;
 
-            // editPost() in feedComponent.js stamps this when reopening the modal
-            // to edit an existing post instead of creating a new one.
-            const editPostNo = document.getElementById('editPostNo')?.value;
-            const isEditing = !!editPostNo;
-            const originalBtnText = submitBtn.innerHTML;
+        // editPost() in feedComponent.js stamps this when reopening the modal
+        // to edit an existing post instead of creating a new one.
+        const editPostNo = document.getElementById('editPostNo')?.value;
+        const isEditing = !!editPostNo;
+        const originalBtnText = submitBtn.innerHTML;
+        let didSucceed = false;
 
-            // Immediate visual feedback with spinner
-            if (window.ScoreTenantSpinner) {
-                window.ScoreTenantSpinner.start(submitBtn);
-            } else {
-                submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> ${isEditing ? 'Saving...' : 'Posting...'}`;
-                submitBtn.disabled = true;
-            }
+        submitBtn.setAttribute('data-submitting', 'true');
 
-            try {
+        // Immediate visual feedback with spinner
+        if (window.ScoreTenantSpinner) {
+            window.ScoreTenantSpinner.start(submitBtn);
+        } else {
+            submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> ${isEditing ? 'Saving...' : 'Posting...'}`;
+            submitBtn.disabled = true;
+        }
+
+        try {
                 // Validate poll if it's being created
                 const pollContainer = document.getElementById('pollCreationContainer');
                 if (pollContainer && !pollContainer.classList.contains('d-none')) {
@@ -241,15 +243,17 @@ try {
                 // than the multipart POST the create flow uses (images/poll aren't
                 // part of the edit payload — see PostMessage::updatePost).
                 const selectedStageStyle = document.getElementById('composerPostStyleInput')?.value || '';
+                const reqOptions = { ...options, timeout: 60000 };
                 const response = isEditing
                     ? await axios.put(`/post/${editPostNo}`, {
                         postMessage: id('postMessage').value,
                         post_style: selectedStageStyle || 'none',
-                    }, options)
-                    : await axios.post("/member/profilePage/post", formData, options);
+                    }, reqOptions)
+                    : await axios.post("/member/profilePage/post", formData, reqOptions);
 
                 // Defensive check on response data
-                if (response?.data?.status === 'success' || response?.status === 200) {
+                if (response?.data?.status === 'success' || (response?.status === 200 && response?.data && typeof response.data === 'object' && response.data.status !== 'error')) {
+                    didSucceed = true;
                     if (isEditing) {
                         const editPayload = (response?.data?.message && typeof response.data.message === 'object')
                             ? response.data.message
@@ -359,13 +363,37 @@ try {
                     html: typeof rawMsg === 'string' ? rawMsg.replace(/\n/g, '<br>') : rawMsg,
                 });
             } finally {
-                if (window.ScoreTenantSpinner) {
-                    window.ScoreTenantSpinner.stop(submitBtn);
-                } else {
-                    submitBtn.innerHTML = originalBtnText;
-                    submitBtn.disabled = false;
+                submitBtn.removeAttribute('data-submitting');
+                if (!didSucceed) {
+                    const step2 = document.getElementById('composerStep2');
+                    if (step2) step2.setAttribute('data-confirmed', 'false');
                 }
+                [submitBtn, confirmBtn, step1SubmitBtn].forEach((btn) => {
+                    if (!btn) return;
+                    if (window.ScoreTenantSpinner) {
+                        window.ScoreTenantSpinner.stop(btn);
+                    }
+                    if (btn === submitBtn && !window.ScoreTenantSpinner) {
+                        btn.innerHTML = originalBtnText;
+                        btn.disabled = false;
+                    }
+                });
             }
+    };
+
+    window.__submitPostModalForm = submitPostModalForm;
+
+    document.addEventListener('click', async (e) => {
+        const submitBtn = e.target.closest('#submitPost, .submitPost');
+        const elementId = e.target.id;
+
+        // SUBMIT THE NEW POST (from modal)
+        if (submitBtn) {
+            e.preventDefault();
+            if (submitBtn.disabled || submitBtn.getAttribute('aria-busy') === 'true') {
+                return;
+            }
+            await submitPostModalForm(submitBtn);
         } 
         // add/delete to/from the notificatn bar 
         else if (elementId && elementId.includes('deleteNotification')) {

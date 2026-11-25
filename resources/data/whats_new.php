@@ -22,10 +22,10 @@
  * }
  */
 return [
-    'version_key' => '2026_11_w14',
+    'version_key' => '2026_11_w15',
     'badge' => 'What’s New',
-    'title' => 'Daily Arcade Live-Play Previews, Guest Share Gate & Weekly Fun Facts',
-    'summary' => 'Preview today’s featured Daily Family Arcade puzzle in live step-by-step motion right on the feed before jumping in, share posts and Sparks with our sleek Guest Gate, and enjoy 60fps Weekly Family Fun Facts.',
+    'title' => 'Auto-Generated Video Subtitles (CC), Daily Arcade Previews & Guest Share Gate',
+    'summary' => 'Toggle Closed Captions (CC) on any family video with English (Auto-generated) subtitles and customisable text size, background, and position, alongside Daily Arcade live previews and Weekly Fun Facts.',
     'primary_cta' => [
         'label' => 'Play Daily Arcade',
         'url' => '/arcade',
@@ -33,6 +33,12 @@ return [
     ],
     'playbook_url' => '/playbook',
     'items' => [
+        [
+            'title' => 'Closed Captions & Auto-Generated Subtitles (CC)',
+            'description' => 'Tap the new CC button on any feed video or full-screen player to toggle English (Auto-generated) subtitles or customise text size, background contrast, and screen position.',
+            'icon' => 'bi-badge-cc-fill',
+            'color' => '#a31621',
+        ],
         [
             'title' => 'Daily Arcade Live-Play Motion Previews',
             'description' => 'The Daily Family Arcade banner on your feed now animates today’s featured challenge — from Wordie tile flips to Ayò seed sowing and KinZip path traces — with a one-tap Pause/Watch Demo control.',
@@ -50,12 +56,6 @@ return [
             'description' => 'Your weekly family activity is now automatically curated into a 60fps motion presentation highlighting your Top Storyteller, Golden Hour, Most-Loved Moment, and "Do You Know?" Family Historian cards.',
             'icon' => 'bi-film',
             'color' => '#b8202c',
-        ],
-        [
-            'title' => 'Then & Now Heirloom Frame Studio',
-            'description' => 'Redesigned Polaroid-style Then & Now cards integrate inline date-stamp headers, live year-apart calculation badges, Family Archive & Ghost-Pose Camera actions, and an auto-collapsing backdrop bar.',
-            'icon' => 'bi-hourglass-split',
-            'color' => '#a31621',
         ],
     ],
 ];

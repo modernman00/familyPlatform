@@ -3913,6 +3913,412 @@ video.feed-post-video::-webkit-media-controls-play-button,
   100% { opacity: 0; transform: translate3d(680px, 260px, 0) rotate(22deg); }
 }
 
+.fp-cosmos-sun-companion {
+  display: none;
+}
+
+/* ==========================================================================
+   🌌 20. Andromeda Nebula (Magenta-Violet Nebula, Pulsar Core & Orchid Orbits)
+   ========================================================================== */
+.fp-text-stage--andromeda_nebula {
+  background:
+    radial-gradient(ellipse 64% 50% at 50% 50%, rgba(7, 2, 18, 0.58) 0%, transparent 100%),
+    radial-gradient(circle at 20% 20%, rgba(217, 70, 239, 0.30) 0%, transparent 46%),
+    radial-gradient(circle at 82% 28%, rgba(139, 92, 246, 0.28) 0%, transparent 46%),
+    radial-gradient(circle at 75% 84%, rgba(236, 72, 153, 0.24) 0%, transparent 48%),
+    linear-gradient(155deg, #050214 0%, #160936 50%, #1f0628 100%);
+  background-color: #050214;
+  color: #ffffff !important;
+  border-color: rgba(232, 121, 249, 0.45);
+}
+.fp-text-stage--andromeda_nebula .fp-text-stage__orb--a {
+  background: radial-gradient(circle, rgba(232, 121, 249, 0.36) 0%, rgba(147, 51, 234, 0.14) 70%);
+}
+.fp-text-stage--andromeda_nebula .fp-text-stage__orb--b {
+  background: radial-gradient(circle, rgba(167, 139, 250, 0.32) 0%, rgba(79, 70, 229, 0.12) 72%);
+}
+.fp-text-stage--andromeda_nebula .fp-text-stage__bokeh::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='260' viewBox='0 0 320 260'%3E%3Cg fill='%23ffffff'%3E%3Ccircle cx='34' cy='28' r='1.4' opacity='0.92'/%3E%3Ccircle cx='164' cy='34' r='1.7' opacity='0.95'/%3E%3Ccircle cx='292' cy='24' r='1.5' opacity='0.88'/%3E%3Ccircle cx='138' cy='168' r='1.8' opacity='0.94'/%3E%3Ccircle cx='278' cy='174' r='1.5' opacity='0.88'/%3E%3Ccircle cx='44' cy='224' r='1.6' opacity='0.9'/%3E%3C/g%3E%3Cg fill='%23f0abfc'%3E%3Ccircle cx='78' cy='108' r='2.0' opacity='0.82'/%3E%3Ccircle cx='252' cy='104' r='2.1' opacity='0.86'/%3E%3Ccircle cx='116' cy='204' r='1.9' opacity='0.78'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 320px 260px;
+  animation: fpStarTwinkle 4.2s ease-in-out infinite;
+}
+.fp-cosmos-orrery--andromeda_nebula .fp-cosmos-sun {
+  background: radial-gradient(circle at 38% 38%, #ffffff 0%, #fae8ff 30%, #d946ef 68%, #701a75 100%);
+  box-shadow:
+    0 0 18px 4px rgba(240, 171, 252, 0.88),
+    0 0 44px 12px rgba(217, 70, 239, 0.54),
+    0 0 82px 24px rgba(147, 51, 234, 0.30);
+}
+.fp-cosmos-orrery--andromeda_nebula .fp-cosmos-orbit {
+  border-color: rgba(232, 121, 249, 0.22);
+}
+.fp-cosmos-orrery--andromeda_nebula .fp-cosmos-comet {
+  background: linear-gradient(90deg, transparent 0%, rgba(240, 171, 252, 0.5) 55%, #ffffff 100%);
+  box-shadow: 0 0 8px rgba(240, 171, 252, 0.9);
+}
+
+/* ==========================================================================
+   🌒 21. Binary Eclipse (Twin Orbiting Suns & Gravitational Orrery)
+   ========================================================================== */
+.fp-text-stage--binary_eclipse {
+  background:
+    radial-gradient(ellipse 64% 50% at 50% 50%, rgba(2, 6, 20, 0.58) 0%, transparent 100%),
+    radial-gradient(circle at 22% 26%, rgba(249, 115, 22, 0.26) 0%, transparent 45%),
+    radial-gradient(circle at 80% 76%, rgba(14, 165, 233, 0.28) 0%, transparent 48%),
+    linear-gradient(155deg, #030712 0%, #0b132b 50%, #1c1018 100%);
+  background-color: #030712;
+  color: #ffffff !important;
+  border-color: rgba(56, 189, 248, 0.44);
+}
+.fp-text-stage--binary_eclipse .fp-text-stage__orb--a {
+  background: radial-gradient(circle, rgba(251, 146, 60, 0.34) 0%, rgba(234, 88, 12, 0.12) 70%);
+}
+.fp-text-stage--binary_eclipse .fp-text-stage__orb--b {
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.34) 0%, rgba(37, 99, 235, 0.12) 72%);
+}
+.fp-text-stage--binary_eclipse .fp-text-stage__bokeh::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='260' viewBox='0 0 320 260'%3E%3Cg fill='%23ffffff'%3E%3Ccircle cx='42' cy='34' r='1.5' opacity='0.9'/%3E%3Ccircle cx='148' cy='52' r='1.7' opacity='0.94'/%3E%3Ccircle cx='274' cy='38' r='1.4' opacity='0.86'/%3E%3Ccircle cx='94' cy='182' r='1.6' opacity='0.9'/%3E%3Ccircle cx='236' cy='214' r='1.5' opacity='0.88'/%3E%3C/g%3E%3Cg fill='%237dd3fc'%3E%3Ccircle cx='212' cy='96' r='2.0' opacity='0.82'/%3E%3Ccircle cx='58' cy='132' r='1.9' opacity='0.78'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 320px 260px;
+  animation: fpStarTwinkle 4.8s ease-in-out infinite;
+}
+.fp-cosmos-orrery--binary_eclipse .fp-cosmos-sun {
+  width: 28px;
+  height: 28px;
+  margin-left: -14px;
+  margin-top: -14px;
+}
+.fp-cosmos-orrery--binary_eclipse .fp-cosmos-sun-companion {
+  display: block;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  margin-left: 16px;
+  margin-top: -9px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #bae6fd 35%, #0ea5e9 72%, #1e3a8a 100%);
+  box-shadow:
+    0 0 14px 3px rgba(125, 211, 252, 0.9),
+    0 0 34px 10px rgba(14, 165, 233, 0.55);
+  transform-origin: -16px 9px;
+  animation: fpCosmosOrbit 7.5s linear infinite;
+}
+.fp-cosmos-orrery--binary_eclipse .fp-cosmos-orbit--2,
+.fp-cosmos-orrery--binary_eclipse .fp-cosmos-orbit--4 {
+  border-color: rgba(251, 146, 60, 0.24);
+}
+.fp-cosmos-orrery--binary_eclipse .fp-cosmos-orbit--3,
+.fp-cosmos-orrery--binary_eclipse .fp-cosmos-orbit--6 {
+  border-color: rgba(56, 189, 248, 0.26);
+}
+
+/* ==========================================================================
+   💫 22. Supernova Crown (Emerald-Cyan Shockwave & Golden Core)
+   ========================================================================== */
+.fp-text-stage--supernova_crown {
+  background:
+    radial-gradient(ellipse 64% 50% at 50% 50%, rgba(2, 10, 12, 0.58) 0%, transparent 100%),
+    radial-gradient(circle at 24% 22%, rgba(16, 185, 129, 0.28) 0%, transparent 46%),
+    radial-gradient(circle at 80% 78%, rgba(20, 184, 166, 0.26) 0%, transparent 48%),
+    radial-gradient(circle at 78% 22%, rgba(250, 204, 21, 0.16) 0%, transparent 40%),
+    linear-gradient(155deg, #020617 0%, #031c1e 50%, #061224 100%);
+  background-color: #020617;
+  color: #ffffff !important;
+  border-color: rgba(52, 211, 153, 0.45);
+}
+.fp-text-stage--supernova_crown .fp-text-stage__orb--a {
+  background: radial-gradient(circle, rgba(52, 211, 153, 0.34) 0%, rgba(5, 150, 105, 0.12) 70%);
+}
+.fp-text-stage--supernova_crown .fp-text-stage__orb--b {
+  background: radial-gradient(circle, rgba(250, 204, 21, 0.28) 0%, rgba(13, 148, 136, 0.12) 72%);
+}
+.fp-text-stage--supernova_crown .fp-text-stage__bokeh::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='260' viewBox='0 0 320 260'%3E%3Cg fill='%23ffffff'%3E%3Ccircle cx='38' cy='42' r='1.5' opacity='0.92'/%3E%3Ccircle cx='182' cy='28' r='1.7' opacity='0.95'/%3E%3Ccircle cx='286' cy='76' r='1.4' opacity='0.88'/%3E%3Ccircle cx='112' cy='198' r='1.6' opacity='0.92'/%3E%3Ccircle cx='264' cy='222' r='1.5' opacity='0.88'/%3E%3C/g%3E%3Cg fill='%236ee7b7'%3E%3Ccircle cx='88' cy='116' r='2.1' opacity='0.82'/%3E%3Ccircle cx='234' cy='148' r='2.0' opacity='0.85'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 320px 260px;
+  animation: fpStarTwinkle 4.0s ease-in-out infinite;
+}
+.fp-cosmos-orrery--supernova_crown .fp-cosmos-sun {
+  background: radial-gradient(circle at 38% 38%, #ffffff 0%, #fef08a 30%, #10b981 68%, #064e3b 100%);
+  box-shadow:
+    0 0 18px 4px rgba(110, 231, 183, 0.88),
+    0 0 46px 14px rgba(16, 185, 129, 0.52),
+    0 0 88px 26px rgba(250, 204, 21, 0.24);
+}
+.fp-cosmos-orrery--supernova_crown .fp-cosmos-orbit {
+  border-color: rgba(52, 211, 153, 0.24);
+}
+.fp-cosmos-orrery--supernova_crown .fp-cosmos-galaxy--primary {
+  background:
+    radial-gradient(circle at center, rgba(254, 240, 138, 0.88) 0%, rgba(52, 211, 153, 0.5) 18%, rgba(13, 148, 136, 0.2) 42%, transparent 70%),
+    conic-gradient(from 0deg, transparent 0deg, rgba(52, 211, 153, 0.34) 45deg, transparent 105deg, rgba(45, 212, 191, 0.3) 180deg, transparent 245deg, rgba(250, 204, 21, 0.24) 310deg, transparent 360deg);
+}
+.fp-cosmos-orrery--supernova_crown .fp-cosmos-comet {
+  background: linear-gradient(90deg, transparent 0%, rgba(110, 231, 183, 0.52) 55%, #ffffff 100%);
+  box-shadow: 0 0 8px rgba(110, 231, 183, 0.9);
+}
+
+/* ==========================================================================
+   ☄️ 23. Cosmic Rings (Rose-Gold & Midnight Indigo Ringed Orrery)
+   ========================================================================== */
+.fp-text-stage--cosmic_rings {
+  background:
+    radial-gradient(ellipse 64% 50% at 50% 50%, rgba(8, 3, 18, 0.58) 0%, transparent 100%),
+    radial-gradient(circle at 20% 24%, rgba(225, 29, 72, 0.26) 0%, transparent 46%),
+    radial-gradient(circle at 82% 76%, rgba(251, 146, 60, 0.22) 0%, transparent 46%),
+    radial-gradient(circle at 76% 20%, rgba(99, 102, 241, 0.26) 0%, transparent 44%),
+    linear-gradient(155deg, #030312 0%, #1b0b2e 50%, #24081c 100%);
+  background-color: #030312;
+  color: #ffffff !important;
+  border-color: rgba(251, 113, 133, 0.45);
+}
+.fp-text-stage--cosmic_rings .fp-text-stage__orb--a {
+  background: radial-gradient(circle, rgba(251, 113, 133, 0.34) 0%, rgba(190, 18, 60, 0.12) 70%);
+}
+.fp-text-stage--cosmic_rings .fp-text-stage__orb--b {
+  background: radial-gradient(circle, rgba(253, 186, 116, 0.30) 0%, rgba(99, 102, 241, 0.12) 72%);
+}
+.fp-text-stage--cosmic_rings .fp-text-stage__bokeh::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='260' viewBox='0 0 320 260'%3E%3Cg fill='%23ffffff'%3E%3Ccircle cx='30' cy='36' r='1.5' opacity='0.92'/%3E%3Ccircle cx='162' cy='46' r='1.7' opacity='0.94'/%3E%3Ccircle cx='288' cy='32' r='1.4' opacity='0.88'/%3E%3Ccircle cx='78' cy='186' r='1.6' opacity='0.9'/%3E%3Ccircle cx='248' cy='218' r='1.5' opacity='0.88'/%3E%3C/g%3E%3Cg fill='%23fda4af'%3E%3Ccircle cx='124' cy='112' r='2.0' opacity='0.82'/%3E%3Ccircle cx='268' cy='144' r='2.0' opacity='0.84'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 320px 260px;
+  animation: fpStarTwinkle 4.5s ease-in-out infinite;
+}
+.fp-cosmos-orrery--cosmic_rings .fp-cosmos-sun {
+  background: radial-gradient(circle at 38% 38%, #ffffff 0%, #fed7aa 32%, #f43f5e 68%, #881337 100%);
+  box-shadow:
+    0 0 18px 4px rgba(253, 164, 175, 0.88),
+    0 0 44px 12px rgba(244, 63, 94, 0.50),
+    0 0 82px 24px rgba(251, 146, 60, 0.25);
+}
+.fp-cosmos-orrery--cosmic_rings .fp-cosmos-orbit {
+  border-color: rgba(253, 164, 175, 0.24);
+}
+.fp-cosmos-orrery--cosmic_rings .fp-cosmos-orbit--3 {
+  border-width: 2px;
+  border-color: rgba(253, 186, 116, 0.34);
+}
+.fp-cosmos-orrery--cosmic_rings .fp-cosmos-comet {
+  background: linear-gradient(90deg, transparent 0%, rgba(253, 186, 116, 0.52) 55%, #ffffff 100%);
+  box-shadow: 0 0 8px rgba(253, 186, 116, 0.9);
+}
+
+/* ==========================================================================
+   🌊 24–26. Living Scenic Layers (Ocean Waves, Golden Sunset, Family Fireside)
+   ========================================================================== */
+.fp-scenic-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+/* 24. Ocean Waves (Moonlit Sea, Shimmer & 3 Parallax Rolling Wave Crests) */
+.fp-text-stage--ocean_waves {
+  background:
+    radial-gradient(ellipse 68% 48% at 50% 42%, rgba(2, 18, 38, 0.45) 0%, transparent 100%),
+    linear-gradient(180deg, #041024 0%, #082f49 48%, #0369a1 78%, #075985 100%);
+  background-color: #041024;
+  color: #ffffff !important;
+  border-color: rgba(56, 189, 248, 0.45);
+}
+.fp-ocean-moon {
+  position: absolute;
+  top: 12%;
+  right: 16%;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #e0f2fe 48%, #7dd3fc 100%);
+  box-shadow: 0 0 24px 6px rgba(186, 230, 253, 0.55), 0 0 60px 16px rgba(56, 189, 248, 0.25);
+}
+.fp-ocean-shimmer {
+  position: absolute;
+  top: 46%;
+  right: calc(16% - 14px);
+  width: 64px;
+  height: 54%;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(224, 242, 254, 0.26) 0px,
+    rgba(224, 242, 254, 0.26) 3px,
+    transparent 3px,
+    transparent 11px
+  );
+  filter: blur(2px);
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.9) 0%, transparent 95%);
+  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.9) 0%, transparent 95%);
+  animation: fpOceanShimmer 4.5s ease-in-out infinite alternate;
+}
+.fp-ocean-wave {
+  position: absolute;
+  left: -10%;
+  width: 220%;
+  background-repeat: repeat-x;
+  background-size: 50% 100%;
+  will-change: transform;
+}
+.fp-ocean-wave--back {
+  bottom: 18%;
+  height: 56px;
+  opacity: 0.45;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 120' preserveAspectRatio='none'%3E%3Cpath d='M0 44 Q100 10 200 44 T400 44 T600 44 T800 44 L800 120 L0 120 Z' fill='%230284c7'/%3E%3C/svg%3E");
+  animation: fpWaveScroll 16s linear infinite;
+}
+.fp-ocean-wave--mid {
+  bottom: 7%;
+  height: 62px;
+  opacity: 0.68;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 120' preserveAspectRatio='none'%3E%3Cpath d='M0 48 Q100 14 200 48 T400 48 T600 48 T800 48 L800 120 L0 120 Z' fill='%230369a1'/%3E%3Cpath d='M0 48 Q100 14 200 48 T400 48 T600 48 T800 48' fill='none' stroke='%23bae6fd' stroke-opacity='0.35' stroke-width='3'/%3E%3C/svg%3E");
+  animation: fpWaveScrollReverse 11s linear infinite;
+}
+.fp-ocean-wave--front {
+  bottom: -6px;
+  height: 68px;
+  opacity: 0.92;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 120' preserveAspectRatio='none'%3E%3Cpath d='M0 42 Q100 8 200 42 T400 42 T600 42 T800 42 L800 120 L0 120 Z' fill='%230c4a6e'/%3E%3Cpath d='M0 42 Q100 8 200 42 T400 42 T600 42 T800 42' fill='none' stroke='%23e0f2fe' stroke-opacity='0.55' stroke-width='3.5'/%3E%3C/svg%3E");
+  animation: fpWaveScroll 8s linear infinite;
+}
+
+/* 25. Golden Sunset (Animated Setting Sun, Drifting Clouds & Horizon Shimmer) */
+.fp-text-stage--moving_sunset {
+  background:
+    radial-gradient(ellipse 68% 48% at 50% 44%, rgba(28, 10, 36, 0.45) 0%, transparent 100%),
+    linear-gradient(180deg, #1e1035 0%, #701a75 34%, #db2777 58%, #f97316 80%, #1c102b 100%);
+  background-color: #1e1035;
+  color: #ffffff !important;
+  border-color: rgba(251, 146, 60, 0.48);
+}
+.fp-sunset-sun {
+  position: absolute;
+  left: 50%;
+  bottom: 22%;
+  width: 78px;
+  height: 78px;
+  margin-left: -39px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 35%, #fef9c3 0%, #fde047 36%, #fb923c 75%, #ea580c 100%);
+  box-shadow: 0 0 36px 10px rgba(251, 146, 60, 0.65), 0 0 90px 24px rgba(244, 63, 94, 0.35);
+  animation: fpSunsetGlide 14s ease-in-out infinite alternate;
+}
+.fp-sunset-horizon {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 26%;
+  background: linear-gradient(180deg, rgba(28, 12, 36, 0.86) 0%, #0f071c 100%);
+  border-top: 1px solid rgba(253, 186, 116, 0.35);
+}
+.fp-sunset-reflection {
+  position: absolute;
+  left: 50%;
+  bottom: 2%;
+  width: 96px;
+  height: 22%;
+  margin-left: -48px;
+  z-index: 2;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(254, 240, 138, 0.42) 0px,
+    rgba(254, 240, 138, 0.42) 3px,
+    transparent 3px,
+    transparent 9px
+  );
+  filter: blur(1.5px);
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.95) 0%, transparent 100%);
+  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.95) 0%, transparent 100%);
+  animation: fpOceanShimmer 3.8s ease-in-out infinite alternate;
+}
+.fp-sunset-cloud {
+  position: absolute;
+  height: 28px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent 0%, rgba(253, 186, 116, 0.22) 50%, transparent 100%);
+  filter: blur(6px);
+}
+.fp-sunset-cloud--a {
+  top: 18%;
+  left: -15%;
+  width: 190px;
+  animation: fpCloudDrift 22s linear infinite;
+}
+.fp-sunset-cloud--b {
+  top: 32%;
+  left: -20%;
+  width: 240px;
+  animation: fpCloudDrift 28s linear infinite;
+  animation-delay: -12s;
+}
+
+/* 26. Family Fireside (Warm Hearth Glow, Silhouettes Talking Together & Sparks) */
+.fp-text-stage--family_gathering {
+  background:
+    radial-gradient(ellipse 68% 50% at 50% 42%, rgba(22, 9, 2, 0.48) 0%, transparent 100%),
+    radial-gradient(circle at 50% 88%, rgba(245, 158, 11, 0.36) 0%, transparent 52%),
+    linear-gradient(160deg, #1a0b04 0%, #3b1707 48%, #1c0902 100%);
+  background-color: #1a0b04;
+  color: #ffffff !important;
+  border-color: rgba(251, 191, 36, 0.46);
+}
+.fp-family-hearth-glow {
+  position: absolute;
+  left: 50%;
+  bottom: -24px;
+  width: 240px;
+  height: 110px;
+  margin-left: -120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(254, 240, 138, 0.62) 0%, rgba(245, 158, 11, 0.32) 45%, transparent 75%);
+  filter: blur(10px);
+  animation: fpHearthPulse 3.6s ease-in-out infinite;
+}
+.fp-family-sparks {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='260' viewBox='0 0 320 260'%3E%3Cg fill='%23fde68a'%3E%3Ccircle cx='96' cy='210' r='2.1' opacity='0.85'/%3E%3Ccircle cx='144' cy='186' r='1.7' opacity='0.78'/%3E%3Ccircle cx='178' cy='204' r='2.3' opacity='0.9'/%3E%3Ccircle cx='222' cy='192' r='1.8' opacity='0.82'/%3E%3Ccircle cx='160' cy='154' r='1.5' opacity='0.72'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 320px 260px;
+  animation: fpFireflyRise 8s ease-in-out infinite;
+}
+.fp-family-silhouettes {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 340px;
+  height: 92px;
+  margin-left: -170px;
+  background-repeat: no-repeat;
+  background-position: bottom center;
+  background-size: contain;
+  opacity: 0.78;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 340 96'%3E%3Cg fill='%23120602'%3E%3Ccircle cx='78' cy='38' r='13'/%3E%3Cpath d='M52 96 C52 62 104 62 104 96 Z'/%3E%3Ccircle cx='126' cy='46' r='10'/%3E%3Cpath d='M106 96 C106 68 146 68 146 96 Z'/%3E%3Ccircle cx='214' cy='44' r='11'/%3E%3Cpath d='M192 96 C192 66 236 66 236 96 Z'/%3E%3Ccircle cx='262' cy='36' r='13'/%3E%3Cpath d='M236 96 C236 60 288 60 288 96 Z'/%3E%3C/g%3E%3Ccircle cx='170' cy='76' r='16' fill='%23fbbf24' fill-opacity='0.28'/%3E%3C/svg%3E");
+}
+
+@keyframes fpWaveScroll {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+@keyframes fpWaveScrollReverse {
+  from { transform: translate3d(-50%, 0, 0); }
+  to { transform: translate3d(0, 0, 0); }
+}
+@keyframes fpOceanShimmer {
+  0% { opacity: 0.55; transform: scaleX(0.94); }
+  100% { opacity: 0.95; transform: scaleX(1.08); }
+}
+@keyframes fpSunsetGlide {
+  0% { transform: translate3d(0, -14px, 0) scale(1.02); }
+  100% { transform: translate3d(0, 12px, 0) scale(0.98); }
+}
+@keyframes fpCloudDrift {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(960px, 0, 0); }
+}
+@keyframes fpHearthPulse {
+  0%, 100% { opacity: 0.72; transform: scale(0.96); }
+  50% { opacity: 1; transform: scale(1.08); }
+}
+
 /* Translucent 3D Grid & Floating Orbs */
 .fp-text-stage__grid {
   position: absolute;

@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(weekly-fun-facts): render 60fps presentation in feed and fix ms timestamp",
+    "title": "Feat(feed): deploy keyset pagination, profile updates, and preflight fixes",
     "notes": [
+        "Feat(feed): deploy keyset pagination, profile updates, and preflight fixes",
         "Fix(weekly-fun-facts): render 60fps presentation in feed and fix ms timestamp",
-        "Test(auth): set 2fa_passed in admin root redirect test",
-        "Feat(feed): inline Facebook Reel/video playback via signed fbcdn stream proxy with Rich Preview fallback"
+        "Test(auth): set 2fa_passed in admin root redirect test"
     ],
     "released_at": "2026-11-25",
-    "commit": "8a891f9b"
+    "commit": "38e5afaa"
 }

@@ -7,6 +7,7 @@ import { CommentThread } from './CommentThread';
 import { FeedVideoGallery } from './FeedVideoGallery';
 import { RichTextTokens } from './RichTextTokens';
 import CosmicOrrery from './CosmicOrrery';
+import ScenicMotionLayer, { LIVING_SCENIC_SLUGS } from './ScenicMotionLayer';
 import { WeeklyFunFactsPlayer } from './WeeklyFunFactsPlayer';
 import {
     TEXT_STAGE_CATALOG,
@@ -840,7 +841,12 @@ export const PostCard = memo(function PostCard({
                                 ) : (
                                     <div className="fp-text-stage__grid" aria-hidden="true" />
                                 )}
-                                {stageMeta.slug === 'solar_galaxy' && <CosmicOrrery />}
+                                {['solar_galaxy', 'andromeda_nebula', 'binary_eclipse', 'supernova_crown', 'cosmic_rings'].includes(stageMeta.slug) && (
+                                    <CosmicOrrery variant={stageMeta.slug} />
+                                )}
+                                {LIVING_SCENIC_SLUGS.includes(stageMeta.slug) && (
+                                    <ScenicMotionLayer variant={stageMeta.slug} />
+                                )}
                                 {stageMeta.badge && (
                                     <div className="fp-text-stage__header">
                                         <span className="fp-stage-badge">

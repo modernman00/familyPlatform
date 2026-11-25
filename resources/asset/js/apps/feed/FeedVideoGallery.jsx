@@ -2,6 +2,12 @@ import { useEffect, useRef, useState } from 'preact/hooks';
 import { isDirectVideoDescriptor, isVideoPath, resolveVideoPlaybackSrc } from './feedUtils';
 import { attachWebGL4kCas } from './AtgWebGL4kRenderer';
 import {
+    VideoCaptionOverlay,
+    VideoSubtitlesButton,
+    VideoSubtitlesPopover,
+    useVideoSubtitles,
+} from './VideoSubtitlesControl';
+import {
     activePostId,
     isGlobalMuted,
     registerMediaPlayer,
@@ -97,10 +103,12 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo, playerId }) {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isBuffering, setIsBuffering] = useState(false);
     const [streamFailed, setStreamFailed] = useState(false);
+    const [ccMenuOpen, setCcMenuOpen] = useState(false);
     const [detectedRatio, setDetectedRatio] = useState(() => safeAspectRatio(vid?.aspectRatio || vid?.aspect_ratio));
 
     const isDirect = isDirectVideoDescriptor(vid);
     const playSrc = resolveVideoPlaybackSrc(vid);
+    const subtitles = useVideoSubtitles(isDirect ? playSrc : null, videoRef);
     const fallbackOriginal = typeof vid === 'object' ? (vid?.originalUrl || '') : '';
     const thumbUrl = typeof vid === 'object' ? (vid?.posterUrl || vid?.thumbnailUrl || null) : null;
     const durationSec = typeof vid === 'object' && Number.isFinite(Number(vid?.durationSec ?? vid?.duration_sec))
@@ -429,6 +437,30 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo, playerId }) {
                                 </div>
                             </div>
                         )}
+                        <VideoSubtitlesButton
+                            captionsEnabled={subtitles.captionsEnabled}
+                            loading={subtitles.loading}
+                            menuOpen={ccMenuOpen}
+                            onToggleMenu={() => setCcMenuOpen((o) => !o)}
+                            style={{ top: '10px', right: '112px' }}
+                        />
+                        <VideoSubtitlesPopover
+                            menuOpen={ccMenuOpen}
+                            onClose={() => setCcMenuOpen(false)}
+                            captionsEnabled={subtitles.captionsEnabled}
+                            loading={subtitles.loading}
+                            error={subtitles.error}
+                            onSelectOff={subtitles.disableCaptions}
+                            onSelectAutoEn={subtitles.enableAutoCaptions}
+                            captionStyle={subtitles.stylePrefs}
+                            onUpdateStyle={subtitles.updateStyle}
+                        />
+                        <VideoCaptionOverlay
+                            captionsEnabled={subtitles.captionsEnabled}
+                            activeCueText={subtitles.activeCueText}
+                            captionStyle={subtitles.stylePrefs}
+                            loading={subtitles.loading}
+                        />
                         <button
                             type="button"
                             className="btn position-absolute d-inline-flex align-items-center justify-content-center p-0 shadow-sm"
@@ -688,6 +720,7 @@ function MultiVideoCard({
     const [hasFrame, setHasFrame] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isBuffering, setIsBuffering] = useState(false);
+    const [ccMenuOpen, setCcMenuOpen] = useState(false);
     const globalMuted = useSignalValue(isGlobalMuted);
     const currentActiveId = useSignalValue(activePostId);
     const [userActivatedIframe, setUserActivatedIframe] = useState(false);
@@ -701,6 +734,7 @@ function MultiVideoCard({
 
     const isDirect = isDirectVideoDescriptor(vid);
     const playSrc = resolveVideoPlaybackSrc(vid);
+    const subtitles = useVideoSubtitles(isDirect ? playSrc : null, videoRef);
     const fallbackOriginal = typeof vid === 'object' ? (vid?.originalUrl || '') : '';
     const thumbUrl = typeof vid === 'object' ? (vid?.posterUrl || vid?.thumbnailUrl || null) : null;
     const hasObserver = typeof IntersectionObserver !== 'undefined';
@@ -841,6 +875,24 @@ function MultiVideoCard({
 
             {isDirect ? (
                 <>
+                    <VideoSubtitlesButton
+                        captionsEnabled={subtitles.captionsEnabled}
+                        loading={subtitles.loading}
+                        menuOpen={ccMenuOpen}
+                        onToggleMenu={() => setCcMenuOpen((o) => !o)}
+                        style={{ top: '8px', right: '112px' }}
+                    />
+                    <VideoSubtitlesPopover
+                        menuOpen={ccMenuOpen}
+                        onClose={() => setCcMenuOpen(false)}
+                        captionsEnabled={subtitles.captionsEnabled}
+                        loading={subtitles.loading}
+                        error={subtitles.error}
+                        onSelectOff={subtitles.disableCaptions}
+                        onSelectAutoEn={subtitles.enableAutoCaptions}
+                        captionStyle={subtitles.stylePrefs}
+                        onUpdateStyle={subtitles.updateStyle}
+                    />
                     <button
                         type="button"
                         className="btn position-absolute d-inline-flex align-items-center justify-content-center p-0 shadow-sm"
@@ -943,6 +995,12 @@ function MultiVideoCard({
                         />
 
                         {/* Subtle Play Indicator when paused and poster is shown */}
+                        <VideoCaptionOverlay
+                            captionsEnabled={subtitles.captionsEnabled}
+                            activeCueText={subtitles.activeCueText}
+                            captionStyle={subtitles.stylePrefs}
+                            loading={subtitles.loading}
+                        />
                         {!isPlaying && !isBuffering && (
                             <div
                                 className="position-absolute top-50 start-50 translate-middle d-inline-flex align-items-center justify-content-center rounded-circle"

@@ -1,7 +1,8 @@
-import { describe, expect, it } from 'vitest';
-import { render } from '@testing-library/preact';
+import { describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, waitFor } from '@testing-library/preact';
 import { FeedVideoGallery } from './FeedVideoGallery';
 import { VideoModal } from './VideoModal';
+import { resetMediaPlaybackStore } from './mediaPlaybackStore';
 
 describe('FeedVideoGallery & VideoModal Aspect Ratio & Framing', () => {
     it('clamps portrait video feed preview to 4/5 full-width with object-fit: cover', () => {
@@ -165,5 +166,81 @@ describe('FeedVideoGallery & VideoModal Aspect Ratio & Framing', () => {
         expect(stage).toBeTruthy();
         expect(stage.style.aspectRatio).toBe('16 / 9');
         expect(stage.style.maxWidth).toBe('100%');
+    });
+
+    it('renders CC button, Subtitles popover (Off / English Auto-generated / Options), and fetches captions', async () => {
+        resetMediaPlaybackStore();
+        const originalFetch = globalThis.fetch;
+        globalThis.fetch = vi.fn().mockResolvedValue({
+            ok: true,
+            status: 200,
+            headers: new Headers({ 'content-type': 'application/json' }),
+            json: async () => ({
+                success: true,
+                language: 'en-GB',
+                label: 'English (Auto-generated)',
+                vtt: 'WEBVTT\n\n00:00:00.000 --> 00:00:05.000\nWelcome home to the family.',
+                cues: [{ start: 0, end: 5, text: 'Welcome home to the family.' }],
+            }),
+        });
+
+        try {
+            const { container } = render(
+                <FeedVideoGallery
+                    videos={[{
+                        type: 'direct',
+                        embedUrl: '/resources/videos/posts/cc-test.mp4',
+                        aspect_ratio: '16 / 9',
+                        duration_sec: 15,
+                    }]}
+                />
+            );
+
+            const ccBtn = container.querySelector('[data-testid="video-cc-btn"]');
+            expect(ccBtn).toBeTruthy();
+            expect(ccBtn.style.minWidth).toBe('44px');
+            expect(ccBtn.style.minHeight).toBe('44px');
+
+            fireEvent.click(ccBtn);
+            const popover = container.querySelector('[data-testid="video-cc-popover"]');
+            expect(popover).toBeTruthy();
+            expect(popover.textContent).toContain('Subtitles');
+            expect(popover.textContent).toContain('Off');
+            expect(popover.textContent).toContain('English (Auto-generated)');
+
+            const optionsBtn = container.querySelector('[data-testid="video-cc-options-btn"]');
+            fireEvent.click(optionsBtn);
+            expect(container.querySelector('[data-testid="video-cc-options-panel"]')).toBeTruthy();
+
+            fireEvent.click(optionsBtn); // back to tracks
+            const autoEnBtn = container.querySelector('[data-testid="video-cc-auto-en"]');
+            fireEvent.click(autoEnBtn);
+
+            await waitFor(() => {
+                const overlay = container.querySelector('[data-testid="video-cc-overlay"]');
+                expect(overlay).toBeTruthy();
+                expect(overlay.textContent).toContain('Welcome home to the family.');
+            });
+        } finally {
+            globalThis.fetch = originalFetch;
+            resetMediaPlaybackStore();
+        }
+    });
+
+    it('renders CC control button inside VideoModal for direct videos', () => {
+        const { container } = render(
+            <VideoModal
+                isOpen={true}
+                videos={[{
+                    type: 'direct',
+                    embedUrl: '/resources/videos/posts/modal-cc.mp4',
+                    aspect_ratio: '16 / 9',
+                }]}
+                initialIndex={0}
+                onClose={() => {}}
+            />
+        );
+        const modalCcBtn = container.querySelector('[data-testid="modal-video-cc-btn"]');
+        expect(modalCcBtn).toBeTruthy();
     });
 });

@@ -82,6 +82,13 @@ $router->map(
 
 $router->map(
   method: 'POST',
+  route: '/api/video/subtitles',
+  target: 'App\controller\members\StreamController@generateSubtitles',
+  name: 'video_subtitles_generate'
+);
+
+$router->map(
+  method: 'POST',
   route: '/api/webhooks/stream',
   target: 'App\controller\members\StreamController@handleWebhook',
   name: 'cloudflare_stream_webhook'

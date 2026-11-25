@@ -389,4 +389,61 @@ class StreamController
             'poster_url' => $mirroredPoster,
         ], JSON_UNESCAPED_SLASHES);
     }
+
+    /**
+     * Generate or retrieve cached WebVTT closed captions / subtitles for a video clip.
+     */
+    public function generateSubtitles(): void
+    {
+        header('Content-Type: application/json');
+
+        try {
+            $userId = (string)($_SESSION['id'] ?? '');
+            if ($userId === '') {
+                $verifyJWT = SignIn::verify();
+                if (empty($verifyJWT['id'])) {
+                    http_response_code(401);
+                    echo json_encode(['success' => false, 'error' => 'Authentication required.']);
+                    return;
+                }
+                $userId = (string)$verifyJWT['id'];
+            }
+
+            \Src\CheckToken::tokenCheck();
+
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
+
+            if (\App\services\AnalyticsService::isRateLimited($userId, 'video_subtitles', 20, 60)) {
+                http_response_code(429);
+                echo json_encode(['success' => false, 'error' => 'Too many subtitle requests. Please wait a moment.']);
+                return;
+            }
+
+            $rawInput = file_get_contents('php://input');
+            $json = is_string($rawInput) && $rawInput !== '' ? json_decode($rawInput, true) : null;
+            $src = is_array($json) && isset($json['src']) && is_string($json['src'])
+                ? $json['src']
+                : (isset($_POST['src']) && is_string($_POST['src']) ? $_POST['src'] : '');
+            $lang = is_array($json) && isset($json['lang']) && is_string($json['lang'])
+                ? $json['lang']
+                : (isset($_POST['lang']) && is_string($_POST['lang']) ? $_POST['lang'] : 'en-GB');
+
+            $result = \App\services\VideoSubtitleService::generateForVideo($src, $lang);
+            http_response_code(200);
+            // nosemgrep: php.lang.security.injection.echoed-request.echoed-request
+            echo json_encode($result, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+        } catch (\Src\Exceptions\UnauthorisedException $ue) {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'error' => 'Invalid or missing security token. Please refresh and try again.']);
+        } catch (\Src\Exceptions\ValidationException $ve) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => $ve->getMessage()]);
+        } catch (\Throwable $e) {
+            error_log('[StreamController::generateSubtitles] Error: ' . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => 'Unable to generate subtitles for this video.']);
+        }
+    }
 }

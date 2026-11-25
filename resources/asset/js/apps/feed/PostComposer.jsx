@@ -10,6 +10,7 @@ import {
 } from './feedUtils';
 import styles from './FeedShell.module.css';
 import CosmicOrrery from './CosmicOrrery';
+import ScenicMotionLayer, { LIVING_SCENIC_SLUGS } from './ScenicMotionLayer';
 
 const QUICK_EMOJIS = ['❤️', '🎉', '🙏', '😂', '🏡', '✨'];
 
@@ -255,7 +256,12 @@ export function PostComposer({ bootstrap, onOptimisticInsert, onReplaceOptimisti
                         {selectedStyle && files.length === 0 && (
                             <div className="fp-text-stage__bokeh" aria-hidden="true" />
                         )}
-                        {selectedStyle === 'solar_galaxy' && files.length === 0 && <CosmicOrrery />}
+                        {['solar_galaxy', 'andromeda_nebula', 'binary_eclipse', 'supernova_crown', 'cosmic_rings'].includes(selectedStyle) && files.length === 0 && (
+                            <CosmicOrrery variant={selectedStyle} />
+                        )}
+                        {LIVING_SCENIC_SLUGS.includes(selectedStyle) && files.length === 0 && (
+                            <ScenicMotionLayer variant={selectedStyle} />
+                        )}
                         <textarea
                             ref={composerRef}
                             rows={hasDraft || selectedStyle ? 3 : 1}

@@ -2148,4 +2148,78 @@ describe('Profile Feed Preact Island (Phases 1–4)', () => {
         expect(cosmosCard.querySelectorAll('.fp-cosmos-orbit').length).toBe(6);
         expect(cosmosCard.querySelector('.fp-cosmos-planet--saturn .fp-cosmos-saturn-ring')).toBeTruthy();
     });
+
+    it.each([
+        'andromeda_nebula',
+        'binary_eclipse',
+        'supernova_crown',
+        'cosmic_rings',
+    ])('renders %s cosmic universe backdrop with orbital system and variant modifier', (slug) => {
+        const { container } = render(
+            <FeedShell
+                bootstrap={{
+                    ...baseBootstrap,
+                    userId: 'u_owner',
+                    initialPosts: [
+                        {
+                            post_no: '9302',
+                            id: 'u_owner',
+                            firstName: 'Wally',
+                            lastName: 'Olaogun',
+                            postMessage: `Stargazing under ${slug} [style:${slug}]`,
+                            images: [],
+                            videos: [],
+                            comments: [],
+                        },
+                    ],
+                    initialHasMore: false,
+                }}
+            />
+        );
+
+        const cosmosCard = container.querySelector('#post9302 [data-testid="feed-text-stage-card"]');
+        expect(cosmosCard).toBeTruthy();
+        expect(cosmosCard.classList.contains(`fp-text-stage--${slug}`)).toBe(true);
+        expect(cosmosCard.classList.contains('fp-text-stage--scenic')).toBe(true);
+        const orrery = cosmosCard.querySelector(`.fp-cosmos-orrery--${slug}`);
+        expect(orrery).toBeTruthy();
+        expect(orrery.querySelector('.fp-cosmos-sun')).toBeTruthy();
+        expect(orrery.querySelectorAll('.fp-cosmos-orbit').length).toBe(6);
+    });
+
+    it.each([
+        ['ocean_waves', '.fp-ocean-wave'],
+        ['moving_sunset', '.fp-sunset-sun'],
+        ['family_gathering', '.fp-family-silhouettes'],
+    ])('renders %s living scenic backdrop with animated %s layer', (slug, expectedSelector) => {
+        const { container } = render(
+            <FeedShell
+                bootstrap={{
+                    ...baseBootstrap,
+                    userId: 'u_owner',
+                    initialPosts: [
+                        {
+                            post_no: '9303',
+                            id: 'u_owner',
+                            firstName: 'Wally',
+                            lastName: 'Olaogun',
+                            postMessage: `Sharing a warm moment [style:${slug}]`,
+                            images: [],
+                            videos: [],
+                            comments: [],
+                        },
+                    ],
+                    initialHasMore: false,
+                }}
+            />
+        );
+
+        const scenicCard = container.querySelector('#post9303 [data-testid="feed-text-stage-card"]');
+        expect(scenicCard).toBeTruthy();
+        expect(scenicCard.classList.contains(`fp-text-stage--${slug}`)).toBe(true);
+        expect(scenicCard.classList.contains('fp-text-stage--scenic')).toBe(true);
+        const layer = scenicCard.querySelector(`.fp-scenic-layer--${slug}`);
+        expect(layer).toBeTruthy();
+        expect(layer.querySelector(expectedSelector)).toBeTruthy();
+    });
 });

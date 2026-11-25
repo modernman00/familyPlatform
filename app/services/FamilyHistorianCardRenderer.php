@@ -19,7 +19,7 @@ use RuntimeException;
 final class FamilyHistorianCardRenderer
 {
     public const WIDTH = 1200;
-    public const HEIGHT = 750;
+    public const HEIGHT = 960;
     private const SS = 2;
 
     /**
@@ -192,25 +192,25 @@ final class FamilyHistorianCardRenderer
      */
     private static function drawHeader(GdImage $img, int $w, string $pillLabel, array $accent, array $accentText, string $famCode): void
     {
-        $sansBold = self::font('sans');
-        $pillFontSize = 24;
+        $sansBold = self::font('sans_bold');
+        $pillFontSize = 32;
         $bb = imagettfbbox($pillFontSize, 0, $sansBold, $pillLabel);
-        $textW = $bb !== false ? abs($bb[2] - $bb[0]) : 500;
-        $pillW = $textW + 72;
-        $pillH = 60;
+        $textW = $bb !== false ? abs($bb[2] - $bb[0]) : 620;
+        $pillW = $textW + 84;
+        $pillH = 76;
         $pillX = 110;
-        $pillY = 100;
+        $pillY = 96;
 
-        self::drawFilledRoundedRect($img, $pillX, $pillY, $pillX + $pillW, $pillY + $pillH, 30, $accent, 0);
-        imagettftext($img, $pillFontSize, 0, $pillX + 36, $pillY + 40, self::col($img, $accentText, 0), $sansBold, $pillLabel);
+        self::drawFilledRoundedRect($img, $pillX, $pillY, $pillX + $pillW, $pillY + $pillH, 38, $accent, 0);
+        imagettftext($img, $pillFontSize, 0, $pillX + 42, $pillY + 50, self::col($img, $accentText, 0), $sansBold, $pillLabel);
 
         // Family code badge on top right
         $cleanCode = '#' . ltrim(strtoupper(trim($famCode)), '#');
-        $codeBb = imagettfbbox(24, 0, $sansBold, $cleanCode);
-        $codeW = $codeBb !== false ? abs($codeBb[2] - $codeBb[0]) : 140;
-        $rightX = $w - 110 - ($codeW + 48);
-        self::drawFilledRoundedRect($img, $rightX, $pillY, $w - 110, $pillY + $pillH, 30, [255, 255, 255], 108);
-        imagettftext($img, 24, 0, $rightX + 24, $pillY + 40, self::col($img, [255, 255, 255], 0), $sansBold, $cleanCode);
+        $codeBb = imagettfbbox(32, 0, $sansBold, $cleanCode);
+        $codeW = $codeBb !== false ? abs($codeBb[2] - $codeBb[0]) : 180;
+        $rightX = $w - 110 - ($codeW + 64);
+        self::drawFilledRoundedRect($img, $rightX, $pillY, $w - 110, $pillY + $pillH, 38, [255, 255, 255], 108);
+        imagettftext($img, 32, 0, $rightX + 32, $pillY + 50, self::col($img, [255, 255, 255], 0), $sansBold, $cleanCode);
     }
 
     /**
@@ -229,19 +229,19 @@ final class FamilyHistorianCardRenderer
         $headline = $count === 1
             ? "1 Birthday in {$monthName}"
             : "{$count} Birthdays in {$monthName}";
-        imagettftext($img, 68, 0, 110, 275, self::col($img, [255, 255, 255], 0), $serif, $headline);
+        imagettftext($img, 80, 0, 110, 300, self::col($img, [255, 255, 255], 0), $serif, $headline);
 
         $sub = 'Celebrating our wonderful family members this month';
-        imagettftext($img, 30, 0, 110, 338, self::col($img, [226, 232, 240], 15), $sans, $sub);
+        imagettftext($img, 38, 0, 110, 376, self::col($img, [226, 232, 240], 10), $sans, $sub);
 
         // Render up to 6 member cards in a 2-column x 3-row grid
         $shown = array_slice($members, 0, 6);
         $startX = 110;
-        $startY = 400;
+        $startY = 445;
         $colW = 1040;
-        $rowH = 260;
+        $rowH = 330;
         $gapX = 100;
-        $gapY = 34;
+        $gapY = 42;
 
         $avatarColors = [
             [245, 158, 11],
@@ -277,13 +277,13 @@ final class FamilyHistorianCardRenderer
                 self::drawCenteredText($img, $initials, $sans, 42, $avatarCx, $avatarCy + 15, [15, 23, 42]);
             }
 
-            imagettftext($img, 36, 0, $cx + 225, $cy + 112, self::col($img, [255, 255, 255], 0), $sans, $name);
-            imagettftext($img, 28, 0, $cx + 225, $cy + 170, self::col($img, $palette['accent'], 0), $sans, $dayLabel);
+            imagettftext($img, 42, 0, $cx + 225, $cy + 145, self::col($img, [255, 255, 255], 0), $sans, $name);
+            imagettftext($img, 34, 0, $cx + 225, $cy + 210, self::col($img, $palette['accent'], 0), $sans, $dayLabel);
         }
 
         if ($count > 6) {
             $more = '+' . ($count - 6) . ' more birthday' . (($count - 6) > 1 ? 's' : '') . ' this month';
-            imagettftext($img, 26, 0, 110, $h - 155, self::col($img, $palette['accent'], 0), $sans, $more);
+            imagettftext($img, 32, 0, 110, $h - 175, self::col($img, $palette['accent'], 0), $sans, $more);
         }
     }
 
@@ -296,12 +296,12 @@ final class FamilyHistorianCardRenderer
         $serif = self::font('playfair');
         $sans = self::font('sans');
 
-        imagettftext($img, 66, 0, 110, 275, self::col($img, [255, 255, 255], 0), $serif, 'What Our Family Builds & Leads');
+        imagettftext($img, 78, 0, 110, 300, self::col($img, [255, 255, 255], 0), $serif, 'What Our Family Builds & Leads');
 
         $total = (int)($data['total_members'] ?? 0);
         $distinct = (int)($data['distinct_count'] ?? 0);
         $sub = "{$total} family members represented across {$distinct} professions & skills";
-        imagettftext($img, 30, 0, 110, 338, self::col($img, [203, 213, 225], 10), $sans, $sub);
+        imagettftext($img, 38, 0, 110, 376, self::col($img, [203, 213, 225], 5), $sans, $sub);
 
         /** @var array<int, array{label:string, count:int, pct:int}> $items */
         $items = array_slice(is_array($data['items'] ?? null) ? $data['items'] : [], 0, 5);
@@ -320,28 +320,28 @@ final class FamilyHistorianCardRenderer
             [244, 114, 182],
         ];
 
-        $y = 430;
+        $y = 485;
         $trackX = 110;
         $trackW = $w - 220;
         foreach ($items as $idx => $item) {
-            $label = self::truncateText((string)$item['label'], $sans, 32, 1400);
+            $label = self::truncateText((string)$item['label'], $sans, 38, 1400);
             $cnt = (int)$item['count'];
             $pct = (int)$item['pct'];
             $countLabel = $cnt . ' ' . ($cnt === 1 ? 'member' : 'members') . " ({$pct}%)";
 
-            imagettftext($img, 32, 0, $trackX, $y, self::col($img, [255, 255, 255], 0), $sans, $label);
-            $cBb = imagettfbbox(28, 0, $sans, $countLabel);
-            $cW = $cBb !== false ? abs($cBb[2] - $cBb[0]) : 200;
-            imagettftext($img, 28, 0, $trackX + $trackW - $cW, $y, self::col($img, [226, 232, 240], 10), $sans, $countLabel);
+            imagettftext($img, 38, 0, $trackX, $y, self::col($img, [255, 255, 255], 0), $sans, $label);
+            $cBb = imagettfbbox(34, 0, $sans, $countLabel);
+            $cW = $cBb !== false ? abs($cBb[2] - $cBb[0]) : 220;
+            imagettftext($img, 34, 0, $trackX + $trackW - $cW, $y, self::col($img, [226, 232, 240], 5), $sans, $countLabel);
 
-            $barY = $y + 24;
-            $barH = 44;
-            self::drawFilledRoundedRect($img, $trackX, $barY, $trackX + $trackW, $barY + $barH, 22, [255, 255, 255], 110);
+            $barY = $y + 30;
+            $barH = 54;
+            self::drawFilledRoundedRect($img, $trackX, $barY, $trackX + $trackW, $barY + $barH, 27, [255, 255, 255], 110);
 
             $fillW = max(60, (int)round(($cnt / $maxCount) * $trackW));
-            self::drawFilledRoundedRect($img, $trackX, $barY, $trackX + $fillW, $barY + $barH, 22, $barColors[$idx % count($barColors)], 0);
+            self::drawFilledRoundedRect($img, $trackX, $barY, $trackX + $fillW, $barY + $barH, 27, $barColors[$idx % count($barColors)], 0);
 
-            $y += 165;
+            $y += 225;
         }
     }
 
@@ -354,8 +354,8 @@ final class FamilyHistorianCardRenderer
         $serif = self::font('playfair');
         $sans = self::font('sans');
 
-        imagettftext($img, 68, 0, 110, 275, self::col($img, [255, 255, 255], 0), $serif, 'Our Living Family Heritage');
-        imagettftext($img, 30, 0, 110, 338, self::col($img, [209, 250, 229], 15), $sans, 'A snapshot of our growing family tree and global roots');
+        imagettftext($img, 82, 0, 110, 300, self::col($img, [255, 255, 255], 0), $serif, 'Our Living Family Heritage');
+        imagettftext($img, 38, 0, 110, 376, self::col($img, [209, 250, 229], 10), $sans, 'A snapshot of our growing family tree and global roots');
 
         $gens = (int)($data['generation_depth'] ?? 1);
         $branches = (int)($data['total_branches'] ?? 0);
@@ -370,18 +370,18 @@ final class FamilyHistorianCardRenderer
         ];
 
         $cardW = 680;
-        $cardH = 420;
+        $cardH = 560;
         $gap = 70;
         $startX = 110;
-        $cardY = 440;
+        $cardY = 480;
 
         foreach ($cards as $i => $c) {
             $cx = $startX + $i * ($cardW + $gap);
             self::drawFilledRoundedRect($img, $cx, $cardY, $cx + $cardW, $cardY + $cardH, 36, [255, 255, 255], 112);
             self::drawRoundedRectOutline($img, $cx, $cardY, $cx + $cardW, $cardY + $cardH, 36, $palette['accent'], 50, 3);
 
-            self::drawCenteredText($img, $c['value'], $serif, 128, $cx + (int)($cardW / 2), $cardY + 230, $palette['accent']);
-            self::drawCenteredText($img, strtoupper($c['label']), $sans, 30, $cx + (int)($cardW / 2), $cardY + 335, [255, 255, 255]);
+            self::drawCenteredText($img, $c['value'], $serif, 156, $cx + (int)($cardW / 2), $cardY + 305, $palette['accent']);
+            self::drawCenteredText($img, strtoupper($c['label']), $sans, 36, $cx + (int)($cardW / 2), $cardY + 440, [255, 255, 255]);
         }
 
         if ($countryCount > 0) {
@@ -389,8 +389,8 @@ final class FamilyHistorianCardRenderer
             if ($countryCount > 5) {
                 $list .= '  +' . ($countryCount - 5) . ' more';
             }
-            $list = self::truncateText($list, $sans, 28, $w - 220);
-            imagettftext($img, 28, 0, 110, 1020, self::col($img, [226, 232, 240], 10), $sans, $list);
+            $list = self::truncateText($list, $sans, 36, $w - 220);
+            imagettftext($img, 36, 0, 110, 1220, self::col($img, [226, 232, 240], 5), $sans, $list);
         }
     }
 
@@ -403,33 +403,33 @@ final class FamilyHistorianCardRenderer
         $serif = self::font('playfair');
         $sans = self::font('sans');
 
-        imagettftext($img, 68, 0, 110, 275, self::col($img, [255, 255, 255], 0), $serif, 'Celebrating Enduring Unions');
+        imagettftext($img, 80, 0, 110, 300, self::col($img, [255, 255, 255], 0), $serif, 'Celebrating Enduring Unions');
         $totalUnions = (int)($data['total_unions'] ?? 0);
         $sub = "Honouring {$totalUnions} cherished " . ($totalUnions === 1 ? 'marriage & partnership' : 'marriages & partnerships') . ' in our family tree';
-        imagettftext($img, 30, 0, 110, 338, self::col($img, [253, 230, 138], 10), $sans, $sub);
+        imagettftext($img, 38, 0, 110, 376, self::col($img, [253, 230, 138], 5), $sans, $sub);
 
         /** @var array<int, array<string, mixed>> $unions */
         $unions = array_slice(is_array($data['unions'] ?? null) ? $data['unions'] : [], 0, 4);
-        $y = 425;
+        $y = 460;
         $cardW = $w - 220;
-        $cardH = 195;
+        $cardH = 240;
 
         foreach ($unions as $u) {
             self::drawFilledRoundedRect($img, 110, $y, 110 + $cardW, $y + $cardH, 30, [255, 255, 255], 112);
             self::drawRoundedRectOutline($img, 110, $y, 110 + $cardW, $y + $cardH, 30, $palette['accent'], 60, 2);
 
-            $couple = self::truncateText((string)($u['couple_label'] ?? 'Family Couple'), $serif, 40, $cardW - 520);
+            $couple = self::truncateText((string)($u['couple_label'] ?? 'Family Couple'), $serif, 48, $cardW - 560);
             $milestone = (string)($u['milestone_label'] ?? 'Cherished Union');
 
-            imagettftext($img, 40, 0, 160, $y + 112, self::col($img, [255, 255, 255], 0), $serif, $couple);
+            imagettftext($img, 48, 0, 160, $y + 138, self::col($img, [255, 255, 255], 0), $serif, $couple);
 
-            $mBb = imagettfbbox(28, 0, $sans, $milestone);
-            $mW = $mBb !== false ? abs($mBb[2] - $mBb[0]) : 240;
-            $badgeX = 110 + $cardW - $mW - 90;
-            self::drawFilledRoundedRect($img, $badgeX, $y + 62, 110 + $cardW - 45, $y + 132, 35, $palette['accent'], 0);
-            imagettftext($img, 28, 0, $badgeX + 24, $y + 107, self::col($img, $palette['accent_text'], 0), $sans, $milestone);
+            $mBb = imagettfbbox(34, 0, $sans, $milestone);
+            $mW = $mBb !== false ? abs($mBb[2] - $mBb[0]) : 280;
+            $badgeX = 110 + $cardW - $mW - 96;
+            self::drawFilledRoundedRect($img, $badgeX, $y + 78, 110 + $cardW - 45, $y + 162, 42, $palette['accent'], 0);
+            imagettftext($img, 34, 0, $badgeX + 26, $y + 133, self::col($img, $palette['accent_text'], 0), $sans, $milestone);
 
-            $y += $cardH + 34;
+            $y += $cardH + 42;
         }
     }
 
@@ -441,37 +441,38 @@ final class FamilyHistorianCardRenderer
     {
         $serif = self::font('playfair');
         $sans = self::font('sans');
+        $sansBold = self::font('sans_bold');
 
-        imagettftext($img, 68, 0, 110, 275, self::col($img, [255, 255, 255], 0), $serif, 'Most-Loved Family Moment');
+        imagettftext($img, 82, 0, 110, 300, self::col($img, [255, 255, 255], 0), $serif, 'Most-Loved Family Moment');
 
         $peakDay = (string)($data['peak_day'] ?? 'Sunday');
         $totalPosts = (int)($data['total_posts'] ?? 0);
         $sub = "{$totalPosts} family stories shared recently  •  Peak day: {$peakDay}";
-        imagettftext($img, 30, 0, 110, 338, self::col($img, [191, 219, 254], 10), $sans, $sub);
+        imagettftext($img, 40, 0, 110, 376, self::col($img, [191, 219, 254], 5), $sans, $sub);
 
         // Spotlight quote card
         $cardX = 110;
-        $cardY = 420;
+        $cardY = 450;
         $cardW = $w - 220;
-        $cardH = 740;
-        self::drawFilledRoundedRect($img, $cardX, $cardY, $cardX + $cardW, $cardY + $cardH, 36, [255, 255, 255], 112);
-        self::drawRoundedRectOutline($img, $cardX, $cardY, $cardX + $cardW, $cardY + $cardH, 36, $palette['accent'], 50, 3);
+        $cardH = $h - 620;
+        self::drawFilledRoundedRect($img, $cardX, $cardY, $cardX + $cardW, $cardY + $cardH, 40, [255, 255, 255], 112);
+        self::drawRoundedRectOutline($img, $cardX, $cardY, $cardX + $cardW, $cardY + $cardH, 40, $palette['accent'], 50, 3);
 
         $author = (string)($data['top_author'] ?? 'Family Member');
         $score = (int)($data['top_score'] ?? 0);
         $excerpt = trim((string)($data['top_excerpt'] ?? 'A cherished family memory shared on the timeline.'));
 
-        // Wrap excerpt into max 4 lines
-        $lines = self::wrapText($excerpt, $serif, 44, $cardW - 140, 4);
-        $lineY = $cardY + 180;
+        // Wrap excerpt into max 5 lines at mobile-legible scale
+        $lines = self::wrapText($excerpt, $serif, 62, $cardW - 160, 5);
+        $lineY = $cardY + 210;
         foreach ($lines as $line) {
-            imagettftext($img, 44, 0, $cardX + 70, $lineY, self::col($img, [255, 255, 255], 0), $serif, $line);
-            $lineY += 78;
+            imagettftext($img, 62, 0, $cardX + 80, $lineY, self::col($img, [255, 255, 255], 0), $serif, $line);
+            $lineY += 102;
         }
 
         // Author + love count
         $meta = "Shared by {$author}  •  {$score} " . ($score === 1 ? 'reaction' : 'reactions');
-        imagettftext($img, 32, 0, $cardX + 70, $cardY + $cardH - 95, self::col($img, $palette['accent'], 0), $sans, $meta);
+        imagettftext($img, 42, 0, $cardX + 80, $cardY + $cardH - 105, self::col($img, $palette['accent'], 0), $sansBold, $meta);
     }
 
     /**
@@ -686,10 +687,10 @@ final class FamilyHistorianCardRenderer
         $left = 'FamilyPlatform  •  Family Historian';
         $right = 'Private Family Timeline';
 
-        imagettftext($img, 24, 0, 110, $h - 86, self::col($img, [226, 232, 240], 45), $sans, $left);
-        $bb = imagettfbbox(24, 0, $sans, $right);
-        $rw = $bb !== false ? abs($bb[2] - $bb[0]) : 250;
-        imagettftext($img, 24, 0, $w - 110 - $rw, $h - 86, self::col($img, [226, 232, 240], 45), $sans, $right);
+        imagettftext($img, 30, 0, 110, $h - 84, self::col($img, [226, 232, 240], 20), $sans, $left);
+        $bb = imagettfbbox(30, 0, $sans, $right);
+        $rw = $bb !== false ? abs($bb[2] - $bb[0]) : 310;
+        imagettftext($img, 30, 0, $w - 110 - $rw, $h - 84, self::col($img, [226, 232, 240], 20), $sans, $right);
     }
 
     /**

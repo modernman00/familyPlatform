@@ -185,8 +185,8 @@
             </div>
           </template>
 
-          <!-- ATG Super Avatar Quick-Launch Pill -->
-          <template x-if="!imageError && !isGifMedia(post.images[0]) && (getPostImageUrl(post.images[0]) || '').startsWith('/')">
+          <!-- ATG Super Avatar Quick-Launch Pill (hidden on system/infographic cards) -->
+          <template x-if="!imageError && !isGifMedia(post.images[0]) && (getPostImageUrl(post.images[0]) || '').startsWith('/') && post.id !== 'FAMILY_HISTORIAN' && post.id !== 'FAM_PLATFORM_OFFICIAL'">
             <a :href="'/member/emojiStudio?tab=photo-avatar&photo_url=' + encodeURIComponent(getPostImageUrl(post.images[0]))"
                @click.stop
                class="position-absolute bottom-0 end-0 m-2 d-inline-flex align-items-center gap-1 px-3 rounded-pill text-white text-decoration-none shadow-sm"

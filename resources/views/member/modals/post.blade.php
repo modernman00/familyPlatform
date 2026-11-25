@@ -84,13 +84,34 @@
                             <div class="fp-cosmos-galaxy fp-cosmos-galaxy--distant"></div>
                             <div class="fp-cosmos-comet"></div>
                             <div class="fp-cosmos-system">
-                                <div class="fp-cosmos-sun"></div>
+                                <div class="fp-cosmos-sun"><div class="fp-cosmos-sun-companion"></div></div>
                                 <div class="fp-cosmos-orbit fp-cosmos-orbit--1"><div class="fp-cosmos-planet fp-cosmos-planet--mercury"></div></div>
                                 <div class="fp-cosmos-orbit fp-cosmos-orbit--2"><div class="fp-cosmos-planet fp-cosmos-planet--venus"></div></div>
                                 <div class="fp-cosmos-orbit fp-cosmos-orbit--3"><div class="fp-cosmos-planet fp-cosmos-planet--earth"><div class="fp-cosmos-moon-orbit"><div class="fp-cosmos-moon"></div></div></div></div>
                                 <div class="fp-cosmos-orbit fp-cosmos-orbit--4"><div class="fp-cosmos-planet fp-cosmos-planet--mars"></div></div>
                                 <div class="fp-cosmos-orbit fp-cosmos-orbit--5"><div class="fp-cosmos-planet fp-cosmos-planet--saturn"><div class="fp-cosmos-saturn-ring"></div></div></div>
                                 <div class="fp-cosmos-orbit fp-cosmos-orbit--6"><div class="fp-cosmos-planet fp-cosmos-planet--neptune"></div></div>
+                            </div>
+                        </div>
+                        <div id="composerStageScenicLayer" class="fp-scenic-layer d-none" aria-hidden="true">
+                            <div class="fp-scenic-variant fp-scenic-variant--ocean_waves d-none">
+                                <div class="fp-ocean-moon"></div>
+                                <div class="fp-ocean-shimmer"></div>
+                                <div class="fp-ocean-wave fp-ocean-wave--back"></div>
+                                <div class="fp-ocean-wave fp-ocean-wave--mid"></div>
+                                <div class="fp-ocean-wave fp-ocean-wave--front"></div>
+                            </div>
+                            <div class="fp-scenic-variant fp-scenic-variant--moving_sunset d-none">
+                                <div class="fp-sunset-cloud fp-sunset-cloud--a"></div>
+                                <div class="fp-sunset-cloud fp-sunset-cloud--b"></div>
+                                <div class="fp-sunset-sun"></div>
+                                <div class="fp-sunset-reflection"></div>
+                                <div class="fp-sunset-horizon"></div>
+                            </div>
+                            <div class="fp-scenic-variant fp-scenic-variant--family_gathering d-none">
+                                <div class="fp-family-hearth-glow"></div>
+                                <div class="fp-family-sparks"></div>
+                                <div class="fp-family-silhouettes"></div>
                             </div>
                         </div>
                         <div id="composerStageHeaderBadge" class="d-none mb-2">
@@ -186,6 +207,34 @@
                             <button type="button" class="composer-stage-pill" data-stage-slug="solar_galaxy" onclick="window.__setComposerTextStage('solar_galaxy')" aria-pressed="false" title="Solar System, Spiral Galaxies &amp; Orbiting Planets Backdrop">
                                 <span class="composer-stage-pill__dot composer-stage-pill__dot--solar-galaxy">🪐</span>
                                 <span>Solar Galaxy</span>
+                            </button>
+                            <button type="button" class="composer-stage-pill" data-stage-slug="andromeda_nebula" onclick="window.__setComposerTextStage('andromeda_nebula')" aria-pressed="false" title="Andromeda Magenta-Violet Nebula &amp; Pulsar Orrery Backdrop">
+                                <span class="composer-stage-pill__dot composer-stage-pill__dot--andromeda-nebula">🌌</span>
+                                <span>Andromeda</span>
+                            </button>
+                            <button type="button" class="composer-stage-pill" data-stage-slug="binary_eclipse" onclick="window.__setComposerTextStage('binary_eclipse')" aria-pressed="false" title="Twin Orbiting Suns &amp; Gravitational Eclipse Backdrop">
+                                <span class="composer-stage-pill__dot composer-stage-pill__dot--binary-eclipse">🌒</span>
+                                <span>Binary Eclipse</span>
+                            </button>
+                            <button type="button" class="composer-stage-pill" data-stage-slug="supernova_crown" onclick="window.__setComposerTextStage('supernova_crown')" aria-pressed="false" title="Emerald-Gold Supernova Shockwave &amp; Crystalline Orbits Backdrop">
+                                <span class="composer-stage-pill__dot composer-stage-pill__dot--supernova-crown">💫</span>
+                                <span>Supernova</span>
+                            </button>
+                            <button type="button" class="composer-stage-pill" data-stage-slug="cosmic_rings" onclick="window.__setComposerTextStage('cosmic_rings')" aria-pressed="false" title="Rose-Gold &amp; Midnight Indigo Ringed Planet Orrery Backdrop">
+                                <span class="composer-stage-pill__dot composer-stage-pill__dot--cosmic-rings">☄️</span>
+                                <span>Cosmic Rings</span>
+                            </button>
+                            <button type="button" class="composer-stage-pill" data-stage-slug="ocean_waves" onclick="window.__setComposerTextStage('ocean_waves')" aria-pressed="false" title="Rolling Moonlit Ocean Waves &amp; Shimmering Tide Backdrop">
+                                <span class="composer-stage-pill__dot composer-stage-pill__dot--ocean-waves">🌊</span>
+                                <span>Ocean Waves</span>
+                            </button>
+                            <button type="button" class="composer-stage-pill" data-stage-slug="moving_sunset" onclick="window.__setComposerTextStage('moving_sunset')" aria-pressed="false" title="Animated Setting Sun, Drifting Clouds &amp; Horizon Shimmer Backdrop">
+                                <span class="composer-stage-pill__dot composer-stage-pill__dot--moving-sunset">🌇</span>
+                                <span>Golden Sunset</span>
+                            </button>
+                            <button type="button" class="composer-stage-pill" data-stage-slug="family_gathering" onclick="window.__setComposerTextStage('family_gathering')" aria-pressed="false" title="Warm Family Fireside Gathering &amp; Hearth Glow Backdrop">
+                                <span class="composer-stage-pill__dot composer-stage-pill__dot--family-gathering">🫂</span>
+                                <span>Family Fireside</span>
                             </button>
                             <button type="button" class="composer-stage-pill" data-stage-slug="dynasty_holo" onclick="window.__setComposerTextStage('dynasty_holo')" aria-pressed="false" title="Translucent 3D Emerald Dynasty Tree Stage">
                                 <span class="composer-stage-pill__dot composer-stage-pill__dot--dynasty">🌳</span>
@@ -2077,6 +2126,9 @@ window.selectPostAudience = function(scope, label, iconClass, famCode) {
         const confirmBtn = e.target.closest('#composerConfirmShareBtn');
         if (confirmBtn) {
             e.preventDefault();
+            if (confirmBtn.getAttribute('data-submitting') === 'true' || confirmBtn.getAttribute('aria-busy') === 'true') {
+                return;
+            }
             const checkedRadio = document.querySelector('#composerStep2 input[name="audience_choice_radio"]:checked');
             if (checkedRadio) {
                 const chosenScope = checkedRadio.getAttribute('data-scope') || 'all';
@@ -2104,9 +2156,17 @@ window.selectPostAudience = function(scope, label, iconClass, famCode) {
                 confirmBtn.disabled = true;
                 confirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1.5" role="status" aria-hidden="true"></span> Sharing...';
             }
+            if (typeof window.__submitPostModalForm === 'function') {
+                window.__submitPostModalForm(confirmBtn);
+                return;
+            }
             const submitBtn = document.getElementById('submitPost');
             if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.removeAttribute('aria-busy');
                 submitBtn.click();
+            } else if (window.ScoreTenantSpinner) {
+                window.ScoreTenantSpinner.stop(confirmBtn);
             }
         }
     });
@@ -2240,6 +2300,41 @@ window.selectPostAudience = function(scope, label, iconClass, famCode) {
             category: 'scenic',
             label: '🪐 Solar Galaxy',
         },
+        andromeda_nebula: {
+            badge: null,
+            category: 'scenic',
+            label: '🌌 Andromeda Nebula',
+        },
+        binary_eclipse: {
+            badge: null,
+            category: 'scenic',
+            label: '🌒 Binary Eclipse',
+        },
+        supernova_crown: {
+            badge: null,
+            category: 'scenic',
+            label: '💫 Supernova Crown',
+        },
+        cosmic_rings: {
+            badge: null,
+            category: 'scenic',
+            label: '☄️ Cosmic Rings',
+        },
+        ocean_waves: {
+            badge: null,
+            category: 'scenic',
+            label: '🌊 Ocean Waves',
+        },
+        moving_sunset: {
+            badge: null,
+            category: 'scenic',
+            label: '🌇 Golden Sunset',
+        },
+        family_gathering: {
+            badge: null,
+            category: 'scenic',
+            label: '🫂 Family Fireside',
+        },
         dynasty_holo: {
             badge: '🌳 DYNASTY LINEAGE CALL',
             category: 'stage',
@@ -2307,8 +2402,28 @@ window.selectPostAudience = function(scope, label, iconClass, famCode) {
             if (bokehLayer) {
                 bokehLayer.classList.toggle('d-none', !isScenic);
             }
+            const COSMOS_SLUGS = ['solar_galaxy', 'andromeda_nebula', 'binary_eclipse', 'supernova_crown', 'cosmic_rings'];
             if (cosmosLayer) {
-                cosmosLayer.classList.toggle('d-none', cleanSlug !== 'solar_galaxy');
+                const isCosmos = COSMOS_SLUGS.includes(cleanSlug);
+                cosmosLayer.classList.toggle('d-none', !isCosmos);
+                COSMOS_SLUGS.forEach(s => cosmosLayer.classList.remove('fp-cosmos-orrery--' + s));
+                if (isCosmos) {
+                    cosmosLayer.classList.add('fp-cosmos-orrery--' + cleanSlug);
+                }
+            }
+            const LIVING_SCENIC_SLUGS = ['ocean_waves', 'moving_sunset', 'family_gathering'];
+            const scenicLayer = document.getElementById('composerStageScenicLayer');
+            if (scenicLayer) {
+                const isLivingScenic = LIVING_SCENIC_SLUGS.includes(cleanSlug);
+                scenicLayer.classList.toggle('d-none', !isLivingScenic);
+                LIVING_SCENIC_SLUGS.forEach(s => {
+                    scenicLayer.classList.remove('fp-scenic-layer--' + s);
+                    const v = scenicLayer.querySelector('.fp-scenic-variant--' + s);
+                    if (v) v.classList.toggle('d-none', s !== cleanSlug);
+                });
+                if (isLivingScenic) {
+                    scenicLayer.classList.add('fp-scenic-layer--' + cleanSlug);
+                }
             }
             editor.style.color = '#ffffff';
             editor.style.fontWeight = isScenic ? '800' : '700';

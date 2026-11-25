@@ -119,7 +119,7 @@ export function WeeklyFunFactsPlayer({ reel }) {
         ctx.fillStyle = g1;
         ctx.fillRect(0, 0, w, h);
 
-        const pad = isVertical ? 36 : 56;
+        const pad = isVertical ? 44 : 56;
 
         if (s.type === 'fun_fact_intro' || s.type === 'intro') {
             const pop = springOut(localMs / 850);
@@ -132,25 +132,29 @@ export function WeeklyFunFactsPlayer({ reel }) {
             ctx.textAlign = 'center';
 
             ctx.fillStyle = '#fcd34d';
-            ctx.font = `700 ${isVertical ? 16 : 18}px system-ui, sans-serif`;
-            ctx.fillText(s.badge || 'WEEKLY FAMILY FUN FACTS', 0, isVertical ? -150 : -110);
+            ctx.font = `700 ${isVertical ? 26 : 28}px system-ui, sans-serif`;
+            ctx.fillText(s.badge || 'WEEKLY FAMILY FUN FACTS', 0, isVertical ? -220 : -145);
 
             ctx.fillStyle = '#ffffff';
-            ctx.font = `800 ${isVertical ? 38 : 44}px system-ui, sans-serif`;
+            ctx.font = `800 ${isVertical ? 58 : 60}px system-ui, sans-serif`;
             const titleLines = wrapLines(ctx, s.title || 'Our Family Week in Numbers', w - pad * 2);
-            titleLines.forEach((ln, i) => ctx.fillText(ln, 0, (isVertical ? -90 : -55) + i * 48));
+            const titleLineH = isVertical ? 68 : 68;
+            const titleStartY = isVertical ? -135 : -75;
+            titleLines.forEach((ln, i) => ctx.fillText(ln, 0, titleStartY + i * titleLineH));
 
             if (countTarget > 0) {
                 ctx.fillStyle = '#38bdf8';
-                ctx.font = `800 ${isVertical ? 84 : 78}px system-ui, sans-serif`;
-                ctx.fillText(String(countNow), 0, isVertical ? 65 : 55);
+                ctx.font = `800 ${isVertical ? 156 : 148}px system-ui, sans-serif`;
+                ctx.fillText(String(countNow), 0, isVertical ? 110 : 85);
                 ctx.fillStyle = '#e2e8f0';
-                ctx.font = `600 ${isVertical ? 22 : 20}px system-ui, sans-serif`;
-                ctx.fillText(s.caption || '', 0, isVertical ? 115 : 100);
+                ctx.font = `600 ${isVertical ? 34 : 34}px system-ui, sans-serif`;
+                const capLines = wrapLines(ctx, s.caption || '', w - pad * 2);
+                capLines.slice(0, 2).forEach((ln, i) => ctx.fillText(ln, 0, (isVertical ? 185 : 150) + i * 42));
             } else {
                 ctx.fillStyle = '#cbd5e1';
-                ctx.font = `500 ${isVertical ? 22 : 22}px system-ui, sans-serif`;
-                ctx.fillText(s.caption || s.subtitle || '', 0, 50);
+                ctx.font = `500 ${isVertical ? 34 : 34}px system-ui, sans-serif`;
+                const capLines = wrapLines(ctx, s.caption || s.subtitle || '', w - pad * 2);
+                capLines.slice(0, 3).forEach((ln, i) => ctx.fillText(ln, 0, (isVertical ? 80 : 65) + i * 44));
             }
             ctx.restore();
         } else if (s.type === 'fun_fact_leaderboard') {
@@ -158,47 +162,53 @@ export function WeeklyFunFactsPlayer({ reel }) {
             ctx.globalAlpha = easeOutCubic(localMs / 500);
             ctx.textAlign = 'left';
             ctx.fillStyle = '#7dd3fc';
-            ctx.font = '700 16px system-ui, sans-serif';
-            ctx.fillText(s.badge || 'FUN FACT #1', pad, pad + 18);
+            ctx.font = `700 ${isVertical ? 26 : 26}px system-ui, sans-serif`;
+            ctx.fillText(s.badge || 'FUN FACT #1', pad, pad + 26);
 
             ctx.fillStyle = '#ffffff';
-            ctx.font = `800 ${isVertical ? 30 : 34}px system-ui, sans-serif`;
+            ctx.font = `800 ${isVertical ? 46 : 46}px system-ui, sans-serif`;
             const lines = wrapLines(ctx, s.title || '', w - pad * 2);
-            lines.forEach((ln, i) => ctx.fillText(ln, pad, pad + 64 + i * 38));
+            const titleLineH = 56;
+            lines.forEach((ln, i) => ctx.fillText(ln, pad, pad + 88 + i * titleLineH));
 
             ctx.fillStyle = '#cbd5e1';
-            ctx.font = '400 18px system-ui, sans-serif';
-            ctx.fillText(s.subtitle || '', pad, pad + 64 + lines.length * 38 + 8);
+            ctx.font = `400 ${isVertical ? 28 : 28}px system-ui, sans-serif`;
+            const subLines = wrapLines(ctx, s.subtitle || '', w - pad * 2);
+            const subStartY = pad + 88 + lines.length * titleLineH + 8;
+            subLines.slice(0, 2).forEach((ln, i) => ctx.fillText(ln, pad, subStartY + i * 36));
 
             const lb = Array.isArray(s.leaderboard) ? s.leaderboard : [];
             const maxPosts = Math.max(1, ...lb.map((b) => Number(b.posts || 1)));
-            const startY = isVertical ? 320 : 230;
+            const subEndY = subStartY + Math.min(2, subLines.length) * 36;
+            const startY = isVertical ? Math.max(410, subEndY + 56) : Math.max(295, subEndY + 34);
+            const rowStep = isVertical ? 210 : 120;
+            const barH = isVertical ? 72 : 60;
             const colors = ['#f59e0b', '#38bdf8', '#a78bfa'];
             lb.forEach((b, idx) => {
-                const y = startY + idx * (isVertical ? 110 : 78);
+                const y = startY + idx * rowStep;
                 const prog = springOut((localMs - 300 - idx * 180) / 850);
-                const barAreaW = isVertical ? w - pad * 2 : w - pad * 2 - 220;
-                const barX = isVertical ? pad : pad + 200;
-                const barY = isVertical ? y + 28 : y;
-                const targetW = Math.max(24, (Number(b.posts || 0) / maxPosts) * barAreaW * prog);
+                const barAreaW = isVertical ? w - pad * 2 : w - pad * 2 - 330;
+                const barX = isVertical ? pad : pad + 310;
+                const barY = isVertical ? y + 42 : y;
+                const targetW = Math.max(36, (Number(b.posts || 0) / maxPosts) * barAreaW * prog);
 
                 ctx.fillStyle = '#f8fafc';
-                ctx.font = '600 20px system-ui, sans-serif';
-                ctx.fillText(String(b.name || 'Member'), pad, y + (isVertical ? 12 : 24));
+                ctx.font = `600 ${isVertical ? 34 : 32}px system-ui, sans-serif`;
+                ctx.fillText(String(b.name || 'Member'), pad, y + (isVertical ? 18 : 40));
 
                 ctx.fillStyle = 'rgba(255,255,255,0.09)';
                 ctx.beginPath();
-                ctx.roundRect(barX, barY, barAreaW, 38, 10);
+                ctx.roundRect(barX, barY, barAreaW, barH, 14);
                 ctx.fill();
 
                 ctx.fillStyle = colors[idx % colors.length];
                 ctx.beginPath();
-                ctx.roundRect(barX, barY, targetW, 38, 10);
+                ctx.roundRect(barX, barY, targetW, barH, 14);
                 ctx.fill();
 
                 ctx.fillStyle = '#ffffff';
-                ctx.font = '700 16px system-ui, sans-serif';
-                ctx.fillText(`${b.posts || 0} posts`, barX + 14, barY + 25);
+                ctx.font = `700 ${isVertical ? 28 : 26}px system-ui, sans-serif`;
+                ctx.fillText(`${b.posts || 0} posts`, barX + 18, barY + (isVertical ? 46 : 39));
             });
             ctx.restore();
         } else if (s.type === 'fun_fact_golden_hour') {
@@ -206,49 +216,52 @@ export function WeeklyFunFactsPlayer({ reel }) {
             ctx.globalAlpha = easeOutCubic(localMs / 500);
             ctx.textAlign = 'left';
             ctx.fillStyle = '#fcd34d';
-            ctx.font = '700 16px system-ui, sans-serif';
-            ctx.fillText(s.badge || 'FUN FACT #2', pad, pad + 18);
+            ctx.font = `700 ${isVertical ? 26 : 26}px system-ui, sans-serif`;
+            ctx.fillText(s.badge || 'FUN FACT #2', pad, pad + 26);
 
             ctx.fillStyle = '#ffffff';
-            ctx.font = `800 ${isVertical ? 28 : 34}px system-ui, sans-serif`;
+            ctx.font = `800 ${isVertical ? 46 : 46}px system-ui, sans-serif`;
             const lines = wrapLines(ctx, s.title || '', w - pad * 2);
-            lines.forEach((ln, i) => ctx.fillText(ln, pad, pad + 64 + i * 38));
+            const titleLineH = 56;
+            lines.forEach((ln, i) => ctx.fillText(ln, pad, pad + 88 + i * titleLineH));
 
             ctx.fillStyle = '#cbd5e1';
-            ctx.font = '400 18px system-ui, sans-serif';
-            ctx.fillText(s.subtitle || '', pad, pad + 64 + lines.length * 38 + 8);
+            ctx.font = `400 ${isVertical ? 28 : 28}px system-ui, sans-serif`;
+            const subLines = wrapLines(ctx, s.subtitle || '', w - pad * 2);
+            const subStartY = pad + 88 + lines.length * titleLineH + 8;
+            subLines.slice(0, 2).forEach((ln, i) => ctx.fillText(ln, pad, subStartY + i * 36));
 
             const daily = s.daily_counts || { Mon: 1, Tue: 1, Wed: 2, Thu: 2, Fri: 3, Sat: 2, Sun: 4 };
             const keys = Object.keys(daily);
             const maxV = Math.max(1, ...Object.values(daily).map(Number));
-            const baseY = h - (isVertical ? 140 : 85);
-            const maxH = isVertical ? 320 : 185;
+            const baseY = h - (isVertical ? 150 : 82);
+            const maxH = isVertical ? 480 : 240;
             const colW = (w - pad * 2) / keys.length;
             const goldenShort = String(s.golden_day || 'Sunday').slice(0, 3);
 
             keys.forEach((day, idx) => {
                 const val = Number(daily[day] || 0);
                 const p = springOut((localMs - 250 - idx * 80) / 800);
-                const bh = Math.max(12, (val / maxV) * maxH * p);
+                const bh = Math.max(16, (val / maxV) * maxH * p);
                 const x = pad + idx * colW + 8;
                 const bw = colW - 16;
                 const isPeak = day === goldenShort;
 
                 ctx.fillStyle = isPeak ? '#f59e0b' : 'rgba(148, 163, 184, 0.35)';
                 ctx.beginPath();
-                ctx.roundRect(x, baseY - bh, bw, bh, 8);
+                ctx.roundRect(x, baseY - bh, bw, bh, 10);
                 ctx.fill();
 
                 if (isPeak && p > 0.6) {
                     ctx.fillStyle = '#fcd34d';
-                    ctx.font = '700 14px system-ui, sans-serif';
+                    ctx.font = `700 ${isVertical ? 22 : 22}px system-ui, sans-serif`;
                     ctx.textAlign = 'center';
-                    ctx.fillText('★ PEAK', x + bw / 2, baseY - bh - 12);
+                    ctx.fillText('★ PEAK', x + bw / 2, baseY - bh - 16);
                 }
                 ctx.fillStyle = isPeak ? '#ffffff' : '#94a3b8';
-                ctx.font = isPeak ? '700 16px system-ui, sans-serif' : '500 15px system-ui, sans-serif';
+                ctx.font = isPeak ? `700 ${isVertical ? 26 : 26}px system-ui, sans-serif` : `500 ${isVertical ? 24 : 24}px system-ui, sans-serif`;
                 ctx.textAlign = 'center';
-                ctx.fillText(day, x + bw / 2, baseY + 28);
+                ctx.fillText(day, x + bw / 2, baseY + 38);
             });
             ctx.restore();
         } else if (s.type === 'fun_fact_most_loved') {
@@ -257,39 +270,40 @@ export function WeeklyFunFactsPlayer({ reel }) {
             ctx.globalAlpha = easeOutCubic(localMs / 500);
             ctx.textAlign = 'left';
             ctx.fillStyle = '#fda4af';
-            ctx.font = '700 16px system-ui, sans-serif';
-            ctx.fillText(s.badge || 'FUN FACT #3', pad, pad + 18);
+            ctx.font = `700 ${isVertical ? 26 : 26}px system-ui, sans-serif`;
+            ctx.fillText(s.badge || 'FUN FACT #3', pad, pad + 26);
 
             ctx.fillStyle = '#ffffff';
-            ctx.font = `800 ${isVertical ? 28 : 34}px system-ui, sans-serif`;
+            ctx.font = `800 ${isVertical ? 46 : 46}px system-ui, sans-serif`;
             const tLines = wrapLines(ctx, s.title || '', w - pad * 2);
-            tLines.forEach((ln, i) => ctx.fillText(ln, pad, pad + 64 + i * 38));
+            tLines.forEach((ln, i) => ctx.fillText(ln, pad, pad + 88 + i * 56));
 
             ctx.save();
-            ctx.translate(w / 2, h / 2 + 40);
+            ctx.translate(w / 2, h / 2 + (isVertical ? 80 : 85));
             ctx.scale(0.92 + 0.08 * cardPop, 0.92 + 0.08 * cardPop);
             const cw = w - pad * 2;
-            const ch = isVertical ? 260 : 185;
+            const ch = isVertical ? 460 : 290;
             ctx.fillStyle = 'rgba(255,255,255,0.08)';
-            ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-            ctx.lineWidth = 1.5;
+            ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+            ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.roundRect(-cw / 2, -ch / 2, cw, ch, 18);
+            ctx.roundRect(-cw / 2, -ch / 2, cw, ch, 22);
             ctx.fill();
             ctx.stroke();
 
             ctx.fillStyle = '#fcd34d';
-            ctx.font = '700 14px system-ui, sans-serif';
-            ctx.fillText(`MOST CELEBRATED POST  •  ${String(s.quote_author || 'Family').toUpperCase()}`, -cw / 2 + 28, -ch / 2 + 38);
+            ctx.font = `700 ${isVertical ? 22 : 22}px system-ui, sans-serif`;
+            ctx.fillText(`MOST CELEBRATED POST  •  ${String(s.quote_author || 'Family').toUpperCase()}`, -cw / 2 + 34, -ch / 2 + 50);
 
             ctx.fillStyle = '#ffffff';
-            ctx.font = `600 ${isVertical ? 22 : 24}px system-ui, sans-serif`;
-            const qLines = wrapLines(ctx, `“${s.quote_text || ''}”`, cw - 56);
-            qLines.slice(0, 3).forEach((ln, i) => ctx.fillText(ln, -cw / 2 + 28, -ch / 2 + 82 + i * 32));
+            ctx.font = `600 ${isVertical ? 34 : 36}px system-ui, sans-serif`;
+            const qLines = wrapLines(ctx, `“${s.quote_text || ''}”`, cw - 68);
+            const maxQuoteLines = isVertical ? 5 : 3;
+            qLines.slice(0, maxQuoteLines).forEach((ln, i) => ctx.fillText(ln, -cw / 2 + 34, -ch / 2 + 108 + i * 46));
 
             ctx.fillStyle = '#fda4af';
-            ctx.font = '700 16px system-ui, sans-serif';
-            ctx.fillText(`❤️ ${s.quote_likes || 0} reactions   •   💬 ${s.quote_comments || 0} replies`, -cw / 2 + 28, ch / 2 - 28);
+            ctx.font = `700 ${isVertical ? 26 : 26}px system-ui, sans-serif`;
+            ctx.fillText(`❤️ ${s.quote_likes || 0} reactions   •   💬 ${s.quote_comments || 0} replies`, -cw / 2 + 34, ch / 2 - 36);
             ctx.restore();
             ctx.restore();
         } else if (s.type === 'photo' || s.type === 'sanctuary' || s.type === 'milestone') {
@@ -304,7 +318,7 @@ export function WeeklyFunFactsPlayer({ reel }) {
             }
             const shade = ctx.createLinearGradient(0, h * 0.45, 0, h);
             shade.addColorStop(0, 'rgba(0,0,0,0.1)');
-            shade.addColorStop(1, 'rgba(0,0,0,0.82)');
+            shade.addColorStop(1, 'rgba(0,0,0,0.84)');
             ctx.fillStyle = shade;
             ctx.fillRect(0, 0, w, h);
 
@@ -313,13 +327,13 @@ export function WeeklyFunFactsPlayer({ reel }) {
             ctx.textAlign = 'left';
             if (s.author) {
                 ctx.fillStyle = '#fcd34d';
-                ctx.font = '700 16px system-ui, sans-serif';
-                ctx.fillText(`SHARED BY ${String(s.author).toUpperCase()}`, pad, h - 115);
+                ctx.font = `700 ${isVertical ? 24 : 24}px system-ui, sans-serif`;
+                ctx.fillText(`SHARED BY ${String(s.author).toUpperCase()}`, pad, h - (isVertical ? 175 : 150));
             }
             ctx.fillStyle = '#ffffff';
-            ctx.font = `700 ${isVertical ? 24 : 26}px system-ui, sans-serif`;
+            ctx.font = `700 ${isVertical ? 38 : 38}px system-ui, sans-serif`;
             const cLines = wrapLines(ctx, s.caption || s.title || '', w - pad * 2);
-            cLines.slice(0, 2).forEach((ln, i) => ctx.fillText(ln, pad, h - 78 + i * 32));
+            cLines.slice(0, 2).forEach((ln, i) => ctx.fillText(ln, pad, h - (isVertical ? 120 : 100) + i * 48));
             ctx.restore();
         } else {
             const pop = springOut(localMs / 800);
@@ -329,15 +343,16 @@ export function WeeklyFunFactsPlayer({ reel }) {
             ctx.globalAlpha = clamp01(localMs / 400);
             ctx.textAlign = 'center';
             ctx.fillStyle = '#fcd34d';
-            ctx.font = '700 16px system-ui, sans-serif';
-            ctx.fillText(s.badge || 'FAMILY CIRCLE HIGHLIGHTS', 0, -68);
+            ctx.font = `700 ${isVertical ? 26 : 26}px system-ui, sans-serif`;
+            ctx.fillText(s.badge || 'FAMILY CIRCLE HIGHLIGHTS', 0, -110);
             ctx.fillStyle = '#ffffff';
-            ctx.font = `800 ${isVertical ? 34 : 42}px system-ui, sans-serif`;
-            ctx.fillText(s.title || 'One Family. Endless Love.', 0, -18);
+            ctx.font = `800 ${isVertical ? 54 : 56}px system-ui, sans-serif`;
+            const oLines = wrapLines(ctx, s.title || 'One Family. Endless Love.', w - pad * 2);
+            oLines.slice(0, 2).forEach((ln, i) => ctx.fillText(ln, 0, -35 + i * 64));
             ctx.fillStyle = '#cbd5e1';
-            ctx.font = '400 19px system-ui, sans-serif';
+            ctx.font = `400 ${isVertical ? 30 : 32}px system-ui, sans-serif`;
             const sLines = wrapLines(ctx, s.subtitle || '', w - pad * 2);
-            sLines.forEach((ln, i) => ctx.fillText(ln, 0, 28 + i * 26));
+            sLines.slice(0, 2).forEach((ln, i) => ctx.fillText(ln, 0, (oLines.length > 1 ? 85 : 40) + i * 40));
             ctx.restore();
         }
 
@@ -495,7 +510,7 @@ export function WeeklyFunFactsPlayer({ reel }) {
                 <div
                     className="w-100 rounded-3 overflow-hidden"
                     style={{
-                        maxWidth: aspectRatio === '9:16' ? '340px' : '100%',
+                        maxWidth: aspectRatio === '9:16' ? '380px' : '100%',
                         aspectRatio: aspectRatio === '9:16' ? '9 / 16' : '16 / 9',
                         background: '#0b1120',
                     }}

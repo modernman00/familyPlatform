@@ -2,15 +2,18 @@ import { h } from 'preact';
 
 /**
  * Pure GPU-composited Solar System & Spiral Galaxies backdrop layer.
+ * Supports multiple cosmic variants via the `variant` modifier class.
  */
-export default function CosmicOrrery() {
+export default function CosmicOrrery({ variant = 'solar_galaxy' }) {
     return (
-        <div className="fp-cosmos-orrery" aria-hidden="true">
+        <div className={`fp-cosmos-orrery fp-cosmos-orrery--${variant}`} aria-hidden="true">
             <div className="fp-cosmos-galaxy fp-cosmos-galaxy--primary" />
             <div className="fp-cosmos-galaxy fp-cosmos-galaxy--distant" />
             <div className="fp-cosmos-comet" />
             <div className="fp-cosmos-system">
-                <div className="fp-cosmos-sun" />
+                <div className="fp-cosmos-sun">
+                    <div className="fp-cosmos-sun-companion" />
+                </div>
                 <div className="fp-cosmos-orbit fp-cosmos-orbit--1">
                     <div className="fp-cosmos-planet fp-cosmos-planet--mercury" />
                 </div>

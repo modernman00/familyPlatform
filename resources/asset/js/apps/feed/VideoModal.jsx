@@ -1,5 +1,10 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
 import { isDirectVideoDescriptor, resolveVideoPlaybackSrc } from './feedUtils';
+import {
+    VideoCaptionOverlay,
+    VideoSubtitlesPopover,
+    useVideoSubtitles,
+} from './VideoSubtitlesControl';
 import styles from './FeedShell.module.css';
 
 const SPEEDS = [1, 1.25, 1.5, 2];
@@ -16,12 +21,14 @@ export function VideoModal({
     const [speedIdx, setSpeedIdx] = useState(0);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
+    const [ccMenuOpen, setCcMenuOpen] = useState(false);
     const videoRef = useRef(null);
 
     useEffect(() => {
         setIndex(initialIndex);
         setCurrentTime(0);
         setPlaying(false);
+        setCcMenuOpen(false);
     }, [initialIndex, isOpen]);
 
     useEffect(() => {
@@ -33,13 +40,14 @@ export function VideoModal({
         return () => window.removeEventListener('keydown', onKey);
     }, [isOpen, onClose]);
 
-    if (!isOpen || videos.length === 0) return null;
+    const rawItem = videos[index] || videos[0] || null;
+    const currentUrl = rawItem ? resolveVideoPlaybackSrc(rawItem) : '';
+    const fallbackOriginal = typeof rawItem === 'object' && rawItem ? (rawItem?.originalUrl || '') : '';
+    const posterUrl = typeof rawItem === 'object' && rawItem ? (rawItem?.thumbnailUrl || undefined) : undefined;
+    const isDirect = rawItem ? isDirectVideoDescriptor(rawItem) : false;
+    const subtitles = useVideoSubtitles(isOpen && isDirect ? currentUrl : null, videoRef);
 
-    const rawItem = videos[index] || videos[0];
-    const currentUrl = resolveVideoPlaybackSrc(rawItem);
-    const fallbackOriginal = typeof rawItem === 'object' ? (rawItem?.originalUrl || '') : '';
-    const posterUrl = typeof rawItem === 'object' ? (rawItem?.thumbnailUrl || undefined) : undefined;
-    const isDirect = isDirectVideoDescriptor(rawItem);
+    if (!isOpen || videos.length === 0) return null;
     const parsedRatio = typeof rawItem?.aspect_ratio === 'string'
         ? rawItem.aspect_ratio.match(/^\s*(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)\s*$/)
         : null;
@@ -141,30 +149,50 @@ export function VideoModal({
                     </button>
                 </div>
 
-                <div id="fullVideoModalStage" className={styles.modalBody}>
+                <div id="fullVideoModalStage" className={`${styles.modalBody} position-relative`}>
                     {isDirect ? (
-                        <video
-                            ref={videoRef}
-                            referrerPolicy="no-referrer"
-                            src={currentUrl}
-                            poster={posterUrl}
-                            controls
-                            playsInline
-                            muted={muted}
-                            style={{ width: '100%', maxHeight: '78vh', objectFit: 'contain', borderRadius: 10, background: '#000' }}
-                            onLoadedMetadata={(e) => setDuration(e.currentTarget.duration || 0)}
-                            onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime || 0)}
-                            onPlay={() => setPlaying(true)}
-                            onPause={() => setPlaying(false)}
-                            onError={(e) => {
-                                const el = e.currentTarget;
-                                if (!el.dataset.retried && fallbackOriginal && el.src !== fallbackOriginal && fallbackOriginal.startsWith('http')) {
-                                    el.dataset.retried = '1';
-                                    el.src = fallbackOriginal;
-                                    el.load();
-                                }
-                            }}
-                        />
+                        <div className="position-relative w-100">
+                            <video
+                                ref={videoRef}
+                                referrerPolicy="no-referrer"
+                                src={currentUrl}
+                                poster={posterUrl}
+                                controls
+                                playsInline
+                                muted={muted}
+                                style={{ width: '100%', maxHeight: '78vh', objectFit: 'contain', borderRadius: 10, background: '#000' }}
+                                onLoadedMetadata={(e) => setDuration(e.currentTarget.duration || 0)}
+                                onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime || 0)}
+                                onPlay={() => setPlaying(true)}
+                                onPause={() => setPlaying(false)}
+                                onError={(e) => {
+                                    const el = e.currentTarget;
+                                    if (!el.dataset.retried && fallbackOriginal && el.src !== fallbackOriginal && fallbackOriginal.startsWith('http')) {
+                                        el.dataset.retried = '1';
+                                        el.src = fallbackOriginal;
+                                        el.load();
+                                    }
+                                }}
+                            />
+                            <VideoCaptionOverlay
+                                captionsEnabled={subtitles.captionsEnabled}
+                                activeCueText={subtitles.activeCueText}
+                                captionStyle={subtitles.stylePrefs}
+                                loading={subtitles.loading}
+                            />
+                            <VideoSubtitlesPopover
+                                menuOpen={ccMenuOpen}
+                                onClose={() => setCcMenuOpen(false)}
+                                captionsEnabled={subtitles.captionsEnabled}
+                                loading={subtitles.loading}
+                                error={subtitles.error}
+                                onSelectOff={subtitles.disableCaptions}
+                                onSelectAutoEn={subtitles.enableAutoCaptions}
+                                captionStyle={subtitles.stylePrefs}
+                                onUpdateStyle={subtitles.updateStyle}
+                                containerStyle={{ top: 'auto', bottom: '16px', right: '16px' }}
+                            />
+                        </div>
                     ) : (
                         <div
                             className={useFramedStage ? 'w-100 mx-auto' : 'ratio ratio-16x9 w-100'}
@@ -195,6 +223,16 @@ export function VideoModal({
                                 </button>
                                 <button type="button" className={styles.btnBase} onClick={cycleSpeed}>
                                     Speed {SPEEDS[speedIdx]}x
+                                </button>
+                                <button
+                                    type="button"
+                                    className={styles.btnBase}
+                                    data-testid="modal-video-cc-btn"
+                                    onClick={() => setCcMenuOpen((o) => !o)}
+                                    aria-expanded={ccMenuOpen ? 'true' : 'false'}
+                                    style={subtitles.captionsEnabled ? { background: '#a31621', color: '#ffffff', borderColor: '#ffffff' } : undefined}
+                                >
+                                    {subtitles.loading ? 'CC…' : (subtitles.captionsEnabled ? 'CC On' : 'CC')}
                                 </button>
                                 <span style={{ fontSize: '0.85rem', color: '#cbd5e1' }}>
                                     {formatSecs(currentTime)} / {formatSecs(duration)}
