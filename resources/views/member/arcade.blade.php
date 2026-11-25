@@ -22,5 +22,5 @@
 @endsection
 
 @push('scripts')
-<script defer src="/public/js/arcade-app.js?v={{ assetVersion('js/arcade-app.js') }}" nonce="{{ csp_nonce($nonce ?? null) }}"></script>
+<script type="module" src="/public/js/arcade-app.js?v={{ assetVersion('js/arcade-app.js') }}" nonce="{{ csp_nonce($nonce ?? null) }}"></script>
 @endpush

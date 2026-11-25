@@ -8,6 +8,7 @@
     $reelId = $reel['id'] ?? 0;
     $reelTitle = $reel['title'] ?? 'Our Family Fun Facts';
     $duration = $reel['duration_seconds'] ?? 35;
+    $scenesJson = json_encode($scenes, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?: '[]';
 @endphp
 
 @if($hasPendingReel)
@@ -80,7 +81,7 @@ html.dark-mode #weeklyReelApprovalCard .weekly-reel-title-text {
 </style>
 
 <div id="weeklyReelApprovalCard"
-     x-data="weeklyReelPlayer({{ (int)$reelId }}, {{ json_encode($scenes, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) }}, '{{ addslashes((string)$audioUrl) }}')"
+     x-data="weeklyReelPlayer({{ (int)$reelId }}, {{ $scenesJson }}, '{{ addslashes((string)$audioUrl) }}')"
      x-show="visible"
      x-cloak
      class="card mb-4 shadow-sm border-0 weekly-reel-card">
@@ -768,15 +769,14 @@ function weeklyReelPlayer(reelId, scenes, audioUrl) {
                     this.visible = false;
                     if (this.rafId) cancelAnimationFrame(this.rafId);
                     if (this.$refs.audioTrack) this.$refs.audioTrack.pause();
+                    window.dispatchEvent(new CustomEvent('fp:feed-refresh'));
                     if (window.Swal) {
                         Swal.fire({
                             title: 'Fun Facts Published!',
                             text: 'Your Weekly Family Fun Facts presentation has been shared to the feed and Reels tray.',
                             icon: 'success',
                             confirmButtonColor: '#16a34a'
-                        }).then(() => window.location.reload());
-                    } else {
-                        window.location.reload();
+                        });
                     }
                 } else {
                     alert(data.error || 'Failed to approve weekly fun facts. Please try again.');
@@ -805,4 +805,68 @@ function weeklyReelPlayer(reelId, scenes, audioUrl) {
     };
 }
 </script>
+@else
+<div id="weeklyFunFactsLauncherCard"
+     x-data="{
+        generating: false,
+        async generateNow(event) {
+            if (this.generating) return;
+            const btn = event?.currentTarget || event?.target;
+            this.generating = true;
+            if (window.ScoreTenantSpinner) window.ScoreTenantSpinner.start(btn);
+            const csrfToken = document.querySelector('meta[name=\'csrf-token\']')?.getAttribute('content') ||
+                              document.querySelector('input[name=\'token\']')?.value || '';
+            try {
+                const res = await fetch('/api/weekly-reel/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+                    body: JSON.stringify({ token: csrfToken })
+                });
+                const data = await res.json();
+                if (data && data.success) {
+                    window.location.reload();
+                    return;
+                }
+                alert(data?.error || 'Could not generate weekly fun facts right now.');
+            } catch (e) {
+                alert('A network error occurred. Please try again.');
+            } finally {
+                this.generating = false;
+                if (window.ScoreTenantSpinner) window.ScoreTenantSpinner.stop(btn);
+            }
+        }
+     }"
+     class="card mb-4 shadow-sm border-0"
+     style="border-radius: 18px; background: var(--card-bg, #ffffff); border: 1px solid var(--border-color, #e2e8f0) !important;">
+    <div class="card-body p-3 px-md-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                 style="width: 44px; height: 44px; background: rgba(184, 32, 44, 0.12); color: #b8202c;">
+                <i class="bi bi-stars fs-5" aria-hidden="true"></i>
+            </div>
+            <div>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <span class="fw-bold" style="color: var(--text-color, #0f172a); font-size: 0.95rem;">
+                        Weekly Family Fun Facts Rendition
+                    </span>
+                    <span class="badge rounded-pill px-2 py-1 text-white fw-bold"
+                          style="background: linear-gradient(135deg, #b8202c 0%, #8b131d 100%); font-size: 0.68rem; letter-spacing: 0.04em;">
+                        60FPS MOTION REEL
+                    </span>
+                </div>
+                <div class="text-muted small">
+                    Curate a fresh 60fps weekly fun-facts presentation (Top Storyteller, Golden Hour &amp; Most-Loved Moments).
+                </div>
+            </div>
+        </div>
+        <button type="button"
+                @click="generateNow($event)"
+                data-spin="true"
+                class="btn btn-sm text-white fw-bold rounded-pill px-3 py-2 d-inline-flex align-items-center gap-2 shadow-xs"
+                style="background: linear-gradient(135deg, #b8202c 0%, #8b131d 100%); min-height: 44px; min-width: 44px; white-space: nowrap; flex-shrink: 0;">
+            <i class="bi bi-magic" aria-hidden="true"></i>
+            <span x-text="generating ? 'Curating Fun Facts…' : 'Curate Weekly Fun Facts'">Curate Weekly Fun Facts</span>
+        </button>
+    </div>
+</div>
 @endif

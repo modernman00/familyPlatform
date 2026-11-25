@@ -1,4 +1,5 @@
 'use strict';
+import '../scss/main.scss';
 import axios from 'axios';
 import Alpine from 'alpinejs';
 import collapse from '@alpinejs/collapse';
@@ -16,9 +17,6 @@ import { initVisualSupremacy } from './components/vse-canvas';
 import { initFamilyTooltip } from './components/familyTooltip';
 import './components/recommendModal';
 import './components/navbar';
-
-import { profileFeed } from './components/profilePage/feedComponent';
-import { profileSidebar, upcomingEvents } from './components/profilePage/sidebarComponents';
 
 initGlobalSwalAlerts();
 window.Swal = Swal;
@@ -44,13 +42,6 @@ Alpine.plugin(morph);
 
 initAlpineStores(Alpine);
 initAlpineMagics(Alpine);
-
-Alpine.data('profileFeed', profileFeed);
-Alpine.data('profileSidebar', profileSidebar);
-Alpine.data('upcomingEvents', upcomingEvents);
-window.profileFeed = profileFeed;
-window.profileSidebar = profileSidebar;
-window.upcomingEvents = upcomingEvents;
 
 window.pwaManager = new PWAManager();
 initDarkMode();
@@ -248,38 +239,11 @@ if (window.location.pathname === '/register') {
 } else if (window.location.pathname === '/register/nextStep') {
   qSel('.login').style.display = 'none'; // navbar mgt
   qSel('.signUp').style.display = 'none'; // navbar mgt
-} else if (checkURL('accountSetting')) {
-  if (!document.getElementById('account-settings-root')) {
-    routePromise = import(
-      /* webpackChunkName: 'accountSetting' */
-      './components/accountSetting'
-    )
-      .then((module) => module.default)
-      .catch((err) => showError(err));
-  }
 } else if (checkURL('organogram') || window.location.pathname.startsWith('/organogram')) {
   if (qSel('.familyTreeNav')) qSel('.familyTreeNav').style.display = 'none'; // navbar mgt
-
-  if (!document.getElementById('organogram-root')) {
-    routePromise = import(
-      /* webpackChunkName: 'organogram' */
-      './components/familyTree/index.js'
-    )
-      .then((module) => module.default)
-      .catch((err) => showError(err));
-  }
 } else if (window.location.pathname === '/allMembers/getProfile') {
-  qSel('.familyTreeNav').style.display = 'none'; // navbar mgt
-  qSel('.notification_count').style.display = 'none'; // navbar mgt
-
-  // import (
-  // import { setCookie } from '../../../node_modules/y/Cookie';
-  /* webpackChunkName: 'getProfile' */
-  //     /* webpackPrefetch: true */
-  //     './components/familyTree/index.js'
-  // )
-  // .then((module) => module.default)
-  //     .catch((err) => showError(err))
+  if (qSel('.familyTreeNav')) qSel('.familyTreeNav').style.display = 'none'; // navbar mgt
+  if (qSel('.notification_count')) qSel('.notification_count').style.display = 'none'; // navbar mgt
 }
 
 

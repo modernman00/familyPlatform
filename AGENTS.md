@@ -28,16 +28,19 @@ Inspired by the 7-component automated production pipeline—and hardened with 3 
 
 ## 0.1 Prompt Specialist & Auto-Triage Protocol (Stage 1 & 2)
 
-1. **MANDATORY FIRST-TEXT OUTPUT: Show `📝 Refined Brief` (3–6 lines) on Turn 1 BEFORE calling any tools**:
+1. **MANDATORY FIRST-TEXT OUTPUT: Show `📝 Refined Brief` (4–7 lines) on Turn 1 BEFORE calling any tools**:
    - You MUST emit this text directly to the user at the very start of Turn 1 so the user sees it immediately on their screen before any background commands run.
-   - **Goal**, **Where** (route/file), **Tier** (1/2/3 inferred automatically), **Constraints** (UK English, privacy, domain guide), and **Done when**.
+   - **Goal**, **Where** (route/file), **Tier** (1/2/3 inferred automatically), **Recommended Model** (e.g. `Gemini 4 Hydrogen` for quick/routine, `Neon` for balanced coding, `Argon` for everyday frontier, `Carbon (High Thinking)` for complex architecture/UI passes), **Recommended Actions** (e.g. `/boost`, `/swarm`, `/plan`, `/grill-me`, `/goal`, `/browser`, `/teamwork`, or `None — autonomous Stages 1–10`), **Constraints** (UK English, privacy, domain guide), and **Done when**.
 2. **Show `🔬 5-Bullet Research Brief` on all Tier 2 & Tier 3 Tasks**:
    - Before writing code on Tier 2/3, inspect codebase precedents (`shared-lib`, existing controllers/views) and external best practices (`search_web` when applicable), summarising: (1) UX/Industry Benchmark, (2) Existing Reusable Code, (3) Edge Cases & Failure Modes, (4) Security/IDOR/CSRF Vector, (5) British English Copy & Micro-interactions.
 3. **Merge Follow-Ups**: Treat follow-up messages as amendments to the active brief; re-plan once and continue executing.
-4. **Routing**:
-   - Idea / workflow critique → `/grill-me` (interview 1 question at a time, no code until aligned).
-   - Complex multi-module build → `/plan` or `/boost`.
-   - Standard feature / bug → Execute Stages 1–10 autonomously to completion.
+4. **Model & Action Routing**:
+   - **Idea / workflow critique** → `/grill-me` (interview 1 question at a time, no code until aligned) + `Neon` or `Argon`.
+   - **Complex multi-module build / deep research** → `/plan` or `/boost` + `Carbon (High Thinking)`.
+   - **Parallel multi-file / multi-role build** → `/swarm` or `/teamwork` (coordinator on `Carbon` / `Argon`; routine workers on `Hydrogen` / `Neon`).
+   - **Overnight / long-running autonomous target** → `/goal` + `Carbon` or `Argon`.
+   - **Frontend / UI pass** → `Carbon` or `Argon` (High Thinking) + `/browser` for visual QA.
+   - **Standard feature / bug (Tier 1–2)** → `Hydrogen` (Tier 1) or `Neon` / `Argon` (Tier 2), executing Stages 1–10 autonomously to completion.
 
 ---
 

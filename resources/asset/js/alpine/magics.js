@@ -1,5 +1,7 @@
 'use strict';
 
+import { getCsrfToken } from '../apps/shared/bootstrap';
+
 /**
  * FamilyPlatform Enterprise Alpine Custom Magic Helpers
  * Declarative shortcuts accessible inside any x-data component or template expression.
@@ -28,23 +30,8 @@ export function initAlpineMagics(Alpine) {
     }
   });
 
-  // 2. $csrf: Instant access to active CSRF token without DOM query boilerplate
-  Alpine.magic('csrf', () => () => {
-    if (typeof document === 'undefined') return '';
-    if (typeof document.cookie === 'string' && document.cookie) {
-      const match = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
-      if (match && match[1]) {
-        try {
-          const decoded = decodeURIComponent(match[1].trim());
-          if (decoded) return decoded;
-        } catch (e) {
-          return match[1].trim();
-        }
-      }
-    }
-    const meta = document.querySelector('meta[name="csrf-token"]');
-    return meta ? meta.getAttribute('content') || '' : '';
-  });
+  // 2. $csrf: Instant access to active CSRF token via shared bootstrap/platformStore bridge
+  Alpine.magic('csrf', () => () => getCsrfToken());
 
   // 3. $trans: Direct access to FamilyPlatform's i18n translation system
   Alpine.magic('trans', () => (key, fallback = '') => {

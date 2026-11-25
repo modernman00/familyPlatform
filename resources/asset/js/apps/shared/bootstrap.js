@@ -3,7 +3,18 @@
  * Reads <script type="application/json" id="..."> safely without inline JS execution (CSP-safe).
  */
 
+let preactDebugInitialised = false;
+
+export function initPreactIslandDebug() {
+    if (preactDebugInitialised) return;
+    preactDebugInitialised = true;
+    if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'development') {
+        import(/* webpackMode: "eager" */ 'preact/debug').catch(() => {});
+    }
+}
+
 export function readIslandBootstrap(scriptId, fallback = {}) {
+    initPreactIslandDebug();
     if (typeof document === 'undefined') {
         return { ...fallback };
     }
@@ -67,8 +78,13 @@ export function syncCsrfTokenDom(token) {
     if (meta) {
         meta.setAttribute('content', clean);
     }
-    if (typeof window !== 'undefined' && window.__FP_BOOTSTRAP__ && typeof window.__FP_BOOTSTRAP__ === 'object') {
-        window.__FP_BOOTSTRAP__.csrfToken = clean;
+    if (typeof window !== 'undefined') {
+        if (window.__FP_BOOTSTRAP__ && typeof window.__FP_BOOTSTRAP__ === 'object') {
+            window.__FP_BOOTSTRAP__.csrfToken = clean;
+        }
+        if (window.__FP_PLATFORM_STORE__?.csrf?.set) {
+            window.__FP_PLATFORM_STORE__.csrf.set(clean, { syncDom: false });
+        }
     }
 }
 

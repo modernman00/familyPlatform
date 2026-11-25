@@ -1,62 +1,13 @@
 import { format, render } from "timeago.js"
 import { id, showError, qSel } from '@shared'
 import { toSentenceCase } from "./helper/general"
+import { getPlatformStore } from "../apps/shared/platformStore"
 import axios from "axios"
 
-// Update notification badge
+// Update notification badge via unified platformStore (synchronises Alpine $store.notifications & Preact islands)
 function updateNotificationBadge(count) {
-    const countNum = parseInt(count || '0', 10);
-    if (typeof window !== 'undefined' && window.Alpine && typeof window.Alpine.store === 'function') {
-        const notifStore = window.Alpine.store('notifications');
-        if (notifStore && typeof notifStore.setCount === 'function') {
-            notifStore.setCount(countNum);
-            return;
-        }
-    }
-
-    const badge = id('notification_count');
-    const headerBadge = id('header_notif_count');
-    const mobileBadge = id('pwa_bottom_badge');
-    
-    const displayStr = countNum > 0 ? countNum.toString() : '';
-
-    if (badge) {
-        if (countNum <= 0) {
-            badge.style.display = 'none';
-            badge.textContent = '';
-        } else {
-            badge.textContent = displayStr;
-            badge.style.display = 'flex';
-        }
-    }
-
-    if (headerBadge) {
-        if (countNum <= 0) {
-            headerBadge.style.display = 'none';
-            headerBadge.textContent = '';
-        } else {
-            headerBadge.textContent = displayStr;
-            headerBadge.style.display = 'flex';
-        }
-    }
-
-    if (mobileBadge) {
-        if (countNum <= 0) {
-            mobileBadge.style.display = 'none';
-            mobileBadge.textContent = '';
-        } else {
-            mobileBadge.textContent = displayStr;
-            mobileBadge.style.display = 'inline-flex';
-        }
-    }
-
-    if (typeof navigator !== 'undefined' && 'setAppBadge' in navigator) {
-        if (countNum > 0) {
-            navigator.setAppBadge(countNum).catch(() => {});
-        } else {
-            navigator.clearAppBadge().catch(() => {});
-        }
-    }
+    const countNum = Math.max(0, parseInt(count || '0', 10) || 0);
+    getPlatformStore().notifications.setCount(countNum);
 }
 
 const getCsrfHeaders = () => {

@@ -166,6 +166,7 @@
     </style>
 </head>
 <body>
+    @include('component.submitSpinner')
     <div class="preview-card">
         <div class="preview-media-container">
             <img src="{{ $ogImage }}" alt="{{ $ogTitle }}" class="preview-media-img" onerror="this.onerror=null; this.src='/public/img/og-invite.jpg';">
@@ -180,7 +181,7 @@
             <h1 class="author-title">{{ $ogTitle }}</h1>
             <p class="caption-text">{{ $ogDescription }}</p>
 
-            <a href="{{ $targetRedirectUrl ?? '/register' }}" class="btn-cta">
+            <a href="{{ $targetRedirectUrl ?? '/register' }}" class="btn-cta" data-spin="true">
                 View Memory on FamilyPlatform &rarr;
             </a>
 
@@ -191,5 +192,19 @@
             </div>
         </div>
     </div>
+
+    @if(!empty($isGuestHuman))
+        @include('partials.guest-gate', [
+            'shareType' => 'post',
+            'itemKey' => (string)($postNo ?? ''),
+            'registerUrl' => $targetRedirectUrl ?? '/register',
+            'loginUrl' => '/login?redirect=' . urlencode($redirectTarget ?? '/profilePage'),
+            'gateTitle' => 'Sign in to FamilyPlatform',
+            'gateSubtitle' => !empty($cleanFamCode)
+                ? 'Join the ' . $cleanFamCode . ' Family Circle to view this memory, react, and reply.'
+                : 'Sign in or create a free account to view this private family memory.',
+            'referrerSource' => $referrerSource ?? 'direct',
+        ])
+    @endif
 </body>
 </html>

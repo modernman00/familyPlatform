@@ -7,9 +7,17 @@ import { parseVideoUrl } from '../../components/profilePage/videoParser';
 import { PostCard } from './PostCard';
 import { LightboxModal } from './LightboxModal';
 import { VideoModal } from './VideoModal';
-import { ViewersModal } from './ViewersModal';
-import { SharePortalModal } from './SharePortalModal';
 import { WhatsNewBanner } from './WhatsNewBanner';
+import { createLazyModal } from '../shared/lazyIslandModal';
+
+const LazyViewersModal = createLazyModal(
+    () => import(/* webpackChunkName: "feed-modals" */ './ViewersModal'),
+    'ViewersModal'
+);
+const LazySharePortalModal = createLazyModal(
+    () => import(/* webpackChunkName: "feed-modals" */ './SharePortalModal'),
+    'SharePortalModal'
+);
 import {
     extractPreviewableUrls,
     normalizeComment,
@@ -201,6 +209,15 @@ export function FeedShell({ bootstrap = {} }) {
         }
         loadTrendingHashtags();
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Allow non-Preact islands/cards (e.g. Weekly Fun Facts approval) to refresh the feed without reloading the page
+    useEffect(() => {
+        const onFeedRefresh = () => {
+            fetchFeed({ nextPage: 1, append: false });
+        };
+        window.addEventListener('fp:feed-refresh', onFeedRefresh);
+        return () => window.removeEventListener('fp:feed-refresh', onFeedRefresh);
+    }, [fetchFeed]);
 
     // Lazy OpenGraph / Google Photos album hydration for posts without pre-hydrated link_preview
     useEffect(() => {
@@ -1075,27 +1092,31 @@ export function FeedShell({ bootstrap = {} }) {
                 </div>
             )}
 
-            {/* Modals */}
-            <LightboxModal
-                isOpen={lightboxState.isOpen}
-                images={lightboxState.images}
-                initialIndex={lightboxState.index}
-                initialAnimate={Boolean(lightboxState.startAnimated)}
-                post={activeLightboxPost}
-                bootstrap={profileBootstrap}
-                onClose={() => setLightboxState({ isOpen: false, images: [], index: 0, postNo: null })}
-                onReactPost={handleReactPost}
-                onMutateComments={handleMutateComments}
-            />
+            {/* Modals — mounted on demand so closed modals incur zero hook overhead */}
+            {lightboxState.isOpen && (
+                <LightboxModal
+                    isOpen={lightboxState.isOpen}
+                    images={lightboxState.images}
+                    initialIndex={lightboxState.index}
+                    initialAnimate={Boolean(lightboxState.startAnimated)}
+                    post={activeLightboxPost}
+                    bootstrap={profileBootstrap}
+                    onClose={() => setLightboxState({ isOpen: false, images: [], index: 0, postNo: null })}
+                    onReactPost={handleReactPost}
+                    onMutateComments={handleMutateComments}
+                />
+            )}
 
-            <VideoModal
-                isOpen={videoState.isOpen}
-                videos={videoState.videos}
-                initialIndex={videoState.index}
-                onClose={() => setVideoState({ isOpen: false, videos: [], index: 0 })}
-            />
+            {videoState.isOpen && (
+                <VideoModal
+                    isOpen={videoState.isOpen}
+                    videos={videoState.videos}
+                    initialIndex={videoState.index}
+                    onClose={() => setVideoState({ isOpen: false, videos: [], index: 0 })}
+                />
+            )}
 
-            <ViewersModal
+            <LazyViewersModal
                 isOpen={viewersState.isOpen}
                 type={viewersState.type}
                 targetNo={viewersState.targetNo}
@@ -1104,7 +1125,7 @@ export function FeedShell({ bootstrap = {} }) {
                 onClose={() => setViewersState({ isOpen: false, type: 'post', targetNo: null, initialCount: 0 })}
             />
 
-            <SharePortalModal
+            <LazySharePortalModal
                 isOpen={Boolean(sharePortalPost)}
                 post={sharePortalPost}
                 onClose={() => setSharePortalPost(null)}

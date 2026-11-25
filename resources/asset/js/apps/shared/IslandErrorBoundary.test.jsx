@@ -3,7 +3,18 @@ import { render, screen, fireEvent } from '@testing-library/preact';
 import { useState } from 'preact/hooks';
 import { IslandErrorBoundary } from './IslandErrorBoundary';
 import { Portal } from './Portal';
-import { signal, computed, effect, batch, useSignal, useComputed } from './signals';
+import { createLazyModal } from './lazyIslandModal';
+import {
+    signal,
+    computed,
+    effect,
+    batch,
+    untracked,
+    useSignal,
+    useComputed,
+    useSignalEffect,
+    SignalValue,
+} from './signals';
 
 function CrashableChild({ shouldCrash }) {
     if (shouldCrash) {
@@ -120,5 +131,65 @@ describe('Preact Shared Primitives: IslandErrorBoundary, Portal & Signals', () =
 
         fireEvent.click(screen.getByRole('button', { name: 'Bump Multiplier' }));
         expect(screen.getByTestId('sig-product').textContent).toBe('15');
+    });
+
+    it('supports untracked(), computed().dispose(), useSignalEffect(), and leaf-isolated <SignalValue /> without parent re-renders', async () => {
+        const counter = signal(1);
+        const sideChannel = signal(100);
+        const observed = [];
+
+        const comp = computed(() => counter.value + untracked(() => sideChannel.value));
+        expect(comp.value).toBe(101);
+
+        // Changing untracked sideChannel does not trigger recompute
+        sideChannel.value = 200;
+        expect(comp.value).toBe(101);
+
+        // Disposing computed stops tracking counter updates
+        comp.dispose();
+        counter.value = 10;
+        expect(comp.value).toBe(101);
+
+        let parentRenders = 0;
+        function ParentWithLeafSignal() {
+            parentRenders += 1;
+            useSignalEffect(() => {
+                observed.push(counter.value);
+            }, []);
+            return (
+                <div data-testid="leaf-val">
+                    <SignalValue signal={counter} format={(v) => `Count: ${v}`} />
+                </div>
+            );
+        }
+
+        const { unmount } = render(<ParentWithLeafSignal />);
+        expect(screen.getByTestId('leaf-val').textContent).toBe('Count: 10');
+        expect(parentRenders).toBe(1);
+
+        counter.value = 42;
+        expect(await screen.findByText('Count: 42')).toBeTruthy();
+        expect(parentRenders).toBe(1);
+        expect(observed).toEqual([10, 42]);
+
+        unmount();
+        counter.value = 99;
+        expect(observed).toEqual([10, 42]);
+    });
+
+    it('defers loading createLazyModal chunks until isOpen is true', async () => {
+        const loader = vi.fn(async () => ({
+            MockModal: ({ title }) => <div data-testid="lazy-modal-node">{title}</div>,
+        }));
+        const LazyMockModal = createLazyModal(loader, 'MockModal');
+
+        const { rerender } = render(<LazyMockModal isOpen={false} title="Family Share" />);
+        expect(loader).not.toHaveBeenCalled();
+        expect(screen.queryByTestId('lazy-modal-node')).toBeNull();
+
+        rerender(<LazyMockModal isOpen={true} title="Family Share" />);
+        expect(loader).toHaveBeenCalledTimes(1);
+        expect(await screen.findByTestId('lazy-modal-node')).toBeTruthy();
+        expect(screen.getByTestId('lazy-modal-node').textContent).toBe('Family Share');
     });
 });

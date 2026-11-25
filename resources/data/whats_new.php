@@ -22,40 +22,40 @@
  * }
  */
 return [
-    'version_key' => '2026_11_w9',
+    'version_key' => '2026_11_w14',
     'badge' => 'What’s New',
-    'title' => 'Dynamic Festive Xmas & New Year Look, Living Backdrops & Family Arcade',
-    'summary' => 'Enjoy our automatic festive Christmas look until 30 December (followed by a champagne New Year celebration from 31 December to 2 January), plus 4 festive Xmas backdrops and daily games.',
+    'title' => 'Daily Arcade Live-Play Previews, Guest Share Gate & Weekly Fun Facts',
+    'summary' => 'Preview today’s featured Daily Family Arcade puzzle in live step-by-step motion right on the feed before jumping in, share posts and Sparks with our sleek Guest Gate, and enjoy 60fps Weekly Family Fun Facts.',
     'primary_cta' => [
-        'label' => 'Share a Moment',
-        'url' => '/profilePage',
-        'icon' => 'bi-stars',
+        'label' => 'Play Daily Arcade',
+        'url' => '/arcade',
+        'icon' => 'bi-controller',
     ],
     'playbook_url' => '/playbook',
     'items' => [
         [
-            'title' => 'Multi-Festival Dynamic Seasonal Look',
-            'description' => 'FamilyPlatform automatically celebrates major global & family festivals — Christmas (until 30 Dec), New Year (31 Dec–2 Jan), Eid, Diwali, Lunar New Year, Easter, Valentine’s, Mother’s & Father’s Day — with 1-tap Pause FX & Standard Look controls.',
-            'icon' => 'bi-snow2',
-            'color' => '#991b1b',
-        ],
-        [
-            'title' => 'Living Backdrops, Xmas & Solar Galaxy',
-            'description' => 'Backdrops now animate with twinkling stars, rising fireflies, orbiting Solar System planets & galaxies, plus 4 festive Xmas scenes: Snowfall, Cosy Hearth, Fairy Lights, and Winter Gold.',
-            'icon' => 'bi-stars',
-            'color' => '#0284c7',
-        ],
-        [
-            'title' => 'Family Arcade (Daily Games & Leagues)',
-            'description' => 'Play daily family brain-teasers including Cheeseboard, Minesweeper, and Wordie with family leagues, crown badges, and live challenges.',
-            'icon' => 'bi-trophy-fill',
+            'title' => 'Daily Arcade Live-Play Motion Previews',
+            'description' => 'The Daily Family Arcade banner on your feed now animates today’s featured challenge — from Wordie tile flips to Ayò seed sowing and KinZip path traces — with a one-tap Pause/Watch Demo control.',
+            'icon' => 'bi-controller',
             'color' => '#d97706',
         ],
         [
-            'title' => 'Weekly Family Fun Facts (16:9 & 9:16)',
-            'description' => 'Generate a 60fps animated recap of your family’s top storytellers, liveliest hour, and most-loved moments in both landscape and vertical formats.',
+            'title' => 'One-Tap Guest Share Gate & Spark Previews',
+            'description' => 'Unregistered relatives opening a shared post or Daily Spark now see a rich preview behind a sleek sign-in overlay with Google, Facebook, Apple, Email, and a Skip option to browse first.',
+            'icon' => 'bi-share-fill',
+            'color' => '#1d72fe',
+        ],
+        [
+            'title' => 'Weekly Family Fun Facts 60fps Rendition',
+            'description' => 'Your weekly family activity is now automatically curated into a 60fps motion presentation highlighting your Top Storyteller, Golden Hour, Most-Loved Moment, and "Do You Know?" Family Historian cards.',
             'icon' => 'bi-film',
-            'color' => '#059669',
+            'color' => '#b8202c',
+        ],
+        [
+            'title' => 'Then & Now Heirloom Frame Studio',
+            'description' => 'Redesigned Polaroid-style Then & Now cards integrate inline date-stamp headers, live year-apart calculation badges, Family Archive & Ghost-Pose Camera actions, and an auto-collapsing backdrop bar.',
+            'icon' => 'bi-hourglass-split',
+            'color' => '#a31621',
         ],
     ],
 ];

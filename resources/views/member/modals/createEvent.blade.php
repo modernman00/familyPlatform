@@ -346,6 +346,40 @@
 
     #createEventModal .ce-input-icon-wrap .form-control {
         padding-left: 2.5rem;
+        padding-right: 2.5rem;
+    }
+
+    #createEventModal .ce-loc-spinner {
+        display: none;
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 3;
+        pointer-events: none;
+    }
+
+    /* Shared Address & Venue Autocomplete Dropdown (Heirloom Crimson + Dark Mode) */
+    #createEventModal .shared-loc-autocomplete-menu {
+        z-index: 1065;
+        background: #ffffff !important;
+        border-radius: 16px;
+        border: 1.5px solid #e2e8f0;
+        box-shadow: 0 18px 42px -8px rgba(15, 23, 42, 0.22), 0 4px 14px rgba(15, 23, 42, 0.08);
+    }
+
+    #createEventModal .shared-loc-item {
+        min-height: var(--tap-min, 44px);
+    }
+
+    #createEventModal .shared-loc-item:hover,
+    #createEventModal .shared-loc-item.active {
+        background: rgba(163, 22, 33, 0.08) !important;
+        border-color: rgba(163, 22, 33, 0.24) !important;
+    }
+
+    #createEventModal .shared-loc-footer {
+        color: var(--text-muted-aa, #475569) !important;
     }
 
     /* Audience & Proximity Panel */
@@ -890,6 +924,63 @@
         color: #fda4af !important;
     }
 
+    body.dark-mode #createEventModal .shared-loc-autocomplete-menu,
+    body.dark-theme #createEventModal .shared-loc-autocomplete-menu,
+    [data-bs-theme="dark"] #createEventModal .shared-loc-autocomplete-menu,
+    html.dark #createEventModal .shared-loc-autocomplete-menu,
+    html.dark-mode #createEventModal .shared-loc-autocomplete-menu {
+        background: #141822 !important;
+        border-color: rgba(255, 255, 255, 0.14) !important;
+        box-shadow: 0 20px 48px rgba(0, 0, 0, 0.55) !important;
+    }
+
+    body.dark-mode #createEventModal .shared-loc-item .shared-loc-icon,
+    body.dark-theme #createEventModal .shared-loc-item .shared-loc-icon,
+    [data-bs-theme="dark"] #createEventModal .shared-loc-item .shared-loc-icon,
+    html.dark #createEventModal .shared-loc-item .shared-loc-icon,
+    html.dark-mode #createEventModal .shared-loc-item .shared-loc-icon {
+        background: #1e293b !important;
+    }
+
+    body.dark-mode #createEventModal .shared-loc-item .shared-loc-title,
+    body.dark-theme #createEventModal .shared-loc-item .shared-loc-title,
+    [data-bs-theme="dark"] #createEventModal .shared-loc-item .shared-loc-title,
+    html.dark #createEventModal .shared-loc-item .shared-loc-title,
+    html.dark-mode #createEventModal .shared-loc-item .shared-loc-title {
+        color: #f8fafc !important;
+    }
+
+    body.dark-mode #createEventModal .shared-loc-item .shared-loc-sub,
+    body.dark-theme #createEventModal .shared-loc-item .shared-loc-sub,
+    [data-bs-theme="dark"] #createEventModal .shared-loc-item .shared-loc-sub,
+    html.dark #createEventModal .shared-loc-item .shared-loc-sub,
+    html.dark-mode #createEventModal .shared-loc-item .shared-loc-sub {
+        color: #cbd5e1 !important;
+    }
+
+    body.dark-mode #createEventModal .shared-loc-item:hover,
+    body.dark-theme #createEventModal .shared-loc-item:hover,
+    [data-bs-theme="dark"] #createEventModal .shared-loc-item:hover,
+    html.dark #createEventModal .shared-loc-item:hover,
+    html.dark-mode #createEventModal .shared-loc-item:hover,
+    body.dark-mode #createEventModal .shared-loc-item.active,
+    body.dark-theme #createEventModal .shared-loc-item.active,
+    [data-bs-theme="dark"] #createEventModal .shared-loc-item.active,
+    html.dark #createEventModal .shared-loc-item.active,
+    html.dark-mode #createEventModal .shared-loc-item.active {
+        background: rgba(244, 63, 94, 0.16) !important;
+        border-color: rgba(251, 113, 133, 0.32) !important;
+    }
+
+    body.dark-mode #createEventModal .shared-loc-footer,
+    body.dark-theme #createEventModal .shared-loc-footer,
+    [data-bs-theme="dark"] #createEventModal .shared-loc-footer,
+    html.dark #createEventModal .shared-loc-footer,
+    html.dark-mode #createEventModal .shared-loc-footer {
+        color: #cbd5e1 !important;
+        border-top-color: rgba(255, 255, 255, 0.1) !important;
+    }
+
     body.dark-mode #createEventModal .ce-panel,
     body.dark-theme #createEventModal .ce-panel,
     [data-bs-theme="dark"] #createEventModal .ce-panel,
@@ -1150,7 +1241,7 @@
                         <div>
                             <label for="eventLocation" class="form-label">
                                 <span>Venue or location</span>
-                                <span class="ce-optional-tag">Optional</span>
+                                <span class="ce-optional-tag">Optional · UK Postcode &amp; Venue Finder</span>
                             </label>
                             <div class="ce-input-icon-wrap">
                                 <i class="bi bi-geo-alt-fill ce-input-icon-wrap__icon" aria-hidden="true"></i>
@@ -1158,8 +1249,20 @@
                                        class="form-control"
                                        id="eventLocation"
                                        data-optional="true"
-                                       placeholder="e.g. Richmond Park or postcode">
+                                       autocomplete="off"
+                                       aria-autocomplete="list"
+                                       aria-controls="eventLocation_autocomplete_dropdown"
+                                       placeholder="Search venue, street address, city or UK postcode (e.g. Richmond Park or SW1A 1AA)">
+                                <div id="eventLocation_autocomplete_spinner" class="ce-loc-spinner" aria-hidden="true">
+                                    <span class="spinner-border spinner-border-sm" role="status" style="width: 1rem; height: 1rem; color: #a31621 !important;"></span>
+                                </div>
+                                <div id="eventLocation_autocomplete_dropdown"
+                                     class="shared-loc-autocomplete-menu location-autocomplete-menu"
+                                     style="display: none;"
+                                     role="listbox"
+                                     aria-label="Venue and address suggestions"></div>
                             </div>
+                            <small id="eventLocation_error" class="ce-field-error"></small>
                         </div>
 
                         <div class="ce-panel">
@@ -1244,9 +1347,20 @@
                                                class="form-control"
                                                id="scoutLocationInput"
                                                data-optional="true"
-                                               placeholder="Town, city or postcode">
+                                               autocomplete="off"
+                                               aria-autocomplete="list"
+                                               aria-controls="scoutLocation_autocomplete_dropdown"
+                                               placeholder="Town, city or UK postcode">
+                                        <div id="scoutLocation_autocomplete_spinner" class="ce-loc-spinner" aria-hidden="true">
+                                            <span class="spinner-border spinner-border-sm" role="status" style="width: 1rem; height: 1rem; color: #a31621 !important;"></span>
+                                        </div>
+                                        <div id="scoutLocation_autocomplete_dropdown"
+                                             class="shared-loc-autocomplete-menu location-autocomplete-menu"
+                                             style="display: none;"
+                                             role="listbox"
+                                             aria-label="Town, city and postcode suggestions"></div>
                                     </div>
-                                    <button type="button" class="btn ce-scout-btn" id="btnRunScout">
+                                    <button type="button" class="btn ce-scout-btn" id="btnRunScout" data-spin="true">
                                         <i class="bi bi-compass" aria-hidden="true"></i>
                                         <span>Scout Outings</span>
                                     </button>
@@ -1293,7 +1407,7 @@
 
                 <div class="modal-footer ce-footer">
                     <button type="button" class="btn ce-btn-cancel" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" name="submit" class="btn ce-btn-save" id="submitEventModal">Create Event</button>
+                    <button type="button" name="submit" class="btn ce-btn-save" id="submitEventModal" data-spin="true">Create Event</button>
                 </div>
             </form>
 

@@ -540,6 +540,16 @@ class OAuthController
             }
         }
 
+        if (!empty($_COOKIE['fp_share_intent'])) {
+            $intent = \App\controller\PostShareController::parseShareIntentCookie();
+            if (!empty($intent['post_no']) && (int)$intent['post_no'] > 0) {
+                $targetPost = (int)$intent['post_no'];
+                setcookie('fp_share_intent', '', ['expires' => time() - 3600, 'path' => '/', 'httponly' => true, 'samesite' => 'Lax']);
+                redirect('/member/profilePage?post_no=' . $targetPost . '#post' . $targetPost);
+                return;
+            }
+        }
+
         redirect('/profilePage');
     }
 }

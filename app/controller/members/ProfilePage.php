@@ -83,8 +83,16 @@ final class ProfilePage extends ProcessImg
             // Check and process 18th birthday graduation milestone
             $adulthoodGraduation = \App\services\AdulthoodTransitionService::checkAndProcessUserGraduation($this->id);
 
-            // Fetch any pending weekly activity reel awaiting approval
-            $pendingWeeklyReel = \App\services\WeeklyActivityVideoCuratorService::getPendingReel((string)$this->id, (string)($data['famCode'] ?? ''));
+            // Opportunistically ensure Curated Video Content Engine & Family Historian weekly fun-fact digest are fresh
+            if (empty($data['isPendingApproval'])) {
+                (new \App\services\CuratedVideoEngineService())->ensureFreshEngagementPost();
+                \App\services\FamilyHistorianService::ensureWeeklyDigestForFamily((string)($data['famCode'] ?? ''));
+            }
+
+            // Fetch or automatically curate this week's Family Fun Facts activity reel awaiting approval
+            $pendingWeeklyReel = empty($data['isPendingApproval'])
+                ? \App\services\WeeklyActivityVideoCuratorService::getOrCurateWeeklyReel((string)$this->id, (string)($data['famCode'] ?? ''))
+                : \App\services\WeeklyActivityVideoCuratorService::getPendingReel((string)$this->id, (string)($data['famCode'] ?? ''));
 
             // Dual-Lineage post audiences (all, birth, married codes)
             $postAudiences = (new \App\services\FamilyPostAudienceService())->resolveUserAudiences((string)$this->id);
@@ -117,7 +125,6 @@ final class ProfilePage extends ProcessImg
             $whatsNewPath = dirname(__DIR__, 3) . '/resources/data/whats_new.php';
             $whatsNewData = is_file($whatsNewPath) ? require $whatsNewPath : null;
 
-            $usePreactFeed = true;
             $feedBootstrapJson = json_encode([
                 'famCode' => (string)($data['famCode'] ?? ''),
                 'userId' => (string)$this->id,
@@ -134,7 +141,6 @@ final class ProfilePage extends ProcessImg
 
             view('member/profilePage', [
                 'data' => $data['memberData'],
-                'usePreactFeed' => $usePreactFeed,
                 'feedBootstrapJson' => $feedBootstrapJson,
                 'primaryFamCode' => $data['primaryFamCode'] ?? ($data['famCode'] ?? ''),
                 'maternalFamCode' => $data['maternalFamCode'] ?? '',

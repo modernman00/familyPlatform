@@ -44,7 +44,10 @@ try {
          INNER JOIN personal p ON a.id = p.id
          WHERE p.famCode IS NOT NULL 
            AND p.famCode != ""
-           AND a.status = "approved"
+           AND a.deleted_at IS NULL
+           AND p.deleted_at IS NULL
+           AND a.status IN ("approved", "active", "verified")
+           AND a.id NOT IN ("FAMILY_PLATFORM_OFFICIAL", "FAMILY_HISTORIAN")
          LIMIT 200'
     );
     /** @var array<int, array<string, mixed>> $members */

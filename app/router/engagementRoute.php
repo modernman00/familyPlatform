@@ -40,6 +40,7 @@ $router->map('POST', '/api/sparks/reply/update', 'App\controller\members\DailyFa
 $router->map('POST', '/api/sparks/reply/delete', 'App\controller\members\DailyFamilySparkController@deleteReply', 'sparks_reply_delete');
 $router->map('GET|HEAD', '/spark/[:sparkId]/card.jpg', 'App\controller\SharePreviewController@sparkCardImage', 'spark_share_card');
 $router->map('GET|HEAD', '/spark/[:sparkId]', 'App\controller\SharePreviewController@handleSparkLink', 'spark_share_view');
+$router->map('POST', '/api/public/share/track', 'App\controller\SharePreviewController@trackGuestShare', 'api_public_share_track');
 
 // In-Feed Feature Discovery Spotlight Engine
 $router->map('GET', '/api/spotlights/feed', 'App\controller\members\FeatureSpotlightController@getFeedSpotlights', 'spotlights_feed');

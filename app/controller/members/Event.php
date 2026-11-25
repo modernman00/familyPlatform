@@ -71,7 +71,7 @@ final class Event extends AllMembersData
                     'eventCode' => $famCodeRaw,
                     'id' => $hostIdRaw
                 ],
-                optionalFields: ['eventDescription', 'token', '_token', 'csrf_token']
+                optionalFields: ['eventDescription', 'eventLocation', 'proximity_mode', 'target_radius_miles', 'token', '_token', 'csrf_token']
             );
 
             if (!$retunLastId) {
@@ -617,12 +617,28 @@ final class Event extends AllMembersData
             $rawInput = file_get_contents('php://input');
             $input = json_decode($rawInput !== false ? $rawInput : '', true) ?? [];
 
+            $rawProximityMode = isset($input['proximity_mode']) && is_scalar($input['proximity_mode'])
+                ? (string)$input['proximity_mode']
+                : (string)($event['proximity_mode'] ?? 'all_family');
+            $cleanProximityMode = in_array($rawProximityMode, ['all_family', 'proximity_only'], true)
+                ? $rawProximityMode
+                : 'all_family';
+            $rawRadius = isset($input['target_radius_miles']) && is_numeric($input['target_radius_miles'])
+                ? (int)$input['target_radius_miles']
+                : (int)($event['target_radius_miles'] ?? 25);
+            $cleanRadius = in_array($rawRadius, [10, 25, 50, 100], true) ? $rawRadius : 25;
+
             $data = [
                 'eventName' => checkInput($input['eventName'] ?? null),
                 'eventDate' => checkInput($input['eventDate'] ?? null),
                 'eventType' => checkInput($input['eventType'] ?? null),
                 'eventDescription' => checkInput($input['eventDescription'] ?? null),
                 'eventFrequency' => checkInput($input['eventFrequency'] ?? null),
+                'eventLocation' => isset($input['eventLocation']) && is_scalar($input['eventLocation']) && trim((string)$input['eventLocation']) !== ''
+                    ? checkInput((string)$input['eventLocation'])
+                    : '',
+                'proximity_mode' => $cleanProximityMode,
+                'target_radius_miles' => $cleanRadius,
             ];
 
             UpdateFn::updateMultiple('events', array_merge($data, ['no' => $eventNo]), 'no');
@@ -642,7 +658,13 @@ final class Event extends AllMembersData
                 'no' => $eventNo,
                 'eventName' => $data['eventName'],
                 'eventDate' => dateFormat($data['eventDate']),
+                'eventDateRaw' => $data['eventDate'],
                 'eventType' => $data['eventType'],
+                'eventDescription' => $data['eventDescription'],
+                'eventFrequency' => $data['eventFrequency'],
+                'eventLocation' => $data['eventLocation'],
+                'proximity_mode' => $data['proximity_mode'],
+                'target_radius_miles' => $data['target_radius_miles'],
                 'dateDifference' => $dateDifference,
                 'party_event_id' => $event['party_event_id'] ?? null,
                 'party_rsvp_url' => $event['party_rsvp_url'] ?? null,

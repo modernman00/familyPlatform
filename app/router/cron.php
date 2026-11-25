@@ -6,4 +6,5 @@ $router->map('GET|POST', '/api/cron/ai-blog', 'App\controller\CronController@blo
 $router->map('GET|POST', '/cron/ai-blog', 'App\controller\CronController@blog', 'cron-ai-blog-alias');
 $router->map('GET|POST', '/api/cron/commitments', 'App\controller\CronController@commitments', 'cron-commitments');
 $router->map('GET|POST', '/api/cron/content-engine', 'App\controller\CronController@contentEngine', 'cron-content-engine');
+$router->map('GET|POST', '/api/cron/family-historian', 'App\controller\CronController@familyHistorian', 'cron-family-historian');
 $router->map('GET|POST', '/api/cron/arcade-daily', 'App\controller\CronController@arcadeDailyNudge', 'cron-arcade-daily');

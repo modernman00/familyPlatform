@@ -288,4 +288,59 @@ final class EventNotificationFlowTest extends SocialFeedTestCase
         $this->assertGreaterThan(0, $createdId2);
         $this->createdEventNos[] = $createdId2;
     }
+
+    public function testCreateEventSharedAddressAutocompleteAndLocationPersistence(): void
+    {
+        $token = 'test_token_' . bin2hex(random_bytes(8));
+        $_SESSION['token'] = $token;
+        $_SESSION['id'] = $this->authorId;
+        $_SESSION['famCode'] = $this->famCode;
+        $_SESSION['fName'] = 'Test';
+        $_SESSION['lName'] = 'Host';
+        $_SERVER['CONTENT_TYPE'] = 'application/x-www-form-urlencoded';
+
+        $venueAddress = 'Hilton London Park Lane, 22 Park Lane, Mayfair, London, W1K 1BE, UK';
+
+        $_POST = [
+            'token' => $token,
+            'eventName' => 'Mayfair Family Gala',
+            'eventDate' => date('Y-m-d', strtotime('+18 days')),
+            'eventType' => 'Party',
+            'eventDescription' => 'Black-tie dinner and celebration',
+            'eventFrequency' => 'One-off',
+            'eventLocation' => $venueAddress,
+            'proximity_mode' => 'proximity_only',
+            'target_radius_miles' => '25',
+        ];
+
+        ob_start();
+        Event::submitEvent();
+        $output = ob_get_clean();
+        $response = json_decode((string) $output, true);
+
+        $this->assertIsArray($response);
+        $this->assertSame('success', $response['status'] ?? '');
+        $createdId = (int) ($response['token'] ?? 0);
+        $this->assertGreaterThan(0, $createdId);
+        $this->createdEventNos[] = $createdId;
+
+        $stmt = $this->pdo->prepare('SELECT eventLocation, proximity_mode, target_radius_miles FROM events WHERE no = ?');
+        $stmt->execute([$createdId]);
+        $savedRow = $stmt->fetch();
+
+        $this->assertIsArray($savedRow);
+        $this->assertSame($venueAddress, $savedRow['eventLocation'] ?? '');
+        $this->assertSame('proximity_only', $savedRow['proximity_mode'] ?? '');
+        $this->assertSame(25, (int) ($savedRow['target_radius_miles'] ?? 0));
+
+        // Verify shared-js-lib AddressAutocomplete wiring in createEvent modal and JS bundle source
+        $modalBlade = (string) file_get_contents(__DIR__ . '/../../resources/views/member/modals/createEvent.blade.php');
+        $this->assertStringContainsString('eventLocation_autocomplete_dropdown', $modalBlade);
+        $this->assertStringContainsString('eventLocation_autocomplete_spinner', $modalBlade);
+        $this->assertStringContainsString('scoutLocation_autocomplete_dropdown', $modalBlade);
+
+        $createEventJs = (string) file_get_contents(__DIR__ . '/../../resources/asset/js/components/profilePage/createEvent.js');
+        $this->assertStringContainsString('@modernman00/shared-js-lib', $createEventJs);
+        $this->assertStringContainsString('setupAddressAutocomplete', $createEventJs);
+    }
 }

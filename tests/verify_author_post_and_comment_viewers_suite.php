@@ -335,7 +335,7 @@ runTest("Blade/Preact Invariant: Author Viewers Roster Modal present", function(
     if (!$viewersModal || !$feedShell) {
         throw new \Exception("Failed to read Preact ViewersModal.jsx or FeedShell.jsx");
     }
-    if (!str_contains($feedShell, '<ViewersModal') || !str_contains($viewersModal, 'data-testid="viewers-modal"')) {
+    if ((!str_contains($feedShell, '<ViewersModal') && !str_contains($feedShell, '<LazyViewersModal')) || !str_contains($viewersModal, 'data-testid="viewers-modal"')) {
         throw new \Exception("Preact FeedShell.jsx / ViewersModal.jsx missing viewers-modal");
     }
     if (!str_contains($viewersModal, "type === 'comment' ? 'Comment viewers' : 'Post viewers'")) {

@@ -297,6 +297,27 @@ assertCheck(
     $totalChecks
 );
 
+// Concept A: Integrated Heirloom Frame Studio in Post Composer
+$postModalPath = $rootDir . '/resources/views/member/modals/post.blade.php';
+$postModalContent = file_exists($postModalPath) ? (string)file_get_contents($postModalPath) : '';
+$postJsPath = $rootDir . '/resources/asset/js/components/profilePage/postEmojiImgProcess.js';
+$postJsContent = file_exists($postJsPath) ? (string)file_get_contents($postJsPath) : '';
+
+assertCheck(
+    str_contains($postModalContent, 'then-now-studio') &&
+    str_contains($postModalContent, 'id="thenNowLiveDeltaBadge"') &&
+    str_contains($postModalContent, 'id="thenCardTag"') &&
+    str_contains($postModalContent, 'id="nowCardTag"') &&
+    str_contains($postModalContent, 'then-now-slots__bridge') &&
+    str_contains($postModalContent, 'then-now-story-bar') &&
+    str_contains($postJsContent, 'updateThenNowLiveDeltaBadge') &&
+    str_contains($postJsContent, 'syncTextStageCollapseForThenNow'),
+    "Concept A Heirloom Frame Studio integrates Polaroid date-stamp headers, live Year-Delta badge, centre bridge, unified story bar, and auto-collapsing backdrop.",
+    "Post composer missing Concept A Heirloom Frame Studio elements or JS hooks",
+    $failures,
+    $totalChecks
+);
+
 echo "\n=================================================================\n";
 if (empty($failures)) {
     echo "🏆 ALL {$totalChecks} THEN & NOW CLICKABLE & EXPANDABLE CHECKS PASSED CLEANLY!\n";

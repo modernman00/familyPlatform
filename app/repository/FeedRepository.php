@@ -560,6 +560,42 @@ class FeedRepository
             \error_log('[FeedRepository::hydrateEngagement twoTruths] ' . $ttEx->getMessage());
         }
 
+        // Batch hydrate approved Weekly Fun Facts 60fps presentations
+        $weeklyReelsByPostNo = [];
+        try {
+            $wrPlaceholders = implode(',', array_fill(0, count($postIds), '?'));
+            $wrSql = sprintf(
+                'SELECT id, post_no, title, duration_seconds, audio_url, music_title, storyboard_json
+                 FROM weekly_activity_reels
+                 WHERE post_no IN (%s)
+                   AND status = "approved"',
+                $wrPlaceholders
+            );
+            $wrStmt = $this->db->prepare($wrSql);
+            $wrStmt->execute($postIds);
+            while ($wrRow = $wrStmt->fetch(PDO::FETCH_ASSOC)) {
+                $wrPostNo = (int)($wrRow['post_no'] ?? 0);
+                if ($wrPostNo <= 0) {
+                    continue;
+                }
+                $sb = !empty($wrRow['storyboard_json']) && is_string($wrRow['storyboard_json'])
+                    ? (json_decode($wrRow['storyboard_json'], true) ?: [])
+                    : [];
+                $weeklyReelsByPostNo[$wrPostNo] = [
+                    'id' => (int)$wrRow['id'],
+                    'title' => (string)($wrRow['title'] ?? 'Weekly Family Fun Facts'),
+                    'duration_seconds' => (int)($wrRow['duration_seconds'] ?? 30),
+                    'audio_url' => (string)($wrRow['audio_url'] ?? ''),
+                    'music_title' => (string)($wrRow['music_title'] ?? ''),
+                    'aspect_ratio' => (string)($sb['approved_aspect_ratio'] ?? ($sb['default_aspect_ratio'] ?? '16:9')),
+                    'scenes' => is_array($sb['scenes'] ?? null) ? $sb['scenes'] : [],
+                    'fun_facts' => is_array($sb['fun_facts'] ?? null) ? $sb['fun_facts'] : [],
+                ];
+            }
+        } catch (\Throwable $wrEx) {
+            \error_log('[FeedRepository::hydrateEngagement weeklyReels] ' . $wrEx->getMessage());
+        }
+
         // Batch prefetch any uncached external URLs across the feed page in parallel
         $batchExternalUrls = [];
         foreach ($rows as $rItem) {
@@ -579,6 +615,7 @@ class FeedRepository
             $post['poll'] = $polls[$pNo] ?? null;
             $post['comparison'] = $comparisons[$pNo] ?? null;
             $post['two_truths'] = $twoTruthsGames[$pNo] ?? null;
+            $post['weekly_reel'] = $weeklyReelsByPostNo[$pNo] ?? null;
             $post['post_tags'] = $postTagsByPostNo[$pNo] ?? [];
 
             // Fallback to author's family tree voice capsule if not directly set on post

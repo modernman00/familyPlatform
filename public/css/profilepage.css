@@ -500,11 +500,14 @@ img.rounded-circle {
 
   .sidebar-column {
     order: 3;
+    flex: 0 0 auto;
     width: 100%;
     max-width: 480px;
+    height: auto;
     margin: 20px auto 0 auto;
     position: static;
     max-height: none;
+    overflow: visible;
   }
 }
 

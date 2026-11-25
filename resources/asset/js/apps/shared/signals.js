@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'preact/hooks';
 
 /**
  * Fine-Grained Preact 11 Signals Engine (zero external dependency).
@@ -43,6 +43,16 @@ export function batch(fn) {
         if (batchDepth === 0) {
             flushPending();
         }
+    }
+}
+
+export function untracked(fn) {
+    const prevObserver = currentObserver;
+    currentObserver = null;
+    try {
+        return fn();
+    } finally {
+        currentObserver = prevObserver;
     }
 }
 
@@ -162,7 +172,7 @@ export function effect(computeFn) {
 
 export function computed(computeFn) {
     const out = createSignal(undefined);
-    effect(() => {
+    const dispose = effect(() => {
         const nextVal = computeFn();
         const prevObserver = currentObserver;
         currentObserver = null;
@@ -182,12 +192,13 @@ export function computed(computeFn) {
         subscribe(fn) {
             return out.subscribe(fn);
         },
+        dispose,
     };
 }
 
 export function useSignalValue(sig) {
     const [val, setVal] = useState(() => (sig && typeof sig.peek === 'function' ? sig.peek() : undefined));
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (!sig || typeof sig.subscribe !== 'function') return undefined;
         setVal(sig.peek());
         return sig.subscribe((next) => setVal(next));
@@ -209,6 +220,28 @@ export function useSignal(initialValue) {
 export function useComputed(computeFn, deps = []) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const comp = useMemo(() => computed(computeFn), deps);
+    useLayoutEffect(() => () => {
+        if (comp && typeof comp.dispose === 'function') {
+            comp.dispose();
+        }
+    }, [comp]);
     useSignalValue(comp);
     return comp;
+}
+
+export function useSignalEffect(effectFn, deps = []) {
+    useLayoutEffect(() => {
+        const dispose = effect(effectFn);
+        return () => dispose();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, deps);
+}
+
+/**
+ * Leaf-isolated signal renderer: subscribes only this leaf component to `signal`,
+ * preventing parent component trees from re-rendering on high-frequency signal updates.
+ */
+export function SignalValue({ signal: sig, format }) {
+    const val = useSignalValue(sig);
+    return typeof format === 'function' ? format(val) : val;
 }

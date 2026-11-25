@@ -3,6 +3,7 @@ import { id, log } from "../global"
 import FormHelper from '../FormHelper';
 import { addToNotificationTab, increaseNotificationCount } from '../navbar'
 import { eventHtml } from './eventHTML'
+import { AddressAutocomplete, setupAddressAutocomplete, INTERNAL_VENUE_INDEX } from "@modernman00/shared-js-lib";
 import axios from "axios";
 import Pusher from 'pusher-js';
 import Swal from 'sweetalert2';
@@ -55,6 +56,12 @@ if (createEventModalEl) {
         if (partyToggle) partyToggle.checked = false;
         const locInput = id('eventLocation');
         if (locInput) locInput.value = '';
+        if (eventLocationAutocomplete && typeof eventLocationAutocomplete.close === 'function') {
+            eventLocationAutocomplete.close();
+        }
+        if (scoutLocationAutocomplete && typeof scoutLocationAutocomplete.close === 'function') {
+            scoutLocationAutocomplete.close();
+        }
         const proxMode = id('proximityModeSelect');
         if (proxMode) proxMode.value = 'all_family';
         const targetRad = id('targetRadiusMilesSelect');
@@ -149,6 +156,52 @@ if (eventLocationInput) {
     eventLocationInput.addEventListener('input', () => {
         clearTimeout(locDebounce);
         locDebounce = setTimeout(updateProximityPreview, 500);
+    });
+}
+
+// ── Shared UK Address, Postcode & Venue Autocomplete (@modernman00/shared-js-lib) ──
+let eventLocationAutocomplete = null;
+let scoutLocationAutocomplete = null;
+
+if (typeof window !== 'undefined') {
+    window.AddressAutocomplete = AddressAutocomplete;
+    window.setupAddressAutocomplete = setupAddressAutocomplete;
+    window.INTERNAL_VENUE_INDEX = INTERNAL_VENUE_INDEX;
+}
+
+if (eventLocationInput && !eventLocationInput.dataset.autocompleteAttached) {
+    eventLocationInput.dataset.autocompleteAttached = '1';
+    eventLocationAutocomplete = setupAddressAutocomplete({
+        input: '#eventLocation',
+        dropdown: '#eventLocation_autocomplete_dropdown',
+        spinner: '#eventLocation_autocomplete_spinner',
+        errorElement: '#eventLocation_error',
+        themeColor: '#a31621',
+        country: 'uk',
+        onSelect: (item) => {
+            updateProximityPreview();
+            const scoutInputEl = id('scoutLocationInput');
+            if (scoutInputEl && !scoutInputEl.value.trim() && item) {
+                scoutInputEl.value = item.city || item.postcode || item.title || '';
+            }
+        }
+    });
+}
+
+const scoutLocationInputEl = id('scoutLocationInput');
+if (scoutLocationInputEl && !scoutLocationInputEl.dataset.autocompleteAttached) {
+    scoutLocationInputEl.dataset.autocompleteAttached = '1';
+    scoutLocationAutocomplete = setupAddressAutocomplete({
+        input: '#scoutLocationInput',
+        dropdown: '#scoutLocation_autocomplete_dropdown',
+        spinner: '#scoutLocation_autocomplete_spinner',
+        themeColor: '#a31621',
+        country: 'uk',
+        onSelect: (item) => {
+            if (item && scoutLocationInputEl) {
+                scoutLocationInputEl.value = item.city || item.postcode || item.title || item.fullAddress || '';
+            }
+        }
     });
 }
 
@@ -329,6 +382,7 @@ const dateDifferenceLabel = (dateStr) => {
  * eventForm.addEventListener('submit', process);
  */
 const process = async (e) => {
+    const submitBtnEl = id('submitEventModal');
     try {
         e.preventDefault();
         const errEl = id('error');
@@ -348,6 +402,10 @@ const process = async (e) => {
             });
             formData.clearError();
             return;
+        }
+
+        if (submitBtnEl && window.ScoreTenantSpinner?.start) {
+            window.ScoreTenantSpinner.start(submitBtnEl);
         }
 
         // get the form data
@@ -386,7 +444,13 @@ const process = async (e) => {
                     no: editEventNo,
                     eventName: payload.eventName,
                     eventDate: formatEventDate(payload.eventDate),
+                    eventDateRaw: payload.eventDate,
                     eventType: payload.eventType,
+                    eventDescription: payload.eventDescription,
+                    eventFrequency: payload.eventFrequency,
+                    eventLocation: payload.eventLocation,
+                    proximity_mode: payload.proximity_mode,
+                    target_radius_miles: Number(payload.target_radius_miles) || 25,
                     dateDifference: dateDifferenceLabel(payload.eventDate),
                 }
             }));
@@ -434,6 +498,9 @@ const process = async (e) => {
                 eventType: eventFormEntries.get('eventType') || '',
                 eventDescription: eventFormEntries.get('eventDescription') || '',
                 eventFrequency: eventFormEntries.get('eventFrequency') || '',
+                eventLocation: eventLocEl ? eventLocEl.value : '',
+                proximity_mode: proximityModeEl ? proximityModeEl.value : 'all_family',
+                target_radius_miles: Number(targetRadiusEl ? targetRadiusEl.value : 25) || 25,
                 dateDifference: dateDifferenceLabel(eventFormEntries.get('eventDate')),
                 party_event_id: null,
                 party_rsvp_url: null,
@@ -510,6 +577,10 @@ const process = async (e) => {
             confirmButtonColor: '#a31621'
         });
         log(error);
+    } finally {
+        if (submitBtnEl && window.ScoreTenantSpinner?.stop) {
+            window.ScoreTenantSpinner.stop(submitBtnEl);
+        }
     }
 };
 

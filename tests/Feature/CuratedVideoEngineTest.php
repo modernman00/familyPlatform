@@ -85,6 +85,11 @@ XML;
         $this->assertCount(2, $entries);
         $this->assertTrue($engine->isFamilySafe($entries[0]['title'], $entries[0]['description']));
         $this->assertFalse($engine->isFamilySafe($entries[1]['title'], $entries[1]['description']));
+        // BBC Earth descriptions containing "Dramatic" or "seaweed" must not false-positive
+        $this->assertTrue($engine->isFamilySafe(
+            'Why Are These Sea Urchins Wearing Hats? | Blue Planet III | BBC Earth',
+            'Dramatic, rare, and exclusive natural history beneath seaweed forests.'
+        ));
     }
 
     public function testSsrfProtectionBlocksPrivateAndNonHttpsUrls(): void
@@ -164,5 +169,12 @@ XML;
         $decoded = json_decode($output, true);
         $this->assertIsArray($decoded);
         $this->assertSame('error', $decoded['status']);
+
+        ob_start();
+        $controller->familyHistorian();
+        $fhOutput = (string)ob_get_clean();
+        $fhDecoded = json_decode($fhOutput, true);
+        $this->assertIsArray($fhDecoded);
+        $this->assertSame('error', $fhDecoded['status']);
     }
 }

@@ -703,6 +703,13 @@
                     var result = await response.json().catch(function() { return {}; });
 
                     if (response.ok) {
+                        var previewEl = document.getElementById('profilePreview');
+                        var nextAvatar = result.avatar || result.img || (previewEl ? previewEl.getAttribute('src') : '');
+                        if (nextAvatar) {
+                            window.dispatchEvent(new CustomEvent('fp:profile-updated', {
+                                detail: { avatar: nextAvatar }
+                            }));
+                        }
                         if (typeof Swal !== 'undefined') {
                             Swal.fire({
                                 toast: true,
@@ -714,9 +721,6 @@
                                 timerProgressBar: true
                             });
                         }
-                        setTimeout(function() {
-                            window.location.reload();
-                        }, 900);
                     } else {
                         var errMsg = result.message || result.error || 'Failed to update profile picture. Please try again.';
                         if (typeof Swal !== 'undefined') {

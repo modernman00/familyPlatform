@@ -685,39 +685,24 @@ class PWAManager {
       });
     }
 
-    // Two-way synchronization of notification badge count
+    // Two-way synchronization of notification badge count via shared platformStore
     const syncBadge = () => {
-      const desktopBadge = document.getElementById('notification_count');
-      const mobileBadge = document.getElementById('pwa_bottom_badge');
-      if (!desktopBadge && !mobileBadge) return;
-
-      const rawCount = ((desktopBadge && desktopBadge.textContent) || (mobileBadge && mobileBadge.textContent) || '').trim();
-      const count = parseInt(rawCount, 10);
-
-      if (!isNaN(count) && count > 0) {
-        if (mobileBadge) {
-          mobileBadge.textContent = count > 99 ? '99+' : String(count);
-          mobileBadge.style.display = 'inline-flex';
-        }
-        PWAManager.setBadge(count);
-      } else {
-        if (mobileBadge) {
-          mobileBadge.textContent = '';
-          mobileBadge.style.display = 'none';
-        }
-        PWAManager.setBadge(0);
+      const storeCount = window.__FP_PLATFORM_STORE__?.notifications?.unreadCount;
+      if (typeof storeCount === 'number') {
+        PWAManager.setBadge(storeCount);
+        return;
       }
+      const desktopBadge = document.getElementById('notification_count');
+      const rawCount = (desktopBadge && (desktopBadge.textContent || desktopBadge.dataset?.serverCount) || '').trim();
+      const count = parseInt(rawCount, 10);
+      PWAManager.setBadge(!isNaN(count) && count > 0 ? count : 0);
     };
 
-    // Initial sync
+    // Initial sync & reactive event subscription
     syncBadge();
-
-    // Observe changes to desktop badge
-    const desktopBadge = document.getElementById('notification_count');
-    if (desktopBadge) {
-      const observer = new MutationObserver(syncBadge);
-      observer.observe(desktopBadge, { childList: true, characterData: true, subtree: true });
-    }
+    window.addEventListener('fp:notifications-changed', (e) => {
+      PWAManager.setBadge(e?.detail?.unreadCount || 0);
+    });
   }
 
   /**

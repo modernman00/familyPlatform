@@ -71,6 +71,10 @@ describe('Profile Sidebars Preact Islands', () => {
         await waitFor(() => {
             expect(screen.getByText('Annual Family Reunion')).toBeTruthy();
         });
+        expect(screen.getByText('DEC')).toBeTruthy();
+        expect(screen.getByText('12')).toBeTruthy();
+        expect(screen.getByText('Reunion')).toBeTruthy();
+        expect(screen.getByText(/Enable RSVPs & Party Studio/i)).toBeTruthy();
 
         window.dispatchEvent(new CustomEvent('event-updated', {
             detail: { no: '55', eventName: 'Grand Family Reunion 2026' },

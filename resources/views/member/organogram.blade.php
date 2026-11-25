@@ -6279,6 +6279,6 @@
 @endsection
 @if(!empty($useReactTree))
 @push('scripts')
-<script defer src="/public/js/organogram-app.js?v={{ assetVersion('js/organogram-app.js') }}" nonce="{{ csp_nonce($nonce ?? null) }}"></script>
+<script type="module" src="/public/js/organogram-app.js?v={{ assetVersion('js/organogram-app.js') }}" nonce="{{ csp_nonce($nonce ?? null) }}"></script>
 @endpush
 @endif

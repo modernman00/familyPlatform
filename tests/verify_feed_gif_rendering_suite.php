@@ -172,11 +172,13 @@ assertTest(
 echo "\n[Phase 4] Auditing compiled Webpack production bundle...\n";
 
 $indexBundle = __DIR__ . '/../public/js/index.js';
+$feedAppBundle = __DIR__ . '/../public/js/feed-app.js';
 assertTest(file_exists($indexBundle), "public/js/index.js exists", "public/js/index.js missing", $errors);
+assertTest(file_exists($feedAppBundle), "public/js/feed-app.js exists", "public/js/feed-app.js missing", $errors);
 
-$indexContent = file_get_contents($indexBundle);
+$bundleContent = (file_get_contents($indexBundle) ?: '') . "\n" . (file_get_contents($feedAppBundle) ?: '');
 assertTest(
-    str_contains($indexContent, 'isGifMedia') || str_contains($indexContent, 'image/gif'),
+    str_contains($bundleContent, 'isGifMedia') || str_contains($bundleContent, 'image/gif'),
     "Compiled Webpack bundles contain GIF media handling logic",
     "Compiled Webpack bundles missing GIF media logic",
     $errors

@@ -233,8 +233,8 @@
                 </div>
 
                 <!-- Theme Mode Toggle Icon -->
-                <button type="button" class="btn btn-icon-stitch" id="darkModeToggle" aria-label="{{ __('nav.theme_mode', 'Theme Mode') }}" aria-pressed="false" title="{{ __('nav.theme_mode', 'Toggle dark/light theme') }}">
-                    <i class="bi bi-moon-stars-fill" id="themeToggleIcon" aria-hidden="true"></i>
+                <button type="button" class="btn btn-icon-stitch" id="darkModeToggle" x-data :aria-pressed="$store.theme.isDark ? 'true' : 'false'" @click="$store.theme.toggle()" aria-label="{{ __('nav.theme_mode', 'Theme Mode') }}" aria-pressed="false" title="{{ __('nav.theme_mode', 'Toggle dark/light theme') }}">
+                    <i class="bi bi-moon-stars-fill" :class="{ 'bi-sun-fill text-warning': $store.theme.isDark, 'bi-moon-stars-fill': !$store.theme.isDark }" id="themeToggleIcon" aria-hidden="true"></i>
                 </button>
 
                 <!-- Account Settings Direct Link (Avatar Capsule) -->

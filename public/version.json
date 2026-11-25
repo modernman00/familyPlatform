@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Test(director-mode): guard shared-js-lib parity check when npm package lags",
+    "title": "Test(auth): set 2fa_passed in admin root redirect test",
     "notes": [
-        "Test(director-mode): guard shared-js-lib parity check when npm package lags",
-        "Fix(milestones): omit age from Family Historian birthday posts",
-        "Feat(studio,ui): Super-HD Living Photo & PiP, white theme & navbar polish, and arcade engagement cron"
+        "Test(auth): set 2fa_passed in admin root redirect test",
+        "Feat(feed): inline Facebook Reel/video playback via signed fbcdn stream proxy with Rich Preview fallback",
+        "Test(director-mode): guard shared-js-lib parity check when npm package lags"
     ],
     "released_at": "2026-11-24",
-    "commit": "23d3fb71"
+    "commit": "a31aa96f"
 }

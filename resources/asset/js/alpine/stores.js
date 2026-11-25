@@ -1,14 +1,19 @@
 'use strict';
 
+import { getPlatformStore } from '../apps/shared/platformStore';
+
 /**
  * FamilyPlatform Enterprise Alpine Reactive Stores
  * Single source of truth for global UI state across desktop, tablet, and mobile.
+ * Synchronised with Preact islands via the shared platformStore bridge.
  */
 
 export function initAlpineStores(Alpine) {
+  const platformStore = getPlatformStore();
+
   // 1. Notifications Reactive Store
   Alpine.store('notifications', {
-    unreadCount: Math.max(0, parseInt(sessionStorage.getItem('notificationCount'), 10) || parseInt(document.getElementById('notification_count')?.dataset?.serverCount, 10) || 0),
+    unreadCount: platformStore.notifications.unreadCount,
     get display() {
       return this.unreadCount > 0 ? String(this.unreadCount) : '';
     },
@@ -18,8 +23,7 @@ export function initAlpineStores(Alpine) {
     setCount(count) {
       const num = Math.max(0, parseInt(count, 10) || 0);
       this.unreadCount = num;
-      this._syncAppBadge(num);
-      this._syncLegacyDom(num);
+      platformStore.notifications.setCount(num);
     },
     increment(by = 1) {
       this.setCount(this.unreadCount + (parseInt(by, 10) || 1));
@@ -29,37 +33,19 @@ export function initAlpineStores(Alpine) {
     },
     clear() {
       this.setCount(0);
-    },
-    _syncAppBadge(num) {
-      if (typeof navigator !== 'undefined' && 'setAppBadge' in navigator) {
-        if (num > 0) {
-          navigator.setAppBadge(num).catch(() => {});
-        } else {
-          navigator.clearAppBadge().catch(() => {});
-        }
-      }
-    },
-    _syncLegacyDom(num) {
-      const displayStr = num > 0 ? String(num) : '';
-      const badgeIds = ['notification_count', 'header_notif_count', 'pwa_bottom_badge'];
-      badgeIds.forEach((id) => {
-        const el = document.getElementById(id);
-        if (el) {
-          if (num <= 0) {
-            el.style.display = 'none';
-            el.textContent = '';
-          } else {
-            el.textContent = displayStr;
-            el.style.display = (id === 'pwa_bottom_badge') ? 'inline-flex' : 'flex';
-          }
-        }
-      });
+    }
+  });
+
+  platformStore.notifications.subscribe((nextCount) => {
+    const notifStore = Alpine.store('notifications');
+    if (notifStore && notifStore.unreadCount !== nextCount) {
+      notifStore.unreadCount = nextCount;
     }
   });
 
   // 2. Theme & Dark Mode Reactive Store
   Alpine.store('theme', {
-    isDark: false,
+    isDark: platformStore.theme.isDark,
     init() {
       try {
         const savedTheme = localStorage.getItem('familyPlatform_theme');
@@ -101,53 +87,43 @@ export function initAlpineStores(Alpine) {
       this.apply();
     },
     apply() {
-      if (typeof document === 'undefined') return;
-      if (this.isDark) {
-        document.body?.classList.add('dark-mode');
-        document.documentElement?.classList.add('dark');
-      } else {
-        document.body?.classList.remove('dark-mode');
-        document.documentElement?.classList.remove('dark');
-      }
+      platformStore.theme.setDark(this.isDark, { persist: false });
+    }
+  });
 
-      const themeBadge = document.getElementById('themeStatusBadge');
-      if (themeBadge) {
-        if (this.isDark) {
-          themeBadge.textContent = 'Dark';
-          themeBadge.className = 'badge bg-warning text-dark';
-        } else {
-          themeBadge.textContent = 'Light';
-          themeBadge.className = 'badge bg-secondary-subtle text-secondary';
-        }
-      }
-      const themeIcon = document.getElementById('themeToggleIcon');
-      if (themeIcon) {
-        themeIcon.className = this.isDark ? 'bi bi-sun-fill text-warning' : 'bi bi-moon-stars-fill';
-      }
-      const toggleBtn = document.getElementById('darkModeToggle');
-      if (toggleBtn) {
-        toggleBtn.setAttribute('aria-pressed', this.isDark ? 'true' : 'false');
-      }
+  platformStore.theme.subscribe((nextDark) => {
+    const themeStore = Alpine.store('theme');
+    if (themeStore && themeStore.isDark !== nextDark) {
+      themeStore.isDark = nextDark;
     }
   });
 
   // 3. Network & PWA Connectivity Store
   Alpine.store('network', {
-    isOnline: typeof navigator !== 'undefined' ? navigator.onLine : true,
+    isOnline: platformStore.network.isOnline,
     init() {
       if (typeof window === 'undefined') return;
       window.addEventListener('online', () => {
         this.isOnline = true;
+        platformStore.network.setOnline(true);
         if (window.swalToast) {
           window.swalToast({ icon: 'success', title: 'Back online' });
         }
       });
       window.addEventListener('offline', () => {
         this.isOnline = false;
+        platformStore.network.setOnline(false);
         if (window.swalToast) {
           window.swalToast({ icon: 'warning', title: 'You are currently offline' });
         }
       });
+    }
+  });
+
+  platformStore.network.subscribe((nextOnline) => {
+    const netStore = Alpine.store('network');
+    if (netStore && netStore.isOnline !== nextOnline) {
+      netStore.isOnline = nextOnline;
     }
   });
 

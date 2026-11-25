@@ -362,4 +362,65 @@ class CronController
             fclose($lockHandle);
         }
     }
+
+    /**
+     * Endpoint to run the Family Historian ("Do You Know?" weekly rotating fun-fact cards & monthly birthdays).
+     * Enforces CRON_SECRET auth and non-blocking process lock.
+     */
+    public function familyHistorian(): void
+    {
+        header('Content-Type: application/json');
+
+        $providedSecret = (string) ($_REQUEST['secret'] ?? ($_SERVER['HTTP_X_CRON_SECRET'] ?? ''));
+        $expectedSecret = (string) ($_ENV['CRON_SECRET'] ?? (getenv('CRON_SECRET') ?: ''));
+
+        if (empty($expectedSecret) || !hash_equals($expectedSecret, $providedSecret)) {
+            http_response_code(403);
+            echo json_encode([
+                'status'  => 'error',
+                'message' => 'Unauthorized. Invalid or missing secret.',
+            ]);
+            return;
+        }
+
+        $lockPath = sys_get_temp_dir() . '/familyplatform-historian-cron.lock';
+        $lockHandle = fopen($lockPath, 'c');
+        if ($lockHandle === false || !flock($lockHandle, LOCK_EX | LOCK_NB)) {
+            if (is_resource($lockHandle)) {
+                fclose($lockHandle);
+            }
+            http_response_code(409);
+            echo json_encode([
+                'status'  => 'error',
+                'message' => 'Family Historian cron is currently running on another process.',
+            ]);
+            return;
+        }
+
+        try {
+            $dryRun = filter_var($_REQUEST['dry_run'] ?? false, FILTER_VALIDATE_BOOLEAN);
+            $famCode = isset($_REQUEST['famCode']) ? trim((string)$_REQUEST['famCode']) : '';
+            $forcePillar = isset($_REQUEST['force_pillar']) ? trim((string)$_REQUEST['force_pillar']) : null;
+            $db = Db::connect2();
+
+            $results = $famCode !== ''
+                ? [\App\services\FamilyHistorianService::runForFamily($famCode, $db, null, $dryRun, $forcePillar)]
+                : \App\services\FamilyHistorianService::runForAllFamilies($db, null, $dryRun);
+
+            http_response_code(200);
+            echo json_encode([
+                'status' => 'success',
+                'data'   => $results,
+            ]);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode([
+                'status'  => 'error',
+                'message' => 'Failed to run Family Historian cron: ' . $e->getMessage(),
+            ]);
+        } finally {
+            flock($lockHandle, LOCK_UN);
+            fclose($lockHandle);
+        }
+    }
 }

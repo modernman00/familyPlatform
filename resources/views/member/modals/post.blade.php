@@ -546,14 +546,27 @@
                             </button>
                         </div>
 
-                        <!-- 5b. Then & Now (before / after) Builder -->
-                        <div id="thenNowContainer" class="composer-drawer poll-builder d-none mb-3 shadow-xs">
-                            <div class="poll-builder__header">
-                                <span class="poll-builder__icon"><i class="bi bi-hourglass-split"></i></span>
-                                <span class="poll-builder__title" id="thenNowTitle">Then &amp; Now</span>
-                                <button type="button" id="removeThenNowBtn" class="poll-builder__close" aria-label="Remove Then and Now">
-                                    <i class="bi bi-x-lg"></i>
-                                </button>
+                        <!-- 5b. Then & Now (before / after) Builder — Concept A: Integrated Heirloom Frame Studio -->
+                        <div id="thenNowContainer" class="composer-drawer poll-builder then-now-studio d-none mb-3 shadow-xs">
+                            <div class="poll-builder__header then-now-studio__header">
+                                <div class="d-flex align-items-center gap-2 min-w-0 flex-wrap">
+                                    <span class="poll-builder__icon"><i class="bi bi-hourglass-split"></i></span>
+                                    <span class="poll-builder__title" id="thenNowTitle">Then &amp; Now</span>
+                                    <span id="thenNowLiveDeltaBadge" class="then-now-studio__delta-pill d-none" aria-live="polite"></span>
+                                </div>
+                                <div class="d-flex align-items-center gap-2 ms-auto">
+                                    <div class="then-now-studio__mode-group" role="group" aria-label="Comparison theme">
+                                        <button type="button" id="tnModeClassicBtn" class="then-now-studio__mode-btn active" aria-pressed="true">
+                                            ⏳ Time Travel
+                                        </button>
+                                        <button type="button" id="tnModeEchoBtn" class="then-now-studio__mode-btn text-secondary" aria-pressed="false">
+                                            🧬 Like Parent, Like Child
+                                        </button>
+                                    </div>
+                                    <button type="button" id="removeThenNowBtn" class="poll-builder__close" aria-label="Remove Then and Now">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </div>
                             </div>
                             <input type="hidden" name="then_now" id="thenNowFlag" value="">
                             <input type="hidden" name="reply_to_post" id="thenNowReplyTo" value="">
@@ -561,71 +574,90 @@
                             <input type="hidden" name="mystery_year" id="thenNowMysteryInput" value="0">
                             <input type="hidden" name="then_now_voice_base64" id="thenNowVoiceInput" value="">
 
-                            <!-- Mode Selector: Time Travel vs Genetic Echo (Parent vs Child) -->
-                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2 px-1">
-                                <div class="btn-group p-0.5 rounded-pill bg-light border" role="group" aria-label="Comparison theme">
-                                    <button type="button" id="tnModeClassicBtn" class="btn btn-sm rounded-pill fw-semibold active px-2.5 py-1" style="font-size: 0.76rem; min-height: 36px; white-space: nowrap;">
-                                        ⏳ Time Travel
-                                    </button>
-                                    <button type="button" id="tnModeEchoBtn" class="btn btn-sm rounded-pill fw-semibold text-secondary px-2.5 py-1" style="font-size: 0.76rem; min-height: 36px; white-space: nowrap;">
-                                        🧬 Like Parent, Like Child
-                                    </button>
+                            <!-- Integrated Polaroid / Heirloom Split-Frame Cards -->
+                            <div class="then-now-slots position-relative">
+                                <!-- Centre Time-Bridge Badge -->
+                                <div class="then-now-slots__bridge" aria-hidden="true" title="Side-by-side comparison">
+                                    <i class="bi bi-arrow-right"></i>
                                 </div>
-                                <button type="button" id="tnMysteryToggleBtn" class="btn btn-sm btn-light border rounded-pill px-2.5 py-1 fw-semibold d-inline-flex align-items-center gap-1" style="font-size: 0.75rem; min-height: 36px; white-space: nowrap;" aria-pressed="false" title="Let relatives guess the Then year before revealing it">
-                                    <i class="bi bi-dice-5-fill text-warning"></i>
-                                    <span>Guess the Year</span>
-                                </button>
-                            </div>
 
-                            <div class="then-now-slots">
-                                <div class="then-now-slot">
+                                <!-- THEN FRAME CARD -->
+                                <div class="then-now-slot then-now-card then-now-card--then">
+                                    <div class="then-now-card__header">
+                                        <span class="then-now-card__tag then-now-card__tag--then" id="thenCardTag">THEN</span>
+                                        <input type="text" name="then_label" id="thenLabelInput" class="poll-builder__option then-now-card__year-input" placeholder="Year, e.g. 1998" maxlength="40" aria-label="Then year or label">
+                                    </div>
                                     <label for="thenImgInput" class="then-now-slot__pick" id="thenSlotPick">
                                         <img id="thenPreview" class="d-none" alt="Then photo preview">
-                                        <span id="thenPlaceholder"><i class="bi bi-image"></i><br>Pick the <strong>Then</strong> photo</span>
+                                        <span class="then-now-slot__replace-pill d-none" id="thenReplaceBadge"><i class="bi bi-arrow-repeat me-1"></i>Change</span>
+                                        <span id="thenPlaceholder" class="then-now-slot__empty">
+                                            <span class="then-now-slot__icon-ring"><i class="bi bi-image"></i></span>
+                                            <span class="then-now-slot__prompt">Pick the <strong id="thenPromptStrong">Then</strong> photo</span>
+                                            <span class="then-now-slot__upload-pill"><i class="bi bi-folder2-open"></i> Upload from device</span>
+                                        </span>
                                     </label>
                                     <input type="file" id="thenImgInput" accept="image/*" hidden>
-                                    <input type="text" name="then_label" class="poll-builder__option" placeholder="Then, e.g. 1998" maxlength="40" aria-label="Then year or label">
-                                    <button type="button" id="thenArchivePickBtn" class="btn btn-sm btn-light border rounded-pill w-100 mt-2" style="min-height:44px; white-space: nowrap;">
-                                        <i class="bi bi-collection-fill" style="color: #a31621;"></i> Pick from Family Archive
-                                    </button>
+                                    <div class="then-now-card__footer">
+                                        <button type="button" id="thenArchivePickBtn" class="then-now-card__action-btn then-now-card__action-btn--archive">
+                                            <i class="bi bi-collection-fill"></i>
+                                            <span>Pick from Family Archive</span>
+                                        </button>
+                                    </div>
                                 </div>
-                                <div class="then-now-slot">
+
+                                <!-- NOW FRAME CARD -->
+                                <div class="then-now-slot then-now-card then-now-card--now">
+                                    <div class="then-now-card__header">
+                                        <span class="then-now-card__tag then-now-card__tag--now" id="nowCardTag">NOW</span>
+                                        <input type="text" name="now_label" id="nowLabelInput" class="poll-builder__option then-now-card__year-input" placeholder="Year, e.g. 2026" maxlength="40" aria-label="Now year or label">
+                                    </div>
                                     <label for="nowImgInput" class="then-now-slot__pick" id="nowSlotPick">
                                         <img id="nowPreview" class="d-none" alt="Now photo preview">
-                                        <span id="nowPlaceholder"><i class="bi bi-image"></i><br>Pick the <strong>Now</strong> photo</span>
+                                        <span class="then-now-slot__replace-pill d-none" id="nowReplaceBadge"><i class="bi bi-arrow-repeat me-1"></i>Change</span>
+                                        <span id="nowPlaceholder" class="then-now-slot__empty">
+                                            <span class="then-now-slot__icon-ring"><i class="bi bi-image"></i></span>
+                                            <span class="then-now-slot__prompt">Pick the <strong id="nowPromptStrong">Now</strong> photo</span>
+                                            <span class="then-now-slot__upload-pill"><i class="bi bi-folder2-open"></i> Upload from device</span>
+                                        </span>
                                     </label>
                                     <input type="file" id="nowImgInput" accept="image/*" hidden>
-                                    <input type="text" name="now_label" class="poll-builder__option" placeholder="Now, e.g. 2026" maxlength="40" aria-label="Now year or label">
-                                    <button type="button" id="nowCameraBtn" class="btn btn-sm btn-light border rounded-pill w-100 mt-2" style="min-height:44px; white-space: nowrap;">
-                                        <i class="bi bi-camera-fill"></i> Match it with the camera
-                                    </button>
+                                    <div class="then-now-card__footer">
+                                        <button type="button" id="nowCameraBtn" class="then-now-card__action-btn then-now-card__action-btn--camera" title="Overlays your Then photo on the camera so you can line up the exact same pose">
+                                            <i class="bi bi-camera-fill"></i>
+                                            <span>Ghost-Pose Camera</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
                             <!-- Family Archive Photo Picker Drawer (for Then Slot) -->
-                            <div id="thenArchiveDrawer" class="d-none mt-2 p-2.5 rounded-3 border" style="background: var(--surface-bg, #f8fafc);">
+                            <div id="thenArchiveDrawer" class="d-none mt-2 p-2.5 rounded-3 border then-now-archive-drawer">
                                 <div class="d-flex justify-content-between align-items-center mb-1.5">
-                                    <span class="small fw-bold text-dark"><i class="bi bi-clock-history me-1" style="color:#a31621;"></i> Tap an archive photo to set as "Then"</span>
-                                    <button type="button" id="closeThenArchiveBtn" class="btn-close" style="font-size: 0.65rem;" aria-label="Close archive picker"></button>
+                                    <span class="small fw-bold then-now-archive-drawer__title"><i class="bi bi-clock-history me-1"></i> Tap an archive photo to set as &ldquo;Then&rdquo;</span>
+                                    <button type="button" id="closeThenArchiveBtn" class="btn-close" style="font-size: 0.65rem; min-width: 44px; min-height: 44px;" aria-label="Close archive picker"></button>
                                 </div>
                                 <div id="thenArchiveGrid" class="d-flex gap-2 overflow-x-auto py-1" style="min-height: 76px;"></div>
                             </div>
 
-                            <!-- 15-Second Voice Reflection Studio -->
-                            <div class="mt-2.5 p-2 rounded-3 border d-flex align-items-center justify-content-between flex-wrap gap-2" style="background: rgba(163, 22, 33, 0.04); border-color: rgba(163, 22, 33, 0.16) !important;">
-                                <div class="d-flex align-items-center gap-2">
-                                    <button type="button" id="tnVoiceRecordBtn" class="btn btn-sm rounded-pill fw-semibold px-3 d-inline-flex align-items-center gap-1.5" style="background-color: #a31621; color: #ffffff !important; border: none; min-height: 40px; white-space: nowrap;">
+                            <!-- Unified Bottom Story Bar: 15-Second Voice Story + Guess the Year Challenge -->
+                            <div class="then-now-story-bar mt-2.5">
+                                <div class="d-flex align-items-center gap-2 flex-wrap min-w-0">
+                                    <button type="button" id="tnVoiceRecordBtn" class="then-now-story-bar__voice-btn">
                                         <i class="bi bi-mic-fill"></i>
                                         <span id="tnVoiceRecordLabel">Add 15s Voice Story</span>
                                     </button>
-                                    <span id="tnVoiceStatusText" class="small text-muted" style="font-size: 0.76rem;">Tell the story behind these years</span>
+                                    <span id="tnVoiceStatusText" class="then-now-story-bar__hint">Tell the story behind these years</span>
                                 </div>
                                 <div id="tnVoicePreviewWrap" class="d-none align-items-center gap-1.5">
-                                    <audio id="tnVoiceAudioPreview" controls preload="metadata" style="height: 32px; max-width: 170px;"></audio>
-                                    <button type="button" id="tnVoiceClearBtn" class="btn btn-sm btn-outline-danger rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 34px; height: 34px;" aria-label="Remove voice story">
+                                    <audio id="tnVoiceAudioPreview" controls preload="metadata" style="height: 32px; max-width: 165px;"></audio>
+                                    <button type="button" id="tnVoiceClearBtn" class="btn btn-sm btn-outline-danger rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 44px; height: 44px; min-width: 44px; min-height: 44px;" aria-label="Remove voice story">
                                         <i class="bi bi-trash3"></i>
                                     </button>
                                 </div>
+                                <button type="button" id="tnMysteryToggleBtn" class="then-now-story-bar__mystery-btn" aria-pressed="false" title="Blur the Then year on the feed so relatives can guess it before revealing">
+                                    <i class="bi bi-dice-5-fill text-warning"></i>
+                                    <span>Guess the Year</span>
+                                </button>
                             </div>
                         </div>
 
@@ -799,7 +831,7 @@
                         <div class="composer-audience-cards d-flex flex-column gap-2.5">
                             <!-- Option 1: All Circles & Connected Kin -->
                             <label class="composer-audience-card p-3 rounded-3 border d-flex align-items-start gap-3 cursor-pointer transition-all active" 
-                                   style="cursor: pointer; border-color: var(--brand-primary, #a31621) !important; background: rgba(163, 22, 33, 0.03);"
+                                   style="cursor: pointer;"
                                    onclick="selectPostAudienceCard(this, 'all', 'All Family Circles &amp; Connected Kin', 'bi-people-fill text-primary', '')">
                                 <input type="radio" name="audience_choice_radio" value="all" data-scope="all" data-code="" class="form-check-input mt-1 flex-shrink-0" checked style="cursor: pointer; width: 1.15rem; height: 1.15rem;">
                                 <div class="flex-grow-1">
@@ -816,7 +848,7 @@
                             @if(!empty($audienceItems))
                                 @foreach($audienceItems as $item)
                                     <label class="composer-audience-card p-3 rounded-3 border d-flex align-items-start gap-3 cursor-pointer transition-all" 
-                                           style="cursor: pointer; border-color: rgba(148, 163, 184, 0.3); background: rgba(248, 250, 252, 0.8);"
+                                           style="cursor: pointer;"
                                            onclick="selectPostAudienceCard(this, '{{ $item['kind'] }}', '{{ addslashes($item['label']) }}', '{{ $item['icon'] }}', '{{ $item['code'] }}')">
                                         <input type="radio" name="audience_choice_radio" value="{{ $item['code'] }}" data-scope="{{ $item['kind'] }}" data-code="{{ $item['code'] }}" class="form-check-input mt-1 flex-shrink-0" style="cursor: pointer; width: 1.15rem; height: 1.15rem;">
                                         <div class="flex-grow-1">
@@ -834,7 +866,7 @@
 
                             @if(count($birthCodes) > 1)
                                 <label class="composer-audience-card p-3 rounded-3 border d-flex align-items-start gap-3 cursor-pointer transition-all" 
-                                       style="cursor: pointer; border-color: rgba(148, 163, 184, 0.3); background: rgba(248, 250, 252, 0.8);"
+                                       style="cursor: pointer;"
                                        onclick="selectPostAudienceCard(this, 'birth', 'All Birth Roots (Paternal &amp; Maternal)', 'bi-tree-fill text-warning', '')">
                                     <input type="radio" name="audience_choice_radio" value="all_birth" data-scope="birth" data-code="" class="form-check-input mt-1 flex-shrink-0" style="cursor: pointer; width: 1.15rem; height: 1.15rem;">
                                     <div class="flex-grow-1">
@@ -949,6 +981,13 @@ window.closeAllComposerDrawers = function(exceptId) {
             if (el) el.classList.add('d-none');
         }
     });
+    if (exceptId !== 'thenNowContainer') {
+        const stageBar = document.getElementById('composerTextStageBar');
+        if (stageBar && stageBar.dataset.hiddenByThenNow === '1') {
+            stageBar.classList.remove('d-none');
+            delete stageBar.dataset.hiddenByThenNow;
+        }
+    }
 };
 
 window.copyFamilyShareEndpoint = function(famCode, userToken) {
@@ -1928,12 +1967,8 @@ window.selectPostAudienceCard = function(labelEl, scope, label, iconClass, famCo
     if (radio) radio.checked = true;
 
     document.querySelectorAll('.composer-audience-card').forEach(card => {
-        card.style.borderColor = 'rgba(148, 163, 184, 0.3)';
-        card.style.background = 'rgba(248, 250, 252, 0.8)';
         card.classList.remove('active');
     });
-    labelEl.style.borderColor = 'var(--brand-primary, #a31621)';
-    labelEl.style.background = 'rgba(163, 22, 33, 0.03)';
     labelEl.classList.add('active');
 
     const scopeInput = document.getElementById('composerTargetScope');
@@ -2542,10 +2577,17 @@ window.selectPostAudience = function(scope, label, iconClass, famCode) {
     color: #ffd700 !important; /* Luminous gold on red */
 }
 .composer-audience-card {
+    border-color: rgba(148, 163, 184, 0.35) !important;
+    background: rgba(248, 250, 252, 0.85);
     transition: transform 0.16s ease, border-color 0.16s ease, background-color 0.16s ease, box-shadow 0.16s ease;
     user-select: none;
     -webkit-user-select: none;
     touch-action: manipulation;
+}
+[data-theme="dark"] .composer-audience-card,
+.dark-mode .composer-audience-card {
+    border-color: rgba(148, 163, 184, 0.25) !important;
+    background: rgba(30, 41, 59, 0.72);
 }
 .composer-audience-card:hover {
     transform: translateY(-1.5px);
@@ -2558,5 +2600,345 @@ window.selectPostAudience = function(scope, label, iconClass, famCode) {
     border-color: var(--brand-primary, #a31621) !important;
     background: rgba(163, 22, 33, 0.04) !important;
     box-shadow: 0 0 0 1px var(--brand-primary, #a31621), 0 4px 14px rgba(163, 22, 33, 0.12) !important;
+}
+[data-theme="dark"] .composer-audience-card.active,
+.dark-mode .composer-audience-card.active {
+    border-color: var(--brand-primary, #fb7185) !important;
+    background: rgba(163, 22, 33, 0.14) !important;
+    box-shadow: 0 0 0 1px var(--brand-primary, #fb7185), 0 4px 14px rgba(225, 29, 72, 0.2) !important;
+}
+
+/* ── Concept A: Integrated Heirloom Frame Studio (Then & Now) ──────────────── */
+.then-now-studio {
+    padding: var(--space-3, 12px) !important;
+    border-radius: var(--radius-lg, 16px) !important;
+}
+.then-now-studio__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-2, 8px);
+    margin-bottom: var(--space-3, 12px) !important;
+}
+.then-now-studio__delta-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1, 4px);
+    padding: var(--space-1, 4px) var(--space-2, 10px);
+    border-radius: var(--radius-full, 999px);
+    font-size: var(--text-xs, 0.75rem);
+    font-weight: 700;
+    background: rgba(245, 158, 11, 0.16);
+    color: #b45309;
+    border: 1px solid rgba(245, 158, 11, 0.38);
+    white-space: nowrap;
+}
+[data-theme="dark"] .then-now-studio__delta-pill,
+.dark-mode .then-now-studio__delta-pill {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fcd34d;
+    border-color: rgba(251, 191, 36, 0.35);
+}
+.then-now-studio__mode-group {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1, 4px);
+    padding: var(--space-1, 4px);
+    border-radius: var(--radius-full, 999px);
+    background: var(--surface-bg, rgba(15, 23, 42, 0.06));
+    border: 1px solid var(--border-color, rgba(148, 163, 184, 0.28));
+}
+.then-now-studio__mode-btn {
+    min-height: var(--tap-min, 44px);
+    min-width: var(--tap-min, 44px);
+    padding: var(--space-1, 4px) var(--space-3, 12px);
+    border-radius: var(--radius-full, 999px);
+    border: none;
+    background: transparent;
+    color: var(--text-muted-aa, #475569);
+    font-size: var(--text-xs, 0.75rem);
+    font-weight: 700;
+    white-space: nowrap;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: background-color 0.16s ease, color 0.16s ease, transform 0.12s ease;
+}
+.then-now-studio__mode-btn:active {
+    transform: scale(0.98);
+}
+.then-now-studio__mode-btn.active {
+    background: var(--card-bg, #0f172a);
+    color: var(--text-main, #ffffff);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18);
+}
+:root:not([data-theme="dark"]) .then-now-studio__mode-btn.active {
+    background: #0f172a;
+    color: #ffffff;
+}
+.then-now-slots {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3, 12px);
+    position: relative;
+}
+.then-now-slots__bridge {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 6;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #0f172a;
+    color: #fcd34d;
+    border: 2px solid rgba(251, 191, 36, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-xs, 0.75rem);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.35);
+    pointer-events: none;
+}
+.then-now-card {
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius-md, 14px);
+    border: 1px solid var(--border-color, rgba(148, 163, 184, 0.28));
+    background: var(--surface-bg, rgba(15, 23, 42, 0.03));
+    overflow: hidden;
+    transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+.then-now-card:focus-within {
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+}
+.then-now-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2, 8px);
+    padding: var(--space-1, 4px) var(--space-2, 10px);
+    background: rgba(15, 23, 42, 0.06);
+    border-bottom: 1px solid var(--border-color, rgba(148, 163, 184, 0.22));
+    min-height: var(--tap-min, 44px);
+}
+[data-theme="dark"] .then-now-card__header,
+.dark-mode .then-now-card__header {
+    background: rgba(2, 6, 23, 0.55);
+}
+.then-now-card__tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px var(--space-2, 8px);
+    border-radius: var(--radius-sm, 6px);
+    font-size: var(--text-xs, 0.75rem);
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.then-now-card__tag--then {
+    background: rgba(245, 158, 11, 0.18);
+    color: #d97706;
+}
+[data-theme="dark"] .then-now-card__tag--then,
+.dark-mode .then-now-card__tag--then {
+    color: #fbbf24;
+}
+.then-now-card__tag--now {
+    background: rgba(16, 185, 129, 0.18);
+    color: #059669;
+}
+[data-theme="dark"] .then-now-card__tag--now,
+.dark-mode .then-now-card__tag--now {
+    color: #34d399;
+}
+.then-now-card__year-input {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    text-align: right;
+    font-size: var(--text-xs, 0.75rem) !important;
+    font-weight: 700 !important;
+    color: var(--text-main, #0f172a) !important;
+    padding: var(--space-1, 4px) var(--space-1, 4px) !important;
+    margin: 0 !important;
+    min-height: 38px;
+    width: 100%;
+    min-width: 0;
+}
+.then-now-card__year-input:focus {
+    outline: none !important;
+}
+.then-now-card .then-now-slot__pick {
+    position: relative;
+    aspect-ratio: 4 / 3 !important;
+    min-height: 128px;
+    max-height: 165px;
+    margin-bottom: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-2, 10px);
+}
+.then-now-slot__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1, 6px);
+    text-align: center;
+}
+.then-now-slot__icon-ring {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(148, 163, 184, 0.14);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.then-now-slot__icon-ring i {
+    font-size: var(--text-base, 1rem) !important;
+}
+.then-now-slot__prompt {
+    font-size: var(--text-xs, 0.75rem);
+    line-height: 1.3;
+}
+.then-now-slot__upload-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1, 4px);
+    padding: var(--space-1, 4px) var(--space-2, 10px);
+    border-radius: var(--radius-full, 999px);
+    background: rgba(148, 163, 184, 0.16);
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    font-size: var(--text-xs, 0.75rem);
+    font-weight: 600;
+    white-space: nowrap;
+}
+.then-now-slot__replace-pill {
+    position: absolute;
+    bottom: var(--space-2, 8px);
+    right: var(--space-2, 8px);
+    z-index: 4;
+    padding: var(--space-1, 4px) var(--space-2, 10px);
+    border-radius: var(--radius-full, 999px);
+    background: rgba(15, 23, 42, 0.82);
+    color: #ffffff;
+    font-size: var(--text-xs, 0.75rem);
+    font-weight: 700;
+    backdrop-filter: blur(6px);
+    white-space: nowrap;
+}
+.then-now-card__footer {
+    padding: var(--space-1, 6px);
+    border-top: 1px solid var(--border-color, rgba(148, 163, 184, 0.22));
+    background: rgba(15, 23, 42, 0.03);
+}
+.then-now-card__action-btn {
+    width: 100%;
+    min-height: var(--tap-min, 44px);
+    padding: var(--space-1, 6px) var(--space-2, 10px);
+    border-radius: var(--radius-md, 10px);
+    border: 1px solid var(--border-color, rgba(148, 163, 184, 0.3));
+    background: var(--card-bg, rgba(15, 23, 42, 0.4));
+    color: var(--text-main, #0f172a);
+    font-size: var(--text-xs, 0.75rem);
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1, 6px);
+    white-space: nowrap;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: transform 0.14s ease, background-color 0.14s ease, border-color 0.14s ease;
+}
+.then-now-card__action-btn:active {
+    transform: scale(0.98);
+}
+.then-now-card__action-btn--archive i {
+    color: #e11d48;
+}
+.then-now-card__action-btn--camera i {
+    color: #10b981;
+}
+.then-now-story-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-2, 8px);
+    padding: var(--space-2, 8px) var(--space-3, 10px);
+    border-radius: var(--radius-md, 12px);
+    background: rgba(163, 22, 33, 0.06);
+    border: 1px solid rgba(163, 22, 33, 0.22);
+}
+.then-now-story-bar__voice-btn {
+    min-height: var(--tap-min, 44px);
+    min-width: var(--tap-min, 44px);
+    padding: var(--space-1, 6px) var(--space-3, 14px);
+    border-radius: var(--radius-full, 999px);
+    background-color: #a31621;
+    color: #ffffff !important;
+    border: none;
+    font-size: var(--text-xs, 0.75rem);
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1, 6px);
+    white-space: nowrap;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: transform 0.14s ease, filter 0.14s ease;
+}
+.then-now-story-bar__voice-btn:hover {
+    filter: brightness(1.06);
+}
+.then-now-story-bar__voice-btn:active {
+    transform: scale(0.98);
+}
+.then-now-story-bar__hint {
+    font-size: var(--text-xs, 0.75rem);
+    color: var(--text-muted-aa, #64748b);
+}
+.then-now-story-bar__mystery-btn {
+    min-height: var(--tap-min, 44px);
+    min-width: var(--tap-min, 44px);
+    padding: var(--space-1, 6px) var(--space-3, 12px);
+    border-radius: var(--radius-full, 999px);
+    border: 1px solid var(--border-color, rgba(148, 163, 184, 0.35));
+    background: var(--card-bg, #ffffff);
+    color: var(--text-main, #0f172a);
+    font-size: var(--text-xs, 0.75rem);
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1, 6px);
+    white-space: nowrap;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: transform 0.14s ease, background-color 0.14s ease, color 0.14s ease;
+}
+.then-now-story-bar__mystery-btn.btn-dark,
+.then-now-story-bar__mystery-btn[aria-pressed="true"] {
+    background: #0f172a !important;
+    color: #ffffff !important;
+    border-color: #f59e0b !important;
+}
+@media (max-width: 480px) {
+    .then-now-slots {
+        gap: var(--space-2, 8px);
+    }
+    .then-now-card__action-btn {
+        padding: var(--space-1, 4px) var(--space-2, 8px);
+    }
 }
 </style>

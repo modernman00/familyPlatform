@@ -7,6 +7,7 @@ import { CommentThread } from './CommentThread';
 import { FeedVideoGallery } from './FeedVideoGallery';
 import { RichTextTokens } from './RichTextTokens';
 import CosmicOrrery from './CosmicOrrery';
+import { WeeklyFunFactsPlayer } from './WeeklyFunFactsPlayer';
 import {
     TEXT_STAGE_CATALOG,
     formatRelativeTime,
@@ -137,7 +138,8 @@ export const PostCard = memo(function PostCard({
 
     const images = Array.isArray(post.images) ? post.images : [];
     const videos = Array.isArray(post.videos) ? post.videos : [];
-    const hasMedia = images.length > 0 || videos.length > 0 || Boolean(post.comparison);
+    const hasWeeklyReel = Boolean(post.weekly_reel && Array.isArray(post.weekly_reel.scenes) && post.weekly_reel.scenes.length > 0);
+    const hasMedia = images.length > 0 || videos.length > 0 || Boolean(post.comparison) || hasWeeklyReel;
     const hasLinkPreview = Boolean(
         post.link_preview && (post.link_preview.image || post.link_preview.title || post.link_preview.url)
     );
@@ -1098,8 +1100,13 @@ export const PostCard = memo(function PostCard({
                 </div>
             )}
 
+            {/* Approved Weekly Fun Facts 60fps Motion Presentation */}
+            {hasWeeklyReel && (
+                <WeeklyFunFactsPlayer reel={post.weekly_reel} />
+            )}
+
             {/* Single Photo (Full-Width Natural Aspect — zero sidebars, uncropped) */}
-            {images.length === 1 && !post.comparison && (() => {
+            {images.length === 1 && !post.comparison && !hasWeeklyReel && (() => {
                 const singleImgUrl = getPostImageUrl(images[0]) || images[0];
                 const isSingleBroken = Boolean(brokenPhotoUrls[images[0]] || brokenPhotoUrls[singleImgUrl]);
                 return (

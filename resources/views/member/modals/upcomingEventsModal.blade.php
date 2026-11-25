@@ -393,6 +393,10 @@ html.dark-mode #allUpcomingEventsModal .input-group .form-control {
                                                     <i class="bi bi-arrow-repeat text-muted"></i>
                                                     <span x-text="event.eventFrequency"></span>
                                                 </div>
+                                                <div class="d-flex align-items-center gap-1.5" x-show="event.eventLocation">
+                                                    <i class="bi bi-geo-alt-fill text-danger"></i>
+                                                    <span x-text="event.eventLocation"></span>
+                                                </div>
                                             </div>
 
                                             <!-- Event Description -->
@@ -729,6 +733,11 @@ function allUpcomingEventsModal() {
                 setVal('eventType', event.eventType);
                 setVal('eventDescription', event.eventDescription);
                 setVal('eventFrequency', event.eventFrequency);
+                setVal('eventLocation', event.eventLocation || '');
+                setVal('proximityModeSelect', event.proximity_mode || 'all_family');
+                setVal('targetRadiusMilesSelect', String(event.target_radius_miles || 25));
+                const proxSelect = document.getElementById('proximityModeSelect');
+                if (proxSelect) proxSelect.dispatchEvent(new Event('change', { bubbles: true }));
 
                 if (notice) notice.classList.remove('d-none');
                 if (title) title.textContent = 'Edit Event';

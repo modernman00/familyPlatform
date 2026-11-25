@@ -327,9 +327,6 @@
             });
           }
           dismissAnniversaryBanner();
-          setTimeout(function() {
-            window.location.reload();
-          }, 1200);
         } else {
           var msg = res.message || 'Please enter a valid wedding date (e.g. DD/MM/YYYY or select from the calendar).';
           if (errBox) {
@@ -352,11 +349,6 @@
       }
     }
   </script>
-  @endif
-
-  @if(empty($usePreactFeed))
-    {{-- Dismissible "What's New This Week" Banner (Legacy fallback when Preact feed is disabled) --}}
-    @include('member.includes.whatsNewBanner')
   @endif
 
   {{-- Connected Kin Requests Banner (Top of Feed — always mounted for live Pusher arrival) --}}

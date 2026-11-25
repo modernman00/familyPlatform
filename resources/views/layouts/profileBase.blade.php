@@ -250,7 +250,7 @@
   <script nonce="{{ csp_nonce($nonce ?? null) }}">window.ATG_LIVING_EMOJIS = @json($atgLivingEmojis);</script>
   <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/manifest.js?v={{ assetVersion('js/manifest.js') }}" defer></script>
   <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/vendor.js?v={{ assetVersion('js/vendor.js') }}" defer></script>
-  <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/index.js?v={{ assetVersion('js/index.js') }}" defer></script>
+  <script type="module" nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/index.js?v={{ assetVersion('js/index.js') }}"></script>
   <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/telemetry.js?v={{ assetVersion('js/telemetry.js') }}" defer></script>
   <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/pwa-notifications.js?v={{ assetVersion('js/pwa-notifications.js') }}" defer></script>
   <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/family-timezone.js?v={{ assetVersion('js/family-timezone.js') }}" defer></script>

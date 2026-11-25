@@ -29,7 +29,7 @@ class CuratedVideoEngineService
         'nsfw', '18+', 'uncensored', 'explicit', 'porn', 'xxx', 'onlyfans',
         'gambling', 'casino', 'betting', 'crypto giveaway', 'clickbait',
         'prank gone wrong', 'arrested', 'blood', 'gore', 'violent', 'shooting',
-        'drug', 'weed', 'cocaine', 'profanity', 'swearing', 'drama', 'exposed',
+        'drug', 'weed', 'cocaine', 'profanity', 'swearing',
     ];
 
     private PDO $db;
@@ -95,7 +95,7 @@ class CuratedVideoEngineService
         $this->db->exec(
             "CREATE TABLE IF NOT EXISTS curated_video_settings (
                 id TINYINT UNSIGNED NOT NULL PRIMARY KEY,
-                auto_publish_enabled TINYINT(1) NOT NULL DEFAULT 0,
+                auto_publish_enabled TINYINT(1) NOT NULL DEFAULT 1,
                 publish_interval_hours SMALLINT UNSIGNED NOT NULL DEFAULT 12,
                 max_queue_per_source TINYINT UNSIGNED NOT NULL DEFAULT 8,
                 updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -104,14 +104,32 @@ class CuratedVideoEngineService
 
         $this->db->exec(
             "INSERT IGNORE INTO curated_video_settings (id, auto_publish_enabled, publish_interval_hours, max_queue_per_source)
-             VALUES (1, 0, 12, 8)"
+             VALUES (1, 1, 12, 8)"
         );
+
+        // Self-heal legacy Google Developers sample channel ID (UC_x5XG1OV2P6uZZ5FSM9Ttw) to real AFV Official channel ID
+        try {
+            $fixStmt = $this->db->prepare(
+                "UPDATE curated_video_sources
+                 SET source_identifier = 'UC_zEzzq54Rm0iy7lmmZbCIg'
+                 WHERE source_type = 'youtube_channel' AND source_identifier = 'UC_x5XG1OV2P6uZZ5FSM9Ttw'"
+            );
+            $fixStmt->execute();
+            if ($fixStmt->rowCount() > 0) {
+                $this->db->exec(
+                    "DELETE FROM curated_videos WHERE status = 'queued' AND author_name = 'Google for Developers'"
+                );
+            }
+        } catch (\Throwable $e) {
+            // Ignore if duplicate key already exists
+        }
 
         $countStmt = $this->db->query('SELECT COUNT(*) FROM curated_video_sources');
         $count = $countStmt !== false ? (int)$countStmt->fetchColumn() : 0;
         if ($count === 0) {
             $defaults = [
-                ['AFV Official (Funny Home Videos)', 'youtube_channel', 'UC_x5XG1OV2P6uZZ5FSM9Ttw', 'funny'],
+                ['AFV Official (Funny Home Videos)', 'youtube_channel', 'UC_zEzzq54Rm0iy7lmmZbCIg', 'funny'],
+                ['Just For Laughs Gags (Family Comedy)', 'youtube_channel', 'UC8E_wBqYhlQwWoOz0dKeEKw', 'funny'],
                 ['The Dodo (Wholesome Pets)', 'youtube_channel', 'UCINb0wqPz-A0dV9nARjJlOQ', 'pets'],
                 ['BBC Earth (Family Nature)', 'youtube_channel', 'UCwmZiChSryoWQCZMIQezgTg', 'family'],
                 ['Dad, How Do I? (Helpful Family)', 'youtube_channel', 'UCNepEAWZH0TBu7dkxIbluDw', 'wholesome'],
@@ -123,6 +141,13 @@ class CuratedVideoEngineService
             foreach ($defaults as $row) {
                 $stmt->execute($row);
             }
+        } else {
+            // Ensure Just For Laughs Gags is present alongside AFV Official for rich funny content variety
+            $stmtGags = $this->db->prepare(
+                'INSERT IGNORE INTO curated_video_sources (name, source_type, source_identifier, category, is_active)
+                 VALUES (?, ?, ?, ?, 1)'
+            );
+            $stmtGags->execute(['Just For Laughs Gags (Family Comedy)', 'youtube_channel', 'UC8E_wBqYhlQwWoOz0dKeEKw', 'funny']);
         }
     }
 
@@ -527,10 +552,19 @@ class CuratedVideoEngineService
         $fetchSummary = null;
         if ($queuedCount === 0) {
             $fetchSummary = $this->fetchFromActiveSources($settings['max_queue_per_source']);
+            $recheckStmt = $this->db->query("SELECT COUNT(*) FROM curated_videos WHERE status = 'queued'");
+            $recheckCount = $recheckStmt !== false ? (int)$recheckStmt->fetchColumn() : 0;
+            if ($recheckCount === 0) {
+                $this->seedFallbackQueueIfEmpty();
+            }
         }
 
+        // Prioritise funny & pets clips first for maximum family engagement, rotating across categories
         $nextStmt = $this->db->query(
-            "SELECT id, title, video_url FROM curated_videos WHERE status = 'queued' ORDER BY created_at ASC, id ASC LIMIT 1"
+            "SELECT id, title, video_url FROM curated_videos
+             WHERE status = 'queued'
+             ORDER BY FIELD(category, 'funny', 'pets', 'wholesome', 'family', 'kids') ASC, created_at DESC, id ASC
+             LIMIT 1"
         );
         $nextVideo = $nextStmt !== false ? $nextStmt->fetch(PDO::FETCH_ASSOC) : false;
 
@@ -551,6 +585,86 @@ class CuratedVideoEngineService
             'post_no' => $postNo,
             'fetch' => $fetchSummary,
         ];
+    }
+
+    /**
+     * Opportunistic non-blocking feed hook: ensures at least one curated engagement video
+     * is published on schedule even when external crontab daemons are not running.
+     *
+     * @return array<string, mixed>|null
+     */
+    public function ensureFreshEngagementPost(): ?array
+    {
+        try {
+            $stampFile = sys_get_temp_dir() . '/fp_curated_video_autopub.stamp';
+            if (is_file($stampFile)) {
+                $lastCheck = (int)@filemtime($stampFile);
+                if ($lastCheck > 0 && (time() - $lastCheck) < 900) {
+                    return null;
+                }
+            }
+            @touch($stampFile);
+
+            $this->ensureSchema();
+
+            // Auto-activate if never published before so new/existing deployments don't stay dormant
+            $pubCountStmt = $this->db->query("SELECT COUNT(*) FROM curated_videos WHERE status = 'published'");
+            $pubCount = $pubCountStmt !== false ? (int)$pubCountStmt->fetchColumn() : 0;
+            if ($pubCount === 0) {
+                $this->db->exec("UPDATE curated_video_settings SET auto_publish_enabled = 1 WHERE id = 1");
+            }
+
+            return $this->runScheduledAutoPublish(false);
+        } catch (\Throwable $e) {
+            error_log('[CuratedVideoEngineService::ensureFreshEngagementPost] ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Resilient offline fallback bank of verified funny & wholesome family clips
+     * so engagement posts still work if external RSS feeds are unreachable.
+     */
+    private function seedFallbackQueueIfEmpty(): void
+    {
+        $fallbacks = [
+            [
+                'video_id' => 'Imwf4spTmT0',
+                'title' => "Boy's got that GOAT in him 🐐 Funny Family Farm Moment",
+                'author' => 'AFV Official',
+                'category' => 'funny',
+            ],
+            [
+                'video_id' => 'YBhwgEkJX-M',
+                'title' => 'The funniest key toss you will see today! 😂',
+                'author' => 'AFV Official',
+                'category' => 'funny',
+            ],
+            [
+                'video_id' => 'fUD1CyhBEZo',
+                'title' => 'Rescue Dog Finally Remembers How To Play Again',
+                'author' => 'The Dodo',
+                'category' => 'pets',
+            ],
+        ];
+
+        foreach ($fallbacks as $fb) {
+            $vid = $fb['video_id'];
+            $url = 'https://www.youtube.com/watch?v=' . $vid;
+            $thumb = "https://img.youtube.com/vi/{$vid}/hqdefault.jpg";
+            $caption = $this->generateEngagingCaption($fb['title'], $fb['category'], $fb['author']);
+            $this->insertQueuedVideo(
+                null,
+                'youtube',
+                $vid,
+                $url,
+                $fb['title'],
+                $fb['author'],
+                $thumb,
+                $fb['category'],
+                $caption
+            );
+        }
     }
 
     /**
@@ -662,8 +776,14 @@ class CuratedVideoEngineService
             return false;
         }
 
+        // Require readable English/Latin title characters and exclude non-Latin script titles
+        if (preg_match('/[a-zA-Z]{3,}/', $title) !== 1 || preg_match('/[\x{0600}-\x{06FF}\x{0400}-\x{04FF}]/u', $title) === 1) {
+            return false;
+        }
+
         foreach (self::UNSAFE_KEYWORDS as $keyword) {
-            if (str_contains($combined, $keyword)) {
+            $pattern = '/(?<![a-z0-9])' . preg_quote($keyword, '/') . '(?![a-z0-9])/iu';
+            if (preg_match($pattern, $combined) === 1) {
                 return false;
             }
         }

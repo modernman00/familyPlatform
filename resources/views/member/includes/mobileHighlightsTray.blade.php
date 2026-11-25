@@ -230,7 +230,7 @@ foreach(($eventData ?? []) as $event) {
                     <span x-text="event.eventDate"></span>
                 </div>
                 <div class="d-flex align-items-center mb-2" style="font-size: 0.875rem; color: var(--text-muted-aa, #475569);">
-                    <i class="bi bi-geo-alt me-1 text-danger"></i>
+                    <i class="bi bi-bookmark-heart-fill me-1.5 text-danger"></i>
                     <span class="text-truncate" x-text="event.eventType"></span>
                 </div>
 

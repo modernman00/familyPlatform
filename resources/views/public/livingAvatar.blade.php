@@ -204,7 +204,7 @@
     <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/manifest.js?v={{ assetVersion('js/manifest.js') }}" defer></script>
     <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/vendor.js?v={{ assetVersion('js/vendor.js') }}" defer></script>
     <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/SovereignVideoStudioClient.js?v={{ assetVersion('js/SovereignVideoStudioClient.js') }}" defer></script>
-    <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/atg-living-photo-avatar.js?v={{ assetVersion('js/atg-living-photo-avatar.js') }}" defer></script>
+    <script type="module" nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/atg-living-photo-avatar.js?v={{ assetVersion('js/atg-living-photo-avatar.js') }}"></script>
     <script nonce="{{ csp_nonce($nonce ?? null) }}">
         document.addEventListener('DOMContentLoaded', async function () {
             const canvas = document.getElementById('fpPublicCanvas');

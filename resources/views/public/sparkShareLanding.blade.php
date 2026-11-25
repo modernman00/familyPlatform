@@ -78,14 +78,30 @@
     </style>
 </head>
 <body>
+    @include('component.submitSpinner')
     <main class="spark-preview-card">
         <img src="{{ $meta['image'] }}" alt="{{ $meta['image_alt'] }}" class="spark-preview-img">
         <div class="spark-preview-body">
             <span class="spark-preview-badge">{{ $badgeLabel ?? 'DAILY FAMILY SPARK' }}</span>
             <h1 class="spark-preview-title">{{ $meta['title'] }}</h1>
             <p class="spark-preview-desc">{{ $meta['description'] }}</p>
-            <a href="/member" class="spark-preview-cta">Open in FamilyPlatform</a>
+            <a href="{{ $targetRedirectUrl ?? '/register?redirect=%2FprofilePage' }}" class="spark-preview-cta" data-spin="true">Open in FamilyPlatform</a>
+            <div style="margin-top: 14px;">
+                <a href="{{ $loginUrl ?? '/login?redirect=%2FprofilePage' }}" style="color: #94a3b8; font-size: 0.875rem; text-decoration: none;">Already a family member? Sign in</a>
+            </div>
         </div>
     </main>
+
+    @if(!empty($isGuestHuman))
+        @include('partials.guest-gate', [
+            'shareType' => 'spark',
+            'itemKey' => (string)($sparkId ?? ''),
+            'registerUrl' => $targetRedirectUrl ?? '/register?redirect=%2FprofilePage',
+            'loginUrl' => $loginUrl ?? '/login?redirect=%2FprofilePage',
+            'gateTitle' => 'Sign in to FamilyPlatform',
+            'gateSubtitle' => 'Join your family circle to vote on this Daily Spark and see everyone’s answers.',
+            'referrerSource' => $referrerSource ?? 'direct',
+        ])
+    @endif
 </body>
 </html>

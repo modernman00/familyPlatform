@@ -299,7 +299,7 @@
 
       <script type="text/javascript" nonce="{{ csp_nonce($nonce ?? null) }}" src="public/js/manifest.js" defer></script>
     <script type="text/javascript" nonce="{{ csp_nonce($nonce ?? null) }}" src="public/js/vendor.js" defer></script>
-    <script type="text/javascript" nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/index.js" defer></script>
+    <script type="module" nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/index.js"></script>
     <script type="text/javascript" nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/pwa-notifications.js" defer></script>
     <script type="text/javascript" nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/family-timezone.js?v={{ assetVersion('js/family-timezone.js') }}" defer></script>
     <script type="text/javascript" nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/family-tooltip.js?v={{ assetVersion('js/family-tooltip.js') }}" defer></script>

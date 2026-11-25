@@ -52,7 +52,7 @@
     <div class="w3-dropdown-hover">
       <button class="w3-button notification_count" title="{{ __('nav.notifications', 'Notifications') }}">
         <i class="fa fa-bell"></i>
-        <span class="w3-badge w3-green" id="notification_count"></span>
+        <span class="w3-badge w3-green" id="notification_count" x-data x-cloak x-show="$store.notifications.hasUnread" x-text="$store.notifications.display"></span>
       </button>
       <div class="w3-dropdown-content w3-card-4 w3-bar-block notification_tab" id="notification_tab" style="width:300px">
         <!-- Notification content will be inserted here -->

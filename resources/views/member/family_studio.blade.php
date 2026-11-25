@@ -990,7 +990,7 @@ function videoStudioPip() {
 <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/SovereignVideoStudioClient.js?v={{ assetVersion('js/SovereignVideoStudioClient.js') }}"></script>
 <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/SovereignNleEngine.js?v={{ assetVersion('js/SovereignNleEngine.js') }}"></script>
 @if(!empty($useReactStudio))
-<script defer src="/public/js/studio-app.js?v={{ assetVersion('js/studio-app.js') }}" nonce="{{ csp_nonce($nonce ?? null) }}"></script>
+<script type="module" src="/public/js/studio-app.js?v={{ assetVersion('js/studio-app.js') }}" nonce="{{ csp_nonce($nonce ?? null) }}"></script>
 @else
 <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/SovereignSpotlightTour.js?v={{ time() }}"></script>
 <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/SovereignHelpSearchEngine.js?v={{ time() }}"></script>

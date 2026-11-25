@@ -62,6 +62,50 @@ final class WeeklyActivityVideoCuratorService
     }
 
     /**
+     * Retrieve any pending weekly fun-facts reel draft for the given user and family,
+     * or automatically curate one for the current 7-day window if none has been created yet.
+     *
+     * @param string $userId
+     * @param string $famCode
+     * @return array<string, mixed>|null
+     */
+    public static function getOrCurateWeeklyReel(string $userId, string $famCode): ?array
+    {
+        $cleanUser = trim($userId);
+        $cleanFam = trim($famCode);
+        if ($cleanUser === '' || $cleanFam === '') {
+            return null;
+        }
+
+        try {
+            $pending = self::getPendingReel($cleanUser, $cleanFam);
+            if ($pending !== null) {
+                return $pending;
+            }
+
+            // Check if a reel was already approved or dismissed by this user within the current 7-day window
+            $db = Db::connect2();
+            $stmtRecent = $db->prepare(
+                'SELECT id FROM weekly_activity_reels
+                 WHERE user_id = ?
+                   AND (famCode = ? OR REPLACE(famCode, "#", "") = REPLACE(?, "#", ""))
+                   AND status IN ("approved", "discarded")
+                   AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+                 LIMIT 1'
+            );
+            $stmtRecent->execute([$cleanUser, $cleanFam, $cleanFam]);
+            if ($stmtRecent->fetchColumn() !== false) {
+                return null;
+            }
+
+            return self::curateWeeklyActivity($cleanUser, $cleanFam, false);
+        } catch (\Throwable $e) {
+            error_log('[WeeklyActivityVideoCuratorService::getOrCurateWeeklyReel] ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
      * Curate the week's family activities and generate/refresh a weekly reel draft.
      *
      * @param string $userId
@@ -96,13 +140,14 @@ final class WeeklyActivityVideoCuratorService
         $startDateStr = $weekStart->format('Y-m-d');
         $endDateStr = $now->format('Y-m-d');
 
-        // 1. Fetch recent media and active posts from the family circle (bounded to 50)
+        // 1. Fetch recent media and active posts from the family circle (bounded to 50, excluding system bots)
         $stmtPosts = $db->prepare(
             'SELECT post_no, id, fullName, postMessage, profileImg, post_likes, views_count,
                     post_img0, post_img1, post_img2, post_img3, post_img4, post_img5,
                     date_created
              FROM post
              WHERE (postFamCode = ? OR REPLACE(postFamCode, "#", "") = REPLACE(?, "#", ""))
+               AND id NOT IN ("FAMILY_PLATFORM_OFFICIAL", "FAMILY_HISTORIAN")
                AND date_deleted IS NULL
                AND date_created >= DATE_SUB(NOW(), INTERVAL 7 DAY)
              ORDER BY post_likes DESC, views_count DESC, post_no DESC
@@ -121,6 +166,7 @@ final class WeeklyActivityVideoCuratorService
                         date_created
                  FROM post
                  WHERE (postFamCode = ? OR REPLACE(postFamCode, "#", "") = REPLACE(?, "#", ""))
+                   AND id NOT IN ("FAMILY_PLATFORM_OFFICIAL", "FAMILY_HISTORIAN")
                    AND date_deleted IS NULL
                    AND date_created >= DATE_SUB(NOW(), INTERVAL 30 DAY)
                  ORDER BY post_likes DESC, views_count DESC, post_no DESC
@@ -193,9 +239,12 @@ final class WeeklyActivityVideoCuratorService
             for ($i = 0; $i <= 5; $i++) {
                 $imgKey = "post_img{$i}";
                 if (!empty($post[$imgKey]) && is_string($post[$imgKey])) {
-                    $imgUrl = $post[$imgKey];
+                    $imgUrl = trim($post[$imgKey]);
+                    if ($imgUrl === '' || \App\classes\VideoParser::isVideoUrl($imgUrl)) {
+                        continue;
+                    }
                     if (!str_starts_with($imgUrl, '/') && !str_starts_with($imgUrl, 'http')) {
-                        $imgUrl = '/' . $imgUrl;
+                        $imgUrl = '/resources/images/post/' . $imgUrl;
                     }
                     if ($heroThumbnail === null) {
                         $heroThumbnail = $imgUrl;
@@ -216,13 +265,28 @@ final class WeeklyActivityVideoCuratorService
             }
         }
 
-        // If no user images were found, provide fallback atmospheric sanctuary slides
+        // If no user images were found, synthesise a high-resolution Fun Facts card via FamilyHistorianCardRenderer
         if (empty($mediaScenes)) {
-            $heroThumbnail = '/public/img/family_placeholder.png';
+            $mostLovedForCard = $funFacts['most_loved_post'] ?? null;
+            $synthesisedCard = FamilyHistorianCardRenderer::renderAndSave(
+                'activity_milestone',
+                [
+                    'total_posts' => max(1, (int)($funFacts['total_posts'] ?? 0)),
+                    'peak_day' => (string)($funFacts['golden_day'] ?? 'Sunday'),
+                    'top_author' => (string)($mostLovedForCard['author'] ?? ($funFacts['top_storyteller']['name'] ?? 'Family Circle')),
+                    'top_score' => (int)($funFacts['total_likes'] ?? 0) + (int)($funFacts['total_comments'] ?? 0),
+                    'top_excerpt' => (string)($mostLovedForCard['excerpt'] ?? 'Celebrating our weekly family fun facts, shared stories, and milestones together.'),
+                ],
+                $famCode,
+                'weekly_funfacts_' . $startDateStr
+            );
+            $heroThumbnail = $synthesisedCard !== null
+                ? '/resources/images/post/' . $synthesisedCard
+                : '/images/logo/logo.png';
             $mediaScenes[] = [
                 'type' => 'sanctuary',
                 'duration' => 5,
-                'image_url' => '/public/img/family_placeholder.png',
+                'image_url' => $heroThumbnail,
                 'author' => 'Family Sanctuary',
                 'caption' => 'Connecting hearts across generations',
                 'likes' => count($posts)
@@ -453,8 +517,67 @@ final class WeeklyActivityVideoCuratorService
 
             $title = strip_tags((string)$reel['title']);
             $videoUrl = (string)$reel['video_url'];
-            $thumbnailUrl = !empty($reel['thumbnail_url']) ? (string)$reel['thumbnail_url'] : '/public/img/family_placeholder.png';
-            $postMessage = "🎥 {$title}\n\nOur weekly highlights have been approved! Cherishing our favourite shared moments, laughter, and celebrations together. ❤️✨";
+            $storyboardDecoded = !empty($reel['storyboard_json']) && is_string($reel['storyboard_json'])
+                ? (json_decode($reel['storyboard_json'], true) ?: [])
+                : [];
+            $facts = is_array($storyboardDecoded['fun_facts'] ?? null) ? $storyboardDecoded['fun_facts'] : [];
+
+            // Synthesise a dedicated Fun Facts summary card as the fallback/OpenGraph thumbnail (never a random member photo)
+            $postImg0 = '';
+            $mostLovedCard = is_array($facts['most_loved_post'] ?? null) ? $facts['most_loved_post'] : [];
+            $renderedCard = FamilyHistorianCardRenderer::renderAndSave(
+                'activity_milestone',
+                [
+                    'total_posts' => max(1, (int)($facts['total_posts'] ?? 1)),
+                    'peak_day' => (string)($facts['golden_day'] ?? 'Sunday'),
+                    'top_author' => (string)($mostLovedCard['author'] ?? ($facts['top_storyteller']['name'] ?? $userName)),
+                    'top_score' => (int)($facts['total_likes'] ?? 0) + (int)($facts['total_comments'] ?? 0),
+                    'top_excerpt' => (string)($mostLovedCard['excerpt'] ?? 'Cherishing our favourite shared moments, laughter, and celebrations together.'),
+                ],
+                $famCode,
+                'weekly_approved_' . (int)$reel['id']
+            );
+            if ($renderedCard !== null) {
+                $postImg0 = $renderedCard;
+            }
+            $thumbnailUrl = $postImg0 !== '' ? '/resources/images/post/' . $postImg0 : '/images/logo/logo.png';
+
+            $factLines = [];
+            if (!empty($facts['total_posts'])) {
+                $factLines[] = sprintf(
+                    '• 📊 Family Activity: %d %s & %d %s shared across %d active family %s.',
+                    (int)$facts['total_posts'],
+                    ((int)$facts['total_posts'] === 1 ? 'moment' : 'moments'),
+                    (int)($facts['total_photos'] ?? 0),
+                    ((int)($facts['total_photos'] ?? 0) === 1 ? 'photo' : 'photos'),
+                    max(1, (int)($facts['active_members'] ?? 1)),
+                    (max(1, (int)($facts['active_members'] ?? 1)) === 1 ? 'member' : 'members')
+                );
+            }
+            if (!empty($facts['top_storyteller']['name'])) {
+                $factLines[] = sprintf(
+                    '• 🏆 Top Storyteller: %s led the family feed (%d%% of posts).',
+                    (string)$facts['top_storyteller']['name'],
+                    (int)($facts['top_storyteller']['share_pct'] ?? 100)
+                );
+            }
+            if (!empty($facts['golden_day']) && !empty($facts['golden_hour'])) {
+                $factLines[] = sprintf(
+                    '• ⏰ Golden Hour: %s around %s was our liveliest gathering time.',
+                    (string)$facts['golden_day'],
+                    (string)$facts['golden_hour']
+                );
+            }
+            if (!empty($facts['most_loved_post']['author'])) {
+                $factLines[] = sprintf(
+                    '• ❤️ Most-Loved Moment: Shared by %s (%d reactions & %d comments).',
+                    (string)$facts['most_loved_post']['author'],
+                    (int)($facts['total_likes'] ?? 0),
+                    (int)($facts['total_comments'] ?? 0)
+                );
+            }
+            $factsBlock = !empty($factLines) ? ("\n\n" . implode("\n", $factLines)) : '';
+            $postMessage = "🎥 {$title}{$factsBlock}\n\nOur weekly family fun facts & highlights have been published! Cherishing our favourite shared moments, laughter, and celebrations together. ❤️✨";
             $cleanUserName = mb_substr(trim(strip_tags($userName)), 0, 120) ?: 'Family Member';
 
             // 2. Insert into the main post feed
@@ -469,19 +592,24 @@ final class WeeklyActivityVideoCuratorService
                 $profileImg ?? '',
                 $postMessage,
                 $famCode,
-                time(),
-                $thumbnailUrl
+                (int)round(microtime(true) * 1000),
+                $postImg0 !== '' ? $postImg0 : $thumbnailUrl
             ]);
 
             $postNo = (int)$db->lastInsertId();
 
+            // Persist the user's chosen aspect ratio in storyboard_json for feed playback parity
+            $storyboardDecoded['approved_aspect_ratio'] = $aspectRatio;
+            $updatedStoryboardJson = json_encode($storyboardDecoded, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+                ?: (string)$reel['storyboard_json'];
+
             // 3. Mark weekly reel draft as approved atomically inside transaction
             $stmtUpdate = $db->prepare(
                 'UPDATE weekly_activity_reels 
-                 SET status = "approved", post_no = ?, updated_at = NOW() 
+                 SET status = "approved", post_no = ?, storyboard_json = ?, updated_at = NOW() 
                  WHERE id = ?'
             );
-            $stmtUpdate->execute([$postNo, $reelId]);
+            $stmtUpdate->execute([$postNo, $updatedStoryboardJson, $reelId]);
 
             $db->commit();
         } catch (\Throwable $txEx) {

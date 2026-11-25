@@ -287,7 +287,7 @@
 
     <script type="text/javascript" nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/manifest.js"></script>
     <script type="text/javascript" nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/vendor.js"></script>
-    <script type="text/javascript" nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/index.js"></script>
+    <script type="module" nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/index.js"></script>
     <script type="text/javascript" nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/family-tooltip.js?v={{ assetVersion('js/family-tooltip.js') }}" defer></script>
     {{-- 
     <script type="text/javascript" nonce="{{ csp_nonce($nonce ?? null) }}"  src="public/js/shared-lib.js" defer></script> --}}

@@ -31,14 +31,13 @@ final class SharePreviewController
     {
         $cleanId = preg_replace('/[^A-Za-z0-9_-]/', '', trim($sparkId)) ?? '';
         if ($cleanId === '') {
-            redirect('/member');
+            redirect('/profilePage');
             return;
         }
 
         $meta = $this->resolveSparkPreviewMeta($cleanId);
         $isCrawler = ShareMetadataProtocol::isSocialCrawler()
-            || isset($_GET['crawler'])
-            || isset($_GET['preview']);
+            || isset($_GET['crawler']);
 
         $isJsonRequest = (isset($_SERVER['HTTP_ACCEPT']) && str_contains($_SERVER['HTTP_ACCEPT'], 'application/json'))
             || (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
@@ -62,13 +61,75 @@ final class SharePreviewController
             return;
         }
 
-        // Human visitor: route authenticated members straight to /member; guests to /register?redirect=/member
-        if (!empty($_SESSION['id'])) {
-            redirect('/member');
+        // Human visitor: route authenticated members straight to /profilePage (unless ?preview=1);
+        // guests see the Spark preview + Guest Gate overlay
+        $forceGuestPreview = isset($_GET['preview']) || isset($_GET['guest']);
+        if (!empty($_SESSION['id']) && !$forceGuestPreview) {
+            redirect('/profilePage');
             return;
         }
 
-        redirect('/register?redirect=' . rawurlencode('/member'));
+        $targetRedirect = '/profilePage';
+        view('public/sparkShareLanding', [
+            'meta' => ShareMetadataProtocol::buildMeta($meta),
+            'badgeLabel' => $meta['badge'],
+            'shouldRedirect' => false,
+            'targetRedirectUrl' => '/register?redirect=' . rawurlencode($targetRedirect),
+            'loginUrl' => '/login?redirect=' . rawurlencode($targetRedirect),
+            'isGuestHuman' => true,
+            'sparkId' => $cleanId,
+            'referrerSource' => \App\services\ShareEngagementService::detectReferrerSource(),
+        ]);
+    }
+
+    /**
+     * POST /api/public/share/track
+     * Records zero-PII guest-gate funnel telemetry (view, skip, signup_click, auth_click).
+     */
+    public function trackGuestShare(): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        try {
+            $visitorHash = \App\services\ShareEngagementService::computeVisitorHash();
+            \Src\Limiter::limit('pub_share_' . $visitorHash);
+
+            /** @var array<string, mixed>|null $input */
+            $input = json_decode((string) file_get_contents('php://input'), true);
+            if (!is_array($input)) {
+                $input = $_POST;
+            }
+
+            $shareType = (string) ($input['shareType'] ?? 'post');
+            $eventType = (string) ($input['eventType'] ?? '');
+            $provider = (string) ($input['provider'] ?? '');
+            $itemKey = (string) ($input['itemKey'] ?? '');
+            $refSource = (string) ($input['referrerSource'] ?? 'direct');
+
+            if (
+                !in_array($shareType, \App\services\ShareEngagementService::VALID_SHARE_TYPES, true)
+                || !in_array($eventType, \App\services\ShareEngagementService::VALID_EVENT_TYPES, true)
+            ) {
+                http_response_code(422);
+                echo json_encode(['status' => 'error', 'message' => 'Invalid share telemetry payload.']);
+                return;
+            }
+
+            $db = Db::connect2();
+            \App\services\ShareEngagementService::recordEvent($db, [
+                'share_type' => $shareType,
+                'item_key' => $itemKey,
+                'event_type' => $eventType,
+                'provider' => $provider,
+                'visitor_hash' => $visitorHash,
+                'referrer_source' => $refSource,
+            ]);
+
+            echo json_encode(['status' => 'success']);
+        } catch (\Throwable $e) {
+            http_response_code(200);
+            echo json_encode(['status' => 'ignored']);
+        }
     }
 
     /**

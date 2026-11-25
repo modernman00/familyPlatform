@@ -379,4 +379,50 @@ final class FamilyArcadeTest extends TestCase
         ]);
         $this->assertSame('Family Member', $dtoWithoutPersonal->fullName);
     }
+
+    public function testDailyArcadeBannerRendersLivePlayMotionPreviewForAllNineGames(): void
+    {
+        $viewsDir = dirname(__DIR__, 2) . '/resources/views';
+        $cacheDir = dirname(__DIR__, 2) . '/bootstrap/cache';
+        $blade = new \eftec\bladeone\BladeOne($viewsDir, $cacheDir, \eftec\bladeone\BladeOne::MODE_DEBUG);
+        $blade->pipeEnable = true;
+
+        $expectedBoardHooks = [
+            'wordie' => 'fp-wordie-tile',
+            'kinzip' => 'fp-kinzip-cell',
+            'kingrid' => 'fp-kingrid-cell',
+            'kinword' => 'fp-kinword-tile',
+            'kinpulse' => 'fp-kinpulse-pad',
+            'cheeseboard' => 'cheeseSymbol(',
+            'chess' => 'chessPiece(',
+            'ayo' => 'fp-ayo-pit',
+            'minesweeper' => 'mineSymbol(',
+        ];
+
+        unset($GLOBALS['__fp_daily_arcade_banner_assets']);
+
+        foreach (FamilyArcadeService::VALID_GAMES as $gameSlug) {
+            $html = $blade->run('member.includes.dailyArcadeBanner', [
+                'arcadeGameOverride' => $gameSlug,
+                'arcadeDateOverride' => '2026-11-24',
+            ]);
+
+            $this->assertStringNotContainsString('@once', $html, "BladeOne must not leak literal @once for {$gameSlug}");
+            $this->assertStringNotContainsString('@endonce', $html, "BladeOne must not leak literal @endonce for {$gameSlug}");
+            $this->assertStringContainsString('LIVE PLAY', $html);
+            $this->assertStringContainsString("dailyArcadePreview('{$gameSlug}')", $html);
+            $this->assertStringContainsString('href="/arcade?game=' . $gameSlug . '"', $html);
+            $this->assertStringContainsString('data-spin="true"', $html);
+            $this->assertStringContainsString('Pause Demo', $html);
+            $this->assertStringContainsString($expectedBoardHooks[$gameSlug], $html, "Missing animated board markup for {$gameSlug}");
+        }
+
+        // Adversarial XSS / invalid game override neutralises strictly to allowlisted 'kinzip'
+        $maliciousHtml = $blade->run('member.includes.dailyArcadeBanner', [
+            'arcadeGameOverride' => '"><script>alert(1)</script>',
+            'arcadeDateOverride' => '2026-11-24',
+        ]);
+        $this->assertStringNotContainsString('<script>alert(1)</script>', $maliciousHtml);
+        $this->assertStringContainsString('data-featured-game="kinzip"', $maliciousHtml);
+    }
 }

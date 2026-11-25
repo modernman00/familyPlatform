@@ -143,6 +143,8 @@ final class PostShareController
                     'shouldRedirect' => false,
                     'targetRedirectUrl' => $targetRedirectUrl,
                     'redirectTarget' => $redirectTarget,
+                    'isGuestHuman' => false,
+                    'postNo' => $postNo,
                 ]);
                 return;
             }
@@ -210,6 +212,9 @@ final class PostShareController
                 'shouldRedirect' => false,
                 'targetRedirectUrl' => $targetRedirectUrl,
                 'redirectTarget' => $redirectTarget,
+                'isGuestHuman' => true,
+                'postNo' => $postNo,
+                'referrerSource' => \App\services\ShareEngagementService::detectReferrerSource(),
             ]);
         } catch (\Throwable $e) {
             error_log('[PostShareController] handlePostLink error: ' . $e->getMessage());

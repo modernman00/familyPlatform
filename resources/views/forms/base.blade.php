@@ -459,7 +459,7 @@
     <!-- App Scripts (Bundles Alpine.js 3.x, PWA, SweetAlert2) -->
     <script type="text/javascript" src="/public/js/manifest.js?v={{ assetVersion('js/manifest.js') }}"></script>
     <script type="text/javascript" src="/public/js/vendor.js?v={{ assetVersion('js/vendor.js') }}"></script>
-    <script type="text/javascript" src="/public/js/index.js?v={{ assetVersion('js/index.js') }}"></script>
+    <script type="module" src="/public/js/index.js?v={{ assetVersion('js/index.js') }}"></script>
     <script type="text/javascript" src="/public/js/telemetry.js?v={{ assetVersion('js/telemetry.js') }}" defer></script>
 
     @include('component.submitSpinner')

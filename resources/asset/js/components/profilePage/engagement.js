@@ -71,7 +71,7 @@ export const initEngagementListeners = () => {
                 if (res?.status === 'success') {
                     // Trigger a reload of the post or re-fetch to show new bars
                     window.dispatchEvent(new Event('refresh-feed'));
-                    window.location.reload(); 
+                    window.dispatchEvent(new CustomEvent('fp:feed-refresh'));
                 }
                 btn.disabled = false;
             }
@@ -87,7 +87,7 @@ export const initEngagementListeners = () => {
                 const res = await handleReaction(postNo, reaction)
                 if (res?.status === 'success') {
                     // Trigger a reload of the post or re-fetch to show new bars
-                    window.location.reload();
+                    window.dispatchEvent(new CustomEvent('fp:feed-refresh'));
                 }
             }
         }

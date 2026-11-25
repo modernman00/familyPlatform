@@ -10,24 +10,25 @@ const charIndex = initials.charCodeAt(0) - 65,
     colourIndex = charIndex % 19;
 
 const canvas = document.getElementById("user-icon");
-const context = canvas.getContext("2d");
+if (canvas) {
+    const context = canvas.getContext("2d");
+    const canvasWidth = Number(canvas.getAttribute("width")) || 100;
+    const canvasHeight = Number(canvas.getAttribute("height")) || 100;
+    const canvasCssWidth = canvasWidth;
+    const canvasCssHeight = canvasHeight;
 
-const canvasWidth = $(canvas).attr("width"),
-    canvasHeight = $(canvas).attr("height"),
-    canvasCssWidth = canvasWidth,
-    canvasCssHeight = canvasHeight;
+    if (window.devicePixelRatio) {
+        canvas.setAttribute("width", String(canvasWidth * window.devicePixelRatio));
+        canvas.setAttribute("height", String(canvasHeight * window.devicePixelRatio));
+        canvas.style.width = `${canvasCssWidth}px`;
+        canvas.style.height = `${canvasCssHeight}px`;
+        context.scale(window.devicePixelRatio, window.devicePixelRatio);
+    }
 
-if (window.devicePixelRatio) {
-    $(canvas).attr("width", canvasWidth * window.devicePixelRatio);
-    $(canvas).attr("height", canvasHeight * window.devicePixelRatio);
-    $(canvas).css("width", canvasCssWidth);
-    $(canvas).css("height", canvasCssHeight);
-    context.scale(window.devicePixelRatio, window.devicePixelRatio);
+    context.fillStyle = colours[colourIndex];
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.font = "700 50px Inter, Arial, sans-serif";
+    context.textAlign = "center";
+    context.fillStyle = "#FFF";
+    context.fillText(initials, canvasCssWidth / 2, canvasCssHeight / 1.5);
 }
-
-context.fillStyle = colours[colourIndex];
-context.fillRect (0, 0, canvas.width, canvas.height);
-context.font = "700 50px Inter, Arial, sans-serif";
-context.textAlign = "center";
-context.fillStyle = "#FFF";
-context.fillText(initials, canvasCssWidth / 2, canvasCssHeight / 1.5);

@@ -1042,7 +1042,7 @@
         });
     })();
 </script>
-<script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/atg-living-photo-avatar.js?v={{ assetVersion('js/atg-living-photo-avatar.js') }}" defer></script>
+<script type="module" nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/atg-living-photo-avatar.js?v={{ assetVersion('js/atg-living-photo-avatar.js') }}"></script>
 <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/atg-avatar-styliser.js?v={{ assetVersion('js/atg-avatar-styliser.js') }}" defer></script>
 <script nonce="{{ csp_nonce($nonce ?? null) }}">
     // Tier B: Neural Talking Movie Generator (Kokoro TTS + LivePortrait/MuseTalk sidecar)

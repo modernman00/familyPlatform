@@ -198,27 +198,94 @@ const setThenNowSlot = (slot, file) => {
     thenNowFiles[slot] = file || null;
     const img = document.getElementById(`${slot}Preview`);
     const placeholder = document.getElementById(`${slot}Placeholder`);
+    const replaceBadge = document.getElementById(`${slot}ReplaceBadge`);
     if (!img || !placeholder) return;
     if (img.src && img.src.startsWith('blob:')) URL.revokeObjectURL(img.src);
     if (file) {
         img.src = URL.createObjectURL(file);
         img.classList.remove('d-none');
         placeholder.classList.add('d-none');
+        replaceBadge?.classList.remove('d-none');
     } else {
         img.removeAttribute('src');
         img.classList.add('d-none');
         placeholder.classList.remove('d-none');
+        replaceBadge?.classList.add('d-none');
+    }
+};
+
+const extractFourDigitYear = (raw) => {
+    if (!raw || typeof raw !== 'string') return null;
+    const m = raw.match(/\b(18\d{2}|19\d{2}|20\d{2})\b/);
+    return m ? parseInt(m[1], 10) : null;
+};
+
+const updateThenNowLiveDeltaBadge = () => {
+    const badge = document.getElementById('thenNowLiveDeltaBadge');
+    if (!badge || !thenNowContainer) return;
+    const thenVal = thenNowContainer.querySelector('input[name="then_label"]')?.value || '';
+    const nowVal = thenNowContainer.querySelector('input[name="now_label"]')?.value || '';
+    const y1 = extractFourDigitYear(thenVal);
+    const y2 = extractFourDigitYear(nowVal);
+    if (y1 === null || y2 === null) {
+        badge.classList.add('d-none');
+        badge.textContent = '';
+        return;
+    }
+    const diff = Math.abs(y2 - y1);
+    const mode = document.getElementById('thenNowModeInput')?.value || 'classic';
+    if (diff === 0) {
+        badge.textContent = '✨ Same Year';
+    } else if (mode === 'echo') {
+        badge.textContent = `🧬 ${diff} ${diff === 1 ? 'Year' : 'Years'} Across Generations`;
+    } else {
+        badge.textContent = `⚡ ${diff} ${diff === 1 ? 'Year' : 'Years'} Apart`;
+    }
+    badge.classList.remove('d-none');
+};
+
+const syncTextStageCollapseForThenNow = (isOpen) => {
+    const stageBar = document.getElementById('composerTextStageBar');
+    const editor = document.getElementById('postMessageEditor');
+    if (stageBar) {
+        if (isOpen) {
+            stageBar.classList.add('d-none');
+            stageBar.dataset.hiddenByThenNow = '1';
+        } else if (stageBar.dataset.hiddenByThenNow === '1') {
+            stageBar.classList.remove('d-none');
+            delete stageBar.dataset.hiddenByThenNow;
+        }
+    }
+    if (editor) {
+        editor.style.minHeight = isOpen ? '42px' : '58px';
     }
 };
 
 const closeThenNow = () => {
     if (!thenNowContainer) return;
     thenNowContainer.classList.add('d-none');
+    syncTextStageCollapseForThenNow(false);
     if (addThenNowBtn) addThenNowBtn.classList.remove('thennow-active');
     if (thenNowFlag) thenNowFlag.value = '';
     if (thenNowReplyTo) thenNowReplyTo.value = '';
     const modeInput = document.getElementById('thenNowModeInput');
     if (modeInput) modeInput.value = 'classic';
+    const classicBtn = document.getElementById('tnModeClassicBtn');
+    const echoBtn = document.getElementById('tnModeEchoBtn');
+    classicBtn?.classList.add('active');
+    classicBtn?.classList.remove('text-secondary');
+    classicBtn?.setAttribute('aria-pressed', 'true');
+    echoBtn?.classList.remove('active');
+    echoBtn?.classList.add('text-secondary');
+    echoBtn?.setAttribute('aria-pressed', 'false');
+    const thenCardTag = document.getElementById('thenCardTag');
+    const nowCardTag = document.getElementById('nowCardTag');
+    if (thenCardTag) thenCardTag.textContent = 'THEN';
+    if (nowCardTag) nowCardTag.textContent = 'NOW';
+    const thenPromptStrong = document.getElementById('thenPromptStrong');
+    const nowPromptStrong = document.getElementById('nowPromptStrong');
+    if (thenPromptStrong) thenPromptStrong.textContent = 'Then';
+    if (nowPromptStrong) nowPromptStrong.textContent = 'Now';
     const mysteryInput = document.getElementById('thenNowMysteryInput');
     if (mysteryInput) mysteryInput.value = '0';
     const mysteryBtn = document.getElementById('tnMysteryToggleBtn');
@@ -239,18 +306,24 @@ const closeThenNow = () => {
     thenNowContainer.querySelectorAll('input[type="text"], input[type="file"]').forEach(i => (i.value = ''));
     setThenNowSlot('then', null);
     setThenNowSlot('now', null);
+    updateThenNowLiveDeltaBadge();
     const title = document.getElementById('thenNowTitle');
     if (title) title.textContent = 'Then & Now';
 };
 
 const openThenNow = (replyToPostNo = '') => {
     if (!thenNowContainer) return;
+    if (typeof window.closeAllComposerDrawers === 'function') {
+        window.closeAllComposerDrawers('thenNowContainer');
+    }
     thenNowContainer.classList.remove('d-none');
+    syncTextStageCollapseForThenNow(true);
     if (addThenNowBtn) addThenNowBtn.classList.add('thennow-active');
     if (thenNowFlag) thenNowFlag.value = '1';
     if (thenNowReplyTo) thenNowReplyTo.value = replyToPostNo ? String(replyToPostNo) : '';
     const title = document.getElementById('thenNowTitle');
     if (title) title.textContent = replyToPostNo ? 'Add your Then & Now' : 'Then & Now';
+    updateThenNowLiveDeltaBadge();
     scrollDrawerIntoView(thenNowContainer);
 };
 
@@ -272,7 +345,13 @@ if (addThenNowBtn && thenNowContainer) {
             input.value = String(year);
             input.dataset.guessed = '1';
         }
+        updateThenNowLiveDeltaBadge();
     };
+
+    ['then', 'now'].forEach((slot) => {
+        labelInput(slot)?.addEventListener('input', updateThenNowLiveDeltaBadge);
+        labelInput(slot)?.addEventListener('change', updateThenNowLiveDeltaBadge);
+    });
 
     // Mode switcher: Classic Time Travel vs Genetic Echo (Like Parent, Like Child)
     const modeInput = document.getElementById('thenNowModeInput');
@@ -282,21 +361,38 @@ if (addThenNowBtn && thenNowContainer) {
         if (modeInput) modeInput.value = mode;
         const thenIn = labelInput('then');
         const nowIn = labelInput('now');
+        const thenCardTag = document.getElementById('thenCardTag');
+        const nowCardTag = document.getElementById('nowCardTag');
+        const thenPromptStrong = document.getElementById('thenPromptStrong');
+        const nowPromptStrong = document.getElementById('nowPromptStrong');
         if (mode === 'echo') {
             classicBtn?.classList.remove('active');
             classicBtn?.classList.add('text-secondary');
+            classicBtn?.setAttribute('aria-pressed', 'false');
             echoBtn?.classList.add('active');
             echoBtn?.classList.remove('text-secondary');
-            if (thenIn) thenIn.placeholder = 'Parent, e.g. Mum at age 7 (1992)';
-            if (nowIn) nowIn.placeholder = 'Child, e.g. Tobi at age 7 (2026)';
+            echoBtn?.setAttribute('aria-pressed', 'true');
+            if (thenCardTag) thenCardTag.textContent = 'PARENT';
+            if (nowCardTag) nowCardTag.textContent = 'CHILD';
+            if (thenPromptStrong) thenPromptStrong.textContent = 'Parent';
+            if (nowPromptStrong) nowPromptStrong.textContent = 'Child';
+            if (thenIn) thenIn.placeholder = 'e.g. Mum age 7 (1992)';
+            if (nowIn) nowIn.placeholder = 'e.g. Tobi age 7 (2026)';
         } else {
             echoBtn?.classList.remove('active');
             echoBtn?.classList.add('text-secondary');
+            echoBtn?.setAttribute('aria-pressed', 'false');
             classicBtn?.classList.add('active');
             classicBtn?.classList.remove('text-secondary');
-            if (thenIn) thenIn.placeholder = 'Then, e.g. 1998';
-            if (nowIn) nowIn.placeholder = 'Now, e.g. 2026';
+            classicBtn?.setAttribute('aria-pressed', 'true');
+            if (thenCardTag) thenCardTag.textContent = 'THEN';
+            if (nowCardTag) nowCardTag.textContent = 'NOW';
+            if (thenPromptStrong) thenPromptStrong.textContent = 'Then';
+            if (nowPromptStrong) nowPromptStrong.textContent = 'Now';
+            if (thenIn) thenIn.placeholder = 'Year, e.g. 1998';
+            if (nowIn) nowIn.placeholder = 'Year, e.g. 2026';
         }
+        updateThenNowLiveDeltaBadge();
     };
     classicBtn?.addEventListener('click', () => setMode('classic'));
     echoBtn?.addEventListener('click', () => setMode('echo'));

@@ -96,6 +96,14 @@ $dismissedRow = $stmtVerifyDismiss->fetch(PDO::FETCH_ASSOC);
 assert($dismissedRow['status'] === 'discarded', "Expected status 'discarded'");
 echo "✓ Dismissal workflow verified (status 'discarded')\n";
 
+// 9. Test getOrCurateWeeklyReel respects recent dismissal within 7 days and auto-curates for fresh user
+$afterDismissAuto = WeeklyActivityVideoCuratorService::getOrCurateWeeklyReel($testUserIdA, $testFamCode);
+assert($afterDismissAuto === null, "Expected getOrCurateWeeklyReel not to re-create after recent dismissal");
+$db->prepare("DELETE FROM weekly_activity_reels WHERE user_id = ?")->execute([$testUserIdA]);
+$freshAuto = WeeklyActivityVideoCuratorService::getOrCurateWeeklyReel($testUserIdA, $testFamCode);
+assert(is_array($freshAuto) && !empty($freshAuto['id']), "Expected getOrCurateWeeklyReel to auto-curate when no recent reel exists");
+echo "✓ getOrCurateWeeklyReel auto-curation and 7-day dismissal idempotency verified\n";
+
 // Cleanup fixtures
 $db->prepare("DELETE FROM weekly_activity_reels WHERE user_id IN (?, ?)")->execute([$testUserIdA, $testUserIdB]);
 $db->prepare("DELETE FROM post WHERE postFamCode = ?")->execute([$testFamCode]);

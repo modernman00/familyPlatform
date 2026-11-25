@@ -319,9 +319,15 @@ export function getInitials(firstName = '', lastName = '') {
 
 export function formatRelativeTime(dateInput) {
     if (!dateInput) return 'Just now';
-    const d = typeof dateInput === 'number' || /^\d+$/.test(String(dateInput).trim())
-        ? new Date(Number(dateInput))
-        : new Date(String(dateInput).replace(' ', 'T'));
+    let d;
+    if (typeof dateInput === 'number' || /^\d+$/.test(String(dateInput).trim())) {
+        const rawNum = Number(dateInput);
+        // Normalise 10-digit Unix timestamps (seconds) to milliseconds to avoid 1970 dates
+        const ms = rawNum > 0 && rawNum < 1e12 ? rawNum * 1000 : rawNum;
+        d = new Date(ms);
+    } else {
+        d = new Date(String(dateInput).replace(' ', 'T'));
+    }
     if (Number.isNaN(d.getTime())) return String(dateInput);
     const diffSec = Math.floor((Date.now() - d.getTime()) / 1000);
     if (diffSec < 45) return 'Just now';

@@ -582,6 +582,7 @@ final class FamilyHistorianService
         $topScore = (int)($top['post_likes'] ?? 0) + (int)($top['reaction_count'] ?? 0);
         $rawMsg = PostDto::stripStyleToken((string)($top['postMessage'] ?? ''));
         $rawMsg = (string)preg_replace('#https?://[^\s]+#i', '', $rawMsg);
+        $rawMsg = (string)preg_replace('#/resources/(?:videos|images|audio)/[^\s]+#i', '', $rawMsg);
         $rawMsg = trim((string)preg_replace('/\s+/', ' ', strip_tags($rawMsg)));
         if ($rawMsg === '') {
             $rawMsg = 'A cherished family moment shared on our timeline.';
@@ -662,6 +663,37 @@ final class FamilyHistorianService
         }
 
         return $results;
+    }
+
+    /**
+     * Opportunistic feed hook: ensures the current week's "Do You Know?" fun-fact card
+     * (and 1st-of-month birthday card) has been evaluated/published for a family without
+     * requiring an external crontab daemon. Uses a fast temp-file stamp per family + ISO week.
+     *
+     * @return array<string, mixed>|null
+     */
+    public static function ensureWeeklyDigestForFamily(string $famCode, ?PDO $dbOverride = null): ?array
+    {
+        $normCode = self::normaliseFamilyCode($famCode);
+        if ($normCode === '' || str_starts_with($normCode, 'PHPUNIT') || str_starts_with($normCode, 'TEST_')) {
+            return null;
+        }
+
+        try {
+            $now = new DateTimeImmutable('now');
+            $periodStamp = $now->format('o-\WW') . ($now->format('j') === '1' ? '_m1' : '');
+            $safeCode = preg_replace('/[^A-Z0-9_]/', '', $normCode) ?: 'FAM';
+            $stampFile = sys_get_temp_dir() . '/fp_historian_' . $safeCode . '_' . $periodStamp . '.stamp';
+            if (is_file($stampFile)) {
+                return null;
+            }
+            @touch($stampFile);
+
+            return self::runForFamily($normCode, $dbOverride, $now, false);
+        } catch (\Throwable $e) {
+            error_log('[FamilyHistorianService::ensureWeeklyDigestForFamily] ' . $e->getMessage());
+            return null;
+        }
     }
 
     /**

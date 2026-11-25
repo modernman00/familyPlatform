@@ -94,6 +94,6 @@
 
     <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/manifest.js?v={{ assetVersion('js/manifest.js') }}" defer></script>
     <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/vendor.js?v={{ assetVersion('js/vendor.js') }}" defer></script>
-    <script nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/arcade-app.js?v={{ assetVersion('js/arcade-app.js') }}" defer></script>
+    <script type="module" nonce="{{ csp_nonce($nonce ?? null) }}" src="/public/js/arcade-app.js?v={{ assetVersion('js/arcade-app.js') }}"></script>
 </body>
 </html>

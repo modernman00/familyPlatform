@@ -121,5 +121,5 @@
 @endsection
 
 @push('scripts')
-  <script defer src="/public/js/account-settings-app.js?v={{ assetVersion('js/account-settings-app.js') }}" nonce="{{ csp_nonce($nonce ?? null) }}"></script>
+  <script type="module" src="/public/js/account-settings-app.js?v={{ assetVersion('js/account-settings-app.js') }}" nonce="{{ csp_nonce($nonce ?? null) }}"></script>
 @endpush
