@@ -52,6 +52,109 @@ class FeedRepository
     }
 
     /**
+     * Encode an opaque keyset pagination cursor from (date_created, post_no).
+     */
+    public static function encodeCursor(string $dateCreated, int $postNo): string
+    {
+        $json = json_encode(['d' => $dateCreated, 'p' => $postNo]) ?: '';
+        return rtrim(strtr(base64_encode($json), '+/', '-_'), '=');
+    }
+
+    /**
+     * Decode an opaque keyset pagination cursor. Returns null on invalid input.
+     *
+     * @return array{date_created: string, post_no: int}|null
+     */
+    public static function decodeCursor(?string $cursor): ?array
+    {
+        if ($cursor === null || $cursor === '') {
+            return null;
+        }
+        $padded = strtr($cursor, '-_', '+/');
+        $mod = strlen($padded) % 4;
+        if ($mod !== 0) {
+            $padded .= str_repeat('=', 4 - $mod);
+        }
+        $raw = base64_decode($padded, true);
+        if ($raw === false || $raw === '') {
+            return null;
+        }
+        $data = json_decode($raw, true);
+        if (!is_array($data) || empty($data['d']) || !is_string($data['d']) || empty($data['p'])) {
+            return null;
+        }
+        $postNo = (int)$data['p'];
+        if ($postNo <= 0) {
+            return null;
+        }
+        return [
+            'date_created' => $data['d'],
+            'post_no' => $postNo,
+        ];
+    }
+
+    /**
+     * Retrieve a paginated feed slice using limit+1 lookahead (eliminates COUNT(*))
+     * and optional keyset cursor pagination.
+     *
+     * @param string $userId
+     * @param array<string> $famCodes
+     * @param int $limit
+     * @param int $offset
+     * @param string $filter
+     * @param string|null $cursor
+     * @return array{posts: array<array<string, mixed>>, has_more: bool, next_cursor: string|null}
+     */
+    public function getFeedPostsPage(
+        string $userId,
+        array $famCodes,
+        int $limit = 15,
+        int $offset = 0,
+        string $filter = '',
+        ?string $cursor = null
+    ): array {
+        $safeLimit = max(1, min(50, $limit));
+        $decodedCursor = self::decodeCursor($cursor);
+        $effectiveOffset = $decodedCursor !== null ? 0 : max(0, $offset);
+
+        $rows = $this->fetchFeedRows($userId, $famCodes, $safeLimit + 1, $effectiveOffset, $filter, $decodedCursor);
+        $hasMore = count($rows) > $safeLimit;
+        if ($hasMore) {
+            $rows = array_slice($rows, 0, $safeLimit);
+        }
+
+        if (empty($rows)) {
+            return [
+                'posts' => [],
+                'has_more' => false,
+                'next_cursor' => null,
+            ];
+        }
+
+        $this->hydrateEngagement($rows, $userId);
+        $posts = array_map(
+            fn(array $row) => PostDto::fromDatabaseRow($row, $userId)->toArray(),
+            $rows
+        );
+
+        $nextCursor = null;
+        if ($hasMore) {
+            $lastRow = $rows[count($rows) - 1];
+            $lastDate = (string)($lastRow['date_created'] ?? '');
+            $lastPostNo = (int)($lastRow['post_no'] ?? 0);
+            if ($lastDate !== '' && $lastPostNo > 0) {
+                $nextCursor = self::encodeCursor($lastDate, $lastPostNo);
+            }
+        }
+
+        return [
+            'posts' => $posts,
+            'has_more' => $hasMore,
+            'next_cursor' => $nextCursor,
+        ];
+    }
+
+    /**
      * Retrieve paginated feed posts as backwards-compatible arrays.
      *
      * @param string $userId
@@ -315,9 +418,10 @@ class FeedRepository
      * @param int $limit
      * @param int $offset
      * @param string $filter
+     * @param array{date_created: string, post_no: int}|null $cursor
      * @return array<array<string, mixed>>
      */
-    private function fetchFeedRows(string $userId, array $famCodes, int $limit, int $offset, string $filter = ''): array
+    private function fetchFeedRows(string $userId, array $famCodes, int $limit, int $offset, string $filter = '', ?array $cursor = null): array
     {
         try {
             $cleanedCodes = array_values(array_filter(array_map('strval', $famCodes), fn($c) => $c !== ''));
@@ -385,9 +489,19 @@ class FeedRepository
                 $params = array_merge($params, $feedClause['params']);
             }
 
-            $query .= " ORDER BY post.date_created DESC LIMIT ? OFFSET ?";
+            if ($cursor !== null) {
+                $query .= " AND (post.date_created < ? OR (post.date_created = ? AND post.post_no < ?))";
+                $params[] = $cursor['date_created'];
+                $params[] = $cursor['date_created'];
+                $params[] = $cursor['post_no'];
+            }
+
+            $query .= " ORDER BY post.date_created DESC, post.post_no DESC LIMIT ?";
             $params[] = $limit;
-            $params[] = $offset;
+            if ($cursor === null && $offset > 0) {
+                $query .= " OFFSET ?";
+                $params[] = $offset;
+            }
 
             $stmt = $this->db->prepare($query);
             foreach ($params as $key => $val) {

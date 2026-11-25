@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Test(auth): set 2fa_passed in admin root redirect test",
+    "title": "Fix(weekly-fun-facts): render 60fps presentation in feed and fix ms timestamp",
     "notes": [
+        "Fix(weekly-fun-facts): render 60fps presentation in feed and fix ms timestamp",
         "Test(auth): set 2fa_passed in admin root redirect test",
-        "Feat(feed): inline Facebook Reel/video playback via signed fbcdn stream proxy with Rich Preview fallback",
-        "Test(director-mode): guard shared-js-lib parity check when npm package lags"
+        "Feat(feed): inline Facebook Reel/video playback via signed fbcdn stream proxy with Rich Preview fallback"
     ],
-    "released_at": "2026-11-24",
-    "commit": "a31aa96f"
+    "released_at": "2026-11-25",
+    "commit": "8a891f9b"
 }

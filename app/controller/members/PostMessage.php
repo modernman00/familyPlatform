@@ -63,25 +63,23 @@ final class PostMessage
             // Cap page size so one request can never pull the whole feed; keeps legacy default of 50.
             $limit = isset($_GET['limit']) ? max(1, min(50, (int) $_GET['limit'])) : 50;
             $filter = isset($_GET['filter']) ? trim((string)$_GET['filter']) : '';
-            // Optional explicit offset lets infinite-scroll continue exactly after what is already loaded.
-            $offset = isset($_GET['offset']) ? max(0, (int) $_GET['offset']) : ($page - 1) * $limit;
+            $cursor = isset($_GET['cursor']) ? trim((string)$_GET['cursor']) : '';
+            // Optional explicit offset lets legacy callers paginate when cursor is omitted.
+            $offset = ($cursor !== '') ? 0 : (isset($_GET['offset']) ? max(0, (int) $_GET['offset']) : ($page - 1) * $limit);
 
-            // 1. Get visible posts with pagination across multiple families via unified FeedRepository
+            // 1. Get visible posts with cursor/limit+1 pagination across multiple families via unified FeedRepository
             $feedRepo = new \App\repository\FeedRepository();
-            $posts = $feedRepo->getFeedPostsAsArray(
+            $pageData = $feedRepo->getFeedPostsPage(
                 $id,
                 $famCodes,
                 $limit,
                 $offset,
-                $filter
+                $filter,
+                $cursor !== '' ? $cursor : null
             );
-
-            // Get total count for pagination metadata
-            $total = $feedRepo->countFeedPosts($id, $famCodes, $filter);
-            $lastPage = (int)ceil($total / $limit);
-
-
-
+            $posts = $pageData['posts'];
+            $hasMore = $pageData['has_more'];
+            $nextCursor = $pageData['next_cursor'];
 
             if (!$posts) {
                 msgSuccess(
@@ -89,93 +87,95 @@ final class PostMessage
                     msg: [
                         'message' => [],
                         'pagination' => [
-                            'total' => $total,
                             'per_page' => $limit,
                             'current_page' => $page,
-                            'last_page' => $lastPage,
-                            'has_more' => false
+                            'has_more' => false,
+                            'next_cursor' => null
                         ]
                     ]
                 );
                 return;
             }
 
-            // 2. Loop through each post: MUST use the reference operator (&) to modify the original array.
-            // One batched query for the whole page instead of one per post (N+1).
-            $commentsByPost = AllMembersData::commentProfilePicByPostNos(array_column($posts, 'post_no'), $id);
-
-            // Batch-hydrate current user's reaction across all comments on this page
-            $allCommentNos = [];
-            foreach ($commentsByPost as $postComments) {
-                foreach ($postComments as $c) {
-                    if (!empty($c['comment_no'])) {
-                        $allCommentNos[] = (int)$c['comment_no'];
-                    }
-                }
-            }
-            $userCommentReactions = [];
-            if ($allCommentNos !== []) {
-                $cPlaceholders = implode(',', array_fill(0, count($allCommentNos), '?'));
-                $cQuery = sprintf(
-                    'SELECT comment_no, label, reaction FROM comment_reactions WHERE id = ? AND comment_no IN (%s)',
-                    $cPlaceholders
-                );
-                $reactStmt = \Src\Db::connect2()->prepare($cQuery);
-                $reactStmt->execute([$id, ...$allCommentNos]);
-                while ($reactRow = $reactStmt->fetch(\PDO::FETCH_ASSOC)) {
-                    $userCommentReactions[(string)$reactRow['comment_no']] = (string)($reactRow['label'] ?: $reactRow['reaction']);
-                }
-            }
-
-            foreach ($posts as &$post) {
-
-                // 3. Get all comments for THIS post
-                $comments = $commentsByPost[(string) $post['post_no']] ?? [];
-
-                if (!$comments) {
-                    continue; // No comments for this post, move to the next post
-                }
-
-
-                // 4. Loop through each comment: MUST use the reference operator (&) to modify the original array.
-                foreach ($comments as &$comment) {
-                    //  // 5. Get reactions for THIS comment
-                    // 5. Get reactions for THIS comment
-                    $commentNo = $comment['comment_no'];
-                    $reactions = CommentReactionController::fetchReactions($commentNo, false);
-
-                    // 6. Attach the reactions directly to their comment
-                    // We use $comment (the reference) to attach reactions to this specific comment array.
-                    $comment['reactions'] = $reactions ? $reactions : [];
-                    $comment['user_reaction'] = $userCommentReactions[(string)$commentNo] ?? null;
-                    // }                  
-                }
-                unset($comment); // Good practice to unset the inner reference
-
-                // 7. Attach the comments (which now have reactions) to the CURRENT post array
-                // We use $post (the reference) to modify the specific element in $posts.
-                $post['comments'] = $comments;
-            }
-
-            // 8. Unset references to prevent bugs
-            unset($post);
+            $posts = self::hydrateCommentsOnPosts($posts, $id);
 
             msgSuccess(
                 code: 200,
                 msg: [
                     'message' => $posts,
                     'pagination' => [
-                        'total' => $total,
                         'per_page' => $limit,
                         'current_page' => $page,
-                        'last_page' => $lastPage,
-                        'has_more' => ($offset + count($posts)) < $total
+                        'has_more' => $hasMore,
+                        'next_cursor' => $nextCursor
                     ]
                 ]
             );
         } catch (\Throwable $th) {
             \showError($th);
         }
+    }
+
+    /**
+     * Batch-hydrate comments, comment reaction counts/actors, and viewer reaction state
+     * onto an array of post arrays in 3 read-only queries total.
+     *
+     * @param array<int, array<string, mixed>> $posts
+     * @param string $viewerId
+     * @return array<int, array<string, mixed>>
+     */
+    public static function hydrateCommentsOnPosts(array $posts, string $viewerId): array
+    {
+        if ($posts === []) {
+            return $posts;
+        }
+
+        $commentsByPost = AllMembersData::commentProfilePicByPostNos(array_column($posts, 'post_no'), $viewerId);
+
+        $allCommentNos = [];
+        foreach ($commentsByPost as $postComments) {
+            foreach ($postComments as $c) {
+                if (!empty($c['comment_no'])) {
+                    $allCommentNos[] = (int)$c['comment_no'];
+                }
+            }
+        }
+
+        $reactionsByComment = [];
+        $userCommentReactions = [];
+        if ($allCommentNos !== []) {
+            $reactionsByComment = CommentReactionController::fetchReactionsBatch($allCommentNos);
+
+            $cPlaceholders = implode(',', array_fill(0, count($allCommentNos), '?'));
+            $cQuery = sprintf(
+                'SELECT comment_no, label, reaction FROM comment_reactions WHERE id = ? AND comment_no IN (%s)',
+                $cPlaceholders
+            );
+            $reactStmt = \Src\Db::connect2()->prepare($cQuery);
+            $reactStmt->execute([$viewerId, ...$allCommentNos]);
+            while ($reactRow = $reactStmt->fetch(\PDO::FETCH_ASSOC)) {
+                $userCommentReactions[(string)$reactRow['comment_no']] = (string)($reactRow['label'] ?: $reactRow['reaction']);
+            }
+        }
+
+        foreach ($posts as &$post) {
+            $comments = $commentsByPost[(string) ($post['post_no'] ?? '')] ?? [];
+            if (!$comments) {
+                continue;
+            }
+
+            foreach ($comments as &$comment) {
+                $cKey = (string)($comment['comment_no'] ?? '');
+                $comment['reactions'] = $reactionsByComment[$cKey] ?? [];
+                $comment['user_reaction'] = $userCommentReactions[$cKey] ?? null;
+            }
+            unset($comment);
+
+            $post['comments'] = $comments;
+        }
+        unset($post);
+
+        return $posts;
     }
 
     // update post and comment as published 

@@ -591,12 +591,17 @@ class AllMembersData extends InnerJoin
                 : [];
 
             $placeholders = implode(',', array_fill(0, count($postNos), '?'));
-            $query = "SELECT comment.*, profilePics.img, profilePics.id 
-              FROM comment
-              INNER JOIN profilePics ON comment.id = profilePics.id
-            WHERE comment.post_no IN ($placeholders)
-            AND comment.date_deleted IS NULL
-            ORDER BY comment.date_created DESC";
+            $query = sprintf(
+                "SELECT comment.*, profilePics.img, comment.id AS id
+                 FROM comment
+                 LEFT JOIN profilePics ON profilePics.no = (
+                     SELECT MAX(pp.no) FROM profilePics pp WHERE pp.id = comment.id
+                 )
+                 WHERE comment.post_no IN (%s)
+                 AND comment.date_deleted IS NULL
+                 ORDER BY comment.date_created DESC",
+                $placeholders
+            );
             $stmt = $conn->prepare($query);
             $stmt->execute($postNos);
 

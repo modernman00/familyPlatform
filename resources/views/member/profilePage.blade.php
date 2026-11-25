@@ -2,9 +2,9 @@
 @section('title', 'PROFILE_PAGE')
 @section('data-page-id', 'profilePage')
 @push('styles')
-    <link rel="stylesheet" href="/public/css/profilepage.css?v={{ time() }}">
-    <link rel="preload" href="/public/css/reels.css?v={{ time() }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="/public/css/reels.css?v={{ time() }}"></noscript>
+    <link rel="stylesheet" href="/public/css/profilepage.css?v={{ assetVersion('css/profilepage.css') }}">
+    <link rel="preload" href="/public/css/reels.css?v={{ assetVersion('css/reels.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="/public/css/reels.css?v={{ assetVersion('css/reels.css') }}"></noscript>
 @endpush
 @section('content')
 

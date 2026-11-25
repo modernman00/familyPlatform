@@ -477,4 +477,110 @@ final class CommentReactionController
       \showError($e);
     }
   }
+
+  /**
+   * Read-only batched reaction hydration for a list of comment IDs.
+   * Replaces per-comment fetchReactions() calls (eliminating N+1 queries and write-on-read locks).
+   *
+   * @param array<int|string> $commentNos
+   * @param PDO|null $pdo
+   * @return array<int|string, array{counts: array<string, int|string>, who: array<int, array<string, mixed>>}>
+   */
+  public static function fetchReactionsBatch(array $commentNos, ?PDO $pdo = null): array
+  {
+    $ids = array_values(array_unique(array_filter(array_map('intval', $commentNos), static fn (int $n): bool => $n > 0)));
+    if ($ids === []) {
+      return [];
+    }
+
+    $columnForLabel = [
+      'like' => 'likes',
+      'likes' => 'likes',
+      'love' => 'love',
+      'haha' => 'haha',
+      'wow' => 'wow',
+      'shock' => 'wow',
+      'sad' => 'sad',
+      'angry' => 'angry',
+      'celebrate' => 'celebrate',
+    ];
+
+    $result = [];
+    foreach ($ids as $cNo) {
+      $key = (string)$cNo;
+      $result[$key] = [
+        'counts' => [
+          'likes' => 0,
+          'love' => 0,
+          'haha' => 0,
+          'wow' => 0,
+          'sad' => 0,
+          'angry' => 0,
+          'celebrate' => 0,
+          'comment_no' => $cNo,
+          'totalReactions' => 0,
+        ],
+        'who' => [],
+      ];
+    }
+
+    try {
+      $db = $pdo ?? Db::connect2();
+      $placeholders = implode(',', array_fill(0, count($ids), '?'));
+
+      $countSql = sprintf(
+        'SELECT comment_no, LOWER(COALESCE(NULLIF(label, \'\'), reaction, \'like\')) AS reaction_label, COUNT(*) AS total
+         FROM comment_reactions
+         WHERE comment_no IN (%s)
+         GROUP BY comment_no, reaction_label',
+        $placeholders
+      );
+      $countStmt = $db->prepare($countSql);
+      $countStmt->execute($ids);
+      while ($row = $countStmt->fetch(PDO::FETCH_ASSOC)) {
+        $key = (string)($row['comment_no'] ?? '');
+        if ($key === '' || !isset($result[$key])) {
+          continue;
+        }
+        $label = strtolower((string)($row['reaction_label'] ?? ''));
+        $col = $columnForLabel[$label] ?? null;
+        if ($col === null) {
+          continue;
+        }
+        $total = (int)($row['total'] ?? 0);
+        $result[$key]['counts'][$col] = (int)$result[$key]['counts'][$col] + $total;
+        $result[$key]['counts']['totalReactions'] = (int)$result[$key]['counts']['totalReactions'] + $total;
+      }
+
+      $whoSql = sprintf(
+        'SELECT cr.comment_no, p.firstName, p.lastName, cr.reaction, cr.label
+         FROM comment_reactions cr
+         INNER JOIN personal p ON cr.id = p.id
+         WHERE cr.comment_no IN (%s)
+         ORDER BY cr.comment_no ASC',
+        $placeholders
+      );
+      $whoStmt = $db->prepare($whoSql);
+      $whoStmt->execute($ids);
+      while ($row = $whoStmt->fetch(PDO::FETCH_ASSOC)) {
+        $key = (string)($row['comment_no'] ?? '');
+        if ($key === '' || !isset($result[$key])) {
+          continue;
+        }
+        if (count($result[$key]['who']) >= 5) {
+          continue;
+        }
+        $result[$key]['who'][] = [
+          'firstName' => (string)($row['firstName'] ?? ''),
+          'lastName' => (string)($row['lastName'] ?? ''),
+          'reaction' => (string)($row['reaction'] ?? ''),
+          'label' => (string)($row['label'] ?? ''),
+        ];
+      }
+    } catch (\Throwable $e) {
+      \showError($e);
+    }
+
+    return $result;
+  }
 }

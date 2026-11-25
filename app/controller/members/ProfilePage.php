@@ -125,6 +125,30 @@ final class ProfilePage extends ProcessImg
             $whatsNewPath = dirname(__DIR__, 3) . '/resources/data/whats_new.php';
             $whatsNewData = is_file($whatsNewPath) ? require $whatsNewPath : null;
 
+            $initialPosts = null;
+            $initialHasMore = false;
+            $initialNextCursor = null;
+            if (empty($data['isPendingApproval'])) {
+                try {
+                    $bootstrapFamCodes = $_SESSION['famCodes'] ?? [(string)($data['famCode'] ?? '')];
+                    $initialFeedPage = (new \App\repository\FeedRepository())->getFeedPostsPage(
+                        (string)$this->id,
+                        is_array($bootstrapFamCodes) ? $bootstrapFamCodes : [(string)$bootstrapFamCodes],
+                        8,
+                        0
+                    );
+                    $initialPosts = \App\controller\members\PostMessage::hydrateCommentsOnPosts(
+                        $initialFeedPage['posts'],
+                        (string)$this->id
+                    );
+                    $initialHasMore = $initialFeedPage['has_more'];
+                    $initialNextCursor = $initialFeedPage['next_cursor'];
+                } catch (\Throwable $e) {
+                    error_log('[ProfilePage::index] initialPosts hydration skipped: ' . $e->getMessage());
+                    $initialPosts = null;
+                }
+            }
+
             $feedBootstrapJson = json_encode([
                 'famCode' => (string)($data['famCode'] ?? ''),
                 'userId' => (string)$this->id,
@@ -137,6 +161,9 @@ final class ProfilePage extends ProcessImg
                 'pusherKey' => (string)($_ENV['MIX_PUSHER_APP_KEY'] ?? getenv('MIX_PUSHER_APP_KEY') ?: ''),
                 'pusherCluster' => (string)($_ENV['MIX_PUSHER_APP_CLUSTER'] ?? getenv('MIX_PUSHER_APP_CLUSTER') ?: 'eu'),
                 'whatsNew' => is_array($whatsNewData) ? $whatsNewData : null,
+                'initialPosts' => $initialPosts,
+                'initialHasMore' => $initialHasMore,
+                'initialNextCursor' => $initialNextCursor,
             ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?: '{}';
 
             view('member/profilePage', [

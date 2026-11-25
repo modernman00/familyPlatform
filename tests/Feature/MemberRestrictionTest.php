@@ -163,6 +163,10 @@ final class MemberRestrictionTest extends TestCase
 
     public function test_post_feed_memories_direct_access_and_tag_bypass_are_blocked(): void
     {
+        $repo = new FeedRepository($this->pdo);
+        $baselineRestrictedCount = $repo->countFeedPosts($this->restrictedId, [$this->famCode]);
+        $baselineSiblingCount = $repo->countFeedPosts($this->siblingId, [$this->famCode]);
+
         $ownerPostNo = $this->createPost($this->ownerId, 'Owner Member', 'Secret anniversary surprise #quietplan');
         $siblingPostNo = $this->createPost($this->siblingId, 'Trusted Sibling', 'Sunday brunch update');
         $memoryPostNo = $this->createPost($this->ownerId, 'Owner Member', 'Last year private throwback', date('Y-m-d H:i:s', strtotime('-1 year')));
@@ -194,12 +198,11 @@ final class MemberRestrictionTest extends TestCase
         $this->assertNotContains($this->restrictedId, $taggedIds);
 
         // Feed, count, and memories filtering
-        $repo = new FeedRepository($this->pdo);
         $restrictedFeed = $repo->getFeedPostsAsArray($this->restrictedId, [$this->famCode], 20, 0);
         $restrictedPostIds = array_map(static fn(array $r): int => (int)$r['post_no'], $restrictedFeed);
         $this->assertNotContains($ownerPostNo, $restrictedPostIds);
         $this->assertContains($siblingPostNo, $restrictedPostIds);
-        $this->assertSame(1, $repo->countFeedPosts($this->restrictedId, [$this->famCode]));
+        $this->assertSame($baselineRestrictedCount + 1, $repo->countFeedPosts($this->restrictedId, [$this->famCode]));
 
         $restrictedMemories = $repo->getMemories($this->restrictedId, [$this->famCode]);
         $memoryPostIds = array_map(static fn($dto): int => (int)$dto->postNo, $restrictedMemories);
@@ -208,7 +211,7 @@ final class MemberRestrictionTest extends TestCase
         $siblingFeed = $repo->getFeedPostsAsArray($this->siblingId, [$this->famCode], 20, 0);
         $siblingPostIds = array_map(static fn(array $r): int => (int)$r['post_no'], $siblingFeed);
         $this->assertContains($ownerPostNo, $siblingPostIds);
-        $this->assertSame(3, $repo->countFeedPosts($this->siblingId, [$this->famCode]));
+        $this->assertSame($baselineSiblingCount + 3, $repo->countFeedPosts($this->siblingId, [$this->famCode]));
     }
 
     public function test_comments_emails_and_notifications_are_suppressed_for_restricted_member(): void

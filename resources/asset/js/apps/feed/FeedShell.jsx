@@ -35,18 +35,75 @@ function getDeepLinkPostNo() {
     return qPost && /^\d+$/.test(qPost) ? qPost : null;
 }
 
+const SWR_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+
+function getSwrCacheKey(bootstrap) {
+    const uid = String(bootstrap?.userId || '').trim();
+    const fam = String(bootstrap?.famCode || '').trim();
+    if (!uid || !fam) return null;
+    return `fp_feed_swr_v1_${uid}_${fam}`;
+}
+
+function readSwrFeedCache(bootstrap) {
+    if (typeof window === 'undefined' || !window.localStorage) return null;
+    const key = getSwrCacheKey(bootstrap);
+    if (!key) return null;
+    try {
+        const raw = window.localStorage.getItem(key);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || !Array.isArray(parsed.posts) || parsed.posts.length === 0) return null;
+        if (typeof parsed.ts === 'number' && Date.now() - parsed.ts > SWR_CACHE_TTL_MS) return null;
+        return parsed;
+    } catch {
+        return null;
+    }
+}
+
+function writeSwrFeedCache(bootstrap, { posts, hasMore, nextCursor }) {
+    if (typeof window === 'undefined' || !window.localStorage) return;
+    const key = getSwrCacheKey(bootstrap);
+    if (!key || !Array.isArray(posts)) return;
+    try {
+        window.localStorage.setItem(key, JSON.stringify({
+            ts: Date.now(),
+            posts: posts.slice(0, 10),
+            hasMore: Boolean(hasMore),
+            nextCursor: nextCursor || null,
+        }));
+    } catch {
+        // Ignore storage quota or private-mode errors
+    }
+}
+
 export function FeedShell({ bootstrap = {} }) {
-    const [profileBootstrap, setProfileBootstrap] = useState(bootstrap);
-    const [posts, setPosts] = useState(
-        Array.isArray(bootstrap.initialPosts)
-            ? bootstrap.initialPosts.map(normalizePost).filter(Boolean)
-            : []
+    const hasBootstrapPosts = Array.isArray(bootstrap.initialPosts);
+    const swrSeed = useMemo(
+        () => (hasBootstrapPosts ? null : readSwrFeedCache(bootstrap)),
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        []
     );
-    const [loading, setLoading] = useState(!Array.isArray(bootstrap.initialPosts));
+
+    const [profileBootstrap, setProfileBootstrap] = useState(bootstrap);
+    const [posts, setPosts] = useState(() => {
+        if (hasBootstrapPosts) {
+            return bootstrap.initialPosts.map(normalizePost).filter(Boolean);
+        }
+        if (swrSeed?.posts) {
+            return swrSeed.posts.map(normalizePost).filter(Boolean);
+        }
+        return [];
+    });
+    const [loading, setLoading] = useState(!hasBootstrapPosts && !swrSeed);
     const [loadingMore, setLoadingMore] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [page, setPage] = useState(1);
-    const [hasMore, setHasMore] = useState(Boolean(bootstrap.initialHasMore));
+    const [hasMore, setHasMore] = useState(
+        hasBootstrapPosts ? Boolean(bootstrap.initialHasMore) : Boolean(swrSeed?.hasMore)
+    );
+    const [nextCursor, setNextCursor] = useState(
+        hasBootstrapPosts ? (bootstrap.initialNextCursor || null) : (swrSeed?.nextCursor || null)
+    );
     const [streamFilter, setStreamFilter] = useState('all'); // 'all' | 'tagged'
     const [hashtagFilter, setHashtagFilter] = useState('');
     const [trendingHashtags, setTrendingHashtags] = useState([]);
@@ -145,10 +202,10 @@ export function FeedShell({ bootstrap = {} }) {
         };
     }, [profileBootstrap]);
 
-    const fetchFeed = useCallback(async ({ nextPage = 1, append = false, filter = streamFilter, tag = hashtagFilter, attempt = 0 } = {}) => {
+    const fetchFeed = useCallback(async ({ nextPage = 1, append = false, cursor = null, background = false, filter = streamFilter, tag = hashtagFilter, attempt = 0 } = {}) => {
         if (append) {
             setLoadingMore(true);
-        } else {
+        } else if (!background) {
             setLoading(true);
             setErrorMessage('');
         }
@@ -162,9 +219,13 @@ export function FeedShell({ bootstrap = {} }) {
                 const offset = (Math.max(1, nextPage) - 1) * limit;
                 const params = new URLSearchParams({
                     limit: String(limit),
-                    offset: String(offset),
                     page: String(nextPage),
                 });
+                if (append && cursor) {
+                    params.set('cursor', String(cursor));
+                } else {
+                    params.set('offset', String(offset));
+                }
                 if (filter === 'tagged') params.set('filter', 'tagged');
                 url = `/post/getAllPostCommentByFamCode?${params.toString()}`;
             }
@@ -180,12 +241,25 @@ export function FeedShell({ bootstrap = {} }) {
                 return [...prev, ...extra];
             });
             setPage(nextPage);
-            setHasMore(Boolean(pagination?.has_more));
+            const resolvedHasMore = Boolean(pagination?.has_more);
+            const resolvedCursor = pagination?.next_cursor || null;
+            setHasMore(resolvedHasMore);
+            setNextCursor(resolvedCursor);
+
+            if (!append && !tag && filter === 'all') {
+                writeSwrFeedCache(bootstrap, {
+                    posts: normalized,
+                    hasMore: resolvedHasMore,
+                    nextCursor: resolvedCursor,
+                });
+            }
         } catch (err) {
             if (!append && attempt === 0 && err?.status === 408) {
-                return fetchFeed({ nextPage, append, filter, tag, attempt: 1 });
+                return fetchFeed({ nextPage, append, cursor, background, filter, tag, attempt: 1 });
             }
-            setErrorMessage(err?.message || 'Unable to load your family feed right now.');
+            if (!background) {
+                setErrorMessage(err?.message || 'Unable to load your family feed right now.');
+            }
         } finally {
             setLoading(false);
             setLoadingMore(false);
@@ -204,8 +278,14 @@ export function FeedShell({ bootstrap = {} }) {
     }, [bootstrap]);
 
     useEffect(() => {
-        if (!Array.isArray(bootstrap.initialPosts)) {
-            fetchFeed({ nextPage: 1, append: false });
+        if (Array.isArray(bootstrap.initialPosts)) {
+            writeSwrFeedCache(bootstrap, {
+                posts: bootstrap.initialPosts,
+                hasMore: Boolean(bootstrap.initialHasMore),
+                nextCursor: bootstrap.initialNextCursor || null,
+            });
+        } else {
+            fetchFeed({ nextPage: 1, append: false, background: Boolean(swrSeed) });
         }
         loadTrendingHashtags();
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -343,17 +423,17 @@ export function FeedShell({ bootstrap = {} }) {
         };
     }, [loading]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // Infinite scroll sentinel
+    // Infinite scroll sentinel (600px prefetch window)
     useEffect(() => {
         if (typeof IntersectionObserver === 'undefined' || !sentinelRef.current) return;
         const obs = new IntersectionObserver((entries) => {
             if (entries[0]?.isIntersecting && hasMore && !loading && !loadingMore && !hashtagFilter) {
-                fetchFeed({ nextPage: page + 1, append: true });
+                fetchFeed({ nextPage: page + 1, append: true, cursor: nextCursor });
             }
-        }, { rootMargin: '250px' });
+        }, { rootMargin: '600px' });
         obs.observe(sentinelRef.current);
         return () => obs.disconnect();
-    }, [hasMore, loading, loadingMore, page, hashtagFilter, fetchFeed]);
+    }, [hasMore, loading, loadingMore, page, nextCursor, hashtagFilter, fetchFeed]);
 
     // Realtime bridge (Pusher + SSE failover)
     useEffect(() => {
@@ -1085,7 +1165,7 @@ export function FeedShell({ bootstrap = {} }) {
                         className="btn btn-outline-secondary rounded-pill px-4 fw-semibold"
                         style={{ minHeight: '44px' }}
                         disabled={loadingMore}
-                        onClick={() => fetchFeed({ nextPage: page + 1, append: true })}
+                        onClick={() => fetchFeed({ nextPage: page + 1, append: true, cursor: nextCursor })}
                     >
                         {loadingMore ? 'Loading more memories…' : 'Load More Memories'}
                     </button>
