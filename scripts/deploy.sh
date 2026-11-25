@@ -111,12 +111,18 @@ USER_NAME=$(whoami)
 
 # CLI Flags
 SKIP_E2E=false
+SKIP_TESTS=false
 FULL_E2E=false
 E2E_MODE="smart"
 E2E_SPEC_COUNT=0
 for arg in "$@"; do
     case "$arg" in
         --skip-e2e)
+            SKIP_E2E=true
+            E2E_MODE="skipped"
+            ;;
+        --skip-tests)
+            SKIP_TESTS=true
             SKIP_E2E=true
             E2E_MODE="skipped"
             ;;
@@ -352,13 +358,17 @@ elif command -v phpunit > /dev/null 2>&1; then
     PHPUNIT_BIN="phpunit"
 fi
 
-if [ -f "phpunit.xml" ] && [ -n "$PHPUNIT_BIN" ]; then
-    echo -e "\n🧪 Running PHPUnit Test Suite..."
-    "$PHPUNIT_BIN" --no-coverage || {
-        echo "🛑 FATAL: Automated tests failed."
-        exit 1
-    }
-    echo "✅ Tests passed."
+if [ "$SKIP_TESTS" = "true" ]; then
+    echo -e "\n⏭️  Skipping PHPUnit & JS Unit Test Suites (--skip-tests)."
+else
+    if [ -f "phpunit.xml" ] && [ -n "$PHPUNIT_BIN" ]; then
+        echo -e "\n🧪 Running PHPUnit Test Suite..."
+        "$PHPUNIT_BIN" --no-coverage || {
+            echo "🛑 FATAL: Automated tests failed."
+            exit 1
+        }
+        echo "✅ Tests passed."
+    fi
 fi
 
 if command -v semgrep > /dev/null 2>&1; then
@@ -376,7 +386,7 @@ if command -v semgrep > /dev/null 2>&1; then
 fi
 
 # Frontend Unit Tests (Vitest/Jest)
-if [ -f "package.json" ] && grep -q '"test":' package.json 2>/dev/null; then
+if [ "$SKIP_TESTS" != "true" ] && [ -f "package.json" ] && grep -q '"test":' package.json 2>/dev/null; then
     echo -e "\n🧪 Running JavaScript Unit Test Suite..."
     npm test -- --run --silent 2>/dev/null || npm test 2>/dev/null || {
         echo "🛑 FATAL: Frontend unit tests failed. Aborting deployment."
