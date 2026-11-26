@@ -216,10 +216,10 @@ final class PosterStudioController
             $maxW = 1200;
             if ($w > $maxW) {
                 $newW = $maxW;
-                $newH = (int)round($h * ($maxW / $w));
+                $newH = max(1, (int)round($h * ($maxW / $w)));
             } else {
-                $newW = $w;
-                $newH = $h;
+                $newW = max(1, $w);
+                $newH = max(1, $h);
             }
             $dst = imagecreatetruecolor($newW, $newH);
             imagefill($dst, 0, 0, (int)imagecolorallocate($dst, 255, 255, 255));
