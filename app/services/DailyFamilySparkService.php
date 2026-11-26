@@ -754,11 +754,19 @@ final class DailyFamilySparkService
         $totalReplies = (int)$countStmt->fetchColumn();
 
         $share = self::buildPrivacySafeShareData($spark);
+        $kinshipHonorifics = KinshipHonorificService::getViewerPreference($userId, $db);
+        $kinshipDirectory = KinshipHonorificService::buildViewerMentionDirectory(
+            $userId,
+            (string)$spark['famCode'],
+            $db
+        );
 
         return [
             'id' => $sparkId,
             'current_user_id' => $userId,
             'famCode' => (string)$spark['famCode'],
+            'kinship_honorifics' => $kinshipHonorifics,
+            'kinship_directory' => $kinshipDirectory,
             'spark_type' => (string)$spark['spark_type'],
             'badge_label' => self::badgeLabelForType((string)$spark['spark_type']),
             'title' => (string)$spark['title'],

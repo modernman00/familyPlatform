@@ -5,6 +5,7 @@ import { esc } from '../global';
 import { FAMILY_GIFS, GIF_CATEGORIES } from '../profilePage/gifCatalog';
 import { HEIRLOOM_REACTIONS, getHeirloomGlassSvg, triggerHeirloomBurst } from '../profilePage/heirloomGlassReactions';
 import { compressVideoFile, shouldOptimiseVideoOnDevice } from '../helper/videoCompressor';
+import { renderKinshipMentionsHtml } from '../../apps/feed/kinshipMentions';
 
 const REEL_COMMENT_EMOJI_MAP = {
     love: '❤️',
@@ -60,6 +61,7 @@ class FamilyReelsPlayer {
         this.container = document.getElementById('reelsTheaterContainer');
         this.currentUserId = this.container?.dataset?.currentUserId || '';
         this.commentsDrawer = document.getElementById('reelCommentsDrawer');
+        this.closeCommentsBtn = document.getElementById('btnCloseReelComments');
         this.commentsList = document.getElementById('reelCommentsList');
         this.commentForm = document.getElementById('reelCommentForm');
         this.commentInput = document.getElementById('reelCommentInput');
@@ -68,6 +70,8 @@ class FamilyReelsPlayer {
         this.familyRoster = [];
         this.mentionMatches = [];
         this.mentionIndex = 0;
+        this.kinshipHonorifics = 'on';
+        this.kinshipDirectory = {};
 
         this.replyTarget = null;
         this.attachedGifUrl = null;
@@ -191,8 +195,12 @@ class FamilyReelsPlayer {
         const cards = tray.querySelectorAll('.reel-fb-card[data-reel-id]');
         filterBtns.forEach(btn => {
             btn.addEventListener('click', () => {
-                filterBtns.forEach(b => b.classList.remove('active'));
+                filterBtns.forEach(b => {
+                    b.classList.remove('active');
+                    b.setAttribute('aria-selected', 'false');
+                });
                 btn.classList.add('active');
+                btn.setAttribute('aria-selected', 'true');
                 const selectedCat = (btn.getAttribute('data-reel-filter') || 'all').toLowerCase();
                 cards.forEach(card => {
                     const cardCat = (card.getAttribute('data-reel-category') || '').toLowerCase();
@@ -321,6 +329,19 @@ class FamilyReelsPlayer {
                     this.reels = [];
                 }
             }
+            const kinshipDataEl = document.getElementById('reelsKinshipData');
+            if (kinshipDataEl) {
+                try {
+                    const parsedKin = JSON.parse(kinshipDataEl.textContent || '{}');
+                    this.kinshipHonorifics = parsedKin?.honorifics || 'on';
+                    this.kinshipDirectory = parsedKin?.directory && typeof parsedKin.directory === 'object'
+                        ? parsedKin.directory
+                        : {};
+                } catch (_) {
+                    this.kinshipHonorifics = 'on';
+                    this.kinshipDirectory = {};
+                }
+            }
 
             if (!this.reels.length) {
                 await this.fetchReels();
@@ -430,6 +451,20 @@ class FamilyReelsPlayer {
     }
 
     initCommentControls() {
+        if (this.closeCommentsBtn) {
+            this.closeCommentsBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.toggleComments(false);
+            });
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.isCommentsOpen) {
+                this.toggleComments(false);
+            }
+        });
+
         if (this.commentForm) {
             this.commentForm.addEventListener('submit', (e) => {
                 e.preventDefault();
@@ -987,7 +1022,7 @@ class FamilyReelsPlayer {
                         </div>
                     </div>
 
-                    ${reel.caption ? `<div class="reel-caption-text">${esc(reel.caption)}</div>` : ''}
+                    ${reel.caption ? `<div class="reel-caption-text">${this.formatReelRichText(reel.caption)}</div>` : ''}
 
                     <div class="d-flex align-items-center gap-1.5 flex-wrap mt-2">
                         <button type="button" class="reel-tag-pill btn-use-sound border-0"
@@ -1714,6 +1749,17 @@ class FamilyReelsPlayer {
             .replace(/(^|\s)<3(?=\s|$|[.,!?])/g, '$1❤️');
     }
 
+    formatReelRichText(rawText) {
+        if (!rawText || typeof rawText !== 'string') return '';
+        const escaped = esc(rawText);
+        return renderKinshipMentionsHtml(escaped, {
+            enabled: String(this.kinshipHonorifics || 'on').toLowerCase() !== 'off',
+            directory: this.kinshipDirectory || {},
+            currentUserId: String(this.currentUserId || ''),
+            isDark: true,
+        });
+    }
+
     async loadComments() {
         const reel = this.reels[this.currentIndex];
         if (!reel || !this.commentsList) return;
@@ -1802,7 +1848,7 @@ class FamilyReelsPlayer {
                 </div>
 
                 <div class="reel-comment-text-box" id="reelCommentTextBox_${c.comment_id}">
-                    ${c.comment ? `<div class="reel-comment-text" style="font-variant-emoji: emoji;">${esc(this.normalizeEmoji(c.comment))}</div>` : ''}
+                    ${c.comment ? `<div class="reel-comment-text" style="font-variant-emoji: emoji;">${this.formatReelRichText(this.normalizeEmoji(c.comment))}</div>` : ''}
                     ${c.gif_url ? `<img src="${esc(c.gif_url)}" alt="GIF" loading="lazy" class="reel-comment-gif-img">` : ''}
                 </div>
 
@@ -2546,7 +2592,7 @@ class FamilyReelsPlayer {
             const ytMatch = rawUrl.match(ytRegex);
             if (ytMatch && ytMatch[1]) {
                 const videoId = ytMatch[1];
-                const thumbUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+                const thumbUrl = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
                 displayExternalVideoPreview('youtube', thumbUrl, 'YouTube Video Stream', rawUrl);
                 return;
             }

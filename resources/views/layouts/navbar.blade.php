@@ -5,7 +5,7 @@
         ? \App\services\KinWhisperService::getUnreadWhisperCount((string)$_SESSION['id'])
         : 0;
 @endphp
-<link rel="stylesheet" href="/public/css/navbar.css?v={{ time() }}">
+<link rel="stylesheet" href="/public/css/navbar.css?v={{ assetVersion('css/navbar.css') }}">
 <nav class="navbar navbar-expand-lg sticky-top brand-navbar-stitch" id="mainNavbar">
     <div class="container-fluid px-3 px-lg-4">
         <!-- Brand Logo & Typography -->
@@ -166,20 +166,20 @@
                 <!-- FamChat Direct Action Button with Bell & Unread Counter (desktop; mobile uses top bar icon) -->
                 <div class="whisper-nav-wrapper position-relative d-none d-lg-block">
                     <a href="/kin-whispers" class="btn btn-icon-stitch text-decoration-none d-inline-flex align-items-center justify-content-center position-relative" id="navbarWhispersBtn" title="{{ __('nav.whisper', 'FamChat — Private family messages, artifact reflections & voice dedications') }}" aria-label="FamChat">
-                        <i class="bi bi-chat-dots-fill" style="color: #a31621; font-size: 1.15rem;"></i>
-                        <i class="bi bi-bell-fill text-warning whisper-bell-indicator position-absolute {{ $navWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.65rem; top: 4px; right: 4px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35));" title="Unread FamChat messages"></i>
+                        <i class="bi bi-chat-dots-fill" style="color: #a31621; font-size: 1.15rem; pointer-events: none;"></i>
+                        <i class="bi bi-bell-fill text-warning whisper-bell-indicator position-absolute {{ $navWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.65rem; top: 4px; right: 4px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35)); pointer-events: none;" title="Unread FamChat messages"></i>
+                        <span class="whisper-nav-badge position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger text-white {{ $navWhisperUnreadCount > 0 ? '' : 'd-none' }}" id="navbar_whisper_count" style="font-size: 0.68rem; padding: 2px 5px; font-weight: 700; box-shadow: 0 2px 6px rgba(220,53,69,0.45); pointer-events: none;">
+                            {{ $navWhisperUnreadCount > 0 ? $navWhisperUnreadCount : '' }}
+                        </span>
                     </a>
-                    <span class="whisper-nav-badge position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger text-white {{ $navWhisperUnreadCount > 0 ? '' : 'd-none' }}" id="navbar_whisper_count" style="font-size: 0.68rem; padding: 2px 5px; font-weight: 700; box-shadow: 0 2px 6px rgba(220,53,69,0.45); pointer-events: none;">
-                        {{ $navWhisperUnreadCount > 0 ? $navWhisperUnreadCount : '' }}
-                    </span>
                 </div>
 
                 <!-- Notification Component -->
                 <div class="notification-wrapper position-relative">
-                    <button class="btn btn-icon-stitch" id="notificationBtn" title="{{ __('nav.notifications', 'View alerts and family notifications') }}" type="button">
-                        <i class="bi bi-bell-fill"></i>
+                    <button class="btn btn-icon-stitch" id="notificationBtn" title="{{ __('nav.notifications', 'View alerts and family notifications') }}" aria-label="{{ __('nav.notifications', 'View alerts and family notifications') }}" aria-haspopup="true" aria-expanded="false" type="button">
+                        <i class="bi bi-bell-fill" style="pointer-events: none;" aria-hidden="true"></i>
+                        <span class="notification-badge" id="notification_count" x-data x-cloak x-show="$store.notifications.hasUnread" x-text="$store.notifications.display" data-server-count="{{ $navUnreadNotifCount }}" style="pointer-events: none;"></span>
                     </button>
-                    <span class="notification-badge" id="notification_count" x-data x-cloak x-show="$store.notifications.hasUnread" x-text="$store.notifications.display" data-server-count="{{ $navUnreadNotifCount }}"></span>
 
                     <!-- Google Stitch Notification Dropdown -->
                     <div class="notification-dropdown shadow-lg" id="notificationDropdown">
@@ -382,5 +382,38 @@
             closeMobileNav();
         }
     });
+})();
+
+(function() {
+    'use strict';
+    // Instant t=0ms Notification Bell & Modal Fallback Delegation
+    // Guarantees zero dead clicks before module bundles or CDN Bootstrap finish hydrating.
+    var notifBtn = document.getElementById('notificationBtn');
+    var notifDropdown = document.getElementById('notificationDropdown');
+    if (notifBtn && notifDropdown && !notifBtn.hasAttribute('data-notif-instant-bound')) {
+        notifBtn.setAttribute('data-notif-instant-bound', 'true');
+        notifBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var now = Date.now();
+            var lastToggle = parseInt(notifDropdown.getAttribute('data-last-toggle-ts') || '0', 10);
+            if (now - lastToggle < 40) return;
+            notifDropdown.setAttribute('data-last-toggle-ts', String(now));
+            var isShown = notifDropdown.classList.toggle('show');
+            notifBtn.setAttribute('aria-expanded', isShown ? 'true' : 'false');
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!notifBtn.contains(e.target) && !notifDropdown.contains(e.target)) {
+                if (notifDropdown.classList.contains('show')) {
+                    notifDropdown.classList.remove('show');
+                    notifBtn.setAttribute('aria-expanded', 'false');
+                }
+            }
+        });
+
+        notifDropdown.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    }
 })();
 </script>

@@ -4,7 +4,7 @@
 <section id="thenNowSection" data-tn-id="{{ $tnId }}" class="then-now-timeline card border-0 shadow-sm mb-4 d-none" aria-label="Then and Now photos"
          style="border-radius: 20px; background-color: var(--card-bg, #ffffff); scroll-margin-top: 80px;">
     <div class="card-body px-3 px-sm-4 py-3">
-        <h5 class="fw-bold mb-1" style="font-size: 1.05rem;"><i class="bi bi-hourglass-split me-1" style="color:#b8202c;"></i> {{ __('profile.then_and_now', 'Then & Now') }}</h5>
+        <h3 class="h5 fw-bold mb-1" style="font-size: 1.05rem;"><i class="bi bi-hourglass-split me-1" style="color:#b8202c;"></i> {{ __('profile.then_and_now', 'Then & Now') }}</h3>
         <p class="mb-3" style="font-size: 0.875rem; color: var(--text-muted-aa, #475569); line-height: 1.5;">Before and after photos {{ !empty($memberName) ? 'of ' . e($memberName) : '' }} from the family feed.</p>
         <div class="then-now-timeline__list d-flex gap-3 overflow-auto pb-1" role="region" aria-label="Then and Now timeline"></div>
         <div class="then-now-empty-state text-center py-3 d-none" id="thenNowEmptyState">
@@ -46,7 +46,7 @@
         srcWebp.srcset = imgVariant(name, 'webp');
         srcWebp.type = 'image/webp';
         var i = document.createElement('img');
-        i.src = img(name); i.alt = alt; i.loading = 'lazy'; i.decoding = 'async';
+        i.src = img(name); i.alt = alt; i.width = 120; i.height = 120; i.loading = 'lazy'; i.decoding = 'async';
         // Perf: stop the infinite shimmer once the image has settled (it previously ran forever).
         i.onload = function () { imgWrapper.classList.remove('vse-skeleton-surface'); };
         i.onerror = function () { imgWrapper.classList.remove('vse-skeleton-surface'); f.style.visibility = 'hidden'; };
@@ -70,15 +70,17 @@
                     return;
                 }
                 items.forEach(function (it, idx) {
+                    var beforeLbl = it.before_label || 'Then';
+                    var afterLbl = it.after_label || 'Now';
                     var card = document.createElement('div');
                     card.className = 'then-now-timeline__pair position-relative';
                     card.setAttribute('role', 'button');
                     card.setAttribute('tabindex', '0');
-                    card.setAttribute('aria-label', 'View and expand Then & Now comparison between ' + (it.before_label || 'Then') + ' and ' + (it.after_label || 'Now'));
+                    card.setAttribute('aria-label', beforeLbl + ' ' + afterLbl + ' Expand — View Then & Now comparison');
                     card.title = 'Click to expand comparison';
 
-                    card.appendChild(fig(it.before_img, it.before_label || 'Then', 'Then photo'));
-                    card.appendChild(fig(it.after_img, it.after_label || 'Now', 'Now photo'));
+                    card.appendChild(fig(it.before_img, beforeLbl, 'Then photo'));
+                    card.appendChild(fig(it.after_img, afterLbl, 'Now photo'));
 
                     // Visual tap-to-expand badge overlay
                     var pill = document.createElement('div');

@@ -62,7 +62,7 @@
               data-bs-toggle="modal"
               data-bs-target="#postModal"
               title="Upload Photos - Add memories from your device or camera"
-              aria-label="{{ __('feed.photo', 'Add a photo to post') }}">
+              aria-label="{{ __('feed.photo_label', 'Photo') }} — {{ __('feed.photo', 'Add a photo to post') }}">
         @include('member.includes.composerActionIcon', ['type' => 'photo', 'prefix' => $svgPrefix])
         <span>{{ __('feed.photo_label', 'Photo') }}</span>
       </button>
@@ -73,7 +73,7 @@
               data-bs-target="#postModal"
               onclick="setTimeout(function () { var vb = document.getElementById('addVideoBtn'); var vc = document.getElementById('videoEmbedContainer'); if (vc && vc.classList.contains('d-none') && vb) vb.click(); }, 120)"
               title="Upload Video - Embed or share family video clips"
-              aria-label="{{ __('feed.video', 'Add a video to post') }}">
+              aria-label="{{ __('feed.video_label', 'Video') }} — {{ __('feed.video', 'Add a video to post') }}">
         @include('member.includes.composerActionIcon', ['type' => 'video', 'prefix' => $svgPrefix])
         <span>{{ __('feed.video_label', 'Video') }}</span>
       </button>
@@ -84,7 +84,7 @@
               data-bs-target="#postModal"
               onclick="setTimeout(function () { if (window.__setComposerTextStage) { var cur = document.getElementById('composerPostStyleInput'); if (!cur || !cur.value) { window.__setComposerTextStage('starlight_bokeh'); } } var ed = document.getElementById('postMessageEditor'); if (ed) ed.focus(); }, 120)"
               title="Scenic Post Backdrops - Write quotes and reflections over Starlight Bokeh and atmospheric scenes"
-              aria-label="{{ __('feed.backdrop', 'Choose a scenic post background') }}">
+              aria-label="{{ __('feed.backdrop_label', 'Backdrop') }} — {{ __('feed.backdrop', 'Choose a scenic post background') }}">
         @include('member.includes.composerActionIcon', ['type' => 'backdrop', 'prefix' => $svgPrefix])
         <span>{{ __('feed.backdrop_label', 'Backdrop') }}</span>
       </button>
@@ -95,7 +95,7 @@
               data-bs-target="#postModal"
               onclick="setTimeout(function () { if (window.__openThenNow) window.__openThenNow(''); }, 0)"
               title="Then &amp; Now - Compare milestone photos across years"
-              aria-label="{{ __('feed.then_now', 'Then & Now photo comparison') }}">
+              aria-label="{{ __('feed.then_now_label', 'Then & Now') }} — {{ __('feed.then_now', 'Then & Now photo comparison') }}">
         @include('member.includes.composerActionIcon', ['type' => 'thennow', 'prefix' => $svgPrefix])
         <span>{{ __('feed.then_now_label', 'Then & Now') }}</span>
       </button>
@@ -105,7 +105,7 @@
               data-bs-toggle="modal"
               data-bs-target="#postModal"
               title="Family Poll - Gather opinions and vote on dates or plans"
-              aria-label="{{ __('feed.poll', 'Create a poll') }}">
+              aria-label="{{ __('feed.poll_label', 'Poll') }} — {{ __('feed.poll', 'Create a poll') }}">
         @include('member.includes.composerActionIcon', ['type' => 'poll', 'prefix' => $svgPrefix])
         <span>{{ __('feed.poll_label', 'Poll') }}</span>
       </button>
@@ -115,7 +115,7 @@
               data-bs-toggle="modal"
               data-bs-target="#createAnnouncementModal"
               title="Family Announcement - Broadcast pinned notices to all relatives"
-              aria-label="{{ __('feed.announcement', 'Broadcast family announcement') }}">
+              aria-label="{{ __('feed.announce_label', 'Announce') }} — {{ __('feed.announcement', 'Broadcast family announcement') }}">
         @include('member.includes.composerActionIcon', ['type' => 'announce', 'prefix' => $svgPrefix])
         <span>{{ __('feed.announce_label', 'Announce') }}</span>
       </button>
@@ -124,7 +124,7 @@
               class="btn composer-pill-btn composer-pill-btn--journal"
               onclick="window.location.href='/familyJournal/create'"
               title="Family Journal - Write memoirs, stories, and chronicles"
-              aria-label="{{ __('feed.journal', 'Write family journal chronicle') }}">
+              aria-label="{{ __('feed.journal_label', 'Journal') }} — {{ __('feed.journal', 'Write family journal chronicle') }}">
         @include('member.includes.composerActionIcon', ['type' => 'journal', 'prefix' => $svgPrefix])
         <span>{{ __('feed.journal_label', 'Journal') }}</span>
       </button>

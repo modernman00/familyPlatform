@@ -646,13 +646,11 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo, playerId }) {
                 </div>
             ) : (
                 <div
-                    className="video-rendition-frame position-relative overflow-hidden"
+                    className="video-rendition-frame position-relative overflow-hidden d-flex align-items-center justify-content-center"
                     style={{
                         backgroundColor: '#0b0f19',
                         width: '100%',
                         maxWidth: '100%',
-                        aspectRatio: isShortHint ? '4 / 5' : (detectedRatio || '16 / 10'),
-                        maxHeight: isShortHint ? '880px' : 'min(680px, 75vh)',
                         borderRadius: '12px',
                     }}
                 >
@@ -682,25 +680,35 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo, playerId }) {
                     >
                         <i className="bi bi-arrows-fullscreen" style={{ fontSize: '0.9rem' }} aria-hidden="true" />
                     </button>
-                    {isIframeMounted ? (
-                        <iframe
-                            src={playSrc}
-                            title={vid?.title || 'Family video'}
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                            allowFullScreen
-                            loading="lazy"
-                            style={{ width: '100%', height: '100%', border: 'none' }}
-                        />
-                    ) : (
-                        <IframePosterFacade
-                            vid={vid}
-                            providerLabel={providerLabel}
-                            onActivate={() => {
-                                setUserActivatedIframe(true);
-                                requestActivePlayer(playerId);
-                            }}
-                        />
-                    )}
+                    <div
+                        className="iframe-embed-stage w-100"
+                        style={{
+                            maxWidth: isPortrait ? 'min(460px, 100%)' : '100%',
+                            aspectRatio: isPortrait ? (detectedRatio || '9 / 16') : (detectedRatio || '16 / 9'),
+                            maxHeight: isPortrait ? 'min(820px, 84vh)' : 'min(720px, 80vh)',
+                            margin: '0 auto',
+                        }}
+                    >
+                        {isIframeMounted ? (
+                            <iframe
+                                src={playSrc}
+                                title={vid?.title || 'Family video'}
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                allowFullScreen
+                                loading="lazy"
+                                style={{ width: '100%', height: '100%', border: 'none', display: 'block' }}
+                            />
+                        ) : (
+                            <IframePosterFacade
+                                vid={vid}
+                                providerLabel={providerLabel}
+                                onActivate={() => {
+                                    setUserActivatedIframe(true);
+                                    requestActivePlayer(playerId);
+                                }}
+                            />
+                        )}
+                    </div>
                 </div>
             )}
         </div>

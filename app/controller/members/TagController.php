@@ -299,10 +299,12 @@ class TagController
             }
 
             $kinshipMap = [];
+            $honorificsEnabled = true;
             if ($viewerId !== '' && !empty($rows)) {
                 $targetIds = array_values(array_unique(array_filter(array_map('strval', array_column($rows, 'user_id')))));
                 $feedRepo = new \App\repository\FeedRepository($pdo);
                 $kinshipMap = $feedRepo->batchResolveKinship($viewerId, $targetIds);
+                $honorificsEnabled = \App\services\KinshipHonorificService::isEnabledForViewer($viewerId, $pdo);
             }
 
             $tags = [];
@@ -315,15 +317,27 @@ class TagController
                         : "/resources/images/profile/{$img}";
                 }
                 $uId = (string)$row['user_id'];
+                $rawFull = trim(($row['firstName'] ?? '') . ' ' . ($row['lastName'] ?? ''));
+                $formattedParts = \App\services\NameFormatterService::formatFirstAndLast(
+                    (string)($row['firstName'] ?? ''),
+                    (string)($row['lastName'] ?? '')
+                );
+                $cleanFull = $formattedParts['full_name'] !== 'Relative' ? $formattedParts['full_name'] : $rawFull;
+                $kinLabel = $kinshipMap[$uId] ?? 'Family Member';
+                $honorific = ($honorificsEnabled && $viewerId !== '')
+                    ? \App\services\KinshipHonorificService::mapRelationToHonorific($kinLabel, $viewerId, $uId)
+                    : null;
 
                 $tags[] = [
                     'user_id' => $uId,
-                    'fullName' => trim(($row['firstName'] ?? '') . ' ' . ($row['lastName'] ?? '')),
+                    'fullName' => $cleanFull,
                     'firstName' => (string)($row['firstName'] ?? ''),
                     'lastName' => (string)($row['lastName'] ?? ''),
                     'profileImg' => $profImg,
                     'tagged_by' => (string)$row['tagged_by'],
-                    'kinship' => $kinshipMap[$uId] ?? 'Family Member'
+                    'kinship' => $kinLabel,
+                    'honorific' => $honorific,
+                    'displayFullName' => \App\services\KinshipHonorificService::formatDisplayName($cleanFull, $honorific),
                 ];
             }
 

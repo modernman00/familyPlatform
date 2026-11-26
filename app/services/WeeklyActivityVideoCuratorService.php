@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\services;
 
+use App\dto\PostDto;
 use App\model\Reel;
 use Src\Db;
 use Src\Explainer\ExplainerStoryboard;
@@ -101,6 +102,122 @@ final class WeeklyActivityVideoCuratorService
             return self::curateWeeklyActivity($cleanUser, $cleanFam, false);
         } catch (\Throwable $e) {
             error_log('[WeeklyActivityVideoCuratorService::getOrCurateWeeklyReel] ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Ensure the current week's Family Fun Facts presentation is automatically curated
+     * and published directly to the family feed (no manual approval gate), deduplicated
+     * per family circle within the 7-day window.
+     *
+     * @param string $userId
+     * @param string $famCode
+     * @param string $userName
+     * @param string|null $profileImg
+     * @return array<string, mixed>|null Returns the approved post summary if published, or null if already published/skipped.
+     */
+    public static function ensureAutoPublishedWeeklyReel(
+        string $userId,
+        string $famCode,
+        string $userName = '',
+        ?string $profileImg = null
+    ): ?array {
+        $cleanUser = trim($userId);
+        $cleanFam = trim($famCode);
+        if ($cleanUser === '' || $cleanFam === '') {
+            return null;
+        }
+
+        $safeFam = preg_replace('/[^A-Za-z0-9_]/', '', strtoupper($cleanFam)) ?: 'FAM';
+        $stampFile = sys_get_temp_dir() . '/fp_weekly_reel_' . $safeFam . '_' . date('o-\WW') . '.stamp';
+        if (is_file($stampFile)) {
+            return null;
+        }
+
+        try {
+            $db = Db::connect2();
+
+            // 1. Family-level deduplication: if already published for this family in the last 7 days, do not duplicate
+            $hashCleanFam = '#' . $cleanFam;
+            $stmtApproved = $db->prepare(
+                'SELECT id, post_no FROM weekly_activity_reels
+                 WHERE famCode IN (?, ?)
+                   AND status = "approved"
+                   AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+                 ORDER BY id DESC
+                 LIMIT 1'
+            );
+            $stmtApproved->execute([$cleanFam, $hashCleanFam]);
+            if ($stmtApproved->fetch(PDO::FETCH_ASSOC) !== false) {
+                @touch($stampFile);
+                // Clear any leftover pending drafts for this family so the approval card never surfaces
+                $stmtClearDrafts = $db->prepare(
+                    'UPDATE weekly_activity_reels
+                     SET status = "discarded", updated_at = NOW()
+                     WHERE famCode IN (?, ?)
+                       AND status = "draft_pending_approval"'
+                );
+                $stmtClearDrafts->execute([$cleanFam, $hashCleanFam]);
+                return null;
+            }
+
+            // 2. Respect explicit recent dismissal by this user within the 7-day window if no pending draft exists
+            $reel = self::getPendingReel($cleanUser, $cleanFam);
+            if ($reel === null) {
+                $stmtRecentDismissed = $db->prepare(
+                    'SELECT id FROM weekly_activity_reels
+                     WHERE user_id = ?
+                       AND famCode IN (?, ?)
+                       AND status = "discarded"
+                       AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+                     LIMIT 1'
+                );
+                $stmtRecentDismissed->execute([$cleanUser, $cleanFam, $hashCleanFam]);
+                if ($stmtRecentDismissed->fetchColumn() !== false) {
+                    return null;
+                }
+
+                $reel = self::curateWeeklyActivity($cleanUser, $cleanFam, false);
+            }
+
+            $reelId = (int)($reel['id'] ?? 0);
+            if ($reelId <= 0) {
+                return null;
+            }
+
+            // 3. Resolve member display name if not provided
+            $cleanName = trim(strip_tags($userName));
+            if ($cleanName === '') {
+                $stmtName = $db->prepare(
+                    'SELECT firstName, lastName, profile_pix FROM personal WHERE id = ? LIMIT 1'
+                );
+                $stmtName->execute([$cleanUser]);
+                $person = $stmtName->fetch(PDO::FETCH_ASSOC);
+                if (is_array($person)) {
+                    $cleanName = trim((string)($person['firstName'] ?? '') . ' ' . (string)($person['lastName'] ?? ''));
+                    if ($profileImg === null && !empty($person['profile_pix'])) {
+                        $profileImg = (string)$person['profile_pix'];
+                    }
+                }
+            }
+            if ($cleanName === '') {
+                $cleanName = 'Family Member';
+            }
+
+            // 4. Auto-approve and publish directly to the family feed & Reels tray in 16:9
+            $result = self::approveAndPostReel(
+                $reelId,
+                $cleanUser,
+                $cleanFam,
+                $cleanName,
+                $profileImg,
+                '16:9'
+            );
+
+            return !empty($result['success']) ? $result : null;
+        } catch (\Throwable $e) {
+            error_log('[WeeklyActivityVideoCuratorService::ensureAutoPublishedWeeklyReel] ' . $e->getMessage());
             return null;
         }
     }
@@ -751,7 +868,10 @@ final class WeeklyActivityVideoCuratorService
             $engagementScore = $likes + ($comments * 2);
             if ($engagementScore > $bestScore) {
                 $bestScore = $engagementScore;
-                $cleanMsg = trim(preg_replace('/\s+/', ' ', strip_tags((string)($post['postMessage'] ?? ''))) ?? '');
+                $cleanMsg = PostDto::stripStyleToken((string)($post['postMessage'] ?? ''));
+                $cleanMsg = (string)preg_replace('#https?://[^\s]+#i', '', $cleanMsg);
+                $cleanMsg = (string)preg_replace('#/?resources/(?:videos|images|audio)/[^\s]+#i', '', $cleanMsg);
+                $cleanMsg = trim((string)preg_replace('/\s+/', ' ', strip_tags($cleanMsg)));
                 if ($cleanMsg === '') {
                     $cleanMsg = 'Shared a special family moment';
                 }

@@ -778,6 +778,7 @@ class BaseController
             'email_notifications' => $data['email_notifications'] ?? 'on',
             'post_email_notifications' => $data['post_email_notifications'] ?? 'off',
             'sms_notifications' => $data['sms_notifications'] ?? 'on',
+            'kinship_honorifics' => \App\services\KinshipHonorificService::normalisePreference($data['kinship_honorifics'] ?? 'on'),
             'profilePics' => $data['img'] ?? null,
             'profileImg' => !empty($data['img']) ? $data['img'] : $sex,
             'img' => !empty($data['img']) ? "/resources/images/profile/{$data['img']}" : "/resources/images/profile/$sex",

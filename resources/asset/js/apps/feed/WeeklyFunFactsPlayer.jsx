@@ -563,7 +563,7 @@ export function WeeklyFunFactsPlayer({ reel }) {
                         onClick={() => setSfxEnabled((v) => !v)}
                         className="btn btn-sm btn-outline-light rounded-pill px-3 d-inline-flex align-items-center gap-1"
                         style={{ minHeight: '44px', whiteSpace: 'nowrap', flexShrink: 0 }}
-                        aria-label="Toggle motion sound effects"
+                        aria-label={`${sfxEnabled ? 'SFX On' : 'SFX Off'} — Toggle motion sound effects`}
                     >
                         <i className={sfxEnabled ? 'bi bi-volume-up-fill' : 'bi bi-volume-mute-fill'} aria-hidden="true" />
                         <span>{sfxEnabled ? 'SFX On' : 'SFX Off'}</span>

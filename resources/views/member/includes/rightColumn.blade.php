@@ -40,12 +40,6 @@ foreach(($eventData ?? []) as $event) {
 <!-- Right Column - Sidebar -->
 <div class="sidebar-column">
     @if(empty($isPendingApproval))
-    <!-- Suggested Kin & In-Laws: Primary home is in the main feed carousel -->
-    @if(!empty($suggestedKin))
-    <div class="d-none">
-        @includeIf('member.includes.kinshipSuggestions', ['kinshipWidgetId' => null])
-    </div>
-    @endif
     <div id="upcoming-events-root"></div>
     <script type="application/json" id="upcoming-events-bootstrap">{!! json_encode(['events' => $enrichedEvents, 'userId' => (string)($_SESSION['id'] ?? ''), 'famCode' => (string)($data['famCode'] ?? '')]) !!}</script>
 
@@ -94,7 +88,7 @@ foreach(($eventData ?? []) as $event) {
             $overflowCount = max(0, $memberCount - count($previewMembers));
         @endphp
 
-        <h1 class="display-4 fw-bold mb-0 text-white" style="letter-spacing: -0.02em;">{{ $memberCount }}</h1>
+        <div class="display-4 fw-bold mb-0 text-white" style="letter-spacing: -0.02em;">{{ $memberCount }}</div>
         <p class="mb-3 text-white-50" style="font-size: 0.95rem;">Connected Members</p>
 
         @if(!empty($previewMembers))

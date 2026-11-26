@@ -226,6 +226,123 @@ export const TEXT_STAGE_CATALOG = [
     },
 ];
 
+const STAGE_KEYWORD_RULES = [
+    {
+        slug: 'xmas_snowfall',
+        reason: 'Winter & Snow',
+        pattern: /\b(snow|snowfall|snowman|frost|winter|blizzard)\b/i,
+    },
+    {
+        slug: 'xmas_lights',
+        reason: 'Festive Lights',
+        pattern: /\b(fairy lights?|xmas lights?|christmas lights?|christmas tree|xmas tree)\b/i,
+    },
+    {
+        slug: 'xmas_winter_gold',
+        reason: 'Festive Gold',
+        pattern: /\b(new year|champagne|winter gold|countdown)\b/i,
+    },
+    {
+        slug: 'xmas_hearth',
+        reason: 'Christmas',
+        pattern: /\b(xmas|christmas|santa|festive|reindeer|mistletoe|stocking|yuletide|jingle)\b/i,
+    },
+    {
+        slug: 'aurora_prism',
+        reason: 'Party & Celebration',
+        pattern: /\b(party|parties|birthday|bday|celebrat(?:e|ing|ion)|cheers|disco|bash|fiesta|toast)\b/i,
+    },
+    {
+        slug: 'rose_stardust',
+        reason: 'Love & Anniversary',
+        pattern: /\b(anniversary|wedding|valentine|romance|love you|forever)\b/i,
+    },
+    {
+        slug: 'ocean_waves',
+        reason: 'Ocean & Coast',
+        pattern: /\b(ocean|waves?|sea|beach|surf|tide|coast|island|seaside)\b/i,
+    },
+    {
+        slug: 'moving_sunset',
+        reason: 'Sunset & Dusk',
+        pattern: /\b(sunset|sunrise|golden hour|dusk|twilight|horizon)\b/i,
+    },
+    {
+        slug: 'family_gathering',
+        reason: 'Family Gathering',
+        pattern: /\b(fireside|dinner|sunday roast|talking together|catching up|family time|gathering|chatting|storytime)\b/i,
+    },
+    {
+        slug: 'andromeda_nebula',
+        reason: 'Nebula',
+        pattern: /\b(andromeda|nebula|pulsar|stardust)\b/i,
+    },
+    {
+        slug: 'binary_eclipse',
+        reason: 'Eclipse',
+        pattern: /\b(eclipse|binary star|twin suns?)\b/i,
+    },
+    {
+        slug: 'supernova_crown',
+        reason: 'Supernova',
+        pattern: /\b(supernova|comet|meteor|shooting star)\b/i,
+    },
+    {
+        slug: 'cosmic_rings',
+        reason: 'Cosmic Rings',
+        pattern: /\b(saturn|rings of|celestial)\b/i,
+    },
+    {
+        slug: 'solar_galaxy',
+        reason: 'Universe & Space',
+        pattern: /\b(solar|galaxy|galaxies|planet|planets|cosmos|universe|space|astronomy|stargazing)\b/i,
+    },
+    {
+        slug: 'emerald_canopy',
+        reason: 'Nature & Forest',
+        pattern: /\b(forest|woods|nature|garden|picnic|hike|hiking|springtime)\b/i,
+    },
+    {
+        slug: 'northern_sky',
+        reason: 'Aurora Sky',
+        pattern: /\b(aurora|northern lights|night sky|midnight)\b/i,
+    },
+    {
+        slug: 'dynasty_holo',
+        reason: 'Family Heritage',
+        pattern: /\b(family tree|lineage|ancestry|heritage|dynasty|generations)\b/i,
+    },
+    {
+        slug: 'alert_pulse',
+        reason: 'Important Alert',
+        pattern: /\b(urgent|emergency|important notice|alert)\b/i,
+    },
+    {
+        slug: 'grand_announcement',
+        reason: 'Announcement',
+        pattern: /\b(announce(?:ment)?|congratulations|congrats|welcome|reunion|milestone)\b/i,
+    },
+];
+
+/**
+ * Suggest a matching scenic/3D backdrop theme for a text-only post based on keywords.
+ * Returns null if no keyword matches or text is too short.
+ */
+export function suggestTextStageForMessage(text) {
+    if (!text || typeof text !== 'string') return null;
+    const trimmed = text.trim();
+    if (trimmed.length < 4) return null;
+    for (const rule of STAGE_KEYWORD_RULES) {
+        if (rule.pattern.test(trimmed)) {
+            const meta = TEXT_STAGE_CATALOG.find((item) => item.slug === rule.slug);
+            if (meta) {
+                return { ...meta, reason: rule.reason };
+            }
+        }
+    }
+    return null;
+}
+
 export function decodeHtml(str) {
     if (!str || typeof str !== 'string') return '';
     let decoded = str;
@@ -864,6 +981,20 @@ export function normalizePost(raw) {
     const profileImg = getAvatarUrl(raw);
     const postTime = raw.post_time || raw.date_created || raw.created_at || '';
 
+    let allowSharing = true;
+    if (raw.allow_sharing !== undefined && raw.allow_sharing !== null) {
+        allowSharing = !(raw.allow_sharing === false || raw.allow_sharing === 0 || raw.allow_sharing === '0' || raw.allow_sharing === 'false' || raw.allow_sharing === 'off');
+    } else if (raw.media_meta) {
+        try {
+            const parsedMeta = typeof raw.media_meta === 'string' ? JSON.parse(raw.media_meta) : raw.media_meta;
+            if (parsedMeta && parsedMeta.allow_sharing !== undefined) {
+                allowSharing = !(parsedMeta.allow_sharing === false || parsedMeta.allow_sharing === 0 || parsedMeta.allow_sharing === '0' || parsedMeta.allow_sharing === 'false' || parsedMeta.allow_sharing === 'off');
+            }
+        } catch {
+            // default true
+        }
+    }
+
     const normalized = {
         ...raw,
         post_no: String(raw.post_no ?? ''),
@@ -889,6 +1020,7 @@ export function normalizePost(raw) {
         post_time: postTime,
         is_official: Boolean(raw.is_official || raw.id === 'FAMILY_PLATFORM_OFFICIAL'),
         is_historian: Boolean(raw.is_historian || raw.id === 'FAMILY_HISTORIAN'),
+        allow_sharing: allowSharing,
     };
 
     normalized.displayMessage = getMediaCaption({
@@ -994,7 +1126,7 @@ export function tokenizeRichText(text, arEmoji = null) {
         clean = (clean ? `${clean} ` : '') + `:${arEmoji}:`;
     }
     if (!clean) return [];
-    const regex = /(:me_(?:hello|laugh|wow|love|nod|dance|point|clap)@[A-Za-z0-9_-]{1,64}:|:[a-z0-9_]+_3d:|\[[^\]\n]+\]\((?:https?:\/\/|\/)[^\s)]+\)|https?:\/\/[^\s<>"']+|(?<![@/\w.-])www\.[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:\/[^\s<>"'`]*)?|(?<![@/\w.-])[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9-]{1,63})*\.(?:com|org|net|io|app|dev|co\.uk|org\.uk|uk|edu|gov|ai|me|info|biz|tv|co)(?:\/[^\s<>"'`]*)?(?![a-z0-9@._-])|(?:^|\s)\/[A-Za-z0-9_/?=&#.-]+|#[A-Za-z0-9_]+|@[A-Za-z0-9_.-]+(?:\s+[A-Za-z0-9_.-]+)?)/gi;
+    const regex = /(:me_(?:hello|laugh|wow|love|nod|dance|point|clap)@[A-Za-z0-9_-]{1,64}:|:[a-z0-9_]+_3d:|\[[^\]\n]+\]\((?:https?:\/\/|\/)[^\s)]+\)|https?:\/\/[^\s<>"']+|(?<![@/\w.-])www\.[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:\/[^\s<>"'`]*)?|(?<![@/\w.-])[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9-]{1,63})*\.(?:com|org|net|io|app|dev|co\.uk|org\.uk|uk|edu|gov|ai|me|info|biz|tv|co)(?:\/[^\s<>"'`]*)?(?![a-z0-9@._-])|(?:^|\s)\/[A-Za-z0-9_/?=&#.-]+|#[A-Za-z0-9_]+|@[A-Za-z\u00C0-\u024F0-9_.'-]+(?:[ \t]+[A-Za-z\u00C0-\u024F0-9_.'-]+)?)/gi;
     const tokens = [];
     let lastIndex = 0;
     let match;

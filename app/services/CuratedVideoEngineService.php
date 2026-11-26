@@ -651,7 +651,7 @@ class CuratedVideoEngineService
         foreach ($fallbacks as $fb) {
             $vid = $fb['video_id'];
             $url = 'https://www.youtube.com/watch?v=' . $vid;
-            $thumb = "https://img.youtube.com/vi/{$vid}/hqdefault.jpg";
+            $thumb = "https://i.ytimg.com/vi/{$vid}/hqdefault.jpg";
             $caption = $this->generateEngagingCaption($fb['title'], $fb['category'], $fb['author']);
             $this->insertQueuedVideo(
                 null,
@@ -726,7 +726,7 @@ class CuratedVideoEngineService
                     'title' => $title !== '' ? $title : 'Family Video Spotlight',
                     'author' => $author,
                     'description' => $description,
-                    'thumbnail_url' => "https://img.youtube.com/vi/{$videoId}/hqdefault.jpg",
+                    'thumbnail_url' => "https://i.ytimg.com/vi/{$videoId}/hqdefault.jpg",
                 ];
 
                 if (count($entries) >= $limit) {

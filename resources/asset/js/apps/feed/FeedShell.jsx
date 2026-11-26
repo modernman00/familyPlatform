@@ -8,6 +8,7 @@ import { PostCard } from './PostCard';
 import { LightboxModal } from './LightboxModal';
 import { VideoModal } from './VideoModal';
 import { WhatsNewBanner } from './WhatsNewBanner';
+import { FeedInteractiveShowcase, SHOWCASE_ITEMS } from './FeedInteractiveShowcase';
 import { createLazyModal } from '../shared/lazyIslandModal';
 
 const LazyViewersModal = createLazyModal(
@@ -20,6 +21,7 @@ const LazySharePortalModal = createLazyModal(
 );
 import {
     extractPreviewableUrls,
+    getAvatarUrl,
     normalizeComment,
     normalizePost,
     unwrapFeedResponse,
@@ -106,8 +108,12 @@ export function FeedShell({ bootstrap = {} }) {
     );
     const [streamFilter, setStreamFilter] = useState('all'); // 'all' | 'tagged'
     const [hashtagFilter, setHashtagFilter] = useState('');
+    const [personFilter, setPersonFilter] = useState(null); // { id, name, img } | null
     const [trendingHashtags, setTrendingHashtags] = useState([]);
     const [showTopicsTray, setShowTopicsTray] = useState(false);
+    const [showPeopleTray, setShowPeopleTray] = useState(false);
+    const [peopleSearch, setPeopleSearch] = useState('');
+    const [brokenPersonAvatars, setBrokenPersonAvatars] = useState({});
     const [pendingLivePosts, setPendingLivePosts] = useState([]);
     const [highlightedPostNo, setHighlightedPostNo] = useState(null);
 
@@ -178,7 +184,7 @@ export function FeedShell({ bootstrap = {} }) {
             });
         };
 
-        const onPostUpdated = (e) => {
+                const onPostUpdated = (e) => {
             const detail = e?.detail;
             const targetNo = detail?.postNo ?? detail?.post_no;
             if (!targetNo) return;
@@ -190,6 +196,7 @@ export function FeedShell({ bootstrap = {} }) {
                     displayMessage: undefined,
                     post_style: detail.post_style !== undefined ? detail.post_style : p.post_style,
                     ar_emoji: detail.ar_emoji !== undefined ? detail.ar_emoji : p.ar_emoji,
+                    allow_sharing: detail.allow_sharing !== undefined ? detail.allow_sharing : p.allow_sharing,
                 });
             }));
         };
@@ -202,7 +209,7 @@ export function FeedShell({ bootstrap = {} }) {
         };
     }, [profileBootstrap]);
 
-    const fetchFeed = useCallback(async ({ nextPage = 1, append = false, cursor = null, background = false, filter = streamFilter, tag = hashtagFilter, attempt = 0 } = {}) => {
+    const fetchFeed = useCallback(async ({ nextPage = 1, append = false, cursor = null, background = false, filter = streamFilter, tag = hashtagFilter, personId = personFilter?.id || '', attempt = 0 } = {}) => {
         if (append) {
             setLoadingMore(true);
         } else if (!background) {
@@ -227,6 +234,7 @@ export function FeedShell({ bootstrap = {} }) {
                     params.set('offset', String(offset));
                 }
                 if (filter === 'tagged') params.set('filter', 'tagged');
+                if (personId) params.set('person_id', String(personId));
                 url = `/post/getAllPostCommentByFamCode?${params.toString()}`;
             }
 
@@ -246,7 +254,7 @@ export function FeedShell({ bootstrap = {} }) {
             setHasMore(resolvedHasMore);
             setNextCursor(resolvedCursor);
 
-            if (!append && !tag && filter === 'all') {
+            if (!append && !tag && !personId && filter === 'all') {
                 writeSwrFeedCache(bootstrap, {
                     posts: normalized,
                     hasMore: resolvedHasMore,
@@ -255,7 +263,7 @@ export function FeedShell({ bootstrap = {} }) {
             }
         } catch (err) {
             if (!append && attempt === 0 && err?.status === 408) {
-                return fetchFeed({ nextPage, append, cursor, background, filter, tag, attempt: 1 });
+                return fetchFeed({ nextPage, append, cursor, background, filter, tag, personId, attempt: 1 });
             }
             if (!background) {
                 setErrorMessage(err?.message || 'Unable to load your family feed right now.');
@@ -264,7 +272,7 @@ export function FeedShell({ bootstrap = {} }) {
             setLoading(false);
             setLoadingMore(false);
         }
-    }, [bootstrap, streamFilter, hashtagFilter]);
+    }, [bootstrap, streamFilter, hashtagFilter, personFilter]);
 
     const loadTrendingHashtags = useCallback(async () => {
         try {
@@ -496,6 +504,7 @@ export function FeedShell({ bootstrap = {} }) {
                             displayMessage: undefined,
                             post_style: data.post_style ?? p.post_style,
                             ar_emoji: data.ar_emoji !== undefined ? data.ar_emoji : p.ar_emoji,
+                            allow_sharing: data.allow_sharing !== undefined ? data.allow_sharing : p.allow_sharing,
                         })
                         : p
                 )
@@ -537,22 +546,49 @@ export function FeedShell({ bootstrap = {} }) {
 
     const handleStreamChange = (nextFilter) => {
         setHashtagFilter('');
+        setPersonFilter(null);
+        setShowPeopleTray(false);
         setStreamFilter(nextFilter);
-        fetchFeed({ nextPage: 1, append: false, filter: nextFilter, tag: '' });
+        fetchFeed({ nextPage: 1, append: false, filter: nextFilter, tag: '', personId: '' });
     };
 
     const handleSelectHashtag = useCallback((tag) => {
         const clean = String(tag || '').replace(/^#/, '').trim();
         if (!clean) return;
+        setPersonFilter(null);
+        setShowPeopleTray(false);
         setHashtagFilter(clean);
-        fetchFeed({ nextPage: 1, append: false, filter: streamFilter, tag: clean });
+        fetchFeed({ nextPage: 1, append: false, filter: streamFilter, tag: clean, personId: '' });
     }, [fetchFeed, streamFilter]);
 
     const handleClearHashtag = () => {
         setHashtagFilter('');
-        fetchFeed({ nextPage: 1, append: false, filter: streamFilter, tag: '' });
+        fetchFeed({ nextPage: 1, append: false, filter: streamFilter, tag: '', personId: personFilter?.id || '' });
         loadTrendingHashtags();
     };
+
+    const handleSelectPerson = useCallback((person) => {
+        if (!person || !person.id) return;
+        if (personFilter && String(personFilter.id) === String(person.id)) {
+            setPersonFilter(null);
+            setShowPeopleTray(false);
+            setPeopleSearch('');
+            fetchFeed({ nextPage: 1, append: false, filter: streamFilter, tag: '', personId: '' });
+            return;
+        }
+        setHashtagFilter('');
+        setShowTopicsTray(false);
+        setShowPeopleTray(false);
+        setPeopleSearch('');
+        setPersonFilter(person);
+        fetchFeed({ nextPage: 1, append: false, filter: streamFilter, tag: '', personId: String(person.id) });
+    }, [fetchFeed, personFilter, streamFilter]);
+
+    const handleClearPerson = useCallback(() => {
+        setPersonFilter(null);
+        setPeopleSearch('');
+        fetchFeed({ nextPage: 1, append: false, filter: streamFilter, tag: hashtagFilter, personId: '' });
+    }, [fetchFeed, streamFilter, hashtagFilter]);
 
     const handleReactPost = useCallback(async (postNo, reactionType) => {
         let snapshot = null;
@@ -762,6 +798,74 @@ export function FeedShell({ bootstrap = {} }) {
         [posts, currentUserId]
     );
 
+    const availablePeople = useMemo(() => {
+        const map = new Map();
+        const addPerson = (rawId, rawName, rawImg) => {
+            const id = String(rawId || '').trim();
+            if (!id) return;
+            const name = String(rawName || '').trim() || 'Family Member';
+            const trimmedImg = String(rawImg || '').trim();
+            const img = trimmedImg ? getAvatarUrl({ img: trimmedImg }) : '';
+            const existing = map.get(id);
+            if (!existing) {
+                map.set(id, { id, name, img, count: 0 });
+            } else {
+                if ((!existing.name || existing.name === 'Family Member') && name !== 'Family Member') {
+                    existing.name = name;
+                }
+                if (!existing.img && img) {
+                    existing.img = img;
+                }
+            }
+        };
+
+        if (Array.isArray(profileBootstrap?.familyRoster)) {
+            profileBootstrap.familyRoster.forEach((m) => {
+                const full = `${m?.firstName || ''} ${m?.lastName || ''}`.trim() || m?.fullName || '';
+                addPerson(m?.id, full, m?.img || m?.profilePics || '');
+            });
+        }
+
+        if (currentUserId) {
+            const selfFull = `${profileBootstrap?.firstName || ''} ${profileBootstrap?.lastName || ''}`.trim();
+            addPerson(currentUserId, selfFull, profileBootstrap?.avatar || '');
+        }
+
+        posts.forEach((p) => {
+            const seenInPost = new Set();
+            const authorId = String(p?.id || '').trim();
+            if (authorId) {
+                const authorName = p.fullName || `${p.firstName || ''} ${p.lastName || ''}`.trim();
+                addPerson(authorId, authorName, p.profileImg || p.profilePics || '');
+                seenInPost.add(authorId);
+            }
+            if (Array.isArray(p?.post_tags)) {
+                p.post_tags.forEach((t) => {
+                    const tagId = String(t?.user_id || t?.id || '').trim();
+                    if (!tagId) return;
+                    const tagName = t.fullName || `${t.firstName || ''} ${t.lastName || ''}`.trim();
+                    addPerson(tagId, tagName, t.img || t.profilePics || '');
+                    seenInPost.add(tagId);
+                });
+            }
+            seenInPost.forEach((pid) => {
+                const entry = map.get(pid);
+                if (entry) entry.count += 1;
+            });
+        });
+
+        return Array.from(map.values()).sort((a, b) => {
+            if (b.count !== a.count) return b.count - a.count;
+            return a.name.localeCompare(b.name);
+        });
+    }, [profileBootstrap?.familyRoster, profileBootstrap?.firstName, profileBootstrap?.lastName, profileBootstrap?.avatar, currentUserId, posts]);
+
+    const filteredPeople = useMemo(() => {
+        const q = peopleSearch.trim().toLowerCase();
+        if (!q) return availablePeople;
+        return availablePeople.filter((p) => p.name.toLowerCase().includes(q));
+    }, [availablePeople, peopleSearch]);
+
     // Programmatic bridge for E2E & legacy integrations querying Alpine.$data(.feed-posts-container)
     useEffect(() => {
         const el = shellRef.current;
@@ -871,7 +975,7 @@ export function FeedShell({ bootstrap = {} }) {
                                 <i className="bi bi-hash me-1" aria-hidden="true" />
                                 {hashtagFilter}
                             </span>
-                            <span className="text-dark fw-bold small" style={{ fontSize: '0.9rem' }}>
+                            <span className="fw-bold small" style={{ fontSize: '0.9rem', color: '#0f172a' }}>
                                 Family Memory Stream
                             </span>
                         </div>
@@ -888,7 +992,7 @@ export function FeedShell({ bootstrap = {} }) {
             )}
 
             {/* Active Tagged With You Stream Banner */}
-            {streamFilter === 'tagged' && !hashtagFilter && (
+            {streamFilter === 'tagged' && !hashtagFilter && !personFilter && (
                 <div
                     className="card border-0 shadow-sm mb-4 p-3"
                     style={{
@@ -906,7 +1010,7 @@ export function FeedShell({ bootstrap = {} }) {
                                 <i className="bi bi-tag-fill me-1" aria-hidden="true" />
                                 Tagged With You
                             </span>
-                            <span className="text-dark fw-bold small" style={{ fontSize: '0.9rem' }}>
+                            <span className="fw-bold small" style={{ fontSize: '0.9rem', color: '#0f172a' }}>
                                 Your Living Heritage Scrapbook
                             </span>
                         </div>
@@ -922,6 +1026,43 @@ export function FeedShell({ bootstrap = {} }) {
                 </div>
             )}
 
+            {/* Active Person Filter Stream Banner */}
+            {personFilter && !hashtagFilter && (
+                <div
+                    className="card border-0 shadow-sm mb-4 p-3"
+                    style={{
+                        borderRadius: '14px',
+                        background: 'linear-gradient(135deg, #fdf5f5 0%, #f5dede 100%)',
+                        borderLeft: '4px solid #a31621',
+                    }}
+                    role="status"
+                >
+                    <div className="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <div className="d-flex align-items-center gap-2">
+                            <span
+                                className="badge rounded-pill text-white px-3 py-1 shadow-xs d-inline-flex align-items-center gap-1"
+                                style={{ background: '#a31621', fontSize: '0.88rem', letterSpacing: '0.3px', maxWidth: '240px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                                title={personFilter.name}
+                            >
+                                <i className="bi bi-person-fill" aria-hidden="true" />
+                                <span>{personFilter.name}</span>
+                            </span>
+                            <span className="fw-bold small" style={{ fontSize: '0.9rem', color: '#0f172a' }}>
+                                Memories by or featuring {personFilter.name}
+                            </span>
+                        </div>
+                        <button
+                            type="button"
+                            className="btn btn-sm btn-outline-dark rounded-pill px-3 py-1 d-inline-flex align-items-center gap-1"
+                            onClick={handleClearPerson}
+                            style={{ fontSize: '0.82rem', fontWeight: 600, minHeight: '44px', whiteSpace: 'nowrap', flexShrink: 0 }}
+                        >
+                            <i className="bi bi-x-circle-fill" aria-hidden="true" /> Show All Posts
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* Feed Stream Selector Tabs (All Posts vs Tagged With You) */}
             <div className="feed-tabs-container mb-4 d-flex align-items-center justify-content-between flex-wrap gap-2">
                 <div
@@ -932,8 +1073,8 @@ export function FeedShell({ bootstrap = {} }) {
                     <button
                         type="button"
                         role="tab"
-                        aria-selected={streamFilter === 'all' && !hashtagFilter}
-                        className={`btn btn-sm rounded-pill px-3 py-1 fw-semibold transition-all ${streamFilter === 'all' && !hashtagFilter ? 'btn-primary text-white shadow-xs' : 'text-muted border-0 bg-transparent'}`}
+                        aria-selected={streamFilter === 'all' && !hashtagFilter && !personFilter}
+                        className={`btn btn-sm rounded-pill px-3 py-1 fw-semibold transition-all ${streamFilter === 'all' && !hashtagFilter && !personFilter ? 'btn-primary text-white shadow-xs' : 'text-muted border-0 bg-transparent'}`}
                         onClick={() => handleStreamChange('all')}
                         style={{ fontSize: '0.82rem', whiteSpace: 'nowrap', flexShrink: 0, minHeight: '44px' }}
                     >
@@ -943,32 +1084,73 @@ export function FeedShell({ bootstrap = {} }) {
                     <button
                         type="button"
                         role="tab"
-                        aria-selected={streamFilter === 'tagged' && !hashtagFilter}
-                        className={`btn btn-sm rounded-pill px-3 py-1 fw-semibold transition-all d-inline-flex align-items-center gap-1 ${streamFilter === 'tagged' && !hashtagFilter ? 'btn-primary text-white shadow-xs' : 'text-muted border-0 bg-transparent'}`}
+                        aria-selected={streamFilter === 'tagged' && !hashtagFilter && !personFilter}
+                        className={`btn btn-sm rounded-pill px-3 py-1 fw-semibold transition-all d-inline-flex align-items-center gap-1 ${streamFilter === 'tagged' && !hashtagFilter && !personFilter ? 'btn-primary text-white shadow-xs' : 'text-muted border-0 bg-transparent'}`}
                         onClick={() => handleStreamChange('tagged')}
                         style={{ fontSize: '0.82rem', whiteSpace: 'nowrap', flexShrink: 0, minHeight: '44px' }}
                     >
                         <i className="bi bi-tag-fill me-1" aria-hidden="true" />
                         <span>Tagged With You</span>
                         <span
-                            className={`badge rounded-pill ${streamFilter === 'tagged' && !hashtagFilter ? 'bg-white text-primary' : 'bg-secondary bg-opacity-25 text-dark'}`}
+                            className={`badge rounded-pill ${streamFilter === 'tagged' && !hashtagFilter && !personFilter ? 'bg-white text-primary' : 'bg-secondary bg-opacity-25 text-dark'}`}
                             style={{ fontSize: '0.68rem' }}
                         >
                             {taggedPostsCount}
                         </span>
                     </button>
                 </div>
-                <div className="d-flex align-items-center gap-2 ms-auto">
-                    {streamFilter === 'tagged' && (
+                <div className="d-flex align-items-center gap-2 ms-auto flex-wrap">
+                    {streamFilter === 'tagged' && !personFilter && (
                         <span className="text-muted" style={{ fontSize: '0.875rem' }}>
                             Showing memories featuring you
                         </span>
+                    )}
+                    {availablePeople.length > 0 && !hashtagFilter && (
+                        <button
+                            type="button"
+                            className={`btn btn-sm rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-2 transition-all ${showPeopleTray || personFilter ? 'btn-primary text-white shadow-xs' : 'border shadow-2xs'}`}
+                            onClick={() => {
+                                setShowTopicsTray(false);
+                                setShowPeopleTray((prev) => !prev);
+                            }}
+                            aria-expanded={showPeopleTray}
+                            aria-controls="family-people-tray"
+                            title={showPeopleTray ? 'Hide Family People Filter' : 'Filter posts by family member'}
+                            style={{
+                                fontSize: '0.82rem',
+                                whiteSpace: 'nowrap',
+                                flexShrink: 0,
+                                minHeight: '44px',
+                                ...(showPeopleTray || personFilter
+                                    ? {}
+                                    : {
+                                        backgroundColor: 'var(--card-bg, #ffffff)',
+                                        color: 'var(--text-main, #0f172a)',
+                                    }),
+                            }}
+                        >
+                            <i className="bi bi-people-fill" aria-hidden="true" />
+                            <span>{personFilter ? personFilter.name : 'People'}</span>
+                            <span
+                                className={`badge rounded-pill ${showPeopleTray || personFilter ? 'bg-white text-primary' : 'bg-secondary bg-opacity-25'}`}
+                                style={{
+                                    fontSize: '0.68rem',
+                                    color: (showPeopleTray || personFilter) ? undefined : 'var(--text-main, #0f172a)',
+                                }}
+                            >
+                                {availablePeople.length}
+                            </span>
+                            <i className={`bi ${showPeopleTray ? 'bi-chevron-up' : 'bi-chevron-down'}`} aria-hidden="true" />
+                        </button>
                     )}
                     {trendingHashtags.length > 0 && !hashtagFilter && (
                         <button
                             type="button"
                             className={`btn btn-sm rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-2 transition-all ${showTopicsTray ? 'btn-primary text-white shadow-xs' : 'border shadow-2xs'}`}
-                            onClick={() => setShowTopicsTray((prev) => !prev)}
+                            onClick={() => {
+                                setShowPeopleTray(false);
+                                setShowTopicsTray((prev) => !prev);
+                            }}
                             aria-expanded={showTopicsTray}
                             aria-controls="family-topics-tray"
                             title={showTopicsTray ? 'Hide Family Topics & Milestones' : 'Show Family Topics & Milestones'}
@@ -1001,6 +1183,139 @@ export function FeedShell({ bootstrap = {} }) {
                     )}
                 </div>
             </div>
+
+            {/* Inline Family People Filter Tray (hidden by default to save vertical space) */}
+            {showPeopleTray && availablePeople.length > 0 && !hashtagFilter && (
+                <div
+                    id="family-people-tray"
+                    className="card border-0 shadow-sm mb-4 p-3"
+                    style={{ borderRadius: '14px', backgroundColor: 'var(--card-bg, #ffffff)' }}
+                >
+                    <div className="d-flex align-items-center justify-content-between mb-2 gap-2 flex-wrap">
+                        <div className="d-flex align-items-center gap-2">
+                            <i className="bi bi-people-fill text-primary" style={{ fontSize: '1rem' }} aria-hidden="true" />
+                            <span className="fw-bold small" style={{ fontSize: '0.88rem', color: 'var(--text-main, #0f172a)' }}>
+                                Filter by Person
+                            </span>
+                        </div>
+                        <div className="d-flex align-items-center gap-2">
+                            {personFilter && (
+                                <button
+                                    type="button"
+                                    className="btn btn-sm btn-outline-secondary rounded-pill px-3"
+                                    onClick={() => {
+                                        setShowPeopleTray(false);
+                                        handleClearPerson();
+                                    }}
+                                    style={{ fontSize: '0.78rem', minHeight: '44px', whiteSpace: 'nowrap', flexShrink: 0 }}
+                                >
+                                    Everyone
+                                </button>
+                            )}
+                            <button
+                                type="button"
+                                className="btn btn-sm btn-link text-muted text-decoration-none p-0 px-2"
+                                onClick={() => setShowPeopleTray(false)}
+                                aria-label="Hide Filter by Person"
+                                style={{ fontSize: '0.82rem', minHeight: '44px', whiteSpace: 'nowrap', flexShrink: 0 }}
+                            >
+                                Hide
+                            </button>
+                        </div>
+                    </div>
+                    {availablePeople.length > 6 && (
+                        <div className="mb-2">
+                            <input
+                                type="search"
+                                className="form-control form-control-sm rounded-pill px-3"
+                                placeholder="Find a family member…"
+                                aria-label="Find a family member"
+                                value={peopleSearch}
+                                onInput={(e) => setPeopleSearch(e.currentTarget.value)}
+                                style={{ minHeight: '44px', fontSize: '0.875rem' }}
+                            />
+                        </div>
+                    )}
+                    <div className="d-flex gap-2 flex-wrap align-items-center">
+                        {filteredPeople.length === 0 ? (
+                            <span className="text-muted small py-2">No family members match &ldquo;{peopleSearch}&rdquo;.</span>
+                        ) : (
+                            filteredPeople.map((person) => {
+                                const isActive = personFilter && String(personFilter.id) === String(person.id);
+                                const initials = person.name
+                                    .split(/\s+/)
+                                    .filter(Boolean)
+                                    .slice(0, 2)
+                                    .map((part) => part[0]?.toUpperCase() || '')
+                                    .join('') || '?';
+                                return (
+                                    <button
+                                        key={person.id}
+                                        type="button"
+                                        className={`btn btn-sm rounded-pill px-3 py-1 d-inline-flex align-items-center gap-2 shadow-2xs transition-all ${isActive ? 'btn-primary text-white' : 'border'}`}
+                                        style={{
+                                            minHeight: '44px',
+                                            whiteSpace: 'nowrap',
+                                            flexShrink: 0,
+                                            ...(isActive
+                                                ? {}
+                                                : {
+                                                    backgroundColor: 'var(--card-bg, #ffffff)',
+                                                    color: 'var(--text-main, #0f172a)',
+                                                }),
+                                        }}
+                                        onClick={() => handleSelectPerson(person)}
+                                        title={`View family memories by or featuring ${person.name}`}
+                                        aria-pressed={Boolean(isActive)}
+                                    >
+                                        {person.img && !brokenPersonAvatars[person.id] ? (
+                                            <img
+                                                src={person.img}
+                                                alt=""
+                                                width="24"
+                                                height="24"
+                                                className="rounded-circle object-fit-cover flex-shrink-0"
+                                                style={{ width: '24px', height: '24px' }}
+                                                onError={() => setBrokenPersonAvatars((prev) => ({ ...prev, [person.id]: true }))}
+                                            />
+                                        ) : (
+                                            <span
+                                                className="rounded-circle d-inline-flex align-items-center justify-content-center fw-bold flex-shrink-0"
+                                                style={{
+                                                    width: '24px',
+                                                    height: '24px',
+                                                    fontSize: '0.68rem',
+                                                    backgroundColor: isActive ? 'rgba(255,255,255,0.22)' : '#e2e8f0',
+                                                    color: isActive ? '#ffffff' : '#0f172a',
+                                                }}
+                                            >
+                                                {initials}
+                                            </span>
+                                        )}
+                                        <span
+                                            className="fw-semibold"
+                                            style={{ maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                                        >
+                                            {person.name}
+                                        </span>
+                                        {person.count > 0 && (
+                                            <span
+                                                className={`badge rounded-pill px-1 py-0 ${isActive ? 'bg-white text-primary' : 'bg-secondary bg-opacity-25'}`}
+                                                style={{
+                                                    fontSize: '0.68rem',
+                                                    color: isActive ? undefined : 'var(--text-main, #0f172a)',
+                                                }}
+                                            >
+                                                {person.count}
+                                            </span>
+                                        )}
+                                    </button>
+                                );
+                            })
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* Trending Family Hashtags Carousel (hidden by default to save vertical space) */}
             {showTopicsTray && trendingHashtags.length > 0 && !hashtagFilter && (
@@ -1106,22 +1421,26 @@ export function FeedShell({ bootstrap = {} }) {
                     <h5 className="fw-bold" style={{ color: 'var(--text-main, #0f172a)' }}>
                         {hashtagFilter
                             ? `No memories tagged #${hashtagFilter} yet`
-                            : (streamFilter === 'tagged' ? 'No tagged memories yet' : 'No family posts yet')}
+                            : (personFilter
+                                ? `No memories featuring ${personFilter.name} yet`
+                                : (streamFilter === 'tagged' ? 'No tagged memories yet' : 'No family posts yet'))}
                     </h5>
                     <p className="text-muted mb-3">
                         {hashtagFilter
                             ? 'Return to the full family stream or share the first memory with this hashtag.'
-                            : (streamFilter === 'tagged'
-                                ? 'When relatives tag you in stories or milestone photos, they will appear in this personal scrapbook.'
-                                : 'Share the first memory or event with your family above!')}
+                            : (personFilter
+                                ? `Return to the full family stream or share a memory with ${personFilter.name}.`
+                                : (streamFilter === 'tagged'
+                                    ? 'When relatives tag you in stories or milestone photos, they will appear in this personal scrapbook.'
+                                    : 'Share the first memory or event with your family above!'))}
                     </p>
-                    {hashtagFilter && (
+                    {(hashtagFilter || personFilter) && (
                         <div>
                             <button
                                 type="button"
                                 className="btn btn-primary rounded-pill px-4 fw-semibold"
                                 style={{ minHeight: '44px' }}
-                                onClick={handleClearHashtag}
+                                onClick={hashtagFilter ? handleClearHashtag : handleClearPerson}
                             >
                                 Show All Posts
                             </button>
@@ -1130,32 +1449,52 @@ export function FeedShell({ bootstrap = {} }) {
                 </div>
             )}
 
-            {/* Posts List */}
-            {!loading && posts.map((post) => (
-                <IslandErrorBoundary
-                    key={post.post_no}
-                    name={`PostCard-${post.post_no}`}
-                    fallbackTitle="This family memory could not be displayed."
-                    compact
-                >
-                    <PostCard
-                        post={post}
-                        bootstrap={profileBootstrap}
-                        isHighlighted={String(highlightedPostNo) === String(post.post_no)}
-                        onReactPost={handleReactPost}
-                        onVotePoll={handleVotePoll}
-                        onMutateComments={handleMutateComments}
-                        onUpdatePost={handleUpdatePost}
-                        onDeletePost={handleDeletePost}
-                        onSelectHashtag={handleSelectHashtag}
-                        onOpenLightbox={handleOpenLightbox}
-                        onOpenVideo={handleOpenVideo}
-                        onOpenPostViewers={handleOpenPostViewers}
-                        onOpenCommentViewers={handleOpenCommentViewers}
-                        onOpenSharePortal={handleOpenSharePortal}
-                    />
-                </IslandErrorBoundary>
-            ))}
+            {/* Posts List + Interleaved Live-Playable Games & App Functionality Adverts */}
+            {!loading && posts.map((post, postIdx) => {
+                // Weave a live interactive game or app-feature advert after the 1st post and every 2 posts thereafter
+                const shouldShowInterleavedShowcase = postIdx === 0 || (postIdx + 1) % 2 === 0;
+                const showcaseSlot = postIdx === 0 ? 0 : Math.floor((postIdx + 1) / 2);
+                const slotCategory = showcaseSlot % 2 === 0 ? 'game' : 'feature';
+
+                return (
+                    <div key={post.post_no} data-feed-item-wrapper={post.post_no}>
+                        <IslandErrorBoundary
+                            name={`PostCard-${post.post_no}`}
+                            fallbackTitle="This family memory could not be displayed."
+                            compact
+                        >
+                            <PostCard
+                                post={post}
+                                bootstrap={profileBootstrap}
+                                isHighlighted={String(highlightedPostNo) === String(post.post_no)}
+                                onReactPost={handleReactPost}
+                                onVotePoll={handleVotePoll}
+                                onMutateComments={handleMutateComments}
+                                onUpdatePost={handleUpdatePost}
+                                onDeletePost={handleDeletePost}
+                                onSelectHashtag={handleSelectHashtag}
+                                onOpenLightbox={handleOpenLightbox}
+                                onOpenVideo={handleOpenVideo}
+                                onOpenPostViewers={handleOpenPostViewers}
+                                onOpenCommentViewers={handleOpenCommentViewers}
+                                onOpenSharePortal={handleOpenSharePortal}
+                            />
+                        </IslandErrorBoundary>
+
+                        {shouldShowInterleavedShowcase && (
+                            <FeedInteractiveShowcase
+                                slotIndex={showcaseSlot % SHOWCASE_ITEMS.length}
+                                initialCategory={slotCategory}
+                            />
+                        )}
+                    </div>
+                );
+            })}
+
+            {/* Evergreen Interactive Showcase Deck when feed has 0 posts so discovery never stops */}
+            {!loading && posts.length === 0 && (
+                <FeedInteractiveShowcase slotIndex={0} initialCategory="all" />
+            )}
 
             {/* Pagination / Infinite Scroll Sentinel */}
             {!loading && hasMore && !hashtagFilter && (
@@ -1208,6 +1547,11 @@ export function FeedShell({ bootstrap = {} }) {
             <LazySharePortalModal
                 isOpen={Boolean(sharePortalPost)}
                 post={sharePortalPost}
+                bootstrap={profileBootstrap}
+                onUpdatePost={(postNo, patch) => {
+                    handleUpdatePost(postNo, patch);
+                    setSharePortalPost((prev) => (prev && String(prev.post_no) === String(postNo) ? { ...prev, ...patch } : prev));
+                }}
                 onClose={() => setSharePortalPost(null)}
             />
         </div>

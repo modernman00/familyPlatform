@@ -460,7 +460,7 @@ final class FamilyHistorianCardRenderer
 
         $author = (string)($data['top_author'] ?? 'Family Member');
         $score = (int)($data['top_score'] ?? 0);
-        $excerpt = trim((string)($data['top_excerpt'] ?? 'A cherished family memory shared on the timeline.'));
+        $excerpt = self::sanitiseExcerpt((string)($data['top_excerpt'] ?? ''));
 
         // Wrap excerpt into max 5 lines at mobile-legible scale
         $lines = self::wrapText($excerpt, $serif, 62, $cardW - 160, 5);
@@ -538,66 +538,124 @@ final class FamilyHistorianCardRenderer
         }
 
         // 3. Top Editorial Header Bar
-        $headerY = $cardY + 68;
-        $pillH = 58;
+        $headerY = $cardY + 62;
+        $pillH = 68;
         $leftPillText = 'FAMILY MILESTONE SPOTLIGHT';
-        $bbLeft = imagettfbbox(21, 0, $sansBold, $leftPillText);
-        $leftTextW = $bbLeft !== false ? (int)abs($bbLeft[2] - $bbLeft[0]) : 460;
-        $leftPillW = $leftTextW + 64;
+        $bbLeft = imagettfbbox(25, 0, $sansBold, $leftPillText);
+        $leftTextW = $bbLeft !== false ? (int)abs($bbLeft[2] - $bbLeft[0]) : 540;
+        $leftPillW = $leftTextW + 72;
         $leftPillX = $cardX + 74;
 
         // Solid Royal Bordeaux pill with gold border and crisp white bold text (11.4:1 contrast)
-        self::drawFilledRoundedRect($img, $leftPillX - 2, $headerY - 2, $leftPillX + $leftPillW + 2, $headerY + $pillH + 2, 29, [206, 166, 72], 0);
-        self::drawFilledRoundedRect($img, $leftPillX, $headerY, $leftPillX + $leftPillW, $headerY + $pillH, 28, [107, 18, 38], 0);
-        imagettftext($img, 21, 0, $leftPillX + 32, $headerY + 38, self::col($img, [255, 255, 255], 0), $sansBold, $leftPillText);
+        self::drawFilledRoundedRect($img, $leftPillX - 2, $headerY - 2, $leftPillX + $leftPillW + 2, $headerY + $pillH + 2, 34, [206, 166, 72], 0);
+        self::drawFilledRoundedRect($img, $leftPillX, $headerY, $leftPillX + $leftPillW, $headerY + $pillH, 33, [107, 18, 38], 0);
+        imagettftext($img, 25, 0, $leftPillX + 36, $headerY + 45, self::col($img, [255, 255, 255], 0), $sansBold, $leftPillText);
 
         // Family Code Crest Pill on Top Right
-        $bbCode = imagettfbbox(22, 0, $sansBold, $cleanCode);
-        $codeW = $bbCode !== false ? (int)abs($bbCode[2] - $bbCode[0]) : 180;
-        $rightPillW = $codeW + 60;
+        $bbCode = imagettfbbox(26, 0, $sansBold, $cleanCode);
+        $codeW = $bbCode !== false ? (int)abs($bbCode[2] - $bbCode[0]) : 200;
+        $rightPillW = $codeW + 68;
         $rightPillX = $cardX + $cardW - 74 - $rightPillW;
-        self::drawFilledRoundedRect($img, $rightPillX - 2, $headerY - 2, $rightPillX + $rightPillW + 2, $headerY + $pillH + 2, 29, [196, 158, 78], 0);
-        self::drawFilledRoundedRect($img, $rightPillX, $headerY, $rightPillX + $rightPillW, $headerY + $pillH, 28, [246, 238, 220], 0);
-        imagettftext($img, 22, 0, $rightPillX + 30, $headerY + 38, self::col($img, [107, 18, 38], 0), $sansBold, $cleanCode);
+        self::drawFilledRoundedRect($img, $rightPillX - 2, $headerY - 2, $rightPillX + $rightPillW + 2, $headerY + $pillH + 2, 34, [196, 158, 78], 0);
+        self::drawFilledRoundedRect($img, $rightPillX, $headerY, $rightPillX + $rightPillW, $headerY + $pillH, 33, [246, 238, 220], 0);
+        imagettftext($img, 26, 0, $rightPillX + 34, $headerY + 45, self::col($img, [107, 18, 38], 0), $sansBold, $cleanCode);
 
-        // 4. Left Column — Celebrant Portrait Medallion
-        $avatarCx = $cardX + 345;
-        $avatarCy = $cardY + 555;
-        $avatarR = 215;
+        // 4. Left Column — Celebrant Portrait Medallion (vertically centred in card body)
+        $avatarCx = $cardX + 385;
+        $avatarCy = $cardY + 780;
+        $avatarR = 295;
 
         // Soft warm shadow beneath medallion
-        imagefilledellipse($img, $avatarCx + 4, $avatarCy + 12, ($avatarR + 30) * 2, ($avatarR + 30) * 2, self::col($img, [226, 214, 190], 0));
+        imagefilledellipse($img, $avatarCx + 5, $avatarCy + 14, ($avatarR + 34) * 2, ($avatarR + 34) * 2, self::col($img, [226, 214, 190], 0));
         // Outer 24k Gold Bezel Ring
-        imagefilledellipse($img, $avatarCx, $avatarCy, ($avatarR + 24) * 2, ($avatarR + 24) * 2, self::col($img, [202, 160, 52], 0));
+        imagefilledellipse($img, $avatarCx, $avatarCy, ($avatarR + 28) * 2, ($avatarR + 28) * 2, self::col($img, [202, 160, 52], 0));
         // Middle Royal Bordeaux Inlay Ring
-        imagefilledellipse($img, $avatarCx, $avatarCy, ($avatarR + 14) * 2, ($avatarR + 14) * 2, self::col($img, [107, 18, 38], 0));
+        imagefilledellipse($img, $avatarCx, $avatarCy, ($avatarR + 16) * 2, ($avatarR + 16) * 2, self::col($img, [107, 18, 38], 0));
         // Inner Warm Ivory Mat Ring
-        imagefilledellipse($img, $avatarCx, $avatarCy, ($avatarR + 8) * 2, ($avatarR + 8) * 2, self::col($img, [253, 250, 243], 0));
+        imagefilledellipse($img, $avatarCx, $avatarCy, ($avatarR + 9) * 2, ($avatarR + 9) * 2, self::col($img, [253, 250, 243], 0));
         // Portrait disc backing
         imagefilledellipse($img, $avatarCx, $avatarCy, $avatarR * 2, $avatarR * 2, self::col($img, [107, 18, 38], 0));
 
         $drawn = self::drawCircularAvatar($img, $avatarName, $avatarCx, $avatarCy, $avatarR, $root);
         if (!$drawn) {
             $initials = self::initials($title);
-            self::drawCenteredText($img, $initials, $cinzel, 108, $avatarCx, $avatarCy + 38, [253, 230, 138]);
+            self::drawCenteredText($img, $initials, $cinzel, 144, $avatarCx, $avatarCy + 50, [253, 230, 138]);
         }
 
         // Date Ribbon Seal overlapping bottom of Portrait Medallion
         $dateSealText = $targetDate !== '' ? strtoupper($targetDate) : 'SPECIAL DATE';
-        $bbDate = imagettfbbox(22, 0, $sansBold, $dateSealText);
-        $dateTextW = $bbDate !== false ? (int)abs($bbDate[2] - $bbDate[0]) : 220;
-        $sealW = (int)max(290, $dateTextW + 76);
-        $sealH = 66;
+        $bbDate = imagettfbbox(27, 0, $sansBold, $dateSealText);
+        $dateTextW = $bbDate !== false ? (int)abs($bbDate[2] - $bbDate[0]) : 260;
+        $sealW = (int)max(340, $dateTextW + 88);
+        $sealH = 78;
         $sealX = $avatarCx - intdiv($sealW, 2);
-        $sealY = $avatarCy + $avatarR - 18;
+        $sealY = $avatarCy + $avatarR - 22;
 
-        self::drawFilledRoundedRect($img, $sealX - 4, $sealY - 4, $sealX + $sealW + 4, $sealY + $sealH + 4, 35, [202, 160, 52], 0);
-        self::drawFilledRoundedRect($img, $sealX, $sealY, $sealX + $sealW, $sealY + $sealH, 33, [107, 18, 38], 0);
-        self::drawCenteredText($img, $dateSealText, $sansBold, 22, $avatarCx, $sealY + 42, [255, 255, 255]);
+        self::drawFilledRoundedRect($img, $sealX - 4, $sealY - 4, $sealX + $sealW + 4, $sealY + $sealH + 4, 41, [202, 160, 52], 0);
+        self::drawFilledRoundedRect($img, $sealX, $sealY, $sealX + $sealW, $sealY + $sealH, 39, [107, 18, 38], 0);
+        self::drawCenteredText($img, $dateSealText, $sansBold, 27, $avatarCx, $sealY + 50, [255, 255, 255]);
 
-        // 5. Right Column — High-Contrast Editorial Typography
-        $textX = $cardX + 650;
-        $textMaxW = $cardW - 730;
+        // Engraved Left-Column Heritage Crest below Date Seal
+        $crestY = $sealY + $sealH + 54;
+        imagefilledrectangle($img, $avatarCx - 160, $crestY, $avatarCx - 24, $crestY + 2, self::col($img, [202, 160, 52], 0));
+        imagefilledrectangle($img, $avatarCx + 24, $crestY, $avatarCx + 160, $crestY + 2, self::col($img, [202, 160, 52], 0));
+        imagefilledpolygon($img, [$avatarCx, $crestY - 8, $avatarCx + 9, $crestY + 1, $avatarCx, $crestY + 10, $avatarCx - 9, $crestY + 1], $diamondCol);
+        self::drawCenteredText($img, 'CHERISHED FAMILY MILESTONE', $cinzel, 21, $avatarCx, $crestY + 50, [136, 19, 55]);
+
+        // 5. Right Column — High-Contrast Editorial Typography (dynamically centred vertically)
+        $textX = $cardX + 755;
+        $textMaxW = $cardW - 835;
+
+        // Pre-measure Headline (1 line at 98pt, or wrap up to 2 lines at 84pt)
+        $bbSingleTitle = imagettfbbox(98, 0, $playfair, $title);
+        $singleTitleW = $bbSingleTitle !== false ? (int)abs($bbSingleTitle[2] - $bbSingleTitle[0]) : $textMaxW + 1;
+        if ($singleTitleW <= $textMaxW) {
+            $titleFontSize = 98;
+            $titleLines = [$title];
+            $titleLineH = 104;
+        } else {
+            $titleFontSize = 84;
+            $titleLines = self::wrapText($title, $playfair, $titleFontSize, $textMaxW, 2);
+            $titleLineH = 102;
+        }
+        $titleBlockH = max(1, count($titleLines)) * $titleLineH;
+
+        // Pre-measure Subtitle
+        $subUpper = strtoupper($subtitle);
+        if (!str_contains($subUpper, 'CELEBRATION') && !str_contains($subUpper, 'MILESTONE') && !str_contains($subUpper, 'YEARS')) {
+            $subUpper .= '  •  FAMILY MILESTONE CELEBRATION';
+        }
+        $cleanSub = self::truncateText($subUpper, $cinzel, 32, $textMaxW);
+
+        // Pre-measure Quote Box
+        $quoteFontSize = 54;
+        $quoteLineH = 82;
+        $quoteLines = self::wrapText('"' . $meaningfulMsg . '"', $cormorantItalic, $quoteFontSize, $textMaxW - 92, 4);
+        $quoteCount = max(1, count($quoteLines));
+        $quoteBoxH = max(330, 96 + ($quoteCount - 1) * $quoteLineH + 58);
+
+        // Pre-measure CTA Banner (wrap up to 2 lines for full readability)
+        $callToAction = match ($daysRemaining) {
+            0 => 'Shower with warm wishes, favourite memories, and blessings in the comments below!',
+            1 => 'Get your heartfelt wishes and celebration messages ready for tomorrow!',
+            default => 'Mark your calendar! Share a warm family memory or celebration wish below.',
+        };
+        $ctaFontSize = 29;
+        $ctaLines = self::wrapText($callToAction, $sansBold, $ctaFontSize, $textMaxW - 68, 2);
+        $ctaH = count($ctaLines) > 1 ? 136 : 94;
+
+        // Compute total stack height & centre inside card body
+        $badgeH = 72;
+        $totalRightH = $badgeH
+            + 48 + $titleBlockH
+            + 38 + 38
+            + 42 + 16
+            + 48 + $quoteBoxH
+            + 52 + $ctaH
+            + 58 + 30;
+        $bodyTop = $cardY + 178;
+        $bodyBottom = $cardY + $cardH - 110;
+        $curY = max($bodyTop, $bodyTop + intdiv(max(0, ($bodyBottom - $bodyTop) - $totalRightH), 2));
 
         // Countdown Eyebrow Pill (Warm Gold Fill + Deep Espresso Bold Text -> 9.8:1 contrast)
         $badgeText = match ($daysRemaining) {
@@ -605,77 +663,79 @@ final class FamilyHistorianCardRenderer
             1 => 'CELEBRATING TOMORROW  •  SAVE THE DATE',
             default => 'UPCOMING IN ' . $daysRemaining . ' DAYS  •  SAVE THE DATE',
         };
-        $bbBadge = imagettfbbox(22, 0, $sansBold, $badgeText);
-        $badgeW = $bbBadge !== false ? (int)abs($bbBadge[2] - $bbBadge[0]) : 420;
-        $badgeY = $cardY + 235;
-        self::drawFilledRoundedRect($img, $textX - 3, $badgeY - 3, $textX + $badgeW + 59, $badgeY + 61, 30, [217, 119, 6], 0);
-        self::drawFilledRoundedRect($img, $textX, $badgeY, $textX + $badgeW + 56, $badgeY + 58, 28, [254, 243, 199], 0);
-        imagettftext($img, 22, 0, $textX + 28, $badgeY + 38, self::col($img, [120, 53, 15], 0), $sansBold, $badgeText);
+        $bbBadge = imagettfbbox(26, 0, $sansBold, $badgeText);
+        $badgeW = $bbBadge !== false ? (int)abs($bbBadge[2] - $bbBadge[0]) : 480;
+        $badgeY = $curY;
+        self::drawFilledRoundedRect($img, $textX - 3, $badgeY - 3, $textX + $badgeW + 67, $badgeY + $badgeH + 3, 36, [217, 119, 6], 0);
+        self::drawFilledRoundedRect($img, $textX, $badgeY, $textX + $badgeW + 64, $badgeY + $badgeH, 34, [254, 243, 199], 0);
+        imagettftext($img, 26, 0, $textX + 32, $badgeY + 46, self::col($img, [120, 53, 15], 0), $sansBold, $badgeText);
+        $curY += $badgeH + 48;
 
         // Celebrant Display Headline in Playfair Display (Deep Espresso Ink #1c1917 -> 16.5:1 contrast)
-        $cleanTitle = self::truncateText($title, $playfair, 76, $textMaxW);
         $inkCol = self::col($img, [28, 25, 23], 0);
-        imagettftext($img, 76, 0, $textX, $cardY + 402, $inkCol, $playfair, $cleanTitle);
-        imagettftext($img, 76, 0, $textX + 1, $cardY + 402, $inkCol, $playfair, $cleanTitle);
+        $headlineBaseline = $curY + $titleFontSize;
+        foreach ($titleLines as $tLine) {
+            imagettftext($img, $titleFontSize, 0, $textX, $headlineBaseline, $inkCol, $playfair, $tLine);
+            imagettftext($img, $titleFontSize, 0, $textX + 1, $headlineBaseline, $inkCol, $playfair, $tLine);
+            $headlineBaseline += $titleLineH;
+        }
+        $curY += $titleBlockH + 38;
 
         // Engraved Occasion Subtitle (Royal Bordeaux #881337 -> 8.9:1 contrast)
-        $subUpper = strtoupper($subtitle);
-        if (!str_contains($subUpper, 'CELEBRATION') && !str_contains($subUpper, 'MILESTONE') && !str_contains($subUpper, 'YEARS')) {
-            $subUpper .= '  •  FAMILY MILESTONE CELEBRATION';
-        }
-        $cleanSub = self::truncateText($subUpper, $cinzel, 27, $textMaxW);
         $crimsonCol = self::col($img, [136, 19, 55], 0);
-        imagettftext($img, 27, 0, $textX, $cardY + 468, $crimsonCol, $cinzel, $cleanSub);
-        imagettftext($img, 27, 0, $textX + 1, $cardY + 468, $crimsonCol, $cinzel, $cleanSub);
+        imagettftext($img, 32, 0, $textX, $curY + 32, $crimsonCol, $cinzel, $cleanSub);
+        imagettftext($img, 32, 0, $textX + 1, $curY + 32, $crimsonCol, $cinzel, $cleanSub);
+        $curY += 38 + 42;
 
         // Ornamental Burnished Gold Divider Rule
-        $ruleY = $cardY + 506;
-        imagefilledrectangle($img, $textX, $ruleY, $textX + $textMaxW, $ruleY + 3, self::col($img, [202, 160, 52], 0));
-        imagefilledpolygon($img, [$textX + 60, $ruleY - 7, $textX + 69, $ruleY + 1, $textX + 60, $ruleY + 9, $textX + 51, $ruleY + 1], $diamondCol);
+        $ruleY = $curY + 6;
+        imagefilledrectangle($img, $textX, $ruleY, $textX + $textMaxW, $ruleY + 4, self::col($img, [202, 160, 52], 0));
+        imagefilledpolygon($img, [$textX + 68, $ruleY - 8, $textX + 78, $ruleY + 2, $textX + 68, $ruleY + 12, $textX + 58, $ruleY + 2], $diamondCol);
+        $curY += 16 + 48;
 
-        // Editorial Tribute Quote Panel (#f5eede warm surface + 10px Royal Bordeaux left accent bar)
-        $quoteBoxY = $cardY + 542;
-        $quoteBoxH = 240;
-        self::drawFilledRoundedRect($img, $textX, $quoteBoxY, $textX + $textMaxW, $quoteBoxY + $quoteBoxH, 20, [245, 238, 222], 0);
-        imagefilledrectangle($img, $textX, $quoteBoxY + 16, $textX + 10, $quoteBoxY + $quoteBoxH - 16, $crimsonCol);
+        // Editorial Tribute Quote Panel (#f5eede warm surface + 12px Royal Bordeaux left accent bar)
+        $quoteBoxY = $curY;
+        self::drawFilledRoundedRect($img, $textX, $quoteBoxY, $textX + $textMaxW, $quoteBoxY + $quoteBoxH, 24, [245, 238, 222], 0);
+        imagefilledrectangle($img, $textX, $quoteBoxY + 18, $textX + 12, $quoteBoxY + $quoteBoxH - 18, $crimsonCol);
 
-        $quoteLines = self::wrapText('"' . $meaningfulMsg . '"', $cormorantItalic, 43, $textMaxW - 84, 3);
-        $qY = $quoteBoxY + 76;
+        $qTotalTextH = ($quoteCount - 1) * $quoteLineH + $quoteFontSize;
+        $qY = $quoteBoxY + intdiv(max(0, $quoteBoxH - $qTotalTextH), 2) + $quoteFontSize - 6;
         $quoteCol = self::col($img, [41, 37, 36], 0);
         foreach ($quoteLines as $qLine) {
-            imagettftext($img, 43, 0, $textX + 42, $qY, $quoteCol, $cormorantItalic, $qLine);
-            imagettftext($img, 43, 0, $textX + 43, $qY, $quoteCol, $cormorantItalic, $qLine);
-            $qY += 64;
+            imagettftext($img, $quoteFontSize, 0, $textX + 46, $qY, $quoteCol, $cormorantItalic, $qLine);
+            imagettftext($img, $quoteFontSize, 0, $textX + 47, $qY, $quoteCol, $cormorantItalic, $qLine);
+            $qY += $quoteLineH;
         }
+        $curY += $quoteBoxH + 52;
 
         // Call-to-Action Footer Banner (Pure typographical text, zero broken emoji glyphs)
-        $ctaY = $cardY + 820;
-        $ctaH = 74;
-        self::drawFilledRoundedRect($img, $textX - 2, $ctaY - 2, $textX + $textMaxW + 2, $ctaY + $ctaH + 2, 22, [206, 166, 72], 0);
-        self::drawFilledRoundedRect($img, $textX, $ctaY, $textX + $textMaxW, $ctaY + $ctaH, 20, [250, 243, 224], 0);
+        $ctaY = $curY;
+        self::drawFilledRoundedRect($img, $textX - 2, $ctaY - 2, $textX + $textMaxW + 2, $ctaY + $ctaH + 2, 24, [206, 166, 72], 0);
+        self::drawFilledRoundedRect($img, $textX, $ctaY, $textX + $textMaxW, $ctaY + $ctaH, 22, [250, 243, 224], 0);
 
-        $callToAction = match ($daysRemaining) {
-            0 => 'Shower with warm wishes, favourite memories, and blessings in the comments below!',
-            1 => 'Get your heartfelt wishes and celebration messages ready for tomorrow!',
-            default => 'Mark your calendar! Share a warm family memory or celebration wish below.',
-        };
-        $cleanCta = self::truncateText($callToAction, $sansBold, 24, $textMaxW - 56);
-        imagettftext($img, 24, 0, $textX + 28, $ctaY + 46, self::col($img, [107, 18, 38], 0), $sansBold, $cleanCta);
+        $ctaLineH = 44;
+        $ctaTextY = count($ctaLines) > 1 ? ($ctaY + 52) : ($ctaY + 57);
+        $ctaCol = self::col($img, [107, 18, 38], 0);
+        foreach ($ctaLines as $cLine) {
+            imagettftext($img, $ctaFontSize, 0, $textX + 34, $ctaTextY, $ctaCol, $sansBold, $cLine);
+            $ctaTextY += $ctaLineH;
+        }
+        $curY += $ctaH + 58;
 
         // Engraved Family Dynasty Sign-Off
-        $signOff = 'WITH WARMEST BLESSINGS  •  THE ' . $cleanCode . ' FAMILY DYNASTY';
+        $signOff = self::truncateText('WITH WARMEST BLESSINGS  •  THE ' . $cleanCode . ' FAMILY DYNASTY', $cinzel, 25, $textMaxW);
         $signCol = self::col($img, [146, 102, 32], 0);
-        imagettftext($img, 21, 0, $textX + 4, $cardY + 952, $signCol, $cinzel, $signOff);
-        imagettftext($img, 21, 0, $textX + 5, $cardY + 952, $signCol, $cinzel, $signOff);
+        imagettftext($img, 25, 0, $textX + 4, $curY + 25, $signCol, $cinzel, $signOff);
+        imagettftext($img, 25, 0, $textX + 5, $curY + 25, $signCol, $cinzel, $signOff);
 
         // 6. Card Bottom Heritage Watermark
-        $footY = $cardY + $cardH - 54;
+        $footY = $cardY + $cardH - 52;
         $footLeft = 'FamilyPlatform  •  Family Historian';
         $footRight = 'Private Family Timeline  •  ' . $cleanCode;
-        imagettftext($img, 21, 0, $cardX + 74, $footY, self::col($img, [120, 100, 74], 0), $sans, $footLeft);
-        $bbFootR = imagettfbbox(21, 0, $sans, $footRight);
-        $footRW = $bbFootR !== false ? (int)abs($bbFootR[2] - $bbFootR[0]) : 340;
-        imagettftext($img, 21, 0, $cardX + $cardW - 74 - $footRW, $footY, self::col($img, [120, 100, 74], 0), $sans, $footRight);
+        imagettftext($img, 24, 0, $cardX + 74, $footY, self::col($img, [120, 100, 74], 0), $sans, $footLeft);
+        $bbFootR = imagettfbbox(24, 0, $sans, $footRight);
+        $footRW = $bbFootR !== false ? (int)abs($bbFootR[2] - $bbFootR[0]) : 380;
+        imagettftext($img, 24, 0, $cardX + $cardW - 74 - $footRW, $footY, self::col($img, [120, 100, 74], 0), $sans, $footRight);
     }
 
     /**
@@ -951,12 +1011,25 @@ final class FamilyHistorianCardRenderer
                         return $lines;
                     }
                 }
-                $current = $word;
+                $wordBb = imagettfbbox($size, 0, $font, $word);
+                $wordW = $wordBb !== false ? abs($wordBb[2] - $wordBb[0]) : 0;
+                $current = $wordW > $maxWidth ? self::truncateText($word, $font, $size, $maxWidth) : $word;
             }
         }
         if ($current !== '' && count($lines) < $maxLines) {
-            $lines[] = $current;
+            $lines[] = self::truncateText($current, $font, $size, $maxWidth);
         }
         return $lines;
+    }
+
+    /**
+     * Strip raw media paths, URLs, and HTML from spotlight excerpts before rendering.
+     */
+    private static function sanitiseExcerpt(string $raw): string
+    {
+        $clean = (string)preg_replace('#https?://[^\s]+#i', '', $raw);
+        $clean = (string)preg_replace('#/?resources/(?:videos|images|audio)/[^\s]+#i', '', $clean);
+        $clean = trim((string)preg_replace('/\s+/', ' ', strip_tags($clean)));
+        return $clean !== '' ? $clean : 'A cherished family memory shared on the timeline.';
     }
 }

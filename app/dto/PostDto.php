@@ -146,7 +146,8 @@ final class PostDto implements JsonSerializable
         public readonly string $targetScope = 'all',
         public readonly ?string $postStyle = null,
         public readonly bool $isHistorianPost = false,
-        public readonly array $normalizedMedia = []
+        public readonly array $normalizedMedia = [],
+        public readonly bool $allowSharing = true
     ) {}
 
     /**
@@ -418,6 +419,14 @@ final class PostDto implements JsonSerializable
         $slotImagesForNorm = isset($row['images']) && is_array($row['images']) ? array_values(array_filter($row['images'], 'is_string')) : [];
         $normalizedMedia = self::buildNormalizedMedia($postNo, $slotImagesForNorm, $rowVideos, $linkPreview);
 
+        $allowSharing = true;
+        if (array_key_exists('allow_sharing', $row)) {
+            $rawShareFlag = $row['allow_sharing'];
+            $allowSharing = !($rawShareFlag === false || $rawShareFlag === 0 || $rawShareFlag === '0' || $rawShareFlag === 'false' || $rawShareFlag === 'off');
+        } elseif (is_array($parsedMediaMeta) && array_key_exists('allow_sharing', $parsedMediaMeta)) {
+            $allowSharing = (bool)$parsedMediaMeta['allow_sharing'];
+        }
+
         return new self(
             postNo: $postNo,
             id: $id,
@@ -449,7 +458,8 @@ final class PostDto implements JsonSerializable
             targetScope: (string)($row['target_scope'] ?? 'all'),
             postStyle: $postStyle,
             isHistorianPost: $isHistorianPost,
-            normalizedMedia: $normalizedMedia
+            normalizedMedia: $normalizedMedia,
+            allowSharing: $allowSharing
         );
     }
 
@@ -592,6 +602,7 @@ final class PostDto implements JsonSerializable
         $arr['videos'] = $this->videos;
         $arr['video'] = $this->video;
         $arr['normalized_media'] = $this->normalizedMedia;
+        $arr['allow_sharing'] = $this->allowSharing;
 
         if (isset($this->rawAttributes['images'])) {
             $arr['images'] = $this->rawAttributes['images'];

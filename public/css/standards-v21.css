@@ -1,4 +1,11 @@
-@import url('./outfit.css');
+@font-face {
+  font-family: 'Outfit';
+  src: url('../fonts/outfit/outfit-latin.woff2') format('woff2'),
+       url('../fonts/outfit/outfit-latin-ext.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
 /* Inter font import removed – using native system stack and self‑hosted Outfit */
 /*
  * Global Design Standards v2.1 base layer (CEO-approved 2026-10-22).
@@ -231,10 +238,15 @@ body.dark-theme .bg-warning-subtle :is(p, span, label, small, .text-muted, .text
 /* WCAG AA Inviolable Text Contrast Rule: Ensure muted text meets >= 4.5:1 on light canvas */
 :root {
   --bs-secondary-color: #475569;
+  --bs-secondary-rgb: 71, 85, 105;
 }
 .text-muted,
+.text-secondary,
 .form-text {
   color: var(--text-muted-aa, #475569) !important;
+}
+.badge.bg-success-subtle.text-success {
+  color: #0f5132 !important;
 }
 
 body.dark-mode .text-muted,
@@ -4376,13 +4388,12 @@ video.feed-post-video::-webkit-media-controls-play-button,
    4. Scroll Chaining & Accidental Pull-to-Refresh Guard (overscroll-behavior)
    ========================================================================== */
 
-/* 1. Off-Screen Feed Virtualisation: Skips layout & paint for below-fold cards */
+/* 1. Off-Screen Feed Virtualisation: Skips paint for below-fold cards without fixed intrinsic-height overlap */
 .post-card:nth-of-type(n+3),
 .feed-post-card:nth-of-type(n+3),
 .timeline-post-card:nth-of-type(n+3),
 .member-card-item:nth-of-type(n+7) {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 420px;
+  contain: layout style;
 }
 
 /* Disable containment while a dropdown or input inside the card is active */

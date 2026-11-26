@@ -39,7 +39,7 @@ try {
 
     // Fetch active family members with registered family codes
     $stmt = $db->query(
-        'SELECT DISTINCT a.id AS user_id, p.famCode
+        'SELECT DISTINCT a.id AS user_id, p.famCode, p.firstName, p.lastName, p.profile_pix
          FROM account a
          INNER JOIN personal p ON a.id = p.id
          WHERE p.famCode IS NOT NULL 
@@ -55,6 +55,7 @@ try {
 
     $curatedCount = 0;
     $skippedCount = 0;
+    $seenFamilies = [];
 
     foreach ($members as $member) {
         $userId = (string)($member['user_id'] ?? '');
@@ -64,17 +65,32 @@ try {
             continue;
         }
 
-        // Check if pending draft already exists for this week
-        $existing = WeeklyActivityVideoCuratorService::getPendingReel($userId, $famCode);
-        if ($existing !== null) {
+        // Deduplicate by family circle so each family gets one weekly fun-facts post
+        $normFam = strtoupper(ltrim(trim($famCode), '#'));
+        if (isset($seenFamilies[$normFam])) {
             $skippedCount++;
             continue;
         }
+        $seenFamilies[$normFam] = true;
+
+        $fullName = trim((string)($member['firstName'] ?? '') . ' ' . (string)($member['lastName'] ?? ''));
+        $profilePix = !empty($member['profile_pix']) ? (string)$member['profile_pix'] : null;
 
         if (!$dryRun) {
-            WeeklyActivityVideoCuratorService::curateWeeklyActivity($userId, $famCode, false);
+            $published = WeeklyActivityVideoCuratorService::ensureAutoPublishedWeeklyReel(
+                $userId,
+                $famCode,
+                $fullName,
+                $profilePix
+            );
+            if ($published !== null) {
+                $curatedCount++;
+            } else {
+                $skippedCount++;
+            }
+        } else {
+            $curatedCount++;
         }
-        $curatedCount++;
     }
 
     echo "Completed.\n";

@@ -31,6 +31,9 @@
     <script id="reelsInitialData" type="application/json">
         {!! json_encode($initialReels ?? []) !!}
     </script>
+    <script id="reelsKinshipData" type="application/json">
+        {!! $reelsKinshipJson ?? '{}' !!}
+    </script>
 
     <!-- 9:16 Mobile & Desktop Centered Viewport -->
     <div class="reels-viewport" id="reelsViewport">
@@ -44,8 +47,8 @@
     <div class="reel-comments-drawer" id="reelCommentsDrawer">
         <div class="reel-comments-header">
             <h6 class="mb-0 fw-bold"><i class="bi bi-chat-dots-fill text-primary me-2"></i> Family Comments</h6>
-            <button type="button" class="btn btn-sm btn-link text-white-50 p-0 text-decoration-none fs-5" onclick="document.getElementById('reelCommentsDrawer').classList.remove('open')">
-                <i class="bi bi-x-lg"></i>
+            <button type="button" class="reel-comments-close-btn" id="btnCloseReelComments" aria-label="Close comments" title="Close comments">
+                <i class="bi bi-x-lg" aria-hidden="true"></i>
             </button>
         </div>
 

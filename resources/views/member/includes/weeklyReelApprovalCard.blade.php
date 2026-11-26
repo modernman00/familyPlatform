@@ -179,7 +179,8 @@ html.dark-mode #weeklyReelApprovalCard .weekly-reel-title-text {
                     @click="toggleSfx()"
                     class="btn btn-sm btn-outline-light rounded-pill px-3 d-inline-flex align-items-center gap-1"
                     style="min-height: 44px; white-space: nowrap; flex-shrink: 0;"
-                    aria-label="Toggle motion sound effects">
+                    :aria-label="(sfxEnabled ? 'SFX On' : 'SFX Off') + ' — Toggle motion sound effects'"
+                    aria-label="SFX Off — Toggle motion sound effects">
                 <i :class="sfxEnabled ? 'bi bi-volume-up-fill' : 'bi bi-volume-mute-fill'" aria-hidden="true"></i>
                 <span x-text="sfxEnabled ? 'SFX On' : 'SFX Off'">SFX Off</span>
             </button>

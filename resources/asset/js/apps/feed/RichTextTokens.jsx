@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from 'preact/hooks';
+import { useState, useRef, useEffect, useMemo } from 'preact/hooks';
 import { isEmojiOnlyMessage, tokenizeRichText } from './feedUtils';
+import { applyKinshipToTokens, buildMentionContext } from './kinshipMentions';
 
 function getKnownLivingEmojiIds() {
     if (typeof window === 'undefined') return null;
@@ -35,7 +36,14 @@ function getLivingEmojiTitle(emojiId) {
  * Declaratively renders rich post/comment tokens (3D living family emojis, Me-stickers,
  * hashtags, mentions, links) without dangerouslySetInnerHTML.
  */
-export function RichTextTokens({ text, arEmoji = null, onSelectHashtag, isStage = false }) {
+export function RichTextTokens({
+    text,
+    arEmoji = null,
+    onSelectHashtag,
+    isStage = false,
+    bootstrap = null,
+    postTags = null,
+}) {
     const [playingMap, setPlayingMap] = useState({});
     const timersRef = useRef({});
 
@@ -56,8 +64,14 @@ export function RichTextTokens({ text, arEmoji = null, onSelectHashtag, isStage 
         }, 900);
     };
 
-    const tokens = tokenizeRichText(text, arEmoji);
-    if (tokens.length === 0) return null;
+    const mentionContext = useMemo(
+        () => buildMentionContext(bootstrap, postTags),
+        [bootstrap, postTags]
+    );
+
+    const rawTokens = tokenizeRichText(text, arEmoji);
+    if (rawTokens.length === 0) return null;
+    const tokens = applyKinshipToTokens(rawTokens, mentionContext);
 
     const emojiOnly = isEmojiOnlyMessage(text, arEmoji);
     const knownIds = getKnownLivingEmojiIds();
@@ -186,9 +200,25 @@ export function RichTextTokens({ text, arEmoji = null, onSelectHashtag, isStage 
         }
 
         if (tok.type === 'mention') {
+            const label = tok.displayValue || tok.value;
+            const chipTitle = tok.tooltip || `Mentioned: ${tok.value}`;
+            const stageClass = isStage ? ' mention-chip--stage' : '';
+            if (tok.href) {
+                return (
+                    <a
+                        key={i}
+                        href={tok.href}
+                        className={`mention-chip mention-chip--link${stageClass}`}
+                        title={chipTitle}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {label}
+                    </a>
+                );
+            }
             return (
-                <span key={i} className="mention-chip" title={`Mentioned: ${tok.value}`}>
-                    {tok.value}
+                <span key={i} className={`mention-chip${stageClass}`} title={chipTitle}>
+                    {label}
                 </span>
             );
         }

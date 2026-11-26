@@ -96,12 +96,14 @@ export function parseVideoUrl(url) {
   const ytRegex = /(?:https?:\/\/)?(?:www\.|m\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?|shorts|live)\/|\S*?[?&]v[=_]?)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
   const ytMatch = trimmed.match(ytRegex);
   if (ytMatch && ytMatch[1]) {
+    const isYtShort = /\/shorts\//i.test(trimmed);
     return {
       type: 'youtube',
       videoId: ytMatch[1],
       thumbnailUrl: `https://i.ytimg.com/vi/${ytMatch[1]}/hqdefault.jpg`,
       embedUrl: `https://www.youtube-nocookie.com/embed/${ytMatch[1]}?rel=0&modestbranding=1&autoplay=0`,
-      originalUrl: trimmed
+      originalUrl: trimmed,
+      ...(isYtShort ? { isShort: true, aspect_ratio: '9 / 16' } : {}),
     };
   }
 

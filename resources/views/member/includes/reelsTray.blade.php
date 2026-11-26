@@ -12,7 +12,7 @@
                 <i class="bi bi-camera-reels-fill"></i>
             </div>
             <div>
-                <h6 class="mb-0 fw-bold reel-tray-title" style="letter-spacing: -0.01em;">Family Reels &amp; Stories</h6>
+                <h3 class="h6 mb-0 fw-bold reel-tray-title" style="letter-spacing: -0.01em;">Family Reels &amp; Stories</h3>
                 <div class="reel-tray-subtitle" style="font-size: 0.72rem;">Short-form milestones, celebrations &amp; oral history</div>
             </div>
         </div>
@@ -37,21 +37,21 @@
 
     <!-- Category Quick Filter Pills -->
     <div class="reel-tray-filter-bar mb-2" role="tablist" aria-label="Filter Family Reels">
-        <button type="button" class="reel-tray-filter-pill active" data-reel-filter="all">All</button>
-        <button type="button" class="reel-tray-filter-pill" data-reel-filter="milestone">🎉 Milestones</button>
-        <button type="button" class="reel-tray-filter-pill" data-reel-filter="reunion">🏡 Reunions</button>
-        <button type="button" class="reel-tray-filter-pill" data-reel-filter="storytelling">📖 Stories</button>
-        <button type="button" class="reel-tray-filter-pill" data-reel-filter="first_steps">👶 Kids</button>
-        <button type="button" class="reel-tray-filter-pill" data-reel-filter="wedding">💍 Weddings</button>
-        <button type="button" class="reel-tray-filter-pill" data-reel-filter="night_out">🌙 Night Out</button>
-        <button type="button" class="reel-tray-filter-pill" data-reel-filter="weekend_out">🏖️ Weekend Out</button>
-        <button type="button" class="reel-tray-filter-pill" data-reel-filter="holiday">✈️ Holidays</button>
-        <button type="button" class="reel-tray-filter-pill" data-reel-filter="birthday">🎂 Birthdays</button>
+        <button type="button" role="tab" aria-selected="true" class="reel-tray-filter-pill active" data-reel-filter="all">All</button>
+        <button type="button" role="tab" aria-selected="false" class="reel-tray-filter-pill" data-reel-filter="milestone">🎉 Milestones</button>
+        <button type="button" role="tab" aria-selected="false" class="reel-tray-filter-pill" data-reel-filter="reunion">🏡 Reunions</button>
+        <button type="button" role="tab" aria-selected="false" class="reel-tray-filter-pill" data-reel-filter="storytelling">📖 Stories</button>
+        <button type="button" role="tab" aria-selected="false" class="reel-tray-filter-pill" data-reel-filter="first_steps">👶 Kids</button>
+        <button type="button" role="tab" aria-selected="false" class="reel-tray-filter-pill" data-reel-filter="wedding">💍 Weddings</button>
+        <button type="button" role="tab" aria-selected="false" class="reel-tray-filter-pill" data-reel-filter="night_out">🌙 Night Out</button>
+        <button type="button" role="tab" aria-selected="false" class="reel-tray-filter-pill" data-reel-filter="weekend_out">🏖️ Weekend Out</button>
+        <button type="button" role="tab" aria-selected="false" class="reel-tray-filter-pill" data-reel-filter="holiday">✈️ Holidays</button>
+        <button type="button" role="tab" aria-selected="false" class="reel-tray-filter-pill" data-reel-filter="birthday">🎂 Birthdays</button>
     </div>
 
     <div class="reels-tray-scroll" id="reelsTrayScroll">
         <!-- 1. Create Reel Card (Facebook-Style First Card) -->
-        <div class="reel-fb-create-card" role="button" tabindex="0" data-bs-toggle="modal" data-bs-target="#createReelModal" aria-label="Create Family Reel">
+        <div class="reel-fb-create-card" role="button" tabindex="0" data-bs-toggle="modal" data-bs-target="#createReelModal" aria-label="Create Reel — Share a Family Reel">
             <div class="reel-fb-create-top">
                 <img src="{{ !empty($data['img']) ? (str_starts_with($data['img'], '/') ? $data['img'] : '/resources/images/profile/' . $data['img']) : '/resources/images/profile/avatarM.png' }}" 
                      alt="You">

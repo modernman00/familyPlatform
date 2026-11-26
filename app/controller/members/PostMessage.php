@@ -63,6 +63,7 @@ final class PostMessage
             // Cap page size so one request can never pull the whole feed; keeps legacy default of 50.
             $limit = isset($_GET['limit']) ? max(1, min(50, (int) $_GET['limit'])) : 50;
             $filter = isset($_GET['filter']) ? trim((string)$_GET['filter']) : '';
+            $personId = isset($_GET['person_id']) ? trim((string)$_GET['person_id']) : '';
             $cursor = isset($_GET['cursor']) ? trim((string)$_GET['cursor']) : '';
             // Optional explicit offset lets legacy callers paginate when cursor is omitted.
             $offset = ($cursor !== '') ? 0 : (isset($_GET['offset']) ? max(0, (int) $_GET['offset']) : ($page - 1) * $limit);
@@ -75,7 +76,8 @@ final class PostMessage
                 $limit,
                 $offset,
                 $filter,
-                $cursor !== '' ? $cursor : null
+                $cursor !== '' ? $cursor : null,
+                $personId !== '' ? $personId : null
             );
             $posts = $pageData['posts'];
             $hasMore = $pageData['has_more'];
@@ -668,7 +670,156 @@ final class PostMessage
     }
 
     /**
-     * Edits a post's text. Text only — images/poll are unchanged.
+     * Checks whether a raw post database row permits sharing by non-authors.
+     * Defaults to true unless the author explicitly disabled sharing in media_meta.
+     *
+     * @param array<string, mixed> $postRow
+     */
+    public static function isPostShareable(array $postRow): bool
+    {
+        if (array_key_exists('allow_sharing', $postRow)) {
+            $val = $postRow['allow_sharing'];
+            return !($val === false || $val === 0 || $val === '0' || $val === 'false' || $val === 'off');
+        }
+        $meta = \App\classes\VideoParser::normaliseMediaMeta($postRow['media_meta'] ?? null);
+        if (is_array($meta) && array_key_exists('allow_sharing', $meta)) {
+            return (bool)$meta['allow_sharing'];
+        }
+        return true;
+    }
+
+    /**
+     * Resolves a user's full display name for notifications.
+     */
+    public static function resolveUserDisplayName(\PDO $db, string $userId): string
+    {
+        $sessName = trim(($_SESSION['fName'] ?? '') . ' ' . ($_SESSION['lName'] ?? ''));
+        if ($sessName !== '' && (string)($_SESSION['id'] ?? '') === $userId) {
+            return $sessName;
+        }
+        try {
+            $stmt = $db->prepare("SELECT CONCAT(TRIM(COALESCE(firstName, '')), ' ', TRIM(COALESCE(lastName, ''))) FROM personal WHERE id = ? LIMIT 1");
+            $stmt->execute([$userId]);
+            $name = trim((string)$stmt->fetchColumn());
+            if ($name !== '') {
+                return $name;
+            }
+        } catch (\Throwable) {
+            // Fallback below
+        }
+        return 'A family member';
+    }
+
+    /**
+     * Sends an in-app notification, realtime Pusher toast, and Web Push notification
+     * to the original post author when another family member shares or reposts their post.
+     * Deduplicated over a 60-second window per (sharer, post) to prevent rapid click spam.
+     */
+    public static function notifyAuthorOfPostShare(
+        \PDO $db,
+        int $postNo,
+        string $authorId,
+        string $sharerId,
+        string $sharerName,
+        string $channel = 'link'
+    ): bool {
+        $authorId = trim($authorId);
+        $sharerId = trim($sharerId);
+        if (
+            $postNo <= 0
+            || $authorId === ''
+            || $sharerId === ''
+            || $authorId === $sharerId
+            || in_array($authorId, ['FAMILY_PLATFORM_OFFICIAL', 'FAM_PLATFORM_OFFICIAL', 'FAMILY_HISTORIAN'], true)
+        ) {
+            return false;
+        }
+
+        $actionUrl = self::buildPostUrl($postNo);
+        $channelLabel = match (strtolower(trim($channel))) {
+            'repost', 'feed' => 'reposted your post to the family feed',
+            'whatsapp' => 'shared your post on WhatsApp',
+            'facebook' => 'shared your post on Facebook',
+            'x', 'twitter' => 'shared your post on X',
+            'telegram' => 'shared your post on Telegram',
+            'linkedin' => 'shared your post on LinkedIn',
+            'sms', 'messages' => 'shared your post via Messages',
+            'email' => 'shared your post via Email',
+            'copy' => 'copied a share link to your post',
+            default => 'shared your post',
+        };
+        $notificationMsg = "{$sharerName} {$channelLabel}";
+        $inAppTitle = "Your post was shared";
+        $pushTitle = "🔗 {$sharerName} shared your post";
+        $pushTag = "post-share-{$postNo}-{$sharerId}";
+
+        try {
+            $dupeStmt = $db->prepare(
+                "SELECT 1 FROM notification
+                 WHERE sender_id = ?
+                   AND receiver_id = ?
+                   AND notification_type = 'PostShare'
+                   AND action_url = ?
+                   AND notification_date > (NOW() - INTERVAL 60 SECOND)
+                 LIMIT 1"
+            );
+            $dupeStmt->execute([$sharerId, $authorId, $actionUrl]);
+            if ($dupeStmt->fetchColumn()) {
+                return false;
+            }
+
+            $insStmt = $db->prepare(
+                "INSERT INTO notification
+                 (sender_id, receiver_id, sender_name, notification_name, notification_type, notification_content, action_url, notification_status, notification_date)
+                 VALUES (?, ?, ?, ?, 'PostShare', ?, ?, 'new', NOW())"
+            );
+            $insStmt->execute([
+                $sharerId,
+                $authorId,
+                $sharerName,
+                $inAppTitle,
+                $notificationMsg,
+                $actionUrl ?: '/profilePage',
+            ]);
+        } catch (\Throwable $e) {
+            error_log('[PostMessage::notifyAuthorOfPostShare] DB write failed: ' . $e->getMessage());
+        }
+
+        try {
+            $pusher = Pusher::pusher();
+            if ($pusher !== null) {
+                $cleanTargetUid = preg_replace('/[^A-Za-z0-9_-]/', '', $authorId);
+                if ($cleanTargetUid !== '') {
+                    $pusher->trigger("private-user-{$cleanTargetUid}", 'new-notification', [
+                        'title' => $pushTitle,
+                        'body' => $notificationMsg,
+                        'action_url' => $actionUrl ?: '/profilePage',
+                        'type' => 'PostShare',
+                        'sender_name' => $sharerName,
+                    ]);
+                }
+            }
+        } catch (\Throwable $e) {
+            error_log('[PostMessage::notifyAuthorOfPostShare] Pusher failed: ' . $e->getMessage());
+        }
+
+        try {
+            PushNotificationClass::sendPushNotification(
+                userId: [$authorId],
+                message: $notificationMsg,
+                url: $actionUrl,
+                title: $pushTitle,
+                tag: $pushTag
+            );
+        } catch (\Throwable $e) {
+            error_log('[PostMessage::notifyAuthorOfPostShare] WebPush failed: ' . $e->getMessage());
+        }
+
+        return true;
+    }
+
+    /**
+     * Edits a post's text, 3D stage style, or author sharing permission.
      * Author-only.
      */
     public static function updatePost(int|string $postNo): void
@@ -681,13 +832,24 @@ final class PostMessage
             $input = is_array($input) ? $input : [];
             \App\controller\BaseController::validateCsrf($input);
 
-            $userId = $_SESSION['id'];
+            $userId = (string)($_SESSION['id'] ?? '');
             $postNo = self::asIdentifier(Utility::checkInput($postNo));
             $post = Post::postByNo($postNo);
-            $postAuthorId = $post['id'] ?? null;
+            $postAuthorId = (string)($post['id'] ?? '');
 
-            if ($userId !== $postAuthorId) {
+            if ($userId === '' || $userId !== $postAuthorId) {
                 throw new ForbiddenException('You can only edit your own posts.');
+            }
+
+            $existingMeta = \App\classes\VideoParser::normaliseMediaMeta($post['media_meta'] ?? null) ?? [];
+            $allowSharing = array_key_exists('allow_sharing', $existingMeta) ? (bool)$existingMeta['allow_sharing'] : true;
+            if (array_key_exists('allow_sharing', $input)) {
+                $rawAllow = $input['allow_sharing'];
+                $allowSharing = !($rawAllow === false || $rawAllow === 0 || $rawAllow === '0' || $rawAllow === 'false' || $rawAllow === 'off');
+                $existingMeta['allow_sharing'] = $allowSharing;
+                $metaJson = json_encode($existingMeta, JSON_UNESCAPED_SLASHES) ?: null;
+                $mStmt = \Src\Db::connect2()->prepare('UPDATE post SET media_meta = ? WHERE post_no = ?');
+                $mStmt->execute([$metaJson, (int)$postNo]);
             }
 
             $existingRawMessage = (string)($post['postMessage'] ?? '');
@@ -710,25 +872,27 @@ final class PostMessage
                 $cleanMessageStr = \App\dto\PostDto::stripStyleToken($cleanMessageStr);
             }
 
-            (new Update('post'))->updateTable(
-                column: 'postMessage',
-                columnAnswer: $cleanMessageStr,
-                identifier: 'post_no',
-                identifierAnswer: $postNo
-            );
-
-            // Re-synchronise family hashtags
-            try {
-                $famCode = (string)($post['postFamCode'] ?? ($_SESSION['famCode'] ?? ''));
-                \App\services\HashtagService::syncHashtags(
-                    $famCode,
-                    'post',
-                    (string)$postNo,
-                    (string)$userId,
-                    \App\dto\PostDto::stripStyleToken($cleanMessageStr)
+            if (array_key_exists('postMessage', $input) || array_key_exists('post_style', $input)) {
+                (new Update('post'))->updateTable(
+                    column: 'postMessage',
+                    columnAnswer: $cleanMessageStr,
+                    identifier: 'post_no',
+                    identifierAnswer: $postNo
                 );
-            } catch (\Throwable $th) {
-                error_log('[PostMessage::updatePost hashtags] ' . $th->getMessage());
+
+                // Re-synchronise family hashtags
+                try {
+                    $famCode = (string)($post['postFamCode'] ?? ($_SESSION['famCode'] ?? ''));
+                    \App\services\HashtagService::syncHashtags(
+                        $famCode,
+                        'post',
+                        (string)$postNo,
+                        (string)$userId,
+                        \App\dto\PostDto::stripStyleToken($cleanMessageStr)
+                    );
+                } catch (\Throwable $th) {
+                    error_log('[PostMessage::updatePost hashtags] ' . $th->getMessage());
+                }
             }
 
             // Warm up and resolve link preview
@@ -739,6 +903,7 @@ final class PostMessage
                 'postMessage' => $cleanMessageStr,
                 'post_style' => $resolvedStyle,
                 'link_preview' => $linkPreview,
+                'allow_sharing' => $allowSharing,
             ]);
 
             msgSuccess(200, [
@@ -746,6 +911,7 @@ final class PostMessage
                 'post_no' => $postNo,
                 'postMessage' => $cleanMessageStr,
                 'post_style' => $resolvedStyle,
+                'allow_sharing' => $allowSharing,
             ]);
         } catch (\Throwable $th) {
             \showError($th);
@@ -753,8 +919,9 @@ final class PostMessage
     }
 
     /**
-     * Reposts one of the current user's own earlier posts to the live feed.
-     * Author-only (IDOR-safe), CSRF-protected, de-duplicated within 60 seconds.
+     * Reposts a post to the live family feed.
+     * Permitted for the author OR any authorised family viewer when the author allows sharing.
+     * Sends a Web Push + in-app notification to the original author when shared by a relative.
      */
     public static function repostPost(int|string $postNo): void
     {
@@ -763,7 +930,7 @@ final class PostMessage
 
             $userId = (string)($_SESSION['id'] ?? '');
             if ($userId === '') {
-                throw new ForbiddenException('Please sign in to repost.');
+                throw new ForbiddenException('Please sign in to share or repost.');
             }
 
             $postNo = (int)$postNo;
@@ -778,8 +945,18 @@ final class PostMessage
             if (!$orig) {
                 throw new ValidationException('That post could not be found.');
             }
-            if ((string)($orig['id'] ?? '') !== $userId) {
-                throw new ForbiddenException('You can only repost your own earlier posts.');
+
+            $origAuthorId = (string)($orig['id'] ?? '');
+            $isAuthor = ($origAuthorId === $userId);
+
+            if (!$isAuthor) {
+                $audienceSvc = new \App\services\FamilyPostAudienceService($db);
+                if (!$audienceSvc->canUserAccessPost($postNo, $userId)) {
+                    throw new ForbiddenException('You do not have permission to access or share this post.');
+                }
+                if (!self::isPostShareable($orig)) {
+                    throw new ForbiddenException('The author has turned off sharing for this post.');
+                }
             }
 
             // Always point at the root post so chains of reposts do not nest.
@@ -790,7 +967,7 @@ final class PostMessage
             );
             $dupe->execute([$userId, $rootNo]);
             if ($dupe->fetchColumn()) {
-                throw new ValidationException('You have just reposted this. Please wait a minute before reposting again.');
+                throw new ValidationException('You have just shared this post to the feed. Please wait a minute before reposting again.');
             }
 
             $input = $_POST;
@@ -800,8 +977,21 @@ final class PostMessage
             }
             $reflection = \App\services\LinkPreviewService::sanitizePostMessage((string)($input['reflection_message'] ?? ''));
 
+            $sharerName = self::resolveUserDisplayName($db, $userId);
+            $sharerAvatar = Post::getProfilePicsById($userId) ?: ($orig['profileImg'] ?? 'avatarM.png');
             $famCode = (string)($orig['postFamCode'] ?? ($_SESSION['famCode'] ?? ''));
-            $message = $reflection !== '' ? $reflection : (string)($orig['postMessage'] ?? '');
+            $origMessage = (string)($orig['postMessage'] ?? '');
+            $origAuthorName = trim((string)($orig['fullName'] ?? 'Family Member'));
+
+            if ($isAuthor) {
+                $message = $reflection !== '' ? $reflection : $origMessage;
+            } else {
+                $cleanOrig = \App\dto\PostDto::stripStyleToken($origMessage);
+                $prefix = $reflection !== ''
+                    ? "{$reflection}\n\n🔄 Shared from {$origAuthorName}:"
+                    : "🔄 Shared from {$origAuthorName}:";
+                $message = $cleanOrig !== '' ? "{$prefix}\n{$cleanOrig}" : $prefix;
+            }
 
             $ins = $db->prepare(
                 "INSERT INTO post (id, fullName, postMessage, postFamCode, profileImg,
@@ -811,10 +1001,10 @@ final class PostMessage
             );
             $ins->execute([
                 $userId,
-                (string)($orig['fullName'] ?? ''),
+                $isAuthor ? $origAuthorName : $sharerName,
                 $message,
                 $famCode,
-                $orig['profileImg'] ?? null,
+                $isAuthor ? ($orig['profileImg'] ?? null) : $sharerAvatar,
                 $orig['post_img0'] ?? null,
                 $orig['post_img1'] ?? null,
                 $orig['post_img2'] ?? null,
@@ -826,15 +1016,28 @@ final class PostMessage
             ]);
             $newPostNo = (int)$db->lastInsertId();
 
+            $notifiedAuthor = false;
+            if (!$isAuthor && $origAuthorId !== '') {
+                $notifiedAuthor = self::notifyAuthorOfPostShare(
+                    $db,
+                    $rootNo,
+                    $origAuthorId,
+                    $userId,
+                    $sharerName,
+                    'repost'
+                );
+            }
+
             try {
                 Pusher::broadcastToFamily($famCode, 'new-post', [[
                     'post_no' => $newPostNo,
                     'id' => $userId,
-                    'fullName' => (string)($orig['fullName'] ?? ''),
+                    'fullName' => $isAuthor ? $origAuthorName : $sharerName,
                     'postMessage' => $message,
                     'postFamCode' => $famCode,
                     'post_img0' => $orig['post_img0'] ?? null,
                     'repost_of_post_no' => $rootNo,
+                    'allow_sharing' => true,
                     'date_created' => date('Y-m-d H:i:s'),
                 ]]);
             } catch (\Throwable $th) {
@@ -842,7 +1045,12 @@ final class PostMessage
             }
 
             header('Content-Type: application/json');
-            echo json_encode(['status' => 'success', 'message' => 'Post reposted', 'new_post_no' => $newPostNo]);
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Post shared to family feed',
+                'new_post_no' => $newPostNo,
+                'author_notified' => $notifiedAuthor,
+            ]);
         } catch (\Throwable $th) {
             \showError($th);
         }
@@ -942,17 +1150,8 @@ final class PostMessage
                     $postImage = $appUrl . '/resources/images/post/' . ltrim($data['post_img'], '/');
                 }
 
-                // Send notifications to members by email
-                self::notifyMembersByEmail(
-                    results: $results,
-                    postId: $id,
-                    postOriginName: $postOriginName,
-                    url: $url,
-                    postContent: $cleanPostContent,
-                    video: $videoData,
-                    postImage: $postImage,
-                    postNo: (int)$postNo
-                );
+                // Instant per-post emails are intentionally disabled to avoid bombarding members;
+                // feed highlights are delivered via the weekly curation/digest instead.
 
                 // Human-readable push-notification text built from the post
                 // author's own display name. Not SQL - it only flows into
@@ -994,6 +1193,21 @@ final class PostMessage
         }
     }
 
+    /**
+     * Strip raw external URLs from a post body before rendering it as an email excerpt
+     * so tracking links (e.g. Facebook/Instagram share URLs) are never quoted verbatim.
+     */
+    public static function formatEmailPostExcerpt(string $text): string
+    {
+        $stripped = preg_replace('/(?:https?:\/\/|www\.)[^\s<>"\']+/i', '', $text);
+        $normalised = preg_replace('/\s+/', ' ', trim((string)$stripped));
+        $cleaned = trim((string)$normalised);
+        if ($cleaned === '') {
+            return '';
+        }
+        return rtrim($cleaned, " \t\n\r\0\x0B:-–—");
+    }
+
     // Helper function to construct post URL
     private static function buildPostUrl(int|string $postNo): string
     {
@@ -1014,67 +1228,6 @@ final class PostMessage
             return "{$path}/profilePage?post_no={$cleanPostNo}&comment_no={$cleanCommentNo}#comment{$cleanCommentNo}";
         }
         return "{$path}/profilePage?post_no={$cleanPostNo}#post{$cleanPostNo}";
-    }
-
-    /**
-     * Helper function to notify members by email.
-     *
-     * @param array<int, array<string, mixed>> $results
-     * @param array{type: string, videoId: string|null, thumbnailUrl: string|null, originalUrl: string}|null $video
-     */
-    private static function notifyMembersByEmail(
-        array $results,
-        string $postId,
-        string $postOriginName,
-        string $url,
-        string $postContent,
-        ?array $video = null,
-        ?string $postImage = null,
-        int|string $postNo = 0
-    ): void {
-        // Never email real members from local/dev/test environments.
-        if (\App\classes\Pusher::outboundBlocked()) {
-            return;
-        }
-
-        $results = \App\services\MemberRestrictionService::filterRecipientRows(\Src\Db::connect2(), $postId, $results, 'posts');
-        $results = self::filterOptedInPostEmailRecipients($results);
-        if (empty($results)) {
-            return;
-        }
-        $getPostProfilePics = self::getProfilePicsForPostAndComment($postId);
-
-        foreach ($results as $memberData) {
-            $targetUserId = (string)($memberData['id'] ?? '');
-            if ($targetUserId !== '' && $targetUserId === $postId) {
-                continue;
-            }
-            $memberData['postOriginName'] = $postOriginName;
-            $memberData['url'] = $url;
-            $memberData['img'] = $getPostProfilePics;
-
-            $data = [
-                'email' => is_string($memberData['email'] ?? null) ? $memberData['email'] : '',
-                'authorName' => $postOriginName,
-                'url' => $url,
-                'post_no' => (int)$postNo,
-                'img' => $getPostProfilePics,
-                'firstName' => is_string($memberData['firstName'] ?? null) ? $memberData['firstName'] : '',
-                'postContent' => $postContent,
-                'video' => $video,
-                'postImage' => $postImage,
-            ];
-
-            // Send email to all members
-            if (!\App\classes\Pusher::outboundBlocked()) {
-                SendMail::email(
-                    "msg/customer/notifyNewPost",
-                    "$postOriginName posted a new update",
-                    $data,
-                    'member'
-                );
-            }
-        }
     }
 
     /**

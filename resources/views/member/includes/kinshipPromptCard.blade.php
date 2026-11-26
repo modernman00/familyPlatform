@@ -24,9 +24,9 @@
                     <span class="badge rounded-pill bg-warning text-dark fw-bold px-2 py-0.5" style="font-size: 0.72rem; letter-spacing: 0.5px;">
                         RECOMMENDED
                     </span>
-                    <h5 class="fw-bold mb-0 text-white" style="font-size: 1.12rem; letter-spacing: -0.01em;">
+                    <h2 class="h5 fw-bold mb-0 text-white" style="font-size: 1.12rem; letter-spacing: -0.01em;">
                         Preserve Your Family Roots: Build Your Tree
-                    </h5>
+                    </h2>
                 </div>
                 <p class="text-white-50 mb-3" style="font-size: 0.95rem; line-height: 1.5; max-width: 580px;">
                     Connecting your parents, siblings, and children locks in your family's oral history, unlocks automatic kinship recognition, and gives younger generations a permanent map of their roots.

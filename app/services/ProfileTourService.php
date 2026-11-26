@@ -49,7 +49,6 @@ class ProfileTourService
         }
 
         try {
-            $this->ensureTable();
             $stmt = $this->db->prepare(
                 'SELECT is_dismissed FROM user_tour_preferences WHERE user_id = ? AND tour_key = ? LIMIT 1'
             );
@@ -63,6 +62,12 @@ class ProfileTourService
 
             return $dismissed;
         } catch (PDOException $e) {
+            if ((string)$e->getCode() === '42S02') {
+                try {
+                    $this->ensureTable();
+                } catch (PDOException $ignored) {
+                }
+            }
             return false;
         }
     }

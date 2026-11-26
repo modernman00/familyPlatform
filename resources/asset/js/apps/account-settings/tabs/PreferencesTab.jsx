@@ -38,8 +38,8 @@ export function PreferencesTab({
     onDirtyChange,
 }) {
     const [emailNotifs, setEmailNotifs] = useState((accountData.email_notifications || 'on') === 'on');
-    const [postEmailNotifs, setPostEmailNotifs] = useState((accountData.post_email_notifications || 'off') === 'on');
     const [smsNotifs, setSmsNotifs] = useState((accountData.sms_notifications || 'on') === 'on');
+    const [kinshipHonorifics, setKinshipHonorifics] = useState((accountData.kinship_honorifics || 'on') !== 'off');
     const [saving, setSaving] = useState(false);
     const [status, setStatus] = useState({ type: 'info', message: '' });
 
@@ -64,18 +64,18 @@ export function PreferencesTab({
 
     useEffect(() => {
         setEmailNotifs((accountData.email_notifications || 'on') === 'on');
-        setPostEmailNotifs((accountData.post_email_notifications || 'off') === 'on');
         setSmsNotifs((accountData.sms_notifications || 'on') === 'on');
+        setKinshipHonorifics((accountData.kinship_honorifics || 'on') !== 'off');
     }, [
         accountData.email_notifications,
-        accountData.post_email_notifications,
         accountData.sms_notifications,
+        accountData.kinship_honorifics,
     ]);
 
     const isDirty =
         emailNotifs !== ((accountData.email_notifications || 'on') === 'on') ||
-        postEmailNotifs !== ((accountData.post_email_notifications || 'off') === 'on') ||
-        smsNotifs !== ((accountData.sms_notifications || 'on') === 'on');
+        smsNotifs !== ((accountData.sms_notifications || 'on') === 'on') ||
+        kinshipHonorifics !== ((accountData.kinship_honorifics || 'on') !== 'off');
 
     useEffect(() => {
         if (typeof onDirtyChange === 'function') {
@@ -185,15 +185,28 @@ export function PreferencesTab({
             const payload = {
                 action: 'updatePreferences',
                 email_notifications: emailNotifs ? 'on' : 'off',
-                post_email_notifications: postEmailNotifs ? 'on' : 'off',
+                post_email_notifications: 'off',
                 sms_notifications: smsNotifs ? 'on' : 'off',
+                kinship_honorifics: kinshipHonorifics ? 'on' : 'off',
             };
             const res = await postAccountForm(payload, bootstrap);
             if (res.ok) {
+                if (typeof window !== 'undefined' && window.localStorage) {
+                    try {
+                        Object.keys(window.localStorage).forEach((k) => {
+                            if (k.startsWith('fp_feed_swr_v1_')) {
+                                window.localStorage.removeItem(k);
+                            }
+                        });
+                    } catch {
+                        // Ignore private-browsing storage restrictions
+                    }
+                }
                 onSavedAccountData({
                     email_notifications: payload.email_notifications,
                     post_email_notifications: payload.post_email_notifications,
                     sms_notifications: payload.sms_notifications,
+                    kinship_honorifics: payload.kinship_honorifics,
                 });
                 if (typeof onDirtyChange === 'function') {
                     onDirtyChange('preferences', false);
@@ -379,18 +392,9 @@ export function PreferencesTab({
                     id="pref_email_notifications"
                     name="email_notifications"
                     label="Email Notifications"
-                    description="Receive alerts about events, digests, and account activities via email."
+                    description="Receive weekly family curations, event reminders, and account alerts via email."
                     checked={emailNotifs}
                     onChange={setEmailNotifs}
-                />
-
-                <SettingsSwitch
-                    id="pref_post_email_notifications"
-                    name="post_email_notifications"
-                    label="New Post Email Alerts"
-                    description="Opt in to receive an immediate email for every new family post (off by default — weekly digests and push alerts remain active)."
-                    checked={postEmailNotifs}
-                    onChange={setPostEmailNotifs}
                 />
 
                 <SettingsSwitch
@@ -400,6 +404,15 @@ export function PreferencesTab({
                     description="Receive critical alerts directly to your phone."
                     checked={smsNotifs}
                     onChange={setSmsNotifs}
+                />
+
+                <SettingsSwitch
+                    id="pref_kinship_honorifics"
+                    name="kinship_honorifics"
+                    label="Respectful Kinship Titles on @Mentions"
+                    description="Automatically display family-tree titles (such as @Dad, @Mum, @Grandpa, @Grandma, @Uncle, and @Aunty) on @mentions and post tags based on your relationship to each relative."
+                    checked={kinshipHonorifics}
+                    onChange={setKinshipHonorifics}
                 />
 
                 <div className={styles.switchRow}>

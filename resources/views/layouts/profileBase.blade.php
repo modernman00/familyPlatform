@@ -7,6 +7,28 @@
   <meta name="language" content="{{ \App\classes\I18n::getLocale() }}">
   <title>{{ $_ENV['APP_NAME'] }}</title>
   <script nonce="{{ csp_nonce($nonce ?? null) }}">
+    // Neutralise third-party SDK (e.g. pusher-js) unload listener registration when Permissions-Policy blocks unload,
+    // routing cleanup cleanly through pagehide so Chrome logs zero Permissions-Policy console violations and preserves bfcache.
+    (function() {
+      var origAdd = window.addEventListener;
+      var origRemove = window.removeEventListener;
+      if (typeof origAdd === 'function') {
+        window.addEventListener = function(type, listener, options) {
+          if (type === 'unload') {
+            return origAdd.call(window, 'pagehide', listener, options);
+          }
+          return origAdd.call(window, type, listener, options);
+        };
+      }
+      if (typeof origRemove === 'function') {
+        window.removeEventListener = function(type, listener, options) {
+          if (type === 'unload') {
+            return origRemove.call(window, 'pagehide', listener, options);
+          }
+          return origRemove.call(window, type, listener, options);
+        };
+      }
+    })();
     window.APP_LOCALE = '{{ \App\classes\I18n::getLocale() }}';
     window.__TRANSLATIONS__ = {!! json_encode(\App\classes\I18n::transArray()) !!};
     window.__ = function(k, fb) { return (window.__TRANSLATIONS__ && window.__TRANSLATIONS__[k]) || fb || k; };
@@ -171,6 +193,7 @@
        enterprise.js with ?render= here made it run an assessment on every member page,
        which triggered the "Unrecognized feature: 'private-token'" warning and a 401 on
        /recaptcha/enterprise/pat. Member pages don't call grecaptcha, so it's removed. --}}
+  <link rel="preload" href="/public/fonts/outfit/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/public/css/main.css?v={{ assetVersion('css/main.css') }}">
   <link rel="stylesheet" href="/public/css/standards-v21.css?v={{ assetVersion('css/standards-v21.css') }}">
   @include('partials.seasonal-theme-head')

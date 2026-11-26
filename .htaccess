@@ -130,6 +130,12 @@ Options -Indexes
 # ---------------------------------------------------------------------------
 # 7. Static asset caching
 # ---------------------------------------------------------------------------
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css
+  AddOutputFilterByType DEFLATE application/javascript text/javascript application/json application/xml
+  AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+
 <IfModule mod_expires.c>
   ExpiresActive On
   ExpiresByType image/jpg "access plus 1 year"
@@ -143,6 +149,7 @@ Options -Indexes
   ExpiresByType application/x-javascript "access plus 1 year"
   ExpiresByType image/avif "access plus 1 year"
   ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
   ExpiresByType application/pdf "access plus 1 month"
   ExpiresByType image/x-icon "access plus 1 year"
   # Web fonts: paths are versioned (e.g. /public/lib/bootstrap-icons-1.10.3/), so cache for a year

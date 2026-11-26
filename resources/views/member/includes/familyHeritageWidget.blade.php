@@ -16,7 +16,8 @@
     color: #f8fafc !important;
   }
   .family-heritage-sidebar-widget .fhw-active-badge {
-    color: #0f5132;
+    color: #0f5132 !important;
+    background-color: #d1e7dd !important;
     font-size: 0.72rem;
     font-weight: 700;
     line-height: 1;
@@ -61,7 +62,7 @@
     <div class="card-header bg-transparent border-0 pt-4 pb-2 px-4">
         <!-- Top Row: ACTIVE badge -->
         <div class="d-flex justify-content-between align-items-center mb-2">
-            <span class="badge rounded-pill bg-success-subtle text-success px-2.5 py-1 fw-bold d-inline-flex align-items-center gap-1.5 fhw-active-badge">
+            <span class="badge rounded-pill bg-success-subtle px-2.5 py-1 fw-bold d-inline-flex align-items-center gap-1.5 fhw-active-badge">
                 <span style="width: 6px; height: 6px; border-radius: 50%; background-color: #059669; display: inline-block;"></span>
                 ACTIVE
             </span>
@@ -74,9 +75,9 @@
                 <i class="bi bi-stars"></i>
             </div>
             <div style="min-width: 0; flex: 1;">
-                <h5 class="mb-0 fw-bold text-truncate" style="color: var(--text-color); font-size: 1rem; line-height: 1.25; letter-spacing: -0.01em;" title="{{ __('heritage.family_heritage', 'Family Rituals & Quests') }}">
+                <h3 class="h5 mb-0 fw-bold text-truncate" style="color: var(--text-color); font-size: 1rem; line-height: 1.25; letter-spacing: -0.01em;" title="{{ __('heritage.family_heritage', 'Family Rituals & Quests') }}">
                     {{ __('heritage.family_heritage', 'Family Rituals & Quests') }}
-                </h5>
+                </h3>
                 <p class="mb-0 text-truncate" style="font-size: 0.78rem; color: var(--text-muted-aa, #475569); line-height: 1.35; margin-top: 2px;" title="{{ __('heritage.rituals_subtitle', 'Rituals, quests & generational vault.') }}">
                     {{ __('heritage.rituals_subtitle', 'Rituals, quests & generational vault.') }}
                 </p>

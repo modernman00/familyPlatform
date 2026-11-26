@@ -104,6 +104,25 @@ $freshAuto = WeeklyActivityVideoCuratorService::getOrCurateWeeklyReel($testUserI
 assert(is_array($freshAuto) && !empty($freshAuto['id']), "Expected getOrCurateWeeklyReel to auto-curate when no recent reel exists");
 echo "✓ getOrCurateWeeklyReel auto-curation and 7-day dismissal idempotency verified\n";
 
+// 10. Test ensureAutoPublishedWeeklyReel auto-approves existing draft and deduplicates per family
+$autoPubResult = WeeklyActivityVideoCuratorService::ensureAutoPublishedWeeklyReel(
+    $testUserIdA,
+    $testFamCode,
+    'Test Curated User'
+);
+assert(is_array($autoPubResult) && !empty($autoPubResult['success']), "Expected ensureAutoPublishedWeeklyReel to auto-publish existing draft");
+assert(!empty($autoPubResult['post_no']), "Expected post_no from auto-publish");
+assert(WeeklyActivityVideoCuratorService::getPendingReel($testUserIdA, $testFamCode) === null, "Expected no pending draft after auto-publish");
+
+// Calling again for another family member in the same circle must be a no-op (no duplicate post)
+$dedupResult = WeeklyActivityVideoCuratorService::ensureAutoPublishedWeeklyReel(
+    $testUserIdB,
+    $testFamCode,
+    'Another Family Member'
+);
+assert($dedupResult === null, "Expected family-level deduplication to prevent duplicate weekly posts");
+echo "✓ ensureAutoPublishedWeeklyReel auto-publish and family-level deduplication verified\n";
+
 // Cleanup fixtures
 $db->prepare("DELETE FROM weekly_activity_reels WHERE user_id IN (?, ?)")->execute([$testUserIdA, $testUserIdB]);
 $db->prepare("DELETE FROM post WHERE postFamCode = ?")->execute([$testFamCode]);

@@ -73,10 +73,12 @@
                     <input type="hidden" name="attached_video_url" id="attachedVideoUrl" value="">
                     <input type="hidden" name="attached_video_urls" id="attachedVideoUrls" value="">
                     <input type="hidden" name="post_style" id="composerPostStyleInput" value="">
+                    <input type="hidden" name="allow_sharing" id="composerAllowSharingInput" value="1">
 
                     <!-- Step 1 View: Post Creator Content -->
                     <div id="composerStep1" class="composer-step-view">
 
+                    <div class="position-relative w-100">
                     <div id="composerEditorStageWrapper" class="composer-editor-wrapper position-relative w-100">
                         <div id="composerStageBokehLayer" class="fp-text-stage__bokeh d-none" aria-hidden="true"></div>
                         <div id="composerStageCosmosLayer" class="fp-cosmos-orrery d-none" aria-hidden="true">
@@ -129,14 +131,36 @@
                         <textarea class="d-none" data-emoji-target
                             placeholder="{{ __('feed.share_prompt', 'Share a moment with your family...') }}" name="postMessage" id="postMessage"
                             rows="2"></textarea>
+                    </div>
 
-                        <!-- Inline @mention Autocomplete Dropdown for Post Composer -->
+                        <!-- Inline @mention Autocomplete Dropdown for Post Composer (outside stage overflow:hidden) -->
                         <div id="composerMentionDropdown" class="mention-autocomplete mention-autocomplete--below shadow-lg d-none" role="listbox" aria-label="Mention a family member">
                             <div class="mention-autocomplete__header d-flex align-items-center justify-content-between px-2 py-1">
                                 <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Mention a family member</span>
                                 <span style="font-size: 0.7rem;">&uarr;&darr; &bull; Enter</span>
                             </div>
                             <div class="mention-autocomplete__list" id="composerMentionList"></div>
+                        </div>
+                    </div>
+
+                    <!-- Live Text-Only Theme Suggestion Banner (Requires Explicit User Approval) -->
+                    <div id="composerSmartStageSuggestWrap"
+                         class="d-none mt-2 mb-1 px-3 py-2 rounded-3 align-items-center justify-content-between flex-wrap gap-2"
+                         style="background: linear-gradient(135deg, rgba(14, 165, 233, 0.08) 0%, rgba(16, 185, 129, 0.08) 100%); border: 1.5px solid rgba(14, 165, 233, 0.35);"
+                         role="status"
+                         aria-live="polite">
+                        <div class="d-flex align-items-center gap-2 min-w-0">
+                            <span id="composerSmartStageSuggestText" class="small fw-bold" style="color: var(--text-main, #0f172a);">
+                                ✨ Suggested theme for your post
+                            </span>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                            <button type="button" id="composerSmartStageSuggestBtn" class="btn btn-sm rounded-pill px-3 fw-bold" style="font-size: 0.78rem; background: linear-gradient(135deg, #0284c7 0%, #059669 100%); color: #ffffff; border: none; min-height: 44px; white-space: nowrap; flex-shrink: 0;">
+                                ✨ Approve &amp; Apply
+                            </button>
+                            <button type="button" id="composerSmartStageDismissBtn" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold" style="font-size: 0.78rem; min-height: 44px; white-space: nowrap; flex-shrink: 0;" aria-label="Dismiss theme suggestion">
+                                Dismiss
+                            </button>
                         </div>
                     </div>
 
@@ -147,9 +171,6 @@
                                 <i class="bi bi-stars text-warning"></i>
                                 <span>Post Backdrop &amp; Stage</span>
                             </span>
-                            <button type="button" id="composerSmartStageSuggestBtn" class="btn btn-sm rounded-pill d-none py-0.5 px-2.5 fw-bold" style="font-size: 0.72rem; background: linear-gradient(135deg, #0284c7 0%, #059669 100%); color: #ffffff; border: none; min-height: 28px; white-space: nowrap; flex-shrink: 0;">
-                                ✨ Smart Match
-                            </button>
                         </div>
                         <div class="composer-stage-studio__row" role="radiogroup" aria-label="Choose post background or 3D stage style">
                             <button type="button" class="composer-stage-pill is-active" data-stage-slug="" onclick="window.__setComposerTextStage('')" aria-pressed="true" title="Standard clean text post">
@@ -816,6 +837,41 @@
                             </div>
                         </div>
 
+                    </div>
+
+                    <!-- Author Post Sharing Permission Control (Allow family sharing + Web Push alert vs Lock sharing) -->
+                    <div class="d-flex align-items-center justify-content-between px-3 py-2 mb-2 rounded-3 border"
+                         style="background: rgba(15, 23, 42, 0.03); border-color: rgba(148, 163, 184, 0.28) !important;">
+                        <div class="d-flex align-items-center gap-2 min-w-0">
+                            <i class="bi bi-share-fill text-success" id="composerAllowSharingIcon" aria-hidden="true"></i>
+                            <div class="min-w-0">
+                                <label for="composerAllowSharingSwitch" class="fw-semibold small d-block mb-0" style="color: var(--text-main, #0f172a); cursor: pointer;">
+                                    Allow family members to share this post
+                                </label>
+                                <span id="composerAllowSharingHint" class="text-muted d-block" style="font-size: 0.74rem;">
+                                    You will receive an instant Web Push alert whenever someone shares your post
+                                </span>
+                            </div>
+                        </div>
+                        <div class="form-check form-switch mb-0 ms-2 flex-shrink-0 d-flex align-items-center" style="min-height: 44px;">
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   role="switch"
+                                   id="composerAllowSharingSwitch"
+                                   checked
+                                   style="width: 2.5rem; height: 1.35rem; cursor: pointer;"
+                                   aria-label="Allow family members to share this post"
+                                   onchange="(function(el){
+                                       var hidden = document.getElementById('composerAllowSharingInput');
+                                       var icon = document.getElementById('composerAllowSharingIcon');
+                                       var hint = document.getElementById('composerAllowSharingHint');
+                                       if (hidden) hidden.value = el.checked ? '1' : '0';
+                                       if (icon) icon.className = el.checked ? 'bi bi-share-fill text-success' : 'bi bi-lock-fill text-warning';
+                                       if (hint) hint.textContent = el.checked
+                                           ? 'You will receive an instant Web Push alert whenever someone shares your post'
+                                           : 'Sharing locked — only you will be able to share or repost this memory';
+                                   })(this)">
+                        </div>
                     </div>
 
                     <!-- Composer action tools dock -->
@@ -2195,6 +2251,14 @@ window.selectPostAudience = function(scope, label, iconClass, famCode) {
         const arInput = document.getElementById('attachedArEmojiInput');
         if (arInput) arInput.value = '';
 
+        const shareInput = document.getElementById('composerAllowSharingInput');
+        if (shareInput) shareInput.value = '1';
+        const shareSwitch = document.getElementById('composerAllowSharingSwitch');
+        if (shareSwitch) {
+            shareSwitch.checked = true;
+            shareSwitch.dispatchEvent(new Event('change'));
+        }
+
         document.querySelectorAll('input[name="media_meta"], input[name="shared_temp_images[]"]').forEach(el => el.remove());
 
         if (typeof window.__resetLinkPreview === 'function') window.__resetLinkPreview();
@@ -2456,61 +2520,115 @@ window.selectPostAudience = function(scope, label, iconClass, famCode) {
 
     window.__resetTextStageBuilder = function() {
         window.__setComposerTextStage('');
-        const suggestBtn = document.getElementById('composerSmartStageSuggestBtn');
-        if (suggestBtn) suggestBtn.classList.add('d-none');
+        const suggestWrap = document.getElementById('composerSmartStageSuggestWrap');
+        if (suggestWrap) {
+            suggestWrap.classList.add('d-none');
+            suggestWrap.classList.remove('d-flex');
+        }
         const previewContainer = document.getElementById('composerLinkPreviewContainer');
         if (previewContainer) {
             previewContainer.classList.remove('fp-text-stage__composer-preview');
         }
     };
 
+    const editorEl = document.getElementById('postMessageEditor');
     const textarea = document.getElementById('postMessage');
+    const suggestWrap = document.getElementById('composerSmartStageSuggestWrap');
     const suggestBtn = document.getElementById('composerSmartStageSuggestBtn');
+    const dismissBtn = document.getElementById('composerSmartStageDismissBtn');
     let suggestedSlug = '';
+    let dismissedSlug = '';
 
-    if (textarea && suggestBtn) {
-        textarea.addEventListener('input', function() {
-            const val = (textarea.value || '').toLowerCase();
-            const currentStyle = document.getElementById('composerPostStyleInput')?.value || '';
-            if (currentStyle || val.length < 5) {
-                suggestBtn.classList.add('d-none');
-                return;
+    const KEYWORD_THEME_RULES = [
+        { slug: 'xmas_snowfall', pattern: /\b(snow|snowfall|snowman|frost|winter|blizzard)\b/i },
+        { slug: 'xmas_lights', pattern: /\b(fairy lights?|xmas lights?|christmas lights?|christmas tree|xmas tree)\b/i },
+        { slug: 'xmas_winter_gold', pattern: /\b(new year|champagne|winter gold|countdown)\b/i },
+        { slug: 'xmas_hearth', pattern: /\b(xmas|christmas|santa|festive|reindeer|mistletoe|stocking|yuletide|jingle)\b/i },
+        { slug: 'aurora_prism', pattern: /\b(party|parties|birthday|bday|celebrat(?:e|ing|ion)|cheers|disco|bash|fiesta|toast)\b/i },
+        { slug: 'rose_stardust', pattern: /\b(anniversary|wedding|valentine|romance|love you|forever)\b/i },
+        { slug: 'ocean_waves', pattern: /\b(ocean|waves?|sea|beach|surf|tide|coast|island|seaside)\b/i },
+        { slug: 'moving_sunset', pattern: /\b(sunset|sunrise|golden hour|dusk|twilight|horizon)\b/i },
+        { slug: 'family_gathering', pattern: /\b(fireside|dinner|sunday roast|talking together|catching up|family time|gathering|chatting|storytime)\b/i },
+        { slug: 'andromeda_nebula', pattern: /\b(andromeda|nebula|pulsar|stardust)\b/i },
+        { slug: 'binary_eclipse', pattern: /\b(eclipse|binary star|twin suns?)\b/i },
+        { slug: 'supernova_crown', pattern: /\b(supernova|comet|meteor|shooting star)\b/i },
+        { slug: 'cosmic_rings', pattern: /\b(saturn|rings of|celestial)\b/i },
+        { slug: 'solar_galaxy', pattern: /\b(solar|galaxy|galaxies|planet|planets|cosmos|universe|space|astronomy|stargazing)\b/i },
+        { slug: 'emerald_canopy', pattern: /\b(forest|woods|nature|garden|picnic|hike|hiking|springtime)\b/i },
+        { slug: 'northern_sky', pattern: /\b(aurora|northern lights|night sky|midnight)\b/i },
+        { slug: 'dynasty_holo', pattern: /\b(family tree|lineage|ancestry|heritage|dynasty|generations)\b/i },
+        { slug: 'alert_pulse', pattern: /\b(urgent|emergency|important notice|alert)\b/i },
+        { slug: 'grand_announcement', pattern: /\b(announce(?:ment)?|congratulations|congrats|welcome|reunion|milestone)\b/i },
+    ];
+
+    function isComposerTextOnly() {
+        const imgInput = document.getElementById('postImages');
+        if (imgInput && imgInput.files && imgInput.files.length > 0) return false;
+        const previewGrid = document.getElementById('previewGrid');
+        if (previewGrid && previewGrid.children.length > 0) return false;
+        const videoWrap = document.getElementById('videoEmbedContainer');
+        if (videoWrap && !videoWrap.classList.contains('d-none')) return false;
+        const pollWrap = document.getElementById('pollBuilderContainer');
+        if (pollWrap && !pollWrap.classList.contains('d-none')) return false;
+        const thenNowWrap = document.getElementById('thenNowBuilderContainer');
+        if (thenNowWrap && !thenNowWrap.classList.contains('d-none')) return false;
+        return true;
+    }
+
+    function evaluateSmartThemeSuggestion() {
+        if (!suggestWrap || !suggestBtn) return;
+        const suggestTextEl = document.getElementById('composerSmartStageSuggestText');
+        const rawText = (editorEl ? editorEl.innerText : '') || (textarea ? textarea.value : '') || '';
+        const currentStyle = document.getElementById('composerPostStyleInput')?.value || '';
+        if (!isComposerTextOnly() || rawText.trim().length < 4) {
+            suggestWrap.classList.add('d-none');
+            suggestWrap.classList.remove('d-flex');
+            return;
+        }
+
+        let matched = null;
+        for (const rule of KEYWORD_THEME_RULES) {
+            if (rule.pattern.test(rawText)) {
+                matched = rule.slug;
+                break;
             }
-            if (val.includes('solar') || val.includes('galaxy') || val.includes('planet') || val.includes('cosmos') || val.includes('universe') || val.includes('space')) {
-                suggestedSlug = 'solar_galaxy';
-                suggestBtn.textContent = '🪐 Try Solar Galaxy Backdrop';
-                suggestBtn.classList.remove('d-none');
-            } else if (val.includes('xmas') || val.includes('christmas') || val.includes('fairy light') || val.includes('santa') || val.includes('festive') || val.includes('snow')) {
-                suggestedSlug = val.includes('snow') ? 'xmas_snowfall' : (val.includes('light') ? 'xmas_lights' : 'xmas_hearth');
-                suggestBtn.textContent = val.includes('snow') ? '❄️ Try Festive Snowfall Backdrop' : (val.includes('light') ? '✨ Try Fairy Lights Backdrop' : '🎄 Try Cosy Hearth Backdrop');
-                suggestBtn.classList.remove('d-none');
-            } else if (val.includes('family tree') || val.includes('branch') || val.includes('lineage')) {
-                suggestedSlug = 'dynasty_holo';
-                suggestBtn.textContent = '✨ Try 3D Dynasty Tree Stage';
-                suggestBtn.classList.remove('d-none');
-            } else if (val.includes('urgent') || val.includes('alert') || val.includes('emergency') || val.includes('important')) {
-                suggestedSlug = 'alert_pulse';
-                suggestBtn.textContent = '🚨 Try 3D Alert Trigger';
-                suggestBtn.classList.remove('d-none');
-            } else if (val.includes('announce') || val.includes('welcome') || val.includes('congrat') || val.includes('reunion')) {
-                suggestedSlug = 'grand_announcement';
-                suggestBtn.textContent = '📣 Try 3D Announcement Stage';
-                suggestBtn.classList.remove('d-none');
-            } else if (val.length >= 12 && val.length <= 180) {
-                suggestedSlug = 'starlight_bokeh';
-                suggestBtn.textContent = '✨ Try Starlight Bokeh Backdrop';
-                suggestBtn.classList.remove('d-none');
-            } else {
-                suggestBtn.classList.add('d-none');
+        }
+
+        if (matched && matched !== currentStyle && matched !== dismissedSlug && STAGE_META[matched]) {
+            suggestedSlug = matched;
+            if (suggestTextEl) {
+                suggestTextEl.textContent = '✨ Suggested theme: ' + STAGE_META[matched].label;
             }
-        });
+            suggestBtn.textContent = 'Approve & Apply';
+            suggestWrap.classList.remove('d-none');
+            suggestWrap.classList.add('d-flex');
+        } else {
+            suggestedSlug = '';
+            suggestWrap.classList.add('d-none');
+            suggestWrap.classList.remove('d-flex');
+        }
+    }
+
+    if (suggestWrap && suggestBtn) {
+        if (editorEl) editorEl.addEventListener('input', evaluateSmartThemeSuggestion);
+        if (textarea) textarea.addEventListener('input', evaluateSmartThemeSuggestion);
+        const imgInput = document.getElementById('postImages');
+        if (imgInput) imgInput.addEventListener('change', evaluateSmartThemeSuggestion);
 
         suggestBtn.addEventListener('click', function() {
             if (suggestedSlug) {
                 window.__setComposerTextStage(suggestedSlug);
-                suggestBtn.classList.add('d-none');
+                suggestWrap.classList.add('d-none');
+                suggestWrap.classList.remove('d-flex');
             }
         });
+        if (dismissBtn) {
+            dismissBtn.addEventListener('click', function() {
+                dismissedSlug = suggestedSlug;
+                suggestWrap.classList.add('d-none');
+                suggestWrap.classList.remove('d-flex');
+            });
+        }
     }
 })();
 </script>

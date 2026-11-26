@@ -697,17 +697,20 @@
   <template x-if="(!post.videos || post.videos.length <= 1) && post.video && (post.video.type === 'youtube' || post.video.type === 'vimeo' || post.video.type === 'cloudflare' || post.video.type === 'tiktok')">
     <div class="video-embed-container feed-video-breakout mb-3"
          x-data="{
-           isShort: (post.video.type === 'tiktok' || (post.video.originalUrl && post.video.originalUrl.includes('/shorts/')))
+           isShort: Boolean(post.video.isShort || post.video.type === 'tiktok' || (post.video.originalUrl && post.video.originalUrl.includes('/shorts/')) || (post.video.aspect_ratio && (parseFloat(post.video.aspect_ratio.split('/')[0]) / (parseFloat(post.video.aspect_ratio.split('/')[1]) || 1)) < 0.88))
          }">
-      <div class="video-rendition-frame overflow-hidden shadow-sm border border-light-subtle position-relative"
-           :style="isShort ? 'border-radius: 12px; width: 100%; max-width: 100%; aspect-ratio: 4 / 5; max-height: 880px; background: #07090e;' : 'border-radius: 12px; width: 100%; max-width: 100%; aspect-ratio: 16 / 10; max-height: min(680px, 75vh); background: #07090e;'">
-        <iframe :src="post.video.embedUrl" 
-                title="Video Player" 
-                frameborder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                allowfullscreen 
-                loading="lazy"
-                style="width: 100%; height: 100%; border: none;"></iframe>
+      <div class="video-rendition-frame overflow-hidden shadow-sm border border-light-subtle position-relative d-flex align-items-center justify-content-center"
+           style="border-radius: 12px; width: 100%; max-width: 100%; background: #07090e;">
+        <div class="w-100"
+             :style="isShort ? 'max-width: min(460px, 100%); aspect-ratio: 9 / 16; max-height: min(820px, 84vh); margin: 0 auto;' : 'max-width: 100%; aspect-ratio: 16 / 9; max-height: min(720px, 80vh); margin: 0 auto;'">
+          <iframe :src="post.video.embedUrl" 
+                  title="Video Player" 
+                  frameborder="0" 
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                  allowfullscreen 
+                  loading="lazy"
+                  style="width: 100%; height: 100%; border: none; display: block;"></iframe>
+        </div>
         <button type="button"
                 class="btn position-absolute d-inline-flex align-items-center justify-content-center p-0 shadow-sm"
                 @click.stop="openVideoModal([post.video], 0, false, post)"

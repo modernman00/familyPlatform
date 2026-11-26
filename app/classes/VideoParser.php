@@ -27,13 +27,19 @@ final class VideoParser
         $ytRegex = '/(?:https?:\/\/)?(?:www\.|m\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?|shorts|live)\/|\S*?[?&]v[=_]?)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i';
         if (preg_match($ytRegex, $trimmed, $matches) === 1) {
             $videoId = $matches[1];
-            return [
+            $isYtShort = stripos($trimmed, '/shorts/') !== false;
+            $desc = [
                 'type' => 'youtube',
                 'videoId' => $videoId,
-                'thumbnailUrl' => "https://img.youtube.com/vi/{$videoId}/hqdefault.jpg",
+                'thumbnailUrl' => "https://i.ytimg.com/vi/{$videoId}/hqdefault.jpg",
                 'embedUrl' => "https://www.youtube.com/embed/{$videoId}?autoplay=1&rel=0&playsinline=1",
                 'originalUrl' => $trimmed,
             ];
+            if ($isYtShort) {
+                $desc['isShort'] = true;
+                $desc['aspect_ratio'] = '9 / 16';
+            }
+            return $desc;
         }
 
         // 2. Vimeo Matcher
@@ -464,7 +470,7 @@ final class VideoParser
      * Validate and normalise client-submitted or DB-stored media_meta JSON payload.
      *
      * @param mixed $rawMeta
-     * @return array{focal_x?: float, focal_y?: float, aspect_ratio?: string, duration_sec?: float, hls_url?: string}|null
+     * @return array{focal_x?: float, focal_y?: float, aspect_ratio?: string, duration_sec?: float, hls_url?: string, poster_url?: string, allow_sharing?: bool}|null
      */
     public static function normaliseMediaMeta(mixed $rawMeta): ?array
     {
@@ -515,6 +521,10 @@ final class VideoParser
             ) {
                 $clean['poster_url'] = $poster;
             }
+        }
+        if (array_key_exists('allow_sharing', $rawMeta)) {
+            $val = $rawMeta['allow_sharing'];
+            $clean['allow_sharing'] = !($val === false || $val === 0 || $val === '0' || $val === 'false' || $val === 'off');
         }
 
         return !empty($clean) ? $clean : null;

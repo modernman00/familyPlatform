@@ -80,24 +80,24 @@ final class KinshipEngineService
 
             // Signal A: Surname match
             if (!empty($userLastName)) {
-                $whereClauses[] = "UPPER(p.lastName) = :sigLastName";
+                $whereClauses[] = "p.lastName = :sigLastName";
                 $params[':sigLastName'] = $userLastName;
             }
 
             // Signal B & C: Maternal Lineage & Maiden Name Cross-Matching
             if ($settings['include_maternal']) {
                 if (!empty($userMaiden)) {
-                    $whereClauses[] = "(UPPER(p.lastName) = :sigMaiden1 OR UPPER(p.famCode) = :sigMaiden2)";
+                    $whereClauses[] = "(p.lastName = :sigMaiden1 OR p.famCode = :sigMaiden2)";
                     $params[':sigMaiden1'] = $userMaiden;
                     $params[':sigMaiden2'] = $userMaiden;
                 }
 
                 if (!empty($userLastName)) {
-                    $whereClauses[] = "UPPER(o.maiden_name) = :sigCandMaiden1";
+                    $whereClauses[] = "o.maiden_name = :sigCandMaiden1";
                     $params[':sigCandMaiden1'] = $userLastName;
                 }
                 if (!empty($userFamCode)) {
-                    $whereClauses[] = "UPPER(o.maiden_name) = :sigCandMaiden2";
+                    $whereClauses[] = "o.maiden_name = :sigCandMaiden2";
                     $params[':sigCandMaiden2'] = $userFamCode;
                 }
             }
@@ -105,13 +105,13 @@ final class KinshipEngineService
             // Signal D & E: Secondary family code & In-Law overlap
             if ($settings['include_inlaws']) {
                 if (!empty($userFamCode2)) {
-                    $whereClauses[] = "(UPPER(p.famCode) = :sigFam2a OR UPPER(p.familyCode2) = :sigFam2b)";
+                    $whereClauses[] = "(p.famCode = :sigFam2a OR p.familyCode2 = :sigFam2b)";
                     $params[':sigFam2a'] = $userFamCode2;
                     $params[':sigFam2b'] = $userFamCode2;
                 }
 
                 if (!empty($userOtherFamCode)) {
-                    $whereClauses[] = "(UPPER(p.famCode) = :sigOfc1 OR UPPER(o.otherFamCode) = :sigOfc2)";
+                    $whereClauses[] = "(p.famCode = :sigOfc1 OR o.otherFamCode = :sigOfc2)";
                     $params[':sigOfc1'] = $userOtherFamCode;
                     $params[':sigOfc2'] = $userOtherFamCode;
                 }

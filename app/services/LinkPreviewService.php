@@ -1530,6 +1530,70 @@ final class LinkPreviewService
     }
 
     /**
+     * Resolve the aspect ratio of a YouTube video URL (including Shorts shared via watch/youtu.be)
+     * using YouTube's lightweight public oEmbed JSON endpoint.
+     */
+    public static function resolveYoutubeVideoAspectRatio(string $url, bool $allowNetworkFetch = true): ?string
+    {
+        $trimmed = trim($url);
+        if ($trimmed === '') {
+            return null;
+        }
+        if (stripos($trimmed, '/shorts/') !== false) {
+            return '9 / 16';
+        }
+        $videoId = self::extractYoutubeVideoId($trimmed);
+        if ($videoId === null || !$allowNetworkFetch) {
+            return null;
+        }
+
+        $oembedUrl = 'https://www.youtube.com/oembed?url=' . rawurlencode('https://www.youtube.com/watch?v=' . $videoId) . '&format=json';
+        $rawJson = null;
+
+        if (function_exists('curl_init')) {
+            $ch = curl_init($oembedUrl);
+            if ($ch !== false) {
+                curl_setopt_array($ch, [
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_TIMEOUT => 3,
+                    CURLOPT_CONNECTTIMEOUT => 2,
+                    CURLOPT_FOLLOWLOCATION => false,
+                    CURLOPT_PROTOCOLS => CURLPROTO_HTTPS,
+                    CURLOPT_USERAGENT => 'FamilyPlatform/1.0 (+https://familyplatform.co.uk)',
+                ]);
+                $res = curl_exec($ch);
+                $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                curl_close($ch);
+                if (is_string($res) && $code >= 200 && $code < 300) {
+                    $rawJson = $res;
+                }
+            }
+        }
+
+        if ($rawJson === null) {
+            return null;
+        }
+
+        $decoded = json_decode($rawJson, true);
+        if (!is_array($decoded)) {
+            return null;
+        }
+
+        $w = (int)($decoded['width'] ?? 0);
+        $h = (int)($decoded['height'] ?? 0);
+        if ($w <= 0 || $h <= 0) {
+            return null;
+        }
+
+        // YouTube oEmbed returns height > width (e.g. 315x560) for vertical Shorts
+        if ($h > $w) {
+            return '9 / 16';
+        }
+
+        return self::formatAspectRatio($w, $h);
+    }
+
+    /**
      * Resolves a relative URL path against a base host URL.
      */
     private static function resolveRelativeUrl(string $relative, string $baseUrl): string
@@ -1685,8 +1749,8 @@ final class LinkPreviewService
         if (str_contains($s, '--') || str_contains($s, '__')) {
             return true;
         }
-        // Short mixed-case or alphanumeric token without word separators (e.g. K--PySTLPf, 1a2B3c4D)
-        if (!str_contains($s, '-') && !str_contains($s, '_') && strlen($s) <= 18) {
+        // Short mixed-case or alphanumeric token without word separators (e.g. K--PySTLPf, 1a2B3c4D, or base64 story IDs)
+        if (!str_contains($s, '-') && !str_contains($s, '_') && strlen($s) <= 64) {
             $hasUpper = (bool)preg_match('/[A-Z]/', $s);
             $hasLower = (bool)preg_match('/[a-z]/', $s);
             $hasDigit = (bool)preg_match('/\d/', $s);
@@ -1712,6 +1776,9 @@ final class LinkPreviewService
         }
 
         if ($brand === 'Facebook') {
+            if (str_contains($lowerUrl, '/stories/')) {
+                return 'Facebook Story';
+            }
             if (str_contains($lowerDomain, 'fb.watch') || str_contains($lowerUrl, '/videos/') || str_contains($lowerUrl, '/watch')) {
                 return 'Facebook Video';
             }
@@ -1893,8 +1960,14 @@ final class LinkPreviewService
             : ($canEmbed ? 'inline_iframe' : 'external_card');
 
         $resolvedSiteName = $isGooglePhoto ? 'Google Photos' : self::resolveBrandSiteName($domain, (string)($data['site_name'] ?? $domain));
+        $combinedUrlLower = strtolower($url . ' ' . $requestedUrl);
+        $isFbStory = $isFacebook && str_contains($combinedUrlLower, '/stories/');
         $cleanTitle = preg_replace('/\s+/', ' ', trim($title)) ?? trim($title);
-        if ($cleanTitle === '' || $cleanTitle === '- YouTube' || preg_match('/^Fb\s*[—–-]\s*/i', $cleanTitle)) {
+        $isGenericFbLoginTitle = $isFacebook && (
+            strtolower($cleanTitle) === 'facebook'
+            || preg_match('/^log\s*in\s*(?:to|into)\s*facebook/i', $cleanTitle) === 1
+        );
+        if ($cleanTitle === '' || $cleanTitle === '- YouTube' || preg_match('/^Fb\s*[—–-]\s*/i', $cleanTitle) || $isGenericFbLoginTitle) {
             $cleanTitle = self::buildCleanPlatformTitle($url, $domain, $resolvedSiteName);
         } elseif (str_contains($cleanTitle, ' — ')) {
             $parts = explode(' — ', $cleanTitle, 2);
@@ -1905,9 +1978,9 @@ final class LinkPreviewService
             }
         }
 
-        $combinedUrlLower = strtolower($url . ' ' . $requestedUrl);
         $isSocialVideo = $isGoogleVideo
             || !empty($rawVideo)
+            || $isFbStory
             || str_contains($combinedUrlLower, '/reel/')
             || str_contains($combinedUrlLower, '/reels/')
             || str_contains($combinedUrlLower, '/share/v/')
@@ -1923,11 +1996,16 @@ final class LinkPreviewService
         if ($isInstagram && $description !== '') {
             $description = self::cleanInstagramDescription($description);
         }
-        if ($description === '' || filter_var($description, FILTER_VALIDATE_URL)) {
+        $isGenericFbLoginDesc = $isFacebook && (
+            preg_match('/log\s*in(?:to)?\s*facebook|create\s+an\s+account\s+or\s+log\s+in/i', $description) === 1
+        );
+        if ($description === '' || filter_var($description, FILTER_VALIDATE_URL) || $isGenericFbLoginDesc) {
             if ($resolvedSiteName === 'Facebook') {
-                $description = str_contains($combinedUrlLower, '/reel/') || str_contains($combinedUrlLower, '/share/r/')
-                    ? 'Watch this reel on Facebook'
-                    : ($isSocialVideo ? 'Watch this video on Facebook' : 'View this post on Facebook');
+                $description = $isFbStory
+                    ? 'Facebook Stories require you to sign in on Facebook to watch.'
+                    : (str_contains($combinedUrlLower, '/reel/') || str_contains($combinedUrlLower, '/share/r/')
+                        ? 'Watch this reel on Facebook'
+                        : ($isSocialVideo ? 'Watch this video on Facebook' : 'View this post on Facebook'));
             } elseif ($resolvedSiteName === 'Instagram') {
                 $description = $isSocialVideo ? 'Watch this reel on Instagram' : 'View this post on Instagram';
             } elseif ($resolvedSiteName !== '') {
@@ -1942,6 +2020,8 @@ final class LinkPreviewService
             $ctaLabel = 'View Photo →';
         } elseif ($isGoogleVideo) {
             $ctaLabel = 'Play Video →';
+        } elseif ($isFbStory) {
+            $ctaLabel = 'Watch Story on Facebook →';
         } elseif ($isSocialVideo && $resolvedSiteName !== '') {
             $ctaLabel = "Watch on {$resolvedSiteName} →";
         } elseif ($isInstagram) {

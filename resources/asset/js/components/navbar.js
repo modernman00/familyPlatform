@@ -320,15 +320,22 @@ const initNavbarControls = () => {
     const notificationDropdown = id('notificationDropdown');
     const markAllReadBtn = id('markAllRead');
 
-    if (notificationBtn && notificationDropdown) {
+    if (notificationBtn && notificationDropdown && !notificationBtn.hasAttribute('data-notif-instant-bound')) {
+        notificationBtn.setAttribute('data-notif-instant-bound', 'true');
         notificationBtn.addEventListener('click', function (e) {
             e.stopPropagation();
-            notificationDropdown.classList.toggle('show');
+            const now = Date.now();
+            const lastToggle = parseInt(notificationDropdown.getAttribute('data-last-toggle-ts') || '0', 10);
+            if (now - lastToggle < 40) return;
+            notificationDropdown.setAttribute('data-last-toggle-ts', String(now));
+            const isShown = notificationDropdown.classList.toggle('show');
+            notificationBtn.setAttribute('aria-expanded', isShown ? 'true' : 'false');
         });
 
         document.addEventListener('click', function (e) {
             if (!notificationBtn.contains(e.target) && !notificationDropdown.contains(e.target)) {
                 notificationDropdown.classList.remove('show');
+                notificationBtn.setAttribute('aria-expanded', 'false');
             }
         });
 

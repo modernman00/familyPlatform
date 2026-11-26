@@ -413,6 +413,60 @@ foreach ($bladeFiles as $bladePath) {
     }
 }
 
+// --- CHECK 10: NAVBAR CLICK-PHYSICS & HIT-TARGET INTEGRITY GATE ---
+$navbarBladeFile = $targetDir . '/resources/views/layouts/navbar.blade.php';
+$navbarCssFile = $targetDir . '/public/css/navbar.css';
+if (file_exists($navbarBladeFile)) {
+    $navBladeContent = file_get_contents($navbarBladeFile) ?: '';
+    // 10A: Notification badge (#notification_count) must be nested inside #notificationBtn (never a sibling dead-zone)
+    if (!preg_match('/<button[^>]*id=["\']notificationBtn["\'][^>]*>.*?id=["\']notification_count["\'].*?<\/button>/is', $navBladeContent)) {
+        $violations[] = [
+            'severity' => 'CRITICAL',
+            'rule' => 'MUST-HAVE #10: Notification Badge Outside Clickable #notificationBtn Hit Target',
+            'file' => $navbarBladeFile,
+            'line' => 179,
+            'remediation' => 'Place `<span class="notification-badge" id="notification_count" ...>` inside `<button id="notificationBtn">` so clicking the unread count badge triggers the button.',
+        ];
+        $exitCode = 1;
+    }
+    // 10B: Instant t=0ms click fallback delegation must exist in navbar.blade.php
+    if (!str_contains($navBladeContent, 'data-notif-instant-bound')) {
+        $violations[] = [
+            'severity' => 'CRITICAL',
+            'rule' => 'MUST-HAVE #10: Missing Instant t=0ms Notification Bell Click Handler in Navbar',
+            'file' => $navbarBladeFile,
+            'line' => 380,
+            'remediation' => 'Include the inline `data-notif-instant-bound` click handler in `resources/views/layouts/navbar.blade.php` so the bell responds before heavy module bundles finish hydrating.',
+        ];
+        $exitCode = 1;
+    }
+}
+if (file_exists($navbarCssFile)) {
+    $navCssContent = file_get_contents($navbarCssFile) ?: '';
+    // 10C: Ban opposing vertical translateY jumps on :active in navbar.css that cause buttons to flee the cursor between mousedown and mouseup
+    if (preg_match('/(#notificationBtn:active|\.invite-3d-btn:active|\.btn-raised-nav:active)\s*\{[^}]*translateY\(\s*[2-9]px\s*\)/i', $navCssContent)) {
+        $violations[] = [
+            'severity' => 'CRITICAL',
+            'rule' => 'MUST-HAVE #10: Navbar Button :active Vertical translateY Jump (Hit-Box Fleeing)',
+            'file' => $navbarCssFile,
+            'line' => 1480,
+            'remediation' => 'Use `transform: scale(0.98)` on `:active` instead of downward `translateY(2px..3px)` jumps that move the hit box away from the cursor during click.',
+        ];
+        $exitCode = 1;
+    }
+    // 10D: Ban unconditional pointer-events: auto on hidden .creative-studio-rich-tooltip::after bridge
+    if (preg_match('/\.creative-studio-rich-tooltip::after\s*\{[^}]*pointer-events:\s*auto/i', $navCssContent)) {
+        $violations[] = [
+            'severity' => 'CRITICAL',
+            'rule' => 'MUST-HAVE #10: Unconditional pointer-events: auto on Hidden Tooltip Hit-Bridge',
+            'file' => $navbarCssFile,
+            'line' => 298,
+            'remediation' => 'Use `pointer-events: inherit;` on `.creative-studio-rich-tooltip::after` so the hit-bridge is only active when the tooltip menu is open.',
+        ];
+        $exitCode = 1;
+    }
+}
+
 // Display report
 if (empty($violations)) {
     echo "✅ ALL MUST-HAVE CHECKS PASSED!\n";

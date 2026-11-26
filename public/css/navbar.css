@@ -71,13 +71,14 @@
 
 /* Navigation Links */
 .stitch-nav-link {
+  position: relative;
   color: #334155 !important;
   font-weight: 550;
   font-size: 0.84rem;
-  min-height: 38px;
+  min-height: 44px;
   padding: 0.4rem 0.65rem !important;
   border-radius: var(--stitch-radius-pill);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.12s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
   align-items: center;
   gap: 0.32rem;
@@ -85,23 +86,26 @@
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
+.stitch-nav-link > * {
+  pointer-events: none;
+}
 .stitch-nav-link:active {
-  transform: scale(0.96);
+  transform: scale(0.98);
 }
 .stitch-nav-link i {
   color: #475569;
   font-size: 0.92rem;
   margin-right: 0 !important;
+  pointer-events: none;
   transition: color 0.2s ease, transform 0.2s ease;
 }
 .stitch-nav-link:hover {
   color: var(--brand-primary) !important;
   background: var(--brand-primary-container);
-  transform: translateY(-1px);
 }
 .stitch-nav-link:hover i {
   color: var(--brand-primary);
-  transform: scale(1.08);
+  transform: scale(1.06);
 }
 .stitch-nav-link.active {
   color: var(--brand-primary) !important;
@@ -294,7 +298,7 @@
   white-space: normal;
 }
 
-/* Invisible Hit Bridge: Prevents gap dismissal during pointer transit */
+/* Invisible Hit Bridge: Prevents gap dismissal during pointer transit only when dropdown is open */
 .creative-studio-rich-tooltip::after {
   content: '';
   position: absolute;
@@ -303,7 +307,7 @@
   right: 0;
   height: 16px;
   background: transparent;
-  pointer-events: auto;
+  pointer-events: inherit;
 }
 
 .creative-studio-rich-tooltip::before {
@@ -505,19 +509,32 @@
   justify-content: center;
   position: relative;
   overflow: visible !important;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, transform 0.12s cubic-bezier(0.16, 1, 0.3, 1);
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   cursor: pointer;
 }
+/* Stationary Hit-Target Cushion: Absorbs micro-presses and covers protruding notification/chat badges */
+.btn-icon-stitch::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  bottom: -4px;
+  left: -4px;
+  border-radius: 9999px;
+  background: transparent;
+}
+.btn-icon-stitch > * {
+  pointer-events: none;
+}
 .btn-icon-stitch:active {
-  transform: scale(0.94);
+  transform: scale(0.97);
 }
 .btn-icon-stitch:hover {
   background: var(--brand-primary-container);
   color: var(--brand-primary);
   border-color: #ecc7c9;
-  transform: translateY(-1px);
 }
 
 /* Toggler Button: Hidden on Desktop (>= 992px), Visible on Mobile (< 992px) */
@@ -630,7 +647,6 @@
   background: #e2e8f0;
   border-color: #cbd5e1;
   color: #0f172a !important;
-  transform: translateY(-1px);
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
 }
 
@@ -1280,11 +1296,13 @@ body.dark-mode .dropdown-divider {
   display: inline-block;
   line-height: 1;
 }
+.btn-omni-search-trigger > * {
+  pointer-events: none;
+}
 .btn-omni-search-trigger:hover {
   background: #ffffff;
   border-color: rgba(184, 32, 44, 0.45);
   color: var(--brand-text-dark, #0f172a);
-  transform: translateY(-1px);
   box-shadow: 0 4px 14px -2px rgba(184, 32, 44, 0.12), 0 2px 4px rgba(15, 23, 42, 0.04), inset 0 1px 0 rgba(255, 255, 255, 1);
 }
 .btn-omni-search-trigger:hover .omni-trigger-icon-box {
@@ -1467,20 +1485,22 @@ body.dark-mode .btn-mobile-omni-trigger {
   animation: creativeSheenSweep 4.2s ease-in-out infinite;
   pointer-events: none;
 }
-.invite-3d-btn i { color: #ffd700; filter: drop-shadow(0 1px 1px rgba(80, 8, 14, 0.6)); }
+.invite-3d-btn > * {
+  pointer-events: none;
+}
+.invite-3d-btn i { color: #ffd700; filter: drop-shadow(0 1px 1px rgba(80, 8, 14, 0.6)); pointer-events: none; }
 @media (hover: hover) {
   .invite-3d-btn:hover {
     color: #fff;
     filter: brightness(1.06);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 0 #6b0f18, 0 12px 22px rgba(184, 32, 44, 0.5),
+    box-shadow: 0 5px 0 #6b0f18, 0 12px 22px rgba(184, 32, 44, 0.5),
       inset 0 1px 1.5px rgba(255, 255, 255, 0.6), inset 0 -2px 3px rgba(80, 8, 14, 0.45);
   }
 }
 .invite-3d-btn:active {
   color: #fff;
-  transform: translateY(3px) scale(0.98);
-  box-shadow: 0 1px 0 #6b0f18, 0 3px 6px rgba(184, 32, 44, 0.4), inset 0 2px 4px rgba(80, 8, 14, 0.5);
+  transform: scale(0.98);
+  box-shadow: 0 2px 0 #6b0f18, 0 3px 6px rgba(184, 32, 44, 0.4), inset 0 2px 4px rgba(80, 8, 14, 0.5);
 }
 .invite-3d-btn:focus-visible { outline: 2px solid #ffd700; outline-offset: 2px; }
 @keyframes invite3DPulse {
@@ -1498,14 +1518,14 @@ body.dark-mode .btn-mobile-omni-trigger {
   background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
   border: 1px solid var(--brand-border, #e2e8f0);
   box-shadow: 0 3px 0 #cbd5e1, 0 6px 12px rgba(15, 23, 42, 0.12), inset 0 1px 1px #fff;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.12s ease, box-shadow 0.15s ease;
 }
 #notificationBtn:active {
-  transform: translateY(2px) scale(0.98);
+  transform: scale(0.97);
   box-shadow: 0 1px 0 #cbd5e1, inset 0 2px 3px rgba(15, 23, 42, 0.15);
 }
 #notificationBtn:focus-visible { outline: 2px solid var(--brand-primary, #b8202c); outline-offset: 2px; }
-#notificationBtn .bi-bell-fill { display: inline-block; transform-origin: 50% 0; filter: drop-shadow(0 1px 1px rgba(15, 23, 42, 0.25)); }
+#notificationBtn .bi-bell-fill { display: inline-block; transform-origin: 50% 0; filter: drop-shadow(0 1px 1px rgba(15, 23, 42, 0.25)); pointer-events: none; }
 .notification-wrapper:has(.notification-badge:not(:empty):not([style*="display: none"])) #notificationBtn .bi-bell-fill {
   animation: notifBellRing 4s ease-in-out infinite;
 }
@@ -1519,6 +1539,7 @@ body.dark-mode .btn-mobile-omni-trigger {
   background-color: #be123c;
   box-shadow: 0 2px 0 #881337, 0 4px 10px rgba(190, 18, 60, 0.5);
   animation: notifBadgePulse 2.4s ease-in-out infinite;
+  pointer-events: none;
 }
 @keyframes notifBellRing {
   0%, 82%, 100% { transform: rotate(0); }
@@ -1532,7 +1553,7 @@ body.dark-mode .btn-mobile-omni-trigger {
   50% { transform: scale(1.08); }
 }
 @media (hover: hover) {
-  #notificationBtn:hover { transform: translateY(-2px); box-shadow: 0 5px 0 #cbd5e1, 0 10px 18px rgba(15, 23, 42, 0.16), inset 0 1px 1px #fff; }
+  #notificationBtn:hover { box-shadow: 0 4px 0 #cbd5e1, 0 10px 18px rgba(15, 23, 42, 0.16), inset 0 1px 1px #fff; }
 }
 body.dark-mode #notificationBtn { background: linear-gradient(180deg, #334155 0%, #1e293b 100%); border-color: #475569; color: #fda4af; box-shadow: 0 3px 0 #0f172a, 0 6px 12px rgba(0,0,0,.4), inset 0 1px 1px rgba(255,255,255,.12); }
 @media (prefers-reduced-motion: reduce) {
@@ -1594,11 +1615,12 @@ body.dark-mode #notificationBtn { background: linear-gradient(180deg, #334155 0%
   background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 100%);
   border: 1px solid var(--brand-border, #e2e8f0);
   box-shadow: 0 2px 0 #cbd5e1, 0 4px 8px rgba(15, 23, 42, 0.08), inset 0 1px 1px #fff;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.12s ease, box-shadow 0.15s ease;
 }
-.btn-raised-nav:active { transform: translateY(2px) scale(0.98); box-shadow: 0 0 0 #cbd5e1, inset 0 2px 3px rgba(15, 23, 42, 0.15); }
+.btn-raised-nav > * { pointer-events: none; }
+.btn-raised-nav:active { transform: scale(0.98); box-shadow: 0 0 0 #cbd5e1, inset 0 2px 3px rgba(15, 23, 42, 0.15); }
 .btn-raised-nav:focus-visible { outline: 2px solid var(--brand-primary, #b8202c); outline-offset: 2px; }
-@media (hover: hover) { .btn-raised-nav:hover { transform: translateY(-1px); color: var(--brand-primary, #b8202c); } }
+@media (hover: hover) { .btn-raised-nav:hover { color: var(--brand-primary, #b8202c); } }
 .lang-btn .bi-globe2 { font-size: 1.1rem; color: var(--brand-primary, #b8202c); }
 .lang-btn .lang-code { font-size: 0.75rem; letter-spacing: 0.04em; }
 body.dark-mode .btn-raised-nav { color: #e2e8f0; background: linear-gradient(180deg, #334155 0%, #1e293b 100%); border-color: #475569; box-shadow: 0 2px 0 #0f172a, inset 0 1px 1px rgba(255,255,255,.12); }

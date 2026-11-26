@@ -63,11 +63,18 @@
     font: inherit;
     font-size: 0.83rem;
     font-weight: 600;
+    min-height: 44px;
+    min-width: 44px;
     padding: 0.55rem 1.1rem;
     border-radius: 999px;
     cursor: pointer;
     border: 1px solid transparent;
     transition: background-color .15s ease, border-color .15s ease, transform .15s ease;
+  }
+  @media (max-width: 991.98px) {
+    body.fp-has-bottom-nav #cookieBanner {
+      bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+    }
   }
   #cookieBanner .cookie-btn-ghost { background: #ffffff; border-color: #cfccc0; color: #3c3830; }
   #cookieBanner .cookie-btn-ghost:hover { border-color: #a31621; color: #a31621; }
@@ -81,6 +88,7 @@
   @media (prefers-color-scheme: dark) {
     #cookieBanner .cookie-card { background: #1d1b16; color: #ece7db; border-color: #34302a; }
     #cookieBanner .cookie-copy p { color: #a29a88; }
+    #cookieBanner .cookie-copy a { color: #fda4af; }
     #cookieBanner .cookie-btn-ghost { background: #1d1b16; border-color: #45403a; color: #d8d2c4; }
   }
 </style>

@@ -2,7 +2,8 @@
     $seasonalTheme = \App\services\SeasonalThemeService::current();
 @endphp
 @if(!empty($seasonalTheme['is_active']))
-<link rel="stylesheet" href="/public/css/seasonal-themes.css?v={{ assetVersion('css/seasonal-themes.css') }}">
+<link rel="preload" href="/public/css/seasonal-themes.css?v={{ assetVersion('css/seasonal-themes.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/public/css/seasonal-themes.css?v={{ assetVersion('css/seasonal-themes.css') }}"></noscript>
 <script nonce="{{ csp_nonce($nonce ?? null) }}">
   (function () {
     var theme = @json($seasonalTheme);

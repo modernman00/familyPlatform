@@ -7,6 +7,8 @@ $router->map('POST', '/api/poll/vote', 'App\controller\members\EngagementControl
 $router->map('GET', '/api/engagement/memories', 'App\controller\members\EngagementController@fetchMemories', 'engagement_memories');
 $router->map('GET', '/api/memories/today', 'App\controller\members\MemoryMilestoneController@getMemoriesAndMilestones', 'memories_today');
 $router->map('POST', '/api/memories/share', 'App\controller\members\MemoryMilestoneController@shareMemory', 'memories_share');
+$router->map('GET', '/member/milestones/surprise-launch', 'App\controller\members\MemoryMilestoneController@launchSurpriseCelebration', 'member_milestone_surprise_launch');
+$router->map('POST', '/api/v1/ecosystem/milestone-link-callback', 'App\controller\api\EcosystemMilestoneCallbackController@handleCallback', 'api_ecosystem_milestone_link_callback');
 $router->map('GET', '/api/onboarding/state', 'App\controller\members\OnboardingController@getOnboardingState', 'onboarding_state');
 $router->map('POST', '/api/onboarding/step', 'App\controller\members\OnboardingController@completeStep', 'onboarding_step');
 $router->map('GET', '/api/profile/tour-preference', 'App\controller\members\OnboardingController@getProfileTourPreference', 'profile_tour_preference_get');

@@ -111,13 +111,14 @@ class FeedRepository
         int $limit = 15,
         int $offset = 0,
         string $filter = '',
-        ?string $cursor = null
+        ?string $cursor = null,
+        ?string $personId = null
     ): array {
         $safeLimit = max(1, min(50, $limit));
         $decodedCursor = self::decodeCursor($cursor);
         $effectiveOffset = $decodedCursor !== null ? 0 : max(0, $offset);
 
-        $rows = $this->fetchFeedRows($userId, $famCodes, $safeLimit + 1, $effectiveOffset, $filter, $decodedCursor);
+        $rows = $this->fetchFeedRows($userId, $famCodes, $safeLimit + 1, $effectiveOffset, $filter, $decodedCursor, $personId);
         $hasMore = count($rows) > $safeLimit;
         if ($hasMore) {
             $rows = array_slice($rows, 0, $safeLimit);
@@ -171,18 +172,30 @@ class FeedRepository
     }
 
     /**
-     * Build a correlated EXISTS predicate checking whether $userId holds an approved
-     * requestMgt connection with post.id without multiplying feed rows.
+     * Pre-fetch approved/accepted connected kin IDs for $userId once per query
+     * to avoid correlated range scans on requestMgt for every row in post.
+     *
+     * @return list<string>
      */
-    private function approvedConnectionExistsSql(): string
+    private function getApprovedConnectedKinIds(string $userId): array
     {
-        return "EXISTS (
-            SELECT 1
-            FROM requestMgt rm
-            WHERE ((rm.requester_id = ? AND rm.approver_id = post.id)
-                OR (rm.approver_id = ? AND rm.requester_id = post.id))
-              AND LOWER(rm.status) IN ('approved', 'accepted')
-        )";
+        if ($userId === '') {
+            return [];
+        }
+
+        try {
+            $stmt = $this->db->prepare(
+                "SELECT CASE WHEN requester_id = ? THEN approver_id ELSE requester_id END AS kin_id
+                 FROM requestMgt
+                 WHERE (requester_id = ? OR approver_id = ?)
+                   AND LOWER(status) IN ('approved', 'accepted')"
+            );
+            $stmt->execute([$userId, $userId, $userId]);
+            $ids = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            return array_values(array_unique(array_filter(array_map('strval', $ids), static fn(string $v): bool => $v !== '')));
+        } catch (PDOException $e) {
+            return [];
+        }
     }
 
     /**
@@ -193,7 +206,7 @@ class FeedRepository
      * @param string $filter
      * @return int
      */
-    public function countFeedPosts(string $userId, array $famCodes, string $filter = ''): int
+    public function countFeedPosts(string $userId, array $famCodes, string $filter = '', ?string $personId = null): int
     {
         try {
             $cleanedCodes = array_values(array_filter(array_map('strval', $famCodes), fn($c) => $c !== ''));
@@ -208,7 +221,10 @@ class FeedRepository
                 ? "post.postFamCode IN ($inQuery)"
                 : "1 = 0";
 
-            $approvedConn = $this->approvedConnectionExistsSql();
+            $kinIds = $this->getApprovedConnectedKinIds($userId);
+            $approvedConn = !empty($kinIds)
+                ? sprintf("post.id IN (%s)", implode(',', array_fill(0, count($kinIds), '?')))
+                : "1 = 0";
 
             $query = "SELECT COUNT(*) as total
                 FROM post
@@ -216,10 +232,7 @@ class FeedRepository
                     post.id = ?
                     OR EXISTS (SELECT 1 FROM post_tags pt WHERE pt.post_no = post.post_no AND pt.user_id = ?)
                     OR post.id = ?
-                    OR (
-                        EXISTS (SELECT 1 FROM post_family_targets pft_all WHERE pft_all.post_no = post.post_no)
-                        AND {$targetCheck}
-                    )
+                    OR {$targetCheck}
                     OR (
                         NOT EXISTS (SELECT 1 FROM post_family_targets pft_none WHERE pft_none.post_no = post.post_no)
                         AND {$legacyCodeCheck}
@@ -243,12 +256,19 @@ class FeedRepository
             if ($hasFamCodes) {
                 $params = array_merge($params, $cleanedCodes, $cleanedCodes);
             }
-            $params[] = $userId;
-            $params[] = $userId;
+            if (!empty($kinIds)) {
+                $params = array_merge($params, $kinIds);
+            }
 
             if ($filter === 'tagged') {
                 $query .= " AND EXISTS (SELECT 1 FROM post_tags pt_filter WHERE pt_filter.post_no = post.post_no AND pt_filter.user_id = ?)";
                 $params[] = $userId;
+            }
+
+            if ($personId !== null && $personId !== '') {
+                $query .= " AND (post.id = ? OR EXISTS (SELECT 1 FROM post_tags pt_person WHERE pt_person.post_no = post.post_no AND pt_person.user_id = ?))";
+                $params[] = $personId;
+                $params[] = $personId;
             }
 
             $restrictorIds = \App\services\MemberRestrictionService::getRestrictorIdsForViewer($this->db, $userId, 'posts');
@@ -337,7 +357,10 @@ class FeedRepository
                 ? "post.postFamCode IN ($inQuery)"
                 : "1 = 0";
 
-            $approvedConn = $this->approvedConnectionExistsSql();
+            $kinIds = $this->getApprovedConnectedKinIds($userId);
+            $approvedConn = !empty($kinIds)
+                ? sprintf("post.id IN (%s)", implode(',', array_fill(0, count($kinIds), '?')))
+                : "1 = 0";
 
             $query = "SELECT post.*,
                     (SELECT pp.img FROM profilePics pp WHERE pp.id = post.id ORDER BY pp.no DESC LIMIT 1) AS img,
@@ -347,10 +370,7 @@ class FeedRepository
                 WHERE (
                     post.id = ?
                     OR post.id = ?
-                    OR (
-                        EXISTS (SELECT 1 FROM post_family_targets pft_all WHERE pft_all.post_no = post.post_no)
-                        AND {$targetCheck}
-                    )
+                    OR {$targetCheck}
                     OR (
                         NOT EXISTS (SELECT 1 FROM post_family_targets pft_none WHERE pft_none.post_no = post.post_no)
                         AND {$legacyCodeCheck}
@@ -374,8 +394,9 @@ class FeedRepository
             if ($hasFamCodes) {
                 $params = array_merge($params, $cleanedCodes, $cleanedCodes);
             }
-            $params[] = $userId;
-            $params[] = $userId;
+            if (!empty($kinIds)) {
+                $params = array_merge($params, $kinIds);
+            }
 
             $memRestrictors = \App\services\MemberRestrictionService::getRestrictorIdsForViewer($this->db, $userId, 'posts');
             if (!empty($memRestrictors)) {
@@ -421,7 +442,7 @@ class FeedRepository
      * @param array{date_created: string, post_no: int}|null $cursor
      * @return array<array<string, mixed>>
      */
-    private function fetchFeedRows(string $userId, array $famCodes, int $limit, int $offset, string $filter = '', ?array $cursor = null): array
+    private function fetchFeedRows(string $userId, array $famCodes, int $limit, int $offset, string $filter = '', ?array $cursor = null, ?string $personId = null): array
     {
         try {
             $cleanedCodes = array_values(array_filter(array_map('strval', $famCodes), fn($c) => $c !== ''));
@@ -436,7 +457,10 @@ class FeedRepository
                 ? "post.postFamCode IN ($inQuery)"
                 : "1 = 0";
 
-            $approvedConn = $this->approvedConnectionExistsSql();
+            $kinIds = $this->getApprovedConnectedKinIds($userId);
+            $approvedConn = !empty($kinIds)
+                ? sprintf("post.id IN (%s)", implode(',', array_fill(0, count($kinIds), '?')))
+                : "1 = 0";
 
             $query = "SELECT post.*,
                     (SELECT pp.img FROM profilePics pp WHERE pp.id = post.id ORDER BY pp.no DESC LIMIT 1) AS img,
@@ -447,10 +471,7 @@ class FeedRepository
                     post.id = ?
                     OR EXISTS (SELECT 1 FROM post_tags pt WHERE pt.post_no = post.post_no AND pt.user_id = ?)
                     OR post.id = ?
-                    OR (
-                        EXISTS (SELECT 1 FROM post_family_targets pft_all WHERE pft_all.post_no = post.post_no)
-                        AND {$targetCheck}
-                    )
+                    OR {$targetCheck}
                     OR (
                         NOT EXISTS (SELECT 1 FROM post_family_targets pft_none WHERE pft_none.post_no = post.post_no)
                         AND {$legacyCodeCheck}
@@ -474,12 +495,19 @@ class FeedRepository
             if ($hasFamCodes) {
                 $params = array_merge($params, $cleanedCodes, $cleanedCodes);
             }
-            $params[] = $userId;
-            $params[] = $userId;
+            if (!empty($kinIds)) {
+                $params = array_merge($params, $kinIds);
+            }
 
             if ($filter === 'tagged') {
                 $query .= " AND EXISTS (SELECT 1 FROM post_tags pt_filter WHERE pt_filter.post_no = post.post_no AND pt_filter.user_id = ?)";
                 $params[] = $userId;
+            }
+
+            if ($personId !== null && $personId !== '') {
+                $query .= " AND (post.id = ? OR EXISTS (SELECT 1 FROM post_tags pt_person WHERE pt_person.post_no = post.post_no AND pt_person.user_id = ?))";
+                $params[] = $personId;
+                $params[] = $personId;
             }
 
             $feedRestrictors = \App\services\MemberRestrictionService::getRestrictorIdsForViewer($this->db, $userId, 'posts');
@@ -617,6 +645,7 @@ class FeedRepository
             // Collect all unique tagged user IDs for batch kinship resolution
             $taggedUserIds = array_values(array_unique(array_filter(array_map('strval', array_column($tagRows, 'user_id')))));
             $kinshipMap = $this->batchResolveKinship($userId, $taggedUserIds);
+            $honorificsEnabled = \App\services\KinshipHonorificService::isEnabledForViewer($userId, $this->db);
 
             foreach ($tagRows as $tRow) {
                 $pNo = (int)$tRow['post_no'];
@@ -628,14 +657,27 @@ class FeedRepository
                         ? (string)$img
                         : "/resources/images/profile/{$img}";
                 }
+                $rawFull = trim(($tRow['firstName'] ?? '') . ' ' . ($tRow['lastName'] ?? ''));
+                $formattedParts = \App\services\NameFormatterService::formatFirstAndLast(
+                    (string)($tRow['firstName'] ?? ''),
+                    (string)($tRow['lastName'] ?? '')
+                );
+                $cleanFull = $formattedParts['full_name'] !== 'Relative' ? $formattedParts['full_name'] : $rawFull;
+                $kinLabel = $kinshipMap[$uId] ?? 'Family Member';
+                $honorific = $honorificsEnabled
+                    ? \App\services\KinshipHonorificService::mapRelationToHonorific($kinLabel, $userId, $uId)
+                    : null;
+
                 $postTagsByPostNo[$pNo][] = [
                     'user_id' => $uId,
-                    'fullName' => trim(($tRow['firstName'] ?? '') . ' ' . ($tRow['lastName'] ?? '')),
+                    'fullName' => $cleanFull,
                     'firstName' => (string)($tRow['firstName'] ?? ''),
                     'lastName' => (string)($tRow['lastName'] ?? ''),
                     'profileImg' => $profImg,
                     'tagged_by' => (string)$tRow['tagged_by'],
-                    'kinship' => $kinshipMap[$uId] ?? 'Family Member',
+                    'kinship' => $kinLabel,
+                    'honorific' => $honorific,
+                    'displayFullName' => \App\services\KinshipHonorificService::formatDisplayName($cleanFull, $honorific),
                 ];
             }
         } catch (\Throwable $tagEx) {
@@ -934,6 +976,28 @@ class FeedRepository
             $egoNodesStmt->execute([$currentUserId]);
             $egoNodes = $egoNodesStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 
+            // Defensive Ego fallback: if user_id was not yet linked on family_nodes, match by viewer's famCode + name
+            if (empty($egoNodes)) {
+                $vStmt = $this->db->prepare("SELECT firstName, lastName, famCode FROM personal WHERE id = ? LIMIT 1");
+                $vStmt->execute([$currentUserId]);
+                $vRow = $vStmt->fetch(PDO::FETCH_ASSOC);
+                $vFirst = trim((string)($vRow['firstName'] ?? ''));
+                $vLast = trim((string)($vRow['lastName'] ?? ''));
+                $vFam = strtoupper(ltrim(trim((string)($vRow['famCode'] ?? '')), '#'));
+                if ($vFirst !== '' && $vFam !== '') {
+                    $fbStmt = $this->db->prepare(
+                        "SELECT id, family_code, generation_level FROM family_nodes
+                         WHERE UPPER(TRIM(REPLACE(family_code, '#', ''))) = ?
+                           AND LOWER(TRIM(first_name)) = LOWER(?)
+                           AND (? = '' OR LOWER(TRIM(COALESCE(last_name, ''))) = LOWER(?))
+                           AND COALESCE(is_erased, 0) = 0
+                         ORDER BY id ASC LIMIT 1"
+                    );
+                    $fbStmt->execute([$vFam, $vFirst, $vLast, $vLast]);
+                    $egoNodes = $fbStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+                }
+            }
+
             // Fetch personal names of target users for secondary name-matching if a tree node is unlinked
             $inTarget = implode(',', array_fill(0, count($unresolved), '?'));
             $personalSql = sprintf(
@@ -964,7 +1028,7 @@ class FeedRepository
                 $visitedFamCodes[$famCode] = true;
 
                 $nodesStmt = $this->db->prepare(
-                    "SELECT id, user_id, first_name, last_name, gender, generation_level, is_deceased, is_placeholder, placeholder_label
+                    "SELECT id, user_id, first_name, last_name, gender, generation_level, is_deceased, is_placeholder
                      FROM family_nodes
                      WHERE family_code = ? AND COALESCE(is_erased, 0) = 0
                      ORDER BY generation_level ASC, id ASC"

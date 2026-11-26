@@ -265,12 +265,12 @@ export function UpcomingEventsIsland({ bootstrap = {} }) {
                         >
                             <i className="bi bi-calendar2-heart-fill" />
                         </div>
-                        <h5
-                            className="mb-0 fw-bold ev-widget-heading text-truncate"
+                        <h3
+                            className="h5 mb-0 fw-bold ev-widget-heading text-truncate"
                             style={{ color: 'var(--text-color)', fontSize: '1.02rem', lineHeight: 1.25, letterSpacing: '-0.01em' }}
                         >
                             Upcoming Events
-                        </h5>
+                        </h3>
                     </div>
 
                     <button
@@ -370,13 +370,13 @@ export function UpcomingEventsIsland({ bootstrap = {} }) {
 
                                                 <div className="flex-grow-1 min-w-0">
                                                     <div className="d-flex align-items-start justify-content-between gap-2 mb-1.5">
-                                                        <h6
-                                                            className="fw-bold mb-0 ev-widget-title"
+                                                        <h4
+                                                            className="h6 fw-bold mb-0 ev-widget-title"
                                                             style={{ color: 'var(--text-color)', fontSize: '0.95rem', lineHeight: 1.25, wordBreak: 'break-word' }}
                                                             title={event.eventName}
                                                         >
                                                             {event.eventName}
-                                                        </h6>
+                                                        </h4>
                                                         {event.dateDifference && (
                                                             <span
                                                                 className={`badge rounded-pill fw-bold flex-shrink-0 ev-widget-countdown ${countdownClass}`}

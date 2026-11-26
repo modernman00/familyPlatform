@@ -3,6 +3,7 @@ import { apiFetch } from '../shared/apiClient';
 import { getCsrfToken, notifyToast } from '../shared/bootstrap';
 import {
     TEXT_STAGE_CATALOG,
+    suggestTextStageForMessage,
     extractPreviewableUrls,
     getAvatarUrl,
     getInitials,
@@ -17,12 +18,14 @@ const QUICK_EMOJIS = ['❤️', '🎉', '🙏', '😂', '🏡', '✨'];
 export function PostComposer({ bootstrap, onOptimisticInsert, onReplaceOptimistic, onRollbackOptimistic, composerRef }) {
     const [message, setMessage] = useState('');
     const [selectedStyle, setSelectedStyle] = useState('');
+    const [dismissedSuggestionSlug, setDismissedSuggestionSlug] = useState('');
     const [files, setFiles] = useState([]);
     const [videoUrl, setVideoUrl] = useState('');
     const [showVideoInput, setShowVideoInput] = useState(false);
     const [showPollBuilder, setShowPollBuilder] = useState(false);
     const [pollOptions, setPollOptions] = useState(['', '']);
     const [audienceScope, setAudienceScope] = useState('all');
+    const [allowSharing, setAllowSharing] = useState(true);
     const [showOptions, setShowOptions] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
     const [submitting, setSubmitting] = useState(false);
@@ -113,6 +116,7 @@ export function PostComposer({ bootstrap, onOptimisticInsert, onReplaceOptimisti
             videos: videoUrl.trim() ? [videoUrl.trim()] : [],
             post_likes: 0,
             comments: [],
+            allow_sharing: allowSharing,
             date_created: new Date().toISOString(),
             _optimistic: true,
         });
@@ -125,6 +129,7 @@ export function PostComposer({ bootstrap, onOptimisticInsert, onReplaceOptimisti
         const prevFiles = files;
         const prevVideoUrl = videoUrl;
         const prevPollOpts = pollOptions;
+        const prevAllowSharing = allowSharing;
 
         setMessage('');
         setSelectedStyle('');
@@ -135,12 +140,14 @@ export function PostComposer({ bootstrap, onOptimisticInsert, onReplaceOptimisti
         setShowOptions(false);
         setIsExpanded(false);
         setPollOptions(['', '']);
+        setAllowSharing(true);
         setLinkPreview(null);
         setDismissedLinkUrl('');
 
         try {
             const formData = new FormData();
             formData.append('postMessage', cleanMsg);
+            formData.append('allow_sharing', prevAllowSharing ? '1' : '0');
             if (prevStyle) formData.append('post_style', prevStyle);
             if (audienceScope && audienceScope !== 'all') {
                 formData.append('target_scope', audienceScope);
@@ -194,6 +201,12 @@ export function PostComposer({ bootstrap, onOptimisticInsert, onReplaceOptimisti
         showPollBuilder ||
         showOptions
     );
+    const isTextOnlyPost = files.length === 0 && !videoUrl.trim() && !showPollBuilder && !linkPreview;
+    const rawSuggestion = isTextOnlyPost ? suggestTextStageForMessage(message) : null;
+    const activeSuggestion =
+        rawSuggestion && rawSuggestion.slug !== selectedStyle && rawSuggestion.slug !== dismissedSuggestionSlug
+            ? rawSuggestion
+            : null;
 
     return (
         <section className={`${styles.composerCard} post-composer post-composer--hero mb-3`} aria-label="Create a family post">
@@ -288,6 +301,54 @@ export function PostComposer({ bootstrap, onOptimisticInsert, onReplaceOptimisti
                         />
                     </div>
                 </div>
+
+                {/* Live Text-Only Theme Suggestion (Requires Explicit User Approval) */}
+                {activeSuggestion && (
+                    <div
+                        className="mt-2 px-3 py-2 rounded-3 d-flex align-items-center justify-content-between flex-wrap gap-2"
+                        style={{
+                            background: 'rgba(15, 23, 42, 0.04)',
+                            border: '1px solid rgba(99, 102, 241, 0.28)',
+                        }}
+                        role="status"
+                        aria-live="polite"
+                        data-testid="composer-theme-suggestion"
+                    >
+                        <div className="d-flex align-items-center gap-2 min-w-0">
+                            <span
+                                className="fp-stage-converter__dot flex-shrink-0"
+                                style={{ background: activeSuggestion.swatch }}
+                                aria-hidden="true"
+                            />
+                            <span className="small fw-semibold">
+                                Suggested theme ({activeSuggestion.reason}): <strong>{activeSuggestion.label}</strong>
+                            </span>
+                        </div>
+                        <div className="d-flex align-items-center gap-2 flex-shrink-0">
+                            <button
+                                type="button"
+                                className="btn btn-sm btn-primary rounded-pill fw-semibold px-3"
+                                style={{ minHeight: '44px', whiteSpace: 'nowrap' }}
+                                data-testid="composer-theme-approve-btn"
+                                onClick={() => {
+                                    setSelectedStyle(activeSuggestion.slug);
+                                    setIsExpanded(true);
+                                }}
+                            >
+                                Apply {activeSuggestion.label}
+                            </button>
+                            <button
+                                type="button"
+                                className="btn btn-sm btn-outline-secondary rounded-pill px-3"
+                                style={{ minHeight: '44px', whiteSpace: 'nowrap' }}
+                                data-testid="composer-theme-dismiss-btn"
+                                onClick={() => setDismissedSuggestionSlug(activeSuggestion.slug)}
+                            >
+                                Dismiss
+                            </button>
+                        </div>
+                    </div>
+                )}
 
                 {/* Live Link Preview Card */}
                 {linkPreview && (
@@ -421,6 +482,19 @@ export function PostComposer({ bootstrap, onOptimisticInsert, onReplaceOptimisti
                                     ))}
                                 </select>
                             )}
+
+                            <button
+                                type="button"
+                                className={`btn btn-sm rounded-pill d-inline-flex align-items-center gap-1 px-3 fw-semibold ${allowSharing ? 'btn-outline-success' : 'btn-outline-secondary'}`}
+                                style={{ minHeight: 44, whiteSpace: 'nowrap', flexShrink: 0 }}
+                                aria-pressed={allowSharing ? 'true' : 'false'}
+                                data-testid="composer-allow-sharing-toggle"
+                                title={allowSharing ? 'Relatives can share this post and you will be notified via Web Push' : 'Sharing locked — only you can share this post'}
+                                onClick={() => setAllowSharing((v) => !v)}
+                            >
+                                <i className={`bi ${allowSharing ? 'bi-share-fill' : 'bi-lock-fill'}`} aria-hidden="true" />
+                                <span>{allowSharing ? 'Sharing Allowed' : 'Sharing Locked'}</span>
+                            </button>
                         </div>
                     </div>
                 )}

@@ -469,7 +469,7 @@ class PWAManager {
         <div class="pwa-banner-header">
           <img src="/public/img/favicon/android-chrome-192x192.png" alt="FamilyPlatform" class="pwa-banner-logo" width="46" height="46" onerror="this.src='/resources/images/avatarM.png'">
           <div class="pwa-banner-text">
-            <h6>Install FamilyPlatform</h6>
+            <h2 class="pwa-banner-title">Install FamilyPlatform</h2>
             <p>Get instant alerts, fast family updates and offline access.</p>
           </div>
           <button type="button" id="pwa-banner-close" class="pwa-btn-close" aria-label="Dismiss">&times;</button>

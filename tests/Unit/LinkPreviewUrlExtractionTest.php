@@ -47,4 +47,41 @@ final class LinkPreviewUrlExtractionTest extends TestCase
         $this->assertFalse(LinkPreviewService::isSafeUrl('http://localhost/admin'));
         $this->assertFalse(LinkPreviewService::isSafeUrl('https://test.local/internal'));
     }
+
+    public function testFacebookStoryFallbackAndLoginWallRenderCleanStoryMetadata(): void
+    {
+        $method = new \ReflectionMethod(LinkPreviewService::class, 'formatPreviewPayload');
+
+        $storyUrl = 'https://www.facebook.com/stories/1778112468889642/UzpfSVNDOjI1MjQ5OTUxMzEzMDA4/';
+
+        $fallbackPayload = $method->invoke(null, [
+            'url' => $storyUrl,
+            'canonical_url' => $storyUrl,
+            'domain' => 'facebook.com',
+            'site_name' => 'Facebook',
+            'title' => 'Facebook',
+            'description' => '',
+            'image_url' => null,
+        ], $storyUrl);
+
+        $this->assertSame('Facebook Story', $fallbackPayload['title']);
+        $this->assertSame('Facebook Stories require you to sign in on Facebook to watch.', $fallbackPayload['description']);
+        $this->assertSame('Watch Story on Facebook →', $fallbackPayload['cta_label']);
+        $this->assertTrue($fallbackPayload['is_social_video']);
+        $this->assertTrue($fallbackPayload['is_facebook']);
+
+        $loginWallPayload = $method->invoke(null, [
+            'url' => $storyUrl,
+            'canonical_url' => $storyUrl,
+            'domain' => 'facebook.com',
+            'site_name' => 'Facebook',
+            'title' => 'Log in to Facebook',
+            'description' => 'Log into Facebook to start sharing and connecting with your friends, family, and people you know.',
+            'image_url' => null,
+        ], $storyUrl);
+
+        $this->assertSame('Facebook Story', $loginWallPayload['title']);
+        $this->assertSame('Facebook Stories require you to sign in on Facebook to watch.', $loginWallPayload['description']);
+        $this->assertSame('Watch Story on Facebook →', $loginWallPayload['cta_label']);
+    }
 }

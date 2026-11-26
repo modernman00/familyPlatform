@@ -5,7 +5,7 @@
 @section('data-page-id', 'home')
 
 @section('preload_lcp')
-  <link rel="preload" as="image" href="/public/img/hero-family.webp" type="image/webp" fetchpriority="high">
+  <link rel="preload" as="image" href="/public/media/family-hero-mobile.jpg" type="image/jpeg" fetchpriority="high">
 @endsection
 
 @section('content')
@@ -198,7 +198,7 @@
 
     <div class="container hero-foreground">
       <div class="row align-items-center">
-        <div class="col-lg-6 mb-5 mb-lg-0 pe-lg-5">
+        <div class="col-lg-8 col-xl-7">
           <div class="badge rounded-pill px-3 py-2 mb-3 fw-bold text-uppercase tracking-wider hero-privacy-pill">
             🛡️ 100% Private 
           </div>
@@ -223,12 +223,6 @@
               <i class="bi bi-diagram-3-fill text-info"></i> Living Family Tree
             </div>
           </div>
-        </div>
-        <div class="col-lg-6 text-center">
-          <picture>
-            <source srcset="/public/img/hero-family.webp" type="image/webp">
-            <img src="/public/img/hero-family.png" alt="Family Connection Network" class="hero-image img-fluid" width="600" height="600" fetchpriority="high" decoding="async">
-          </picture>
         </div>
       </div>
     </div>

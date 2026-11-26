@@ -1560,6 +1560,40 @@ final class KinshipCalculatorService
                 ];
             }
 
+            // [parent, sibling, spouse] -> Uncle / Aunt by marriage
+            if ($types === ['parent', 'sibling', 'spouse']) {
+                $firstParentId = $path[0]['to'];
+                $firstParent = $nodesById[$firstParentId] ?? null;
+                $isMaternal = $firstParent && strtolower((string)($firstParent['gender'] ?? '')) === 'female';
+                $prefix = $isMaternal ? 'Maternal ' : 'Paternal ';
+                return [
+                    'title' => $prefix . ($isMale ? 'Uncle' : 'Aunt'),
+                    'side' => $isMaternal ? 'maternal' : 'paternal',
+                    'degree' => null,
+                    'category' => 'in_law'
+                ];
+            }
+
+            // [spouse, parent, parent] -> Spouse's Grandparent
+            if ($types === ['spouse', 'parent', 'parent']) {
+                return [
+                    'title' => $isMale ? 'Grandfather-in-law' : 'Grandmother-in-law',
+                    'side' => 'in_law',
+                    'degree' => null,
+                    'category' => 'in_law'
+                ];
+            }
+
+            // [spouse, parent, sibling] -> Spouse's Uncle / Aunt
+            if ($types === ['spouse', 'parent', 'sibling']) {
+                return [
+                    'title' => $isMale ? 'Uncle-in-law' : 'Aunt-in-law',
+                    'side' => 'in_law',
+                    'degree' => null,
+                    'category' => 'in_law'
+                ];
+            }
+
             // [child, child, child] -> Great-Grandchild
             if ($types === ['child', 'child', 'child']) {
                 return [
@@ -1567,6 +1601,26 @@ final class KinshipCalculatorService
                     'side' => 'direct',
                     'degree' => 3,
                     'category' => 'great_grandchild'
+                ];
+            }
+        }
+
+        // Distance 4 Marital Elder Relationships
+        if ($len === 4) {
+            if ($types === ['parent', 'parent', 'sibling', 'spouse']) {
+                return [
+                    'title' => $isMale ? 'Great-Uncle' : 'Great-Aunt',
+                    'side' => 'ancestral',
+                    'degree' => null,
+                    'category' => 'in_law'
+                ];
+            }
+            if ($types === ['spouse', 'parent', 'parent', 'parent']) {
+                return [
+                    'title' => $isMale ? 'Great-Grandfather-in-law' : 'Great-Grandmother-in-law',
+                    'side' => 'in_law',
+                    'degree' => null,
+                    'category' => 'in_law'
                 ];
             }
         }

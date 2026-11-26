@@ -822,9 +822,9 @@
               </div>
               <div class="col-md-3">
                 <div class="p-3 border rounded-3 bg-light h-100">
-                  <span class="badge text-white mb-2" style="background: #b45309;">Milestone Countdown</span>
-                  <h6 class="fw-bold text-dark">7-Day, 1-Day &amp; Day-of Reminders</h6>
-                  <p class="small text-muted mb-0">Receive advance reminders for upcoming birthdays, anniversaries, and family events at 7 days ahead (to plan gifts and cards), 1 day ahead, and on the day itself.</p>
+                  <span class="badge text-white mb-2" style="background: #b45309;">3D Milestone Surprises</span>
+                  <h6 class="fw-bold text-dark">Secret Group Cards &amp; Video Reels</h6>
+                  <p class="small text-muted mb-0">Upcoming birthdays and anniversaries appear on a 3D celebration stage showing each relative&rsquo;s full name, with <strong>Sign / Send a Card</strong> and <strong>Record Goodwill Video</strong> buttons hidden from the celebrant. Once one relative starts the standalone celebration on PartyPlatform, everyone else joins that shared card and video reel in one tap.</p>
                 </div>
               </div>
               <div class="col-md-3">
@@ -1111,6 +1111,22 @@
               </div>
               <div class="col-md-12 mt-3">
                 <div class="p-3 border rounded-3 bg-light">
+                  <h6 class="fw-bold text-dark"><i class="bi bi-at me-1 text-danger"></i> Respectful Kinship Titles on @Mentions &amp; Post Tags</h6>
+                  <p class="small text-muted mb-0">
+                    Type <strong>@First Last</strong> in any post, comment, Family Reel, or Daily Family Spark reply and FamilyPlatform automatically displays the respectful elder title matching <em>each reader's own relationship</em> on the Family Tree — so a grandchild sees <strong>@Grandpa Oluyomi Olaogun</strong>, a son or daughter sees <strong>@Dad Oluyomi Olaogun</strong>, a niece or nephew sees <strong>@Uncle Oluyomi Olaogun</strong>, and peers or spouses see <strong>@Oluyomi Olaogun</strong>. Tap any mention chip to visit that relative's profile, or switch between <em>Respectful Kinship Titles</em> and <em>Full Names Only</em> anytime in <strong>Account Settings &rarr; Preferences</strong>.
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-12 mt-3">
+                <div class="p-3 border rounded-3 bg-light">
+                  <h6 class="fw-bold text-dark"><i class="bi bi-send-fill me-1 text-success"></i> Family Post Sharing, Author Controls &amp; Instant Web Push Alerts</h6>
+                  <p class="small text-muted mb-0">
+                    Any authorised family member can share a relative's post via WhatsApp, Messages, social apps, or repost it directly to the family feed. Whenever a relative shares your post, you automatically receive an instant <strong>Web Push and in-app notification</strong> letting you know who shared it. Prefer to keep a particular memory private? Authors can toggle <em>Allow family members to share this post</em> on or off when composing a post, or lock/unlock sharing at any time from the post's <strong>&vellip;</strong> menu or Share Portal.
+                  </p>
+                </div>
+              </div>
+              <div class="col-md-12 mt-3">
+                <div class="p-3 border rounded-3 bg-light">
                   <h6 class="fw-bold text-dark"><i class="bi bi-phone-fill me-1 text-danger"></i> Mobile Gallery Direct Photo Sharing (Android &amp; Apple iOS)</h6>
                   <p class="small text-muted mb-2">
                     Share memories directly from your phone's camera roll without manual file browsing:
@@ -1236,13 +1252,22 @@
             <li><strong>Director Mode (<code>/director-mode</code>):</strong> Open <em>Creative Studio &rarr; Director Mode</em> to plan and render multi-shot heirloom and reunion films shot by shot. Mention relatives and moments with tags such as <code>@elders</code>, <code>@grandparents</code>, <code>@homestead</code>, or <code>@reunion</code>, choose a camera move, and tap <em>Plan my video</em> or <em>Render MP4 film</em> to download an H.264 MP4 film and subtitle file (<code>.srt</code>) at zero cost.</li>
         </ul>
     </div>
-    <div class="card bg-dark text-light border-secondary rounded-4 p-4" id="playbook-living-heirloom">
+    <div class="card bg-dark text-light border-secondary rounded-4 p-4 mb-4" id="playbook-living-heirloom">
         <h2 class="h4 text-warning mb-2">Living Heirloom, Age Progression &amp; Ancestral Reverse Computation</h2>
         <p class="small text-secondary mb-3">Available from <strong>Creative Studio &rarr; Heirloom AI</strong> in the top navigation bar and Creative Studio Hub (<code>/family/living-heirloom</code>):</p>
         <ul class="small mb-0">
             <li><strong>Living Motion &amp; Talking Portraits:</strong> Bring cherished portraits of deceased grandparents and relatives to life with natural breathing, blinking, re-emotion expressions (<em>Warm Smile</em>, <em>Nostalgic Nod</em>, <em>Joyful Laugh</em>), and real-time lip-sync driven by recorded family voice notes or tribute captions.</li>
             <li><strong>Future Age Progression (+10 / +20 / +30 / +40 Years):</strong> Forecast how you or a relative will look decades from now while preserving facial bone structure and identity.</li>
             <li><strong>Ancestral Reverse Computation &amp; Calibration:</strong> Run <em>Tree Calibration</em> to test prediction closeness against your photographed relatives, then synthesise a calibrated portrait of any unphotographed grandparent, great-grandparent, or great-great-grandparent in your Family Tree.</li>
+        </ul>
+    </div>
+    <div class="card bg-dark text-light border-secondary rounded-4 p-4" id="playbook-feed-interactive-showcase">
+        <h2 class="h4 text-warning mb-2">Playable In-Feed Games &amp; Live App Functionality Spotlights</h2>
+        <p class="small text-secondary mb-3">Woven directly into your Family Feed (<code>/profilePage</code>) so relatives can play and explore without leaving the stream:</p>
+        <ul class="small mb-0">
+            <li><strong>6 Playable In-Feed Arcade Mini-Games:</strong> Tap directly inside the feed spotlight cards to sow seeds in <em>Ayò Olópon</em>, flip 5-letter tiles in <em>KinWordie</em>, echo 4-pad melodies in <em>KinPulse</em>, connect circuits in <em>KinZip</em>, crown regions in <em>Cheeseboard</em>, or solve Mate-in-1 <em>Family Chess</em> puzzles.</li>
+            <li><strong>6 Live Interactive App Function Sandboxes:</strong> Test-drive <em>Respectful Kinship @Mentions</em> across reader perspectives, inspect <em>7-Generation Dynasty Tree</em> bonds, verify the <em>Secret Milestone Group Card</em> celebrant shield, switch <em>Living Heirloom AI</em> modes, vote in <em>Family RoundTable</em> polls, and queue <em>Director Mode</em> story beats live.</li>
+            <li><strong>Continuous Discovery Ribbon:</strong> Switch between <em>All (12)</em>, <em>Playable Games (6)</em>, and <em>App Functions (6)</em> or tap <em>Try Next Experience</em> on any card in the stream.</li>
         </ul>
     </div>
 </section>

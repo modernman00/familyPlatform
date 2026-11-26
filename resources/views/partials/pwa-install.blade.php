@@ -55,6 +55,7 @@
     min-width: 0;
     padding-right: 40px;
   }
+  #pwa-install-banner .pwa-banner-text h2,
   #pwa-install-banner .pwa-banner-text h6 {
     margin: 0 0 2px 0;
     font-weight: 700;
@@ -238,6 +239,7 @@
     border-color: rgba(255, 255, 255, 0.16) !important;
     color: #f8fafc !important;
   }
+  body.dark-mode #pwa-install-banner .pwa-banner-text h2,
   body.dark-mode #pwa-install-banner .pwa-banner-text h6,
   body.dark-mode #pwa-ios-overlay .pwa-ios-header h6 {
     color: #f8fafc !important;

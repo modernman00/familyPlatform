@@ -1789,20 +1789,21 @@ html.dark-mode {
     }
 }
 
-/* Highlighted mention chips */
+/* Highlighted mention chips (WCAG AA compliant across light, dark & stage surfaces) */
 .mention-chip {
     display: inline-flex;
     align-items: center;
     gap: 2px;
-    background: rgba(163, 22, 33, 0.09);
-    color: var(--primary-color, #a31621);
+    background: rgba(163, 22, 33, 0.10);
+    color: #8b111b;
     font-weight: 600;
-    padding: 1px 7px;
+    padding: 1px 8px;
     border-radius: 999px;
     font-size: 0.88em;
     vertical-align: baseline;
     white-space: nowrap;
-    transition: background 0.15s ease;
+    text-decoration: none;
+    transition: background 0.15s ease, transform 0.12s ease;
 
     i {
         font-size: 0.9em;
@@ -1811,6 +1812,55 @@ html.dark-mode {
 
     &:hover {
         background: rgba(163, 22, 33, 0.18);
+        color: #740d16;
+    }
+
+    &.mention-chip--link {
+        position: relative;
+        cursor: pointer;
+
+        &::after {
+            content: '';
+            position: absolute;
+            inset: -11px -6px;
+        }
+
+        &:hover {
+            text-decoration: underline;
+        }
+
+        &:active {
+            transform: scale(0.98);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--primary-color, #a31621);
+            outline-offset: 2px;
+        }
+    }
+
+    &.mention-chip--stage {
+        background: rgba(254, 202, 202, 0.18);
+        color: #fecaca;
+
+        &:hover {
+            background: rgba(254, 202, 202, 0.28);
+            color: #ffffff;
+        }
+    }
+}
+
+body.dark-mode .mention-chip,
+body.dark-theme .mention-chip,
+[data-bs-theme="dark"] .mention-chip,
+html.dark .mention-chip,
+html.dark-mode .mention-chip {
+    background: rgba(254, 202, 202, 0.16);
+    color: #fecaca;
+
+    &:hover {
+        background: rgba(254, 202, 202, 0.26);
+        color: #ffffff;
     }
 }
 

@@ -166,11 +166,21 @@ final class ReelsController extends BaseController
             // Track reel theater view
             AnalyticsService::track($userId, 'reel_theater_view', null, ['count' => count($initialReels)]);
 
+            $kinshipHonorifics = \App\services\KinshipHonorificService::getViewerPreference($userId);
+            $kinshipDirectory = \App\services\KinshipHonorificService::buildViewerMentionDirectory($userId, $famCode);
+            $reelsKinshipJson = json_encode([
+                'honorifics' => $kinshipHonorifics,
+                'directory' => $kinshipDirectory,
+            ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?: '{}';
+
             view('member/reels', [
                 'data' => $data,
                 'initialReels' => $initialReels,
                 'totalReels' => count($initialReels),
-                'ogMeta' => $ogMeta
+                'ogMeta' => $ogMeta,
+                'kinshipHonorifics' => $kinshipHonorifics,
+                'kinshipDirectory' => $kinshipDirectory,
+                'reelsKinshipJson' => $reelsKinshipJson,
             ]);
         } catch (\Throwable $th) {
             showError($th);

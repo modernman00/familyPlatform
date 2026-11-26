@@ -192,6 +192,71 @@
             }
         });
 
+        // 3a. Multi-Point elementFromPoint() Hit-Target & Badge Dead-Zone Verification Gate
+        // Probes critical navbar links, action buttons, and unread badges to ensure clicks on the centre,
+        // perimeter, or attached unread badge never fall through to a non-interactive background or get intercepted.
+        const navInteractiveControls = Array.from(document.querySelectorAll(
+            '#mainNavbar .stitch-nav-link, #mainNavbar .btn, #mainNavbar button, #mainNavbar a.navbar-brand, #pwaBottomNav .pwa-tab-item'
+        ));
+        navInteractiveControls.forEach(function (ctrl) {
+            if (!isVisible(ctrl)) return;
+            const rect = ctrl.getBoundingClientRect();
+            if (rect.width < 8 || rect.height < 8) return;
+            if (rect.bottom < 0 || rect.top > window.innerHeight || rect.right < 0 || rect.left > winWidth) return;
+
+            const probePoints = [
+                { label: 'centre', x: rect.left + rect.width * 0.5, y: rect.top + rect.height * 0.5 },
+                { label: 'top-edge', x: rect.left + rect.width * 0.5, y: rect.top + 3 },
+                { label: 'bottom-edge', x: rect.left + rect.width * 0.5, y: rect.bottom - 3 },
+                { label: 'left-edge', x: rect.left + 3, y: rect.top + rect.height * 0.5 },
+                { label: 'right-edge', x: rect.right - 3, y: rect.top + rect.height * 0.5 }
+            ];
+
+            for (let i = 0; i < probePoints.length; i++) {
+                const pt = probePoints[i];
+                if (pt.x < 1 || pt.x >= winWidth - 1 || pt.y < 1 || pt.y >= window.innerHeight - 1) continue;
+                const hitEl = document.elementFromPoint(pt.x, pt.y);
+                if (!hitEl) continue;
+                const belongsToControl = ctrl === hitEl || ctrl.contains(hitEl) || hitEl.contains(ctrl);
+                if (!belongsToControl) {
+                    violations.push({
+                        rule: 'HIT_TARGET_INTERCEPTED',
+                        message: 'Click at ' + pt.label + ' (' + Math.round(pt.x) + ',' + Math.round(pt.y) + ') on ' + getSelector(ctrl) + ' was intercepted by ' + getSelector(hitEl),
+                        selector: getSelector(ctrl)
+                    });
+                    break;
+                }
+            }
+        });
+
+        // Verify unread counter badges in navbar are inside an interactive button/link hit box
+        const navBadges = Array.from(document.querySelectorAll('#notification_count, #navbar_whisper_count, #mobile_whisper_count'));
+        navBadges.forEach(function (badge) {
+            const interactiveOwner = badge.closest('button, a[href], [role="button"]');
+            if (!interactiveOwner) {
+                violations.push({
+                    rule: 'BADGE_DEAD_ZONE',
+                    message: 'Navbar badge ' + getSelector(badge) + ' is outside any clickable button/link element (creates an unclickable dead zone)',
+                    selector: getSelector(badge)
+                });
+                return;
+            }
+            if (!isVisible(badge)) return;
+            const bRect = badge.getBoundingClientRect();
+            const bx = bRect.left + bRect.width * 0.5;
+            const by = bRect.top + bRect.height * 0.5;
+            if (bx >= 1 && bx < winWidth - 1 && by >= 1 && by < window.innerHeight - 1) {
+                const hitEl = document.elementFromPoint(bx, by);
+                if (hitEl && hitEl !== interactiveOwner && !interactiveOwner.contains(hitEl)) {
+                    violations.push({
+                        rule: 'BADGE_DEAD_ZONE',
+                        message: 'Clicking badge ' + getSelector(badge) + ' at (' + Math.round(bx) + ',' + Math.round(by) + ') misses ' + getSelector(interactiveOwner) + ' and hits ' + getSelector(hitEl),
+                        selector: getSelector(badge)
+                    });
+                }
+            }
+        });
+
         // 3b. Unlabelled Icon-Only Interactive Controls (Hallmark Floor Gate)
         const iconControls = Array.from(document.querySelectorAll('button, a[href], [role="button"], .btn'));
         iconControls.slice(0, 300).forEach(function (ctrl) {

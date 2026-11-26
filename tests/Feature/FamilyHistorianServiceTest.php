@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\dto\PostDto;
+use App\services\FamilyHistorianCardRenderer;
 use App\services\FamilyHistorianService;
 use DateTimeImmutable;
 use PDO;
@@ -221,5 +222,46 @@ final class FamilyHistorianServiceTest extends TestCase
         $this->assertSame(3, $actData['total_posts']);
         $this->assertSame(9, $actData['top_score']);
         $this->assertSame('Best Sunday roast together!', $actData['top_excerpt']);
+    }
+
+    public function test_activity_spotlight_strips_media_paths_and_bounds_long_tokens(): void
+    {
+        $db = $this->db;
+        $this->assertNotNull($db);
+
+        $insPost = $db->prepare(
+            "INSERT INTO post (id, fullName, postMessage, postFamCode, post_likes, post_time, post_status, date_created)
+             VALUES ('usr_fh_1', 'Laf Olaogun', ?, ?, ?, ?, 'published', NOW())"
+        );
+        $nowMs = (string)(int)(microtime(true) * 1000);
+        $insPost->execute([
+            "/resources/videos/posts/post_vid_937619LAFANE_1794321691_8c820fb6262d.mp4#t=0.1\n/resources/videos/posts/post_vid_937619LAFANE_1794321695_af2ea61556e5.mp4#t=0.1",
+            $this->famCode,
+            5,
+            $nowMs,
+        ]);
+        $insPost->execute(['Second post', $this->famCode, 1, $nowMs]);
+        $insPost->execute(['Third post', $this->famCode, 1, $nowMs]);
+
+        $actData = FamilyHistorianService::getActivityMilestoneData($db, $this->famCode, new DateTimeImmutable('2026-11-16 08:00:00'));
+        $this->assertSame('A cherished family moment shared on our timeline.', $actData['top_excerpt']);
+
+        $rendered = FamilyHistorianCardRenderer::renderAndSave(
+            'activity',
+            [
+                'total_posts' => 3,
+                'peak_day' => 'Tuesday',
+                'top_author' => 'Laf Olaogun',
+                'top_score' => 5,
+                'top_excerpt' => '/resources/videos/posts/post_vid_937619LAFANE_1794321691_8c820fb6262d.mp4#t=0.1 ' . str_repeat('Supercalifragilistic', 6),
+            ],
+            $this->famCode,
+            'test_overflow_' . time()
+        );
+        $this->assertNotNull($rendered);
+        $this->generatedImages[] = $rendered;
+        $imgPath = dirname(__DIR__, 2) . '/resources/images/post/' . $rendered;
+        $this->assertFileExists($imgPath);
+        $this->assertNotFalse(@getimagesize($imgPath));
     }
 }

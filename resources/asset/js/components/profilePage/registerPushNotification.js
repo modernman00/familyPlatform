@@ -131,7 +131,7 @@ function showPushPrompt() {
     <div class="pwa-banner-card">
       <div class="pwa-banner-header">
         <div class="pwa-banner-text">
-          <h6>Stay connected with your family</h6>
+          <h2 class="pwa-banner-title">Stay connected with your family</h2>
           <p>Allow notifications for new friend requests, events, and family updates.</p>
         </div>
         <button type="button" id="push-prompt-close" class="pwa-btn-close" aria-label="Dismiss">&times;</button>

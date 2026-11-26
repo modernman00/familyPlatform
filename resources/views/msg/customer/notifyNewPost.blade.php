@@ -8,6 +8,9 @@
     $baseUrl = rtrim((string)($_ENV['APP_URL'] ?? getenv('APP_URL') ?: ($_ENV['MIX_APP_URL2'] ?? getenv('MIX_APP_URL2') ?: 'https://familyplatform.test')), '/');
     $postNo = !empty($data['post_no']) ? (int)$data['post_no'] : null;
     $postUrl = !empty($data['url']) ? $data['url'] : ($baseUrl . '/profilePage' . ($postNo ? '?post_no=' . $postNo . '#post' . $postNo : ''));
+    $rawExcerpt = is_string($data['postContent'] ?? null) ? $data['postContent'] : '';
+    $hasExternalLink = !empty($data['hasExternalLink']) || preg_match('/(?:https?:\/\/|www\.)[^\s<>"\']+/i', $rawExcerpt) === 1;
+    $displayExcerpt = \App\controller\members\PostMessage::formatEmailPostExcerpt($rawExcerpt);
 @endphp
 <p style="margin-bottom: 20px;">
     Hi <strong>{{ $data['firstName'] ?? 'there' }}</strong>,
@@ -17,9 +20,9 @@
     <strong>{{ $data['authorName'] ?? 'A family member' }}</strong> just posted something new in the family feed!
 </p>
 
-@if(!empty($data['postContent']))
+@if($displayExcerpt !== '')
 <div style="background-color: #f8fafc; border-left: 4px solid #a31621; padding: 16px 20px; border-radius: 6px; margin-bottom: 20px; font-style: italic; color: #475569; font-size: 15px; line-height: 1.6;">
-    "{{ mb_strlen($data['postContent']) > 150 ? mb_substr($data['postContent'], 0, 150) . '...' : $data['postContent'] }}"
+    "{{ mb_strlen($displayExcerpt) > 150 ? mb_substr($displayExcerpt, 0, 150) . '...' : $displayExcerpt }}"
 </div>
 @endif
 
@@ -73,9 +76,9 @@
         <img src="{{ $data['postImage'] }}" alt="Post Photo" width="520" style="display: block; width: 100%; max-width: 520px; height: auto; border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.06);" />
     </a>
 </div>
-@elseif(empty($data['postContent']))
-<div style="background-color: #f8fafc; border-left: 4px solid #a31621; padding: 20px; border-radius: 4px; margin-bottom: 25px; font-style: italic; color: #475569;">
-    "View the post to see more details..."
+@elseif($displayExcerpt === '')
+<div style="background-color: #f8fafc; border-left: 4px solid #a31621; padding: 16px 20px; border-radius: 6px; margin-bottom: 25px; color: #475569; font-size: 15px; line-height: 1.6;">
+    {{ $hasExternalLink ? 'Shared a link in the family feed. Tap below to view it on Family Platform.' : 'Tap below to view this post in your family feed.' }}
 </div>
 @endif
 

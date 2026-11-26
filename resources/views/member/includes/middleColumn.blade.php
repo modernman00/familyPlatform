@@ -184,6 +184,9 @@
   @if(!empty($isPendingApproval))
     @include('member.includes.pendingApprovalHoldingCard')
   @else
+  <!-- Mobile Memories, Milestones & Highlights Tray (Visible < lg so mobile users see 3D milestones at top of feed) -->
+  @includeIf('member.includes.mobileHighlightsTray')
+
   <!-- Proactive Wedding Anniversary Prompt Banner (World-Class Milestone Onboarding) -->
   @if(!empty($data['needs_wedding_date_prompt']))
   <div class="card mb-4 border-0 shadow-sm wedding-anniversary-prompt-card" id="weddingAnniversaryPromptCard">
@@ -824,12 +827,10 @@
   <!-- Contextual Kinship & Phone Contacts Inner Circle Prompt -->
   @includeIf('member.includes.kinshipPromptCard')
 
-  {{-- 🌟 Ecosystem Cross-App Promotion Ribbon (PartyPlatform / iDecide) --}}
+  {{-- 🌟 Ecosystem Cross-App Promotion Ribbon (Rotates across Sister Studio Portfolio) --}}
   @include('components.advert_banner', [
     'placement' => 'family_feed',
-    'context' => [
-      'tags' => ['party', 'event', 'celebration', 'birthday', 'milestone'],
-    ]
+    'context' => []
   ])
 
   <!-- Suggested Kin & In-Laws: Facebook-Style Horizontal Carousel (Visible in feed across mobile & desktop) -->

@@ -7,7 +7,7 @@
   --bg-radial-3: rgba(248, 246, 240, 0.6);
   --card-bg: #ffffff;
   --text-color: #0f172a;
-  --text-muted: #64748b;
+  --text-muted: #475569;
   --border-color: #e2e8f0;
   --hover-color: #f1f5f9;
   --kin-card-bg: #f8fafc;
@@ -1623,7 +1623,7 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: 0.08em;
   font-weight: 700;
   text-transform: uppercase;
-  color: var(--text-muted, #64748b);
+  color: var(--text-muted-aa, #475569);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -6267,9 +6267,9 @@ html.dark-mode .link-preview-card {
   min-width: var(--tap-min, 44px);
   padding: 10px 16px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.10);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  color: #f8fafc;
+  background-color: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #f8fafc !important;
   font-size: var(--text-sm, 0.875rem);
   font-weight: 700;
   white-space: nowrap;
@@ -6280,7 +6280,7 @@ html.dark-mode .link-preview-card {
 
 @media (hover: hover) {
   .fp-arcade-card__secondary:hover {
-    background: rgba(255, 255, 255, 0.18);
+    background-color: #334155;
   }
 }
 

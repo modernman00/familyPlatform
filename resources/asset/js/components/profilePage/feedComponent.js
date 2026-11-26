@@ -15,6 +15,7 @@ import { HEIRLOOM_REACTIONS, getHeirloomGlassSvg, triggerHeirloomBurst } from '.
 import { feedStageAndPolls } from './feed/feedStageAndPolls';
 import { feedReactionsAndTouch } from './feed/feedReactionsAndTouch';
 import { feedPostNormalizer } from './feed/feedPostNormalizer';
+import { renderKinshipMentionsHtml } from '../../apps/feed/kinshipMentions';
 
 export function profileFeed(opts = {}) {
     return {
@@ -1161,9 +1162,24 @@ export function profileFeed(opts = {}) {
                 return `${prefix || ''}<a href="${cleanHref}" target="_blank" rel="noopener noreferrer" class="text-primary fw-medium text-decoration-underline" style="word-break: break-all;" onclick="event.stopPropagation();">${cleanLabel}</a>`;
             });
 
-            // Highlight @First Last mentions as chips
-            safeText = safeText.replace(/(?<![\w@])@([A-Z\p{Lu}][\p{L}'-]+(?:\s+[A-Z\p{Lu}][\p{L}'-]+)+)(?![\w])/gu, (match, name) => {
-                return `<span class="mention-chip" title="Mentioned: ${name}"><i class="bi bi-at"></i>${name}</span>`;
+            // Highlight @First Last mentions as viewer-relative kinship chips
+            if (!this._parsedFeedBootstrap && typeof document !== 'undefined') {
+                const bootEl = document.getElementById('feedBootstrapData') || document.getElementById('feed-bootstrap-json');
+                if (bootEl) {
+                    try {
+                        this._parsedFeedBootstrap = JSON.parse(bootEl.textContent || '{}');
+                    } catch (_) {
+                        this._parsedFeedBootstrap = {};
+                    }
+                } else {
+                    this._parsedFeedBootstrap = {};
+                }
+            }
+            const boot = this._parsedFeedBootstrap || {};
+            safeText = renderKinshipMentionsHtml(safeText, {
+                enabled: String(boot.kinshipHonorifics || 'on').toLowerCase() !== 'off',
+                directory: boot.mentionDirectory || null,
+                currentUserId: String(this.currentUserId || boot.userId || ''),
             });
 
             // Hashtag pills (require word boundary/whitespace or start, never preceded by & or inside an entity, must start with a letter)
@@ -1778,16 +1794,32 @@ export function profileFeed(opts = {}) {
             instance?.show();
         },
 
-        // Reposts one of the user's own earlier posts, with an optional reflection.
+        // Reposts a post to the family feed, with an optional reflection.
         async repostPost(post) {
+            if (!this.canSharePost(post)) {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'warning',
+                        title: 'The author has turned off sharing for this post.',
+                        showConfirmButton: false,
+                        timer: 2500
+                    });
+                }
+                return;
+            }
+            const own = this.isOwnPost(post);
             const result = await Swal.fire({
-                title: 'Repost this memory?',
-                text: 'It will appear again at the top of your family feed.',
+                title: own ? 'Repost this memory?' : `Share ${post.fullName || 'this'} post to family feed?`,
+                text: own
+                    ? 'It will appear again at the top of your family feed.'
+                    : `It will appear in the family feed and ${post.fullName || 'the author'} will receive a Web Push notification.`,
                 input: 'textarea',
                 inputPlaceholder: 'Add your thoughts or reflection (optional)',
                 showCancelButton: true,
                 confirmButtonColor: '#a31621',
-                confirmButtonText: 'Repost',
+                confirmButtonText: own ? 'Repost' : 'Share to Feed',
                 showLoaderOnConfirm: true,
                 allowOutsideClick: () => !Swal.isLoading(),
                 preConfirm: async (note) => {
@@ -1805,7 +1837,59 @@ export function profileFeed(opts = {}) {
                 }
             });
             if (!result.isConfirmed || !result.value) return;
-            Swal.fire({ icon: 'success', title: 'Reposted', timer: 1500, showConfirmButton: false });
+            Swal.fire({
+                icon: 'success',
+                title: own ? 'Reposted' : 'Shared to family feed',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        },
+
+        canSharePost(post) {
+            if (!post) return false;
+            if (this.isOwnPost(post)) return true;
+            if (post.is_official || post.id === 'FAMILY_PLATFORM_OFFICIAL' || post.is_historian || post.id === 'FAMILY_HISTORIAN') {
+                return true;
+            }
+            return !(post.allow_sharing === false || post.allow_sharing === 0 || post.allow_sharing === '0');
+        },
+
+        async togglePostAllowSharing(post) {
+            if (!post || !this.isOwnPost(post)) return;
+            const currentAllow = !(post.allow_sharing === false || post.allow_sharing === 0 || post.allow_sharing === '0');
+            const nextAllow = !currentAllow;
+            post.allow_sharing = nextAllow;
+            try {
+                await axios.put(
+                    `/post/${post.post_no}`,
+                    { allow_sharing: nextAllow },
+                    this.csrfOptions
+                );
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: nextAllow
+                            ? 'Family members can share this post (you will be notified)'
+                            : 'Sharing locked — only you can share this post',
+                        showConfirmButton: false,
+                        timer: 2500
+                    });
+                }
+            } catch (err) {
+                post.allow_sharing = currentAllow;
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'error',
+                        title: err?.response?.data?.message || 'Could not update sharing setting.',
+                        showConfirmButton: false,
+                        timer: 2500
+                    });
+                }
+            }
         },
 
         async deletePost(postNo) {
@@ -2971,14 +3055,14 @@ export function profileFeed(opts = {}) {
         openSharePortal(post) {
             if (!post || !post.post_no) return;
 
-            // Strict Author Ownership Gate: Only the author can share this post
-            if (!this.isOwnPost(post)) {
+            // Check Author Share Permission Gate
+            if (!this.canSharePost(post)) {
                 if (typeof Swal !== 'undefined') {
                     Swal.fire({
                         toast: true,
                         position: 'top-end',
                         icon: 'warning',
-                        title: 'Only the author can share this post.',
+                        title: 'The author has turned off sharing for this post.',
                         showConfirmButton: false,
                         timer: 2500
                     });
@@ -3028,8 +3112,17 @@ export function profileFeed(opts = {}) {
             this.sharePortalPost = null;
         },
 
+        // Notify the original author (Web Push + in-app) only when a real share action happens,
+        // never merely because the portal was opened. Server dedupes within 60s and skips self.
+        notifyAuthorOfShare(channel = 'link') {
+            const post = this.sharePortalPost;
+            if (!post || !post.post_no || this.isOwnPost(post)) return;
+            axios.post(`/api/posts/${encodeURIComponent(post.post_no)}/share`, { channel }, this.csrfOptions).catch(() => {});
+        },
+
         sharePortalViaSystem() {
             if (!this.sharePortalPost) return;
+            this.notifyAuthorOfShare('system');
             if (navigator.share) {
                 navigator.share({
                     title: this.sharePortalTitle,
@@ -3047,6 +3140,7 @@ export function profileFeed(opts = {}) {
 
         copySharePortalLink() {
             if (!this.sharePortalUrl) return;
+            this.notifyAuthorOfShare('copy');
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(this.sharePortalUrl).then(() => {
                     this.sharePortalCopied = true;

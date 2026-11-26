@@ -2,6 +2,9 @@
 @section('title', 'PROFILE_PAGE')
 @section('data-page-id', 'profilePage')
 @push('styles')
+    @if(!empty($cover['url']))
+    <link rel="preload" as="image" href="{{ optimiseLocalImageUrl((string) $cover['url'], 960) }}" fetchpriority="high">
+    @endif
     <link rel="stylesheet" href="/public/css/profilepage.css?v={{ assetVersion('css/profilepage.css') }}">
     <link rel="preload" href="/public/css/reels.css?v={{ assetVersion('css/reels.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="/public/css/reels.css?v={{ assetVersion('css/reels.css') }}"></noscript>
@@ -87,7 +90,13 @@
         @php
             $arcadeChampionsMap = [];
             if (!empty($_SESSION['famCode'])) {
-                foreach (\App\services\FamilyArcadeService::getFamilyChampions(\Src\Db::connect2(), (string)$_SESSION['famCode']) as $champ) {
+                $arcadeFamCode = (string)$_SESSION['famCode'];
+                $arcadeChamps = \App\services\ProfileMicroCache::remember(
+                    'arcade_champs_' . md5($arcadeFamCode),
+                    120,
+                    static fn (): array => \App\services\FamilyArcadeService::getFamilyChampions(\Src\Db::connect2(), $arcadeFamCode)
+                );
+                foreach ($arcadeChamps as $champ) {
                     $uid = (string)($champ['userId'] ?? '');
                     if ($uid !== '') {
                         $arcadeChampionsMap[$uid][] = $champ['badgeTitle'];

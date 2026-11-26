@@ -6,6 +6,7 @@ import { HEIRLOOM_REACTIONS, getHeirloomGlassSvg } from '../../components/profil
 import { CommentThread } from './CommentThread';
 import { FeedVideoGallery } from './FeedVideoGallery';
 import { RichTextTokens } from './RichTextTokens';
+import { formatPostTagForViewer } from './kinshipMentions';
 import CosmicOrrery from './CosmicOrrery';
 import ScenicMotionLayer, { LIVING_SCENIC_SLUGS } from './ScenicMotionLayer';
 import { WeeklyFunFactsPlayer } from './WeeklyFunFactsPlayer';
@@ -133,7 +134,9 @@ export const PostCard = memo(function PostCard({
 
     const isOfficial = Boolean(post.is_official || post.id === 'FAMILY_PLATFORM_OFFICIAL');
     const isHistorian = Boolean(post.is_historian || post.id === 'FAMILY_HISTORIAN');
-    const canSharePost = ownPost || isHistorian || isOfficial;
+    const allowSharing = post.allow_sharing !== false && post.allow_sharing !== 0 && post.allow_sharing !== '0';
+    const canSharePost = ownPost || isHistorian || isOfficial || allowSharing;
+    const [togglingSharePref, setTogglingSharePref] = useState(false);
     const isTaggedSelf = Array.isArray(post.post_tags)
         && post.post_tags.some((t) => String(t.user_id || t.id) === currentUserId);
 
@@ -167,6 +170,8 @@ export const PostCard = memo(function PostCard({
             arEmoji={post.ar_emoji || null}
             onSelectHashtag={onSelectHashtag}
             isStage={Boolean(stageMeta)}
+            bootstrap={bootstrap}
+            postTags={post.post_tags}
         />
     );
 
@@ -235,15 +240,49 @@ export const PostCard = memo(function PostCard({
     };
 
     const handleRepost = async () => {
+        if (!canSharePost) {
+            notifyToast('The author has turned off sharing for this post.', 'warning');
+            return;
+        }
         try {
-            await apiFetch(`/post/${encodeURIComponent(post.post_no)}/repost`, {
+            const res = await apiFetch(`/post/${encodeURIComponent(post.post_no)}/repost`, {
                 method: 'POST',
                 body: { reflection_message: '' },
                 timeoutMs: 30000,
             }, bootstrap);
-            notifyToast('Reposted to your family feed', 'success');
+            notifyToast(
+                ownPost
+                    ? 'Reposted to your family feed'
+                    : (res?.author_notified ? `Shared to family feed (${authorName} notified)` : 'Shared to your family feed'),
+                'success'
+            );
         } catch (err) {
             notifyToast(err?.message || 'Unable to repost.', 'error');
+        }
+    };
+
+    const handleToggleAllowSharing = async () => {
+        if (!ownPost || togglingSharePref) return;
+        const nextAllow = !allowSharing;
+        setTogglingSharePref(true);
+        onUpdatePost?.(post.post_no, { allow_sharing: nextAllow });
+        try {
+            await apiFetch(`/post/${encodeURIComponent(post.post_no)}`, {
+                method: 'PUT',
+                body: { allow_sharing: nextAllow },
+                timeoutMs: 30000,
+            }, bootstrap);
+            notifyToast(
+                nextAllow
+                    ? 'Family members can now share this post (you will be notified)'
+                    : 'Sharing locked — only you can share this post',
+                'success'
+            );
+        } catch (err) {
+            onUpdatePost?.(post.post_no, { allow_sharing: !nextAllow });
+            notifyToast(err?.message || 'Could not update sharing preference.', 'error');
+        } finally {
+            setTogglingSharePref(false);
         }
     };
 
@@ -359,16 +398,28 @@ export const PostCard = memo(function PostCard({
     };
 
     const handleShare = async () => {
+        if (!canSharePost) {
+            notifyToast('The author has turned off sharing for this post.', 'warning');
+            return;
+        }
         if (typeof onOpenSharePortal === 'function') {
             onOpenSharePortal(post);
             return;
         }
+        try {
+            await apiFetch(`/api/posts/${encodeURIComponent(post.post_no)}/share`, {
+                method: 'POST',
+                body: { channel: 'copy' },
+            }, bootstrap);
+        } catch {
+            // Non-blocking notification
+        }
         const shareUrl = `${window.location.origin}/post/${encodeURIComponent(post.post_no)}`;
         if (typeof window !== 'undefined' && typeof window.$clipboard === 'function') {
-            window.$clipboard(shareUrl, 'Post link copied!');
+            window.$clipboard(shareUrl, ownPost ? 'Post link copied!' : `Post link copied (${authorName} notified)!`);
         } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
             await navigator.clipboard.writeText(shareUrl).catch(() => {});
-            notifyToast('Post link copied!', 'success');
+            notifyToast(ownPost ? 'Post link copied!' : `Post link copied (${authorName} notified)!`, 'success');
         }
     };
 
@@ -432,6 +483,8 @@ export const PostCard = memo(function PostCard({
                     <img
                         src={getAvatarUrl(post)}
                         alt={authorName}
+                        width="40"
+                        height="40"
                         className="rounded-circle me-3 flex-shrink-0"
                         style={{ width: '40px', height: '40px', objectFit: 'cover' }}
                         onError={() => setBrokenAvatar(true)}
@@ -485,18 +538,22 @@ export const PostCard = memo(function PostCard({
                                 {Array.isArray(post.post_tags) && post.post_tags.length > 0 && (
                                     <span className="text-secondary small fw-normal ms-1">
                                         is with{' '}
-                                        {post.post_tags.slice(0, 2).map((tag, idx) => (
-                                            <span key={String(tag.user_id || idx)}>
-                                                <a
-                                                    href={`/member/profilePage?id=${encodeURIComponent(tag.user_id || tag.id || '')}`}
-                                                    className="fw-semibold text-decoration-underline"
-                                                    style={{ color: 'var(--text-main, #0f172a)' }}
-                                                >
-                                                    {tag.fullName || `${tag.firstName || ''} ${tag.lastName || ''}`.trim()}
-                                                </a>
-                                                {idx === 0 && post.post_tags.length === 2 ? ' and ' : (idx === 0 && post.post_tags.length > 2 ? ', ' : '')}
-                                            </span>
-                                        ))}
+                                        {post.post_tags.slice(0, 2).map((tag, idx) => {
+                                            const formattedTag = formatPostTagForViewer(tag, bootstrap);
+                                            return (
+                                                <span key={String(formattedTag.id || tag.user_id || idx)}>
+                                                    <a
+                                                        href={formattedTag.href || `/member/profilePage?id=${encodeURIComponent(tag.user_id || tag.id || '')}`}
+                                                        className="fw-semibold text-decoration-underline"
+                                                        style={{ color: 'var(--text-main, #0f172a)' }}
+                                                        title={formattedTag.tooltip}
+                                                    >
+                                                        {formattedTag.label}
+                                                    </a>
+                                                    {idx === 0 && post.post_tags.length === 2 ? ' and ' : (idx === 0 && post.post_tags.length > 2 ? ', ' : '')}
+                                                </span>
+                                            );
+                                        })}
                                         {post.post_tags.length > 2 && ` and ${post.post_tags.length - 2} others`}
                                     </span>
                                 )}
@@ -517,6 +574,17 @@ export const PostCard = memo(function PostCard({
                                 {!isOfficial && !post.postFamCode && !ownPost && (
                                     <span className="badge rounded-pill bg-secondary-subtle text-secondary-emphasis" style={famBadgeStyle}>
                                         <i className="bi bi-people me-1" aria-hidden="true" /> Connected Kin
+                                    </span>
+                                )}
+                                {!allowSharing && (
+                                    <span
+                                        className="badge rounded-pill bg-light text-secondary border d-inline-flex align-items-center gap-1"
+                                        style={{ fontSize: '0.75rem', fontWeight: 600, padding: '2px 8px', whiteSpace: 'nowrap', flexShrink: 0 }}
+                                        title={ownPost ? 'You turned off sharing for this post' : 'The author has turned off sharing for this post'}
+                                        data-testid="post-sharing-locked-badge"
+                                    >
+                                        <i className="bi bi-lock-fill" aria-hidden="true" />
+                                        <span>Sharing off</span>
                                     </span>
                                 )}
                             </div>
@@ -579,6 +647,19 @@ export const PostCard = memo(function PostCard({
                                         <li>
                                             <button
                                                 type="button"
+                                                className="dropdown-item py-2 d-flex align-items-center gap-2"
+                                                style={{ minHeight: '44px', whiteSpace: 'nowrap' }}
+                                                disabled={togglingSharePref}
+                                                data-testid="toggle-post-share-pref-btn"
+                                                onClick={handleToggleAllowSharing}
+                                            >
+                                                <i className={`bi ${allowSharing ? 'bi-lock-fill text-warning' : 'bi-unlock-fill text-success'}`} aria-hidden="true" />
+                                                <span>{allowSharing ? 'Turn Off Sharing' : 'Allow Family Sharing'}</span>
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button
+                                                type="button"
                                                 className="dropdown-item py-2 d-flex align-items-center gap-2 text-danger"
                                                 style={{ minHeight: '44px' }}
                                                 onClick={() => setConfirmingDelete(true)}
@@ -591,17 +672,30 @@ export const PostCard = memo(function PostCard({
                                 ) : (
                                     <>
                                         {canSharePost && (
-                                            <li>
-                                                <button
-                                                    type="button"
-                                                    className="dropdown-item py-2 d-flex align-items-center gap-2"
-                                                    style={{ minHeight: '44px' }}
-                                                    onClick={handleShare}
-                                                >
-                                                    <i className="bi bi-send-fill text-success" style={{ transform: 'rotate(-15deg)', display: 'inline-block' }} aria-hidden="true" />
-                                                    <span>Share Post</span>
-                                                </button>
-                                            </li>
+                                            <>
+                                                <li>
+                                                    <button
+                                                        type="button"
+                                                        className="dropdown-item py-2 d-flex align-items-center gap-2"
+                                                        style={{ minHeight: '44px', whiteSpace: 'nowrap' }}
+                                                        onClick={handleShare}
+                                                    >
+                                                        <i className="bi bi-send-fill text-success" style={{ transform: 'rotate(-15deg)', display: 'inline-block' }} aria-hidden="true" />
+                                                        <span>Share Post</span>
+                                                    </button>
+                                                </li>
+                                                <li>
+                                                    <button
+                                                        type="button"
+                                                        className="dropdown-item py-2 d-flex align-items-center gap-2"
+                                                        style={{ minHeight: '44px', whiteSpace: 'nowrap' }}
+                                                        onClick={handleRepost}
+                                                    >
+                                                        <i className="bi bi-arrow-repeat text-primary" aria-hidden="true" />
+                                                        <span>Repost to Feed</span>
+                                                    </button>
+                                                </li>
+                                            </>
                                         )}
                                         <li>
                                             <button
@@ -749,9 +843,9 @@ export const PostCard = memo(function PostCard({
                                 <i className={`bi ${arcadeMeta.game.icon}`} />
                             </div>
                             <div className="fp-arcade-card__titles">
-                                <h6 className="fp-arcade-card__game" title={arcadeMeta.game.name}>
+                                <h4 className="h6 fp-arcade-card__game" title={arcadeMeta.game.name}>
                                     {arcadeMeta.game.name}
-                                </h6>
+                                </h4>
                                 <p className="fp-arcade-card__prompt">{arcadeMeta.promptText}</p>
                             </div>
                         </div>
@@ -955,6 +1049,7 @@ export const PostCard = memo(function PostCard({
                     lp.is_social_video
                     || lp.is_video
                     || lpUrlLower.includes('/reel/')
+                    || lpUrlLower.includes('/stories/')
                     || lpUrlLower.includes('/share/v/')
                     || lpUrlLower.includes('/share/r/')
                     || lpUrlLower.includes('/videos/')
@@ -1044,7 +1139,7 @@ export const PostCard = memo(function PostCard({
                                         </div>
                                     )}
                                     <div className="min-w-0 flex-grow-1">
-                                        <h6 className="fw-bold mb-1 link-preview-card__title">{lp.title || lp.url}</h6>
+                                        <h4 className="h6 fw-bold mb-1 link-preview-card__title">{lp.title || lp.url}</h4>
                                         {lp.description && (
                                             <p className="small mb-2 link-preview-card__desc">{lp.description}</p>
                                         )}
@@ -1154,6 +1249,8 @@ export const PostCard = memo(function PostCard({
                                     <img
                                         src={singleImgUrl}
                                         alt="Post photo 1"
+                                        width="800"
+                                        height="600"
                                         className="post-media-first-img"
                                         referrerPolicy="no-referrer"
                                         onError={() => setBrokenPhotoUrls((prev) => ({ ...prev, [images[0]]: true, [singleImgUrl]: true }))}
@@ -1718,17 +1815,27 @@ export const PostCard = memo(function PostCard({
                         <i className="bi bi-chat-quote-fill" style={{ fontSize: '1.3rem', lineHeight: 1 }} aria-hidden="true" />
                     </button>
 
-                    {canSharePost && (
+                    {canSharePost ? (
                         <button
                             type="button"
                             className="btn btn-action-glyph btn-action-share rounded-circle"
                             style={{ minWidth: '44px', minHeight: '44px' }}
                             aria-label="Share this memory"
-                            title="Share with family relatives or via social apps"
+                            title={ownPost ? 'Share your post with family or via social apps' : `Share ${authorName}'s post (${authorName} will be notified via Web Push)`}
+                            data-testid="post-share-action-btn"
                             onClick={handleShare}
                         >
                             <i className="bi bi-send-fill" style={{ fontSize: '1.15rem', lineHeight: 1, transform: 'rotate(-15deg)', display: 'inline-block' }} aria-hidden="true" />
                         </button>
+                    ) : (
+                        <span
+                            className="d-inline-flex align-items-center justify-content-center text-muted rounded-circle"
+                            style={{ minWidth: '44px', minHeight: '44px', opacity: 0.55 }}
+                            title="The author has turned off sharing for this post"
+                            aria-label="Sharing turned off by author"
+                        >
+                            <i className="bi bi-lock-fill" style={{ fontSize: '1.1rem', lineHeight: 1 }} aria-hidden="true" />
+                        </span>
                     )}
                 </div>
 

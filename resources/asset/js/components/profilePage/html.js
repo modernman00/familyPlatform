@@ -11,19 +11,19 @@ const renderVideoPlayer = (postMessage) => {
   const video = extractVideoFromText(postMessage);
   if (!video) return '';
 
-  const isShort = (video.originalUrl && video.originalUrl.includes('/shorts/'));
+  const isShort = Boolean(video.isShort || video.type === 'tiktok' || (video.originalUrl && video.originalUrl.includes('/shorts/')));
 
   if (video.type === 'youtube' || video.type === 'vimeo' || video.type === 'cloudflare' || video.type === 'tiktok') {
     return `
-      <div class="video-embed-container feed-video-breakout mb-3" style="border-radius: 14px; overflow: hidden; width: 100%; max-width: 100%; margin: 0 auto; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-        <div class="video-rendition-frame" style="width: 100%; aspect-ratio: ${isShort ? '4 / 5' : '16 / 10'}; max-height: ${isShort ? '880px' : 'min(680px, 75vh)'};">
+      <div class="video-embed-container feed-video-breakout mb-3" style="border-radius: 14px; overflow: hidden; width: 100%; max-width: 100%; margin: 0 auto; background: #07090e; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+        <div class="video-rendition-frame" style="width: 100%; max-width: ${isShort ? 'min(460px, 100%)' : '100%'}; aspect-ratio: ${isShort ? '9 / 16' : '16 / 9'}; max-height: ${isShort ? 'min(820px, 84vh)' : 'min(720px, 80vh)'}; margin: 0 auto;">
           <iframe src="${esc(video.embedUrl)}"
                   title="Video Player"
                   frameborder="0" 
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                   allowfullscreen 
                   loading="lazy"
-                  style="width: 100%; height: 100%; border: none; border-radius: 14px; background: #07090e;"></iframe>
+                  style="width: 100%; height: 100%; border: none; border-radius: 14px; background: #07090e; display: block;"></iframe>
         </div>
       </div>
     `;

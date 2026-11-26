@@ -162,7 +162,7 @@ mkdir -p "${REMOTE_ROOT}/bootstrap/cache"
 mkdir -p "${REMOTE_ROOT}/bootstrap/log"
 mkdir -p "${REMOTE_ROOT}/public/uploads"
 
-find "${REMOTE_ROOT}" -maxdepth 2 -not -path "*/storage/*" -not -path "*/.maintenance" -type d | xargs chmod 755 2>/dev/null || true
+chmod 755 "${REMOTE_ROOT}" && find "${REMOTE_ROOT}" -maxdepth 2 -not -path "*/storage/*" -not -path "*/.maintenance" -type d | xargs chmod 755 2>/dev/null || true
 find "${REMOTE_ROOT}" -maxdepth 2 -not -path "*/storage/*" -type f | xargs chmod 644 2>/dev/null || true
 [ -f "${REMOTE_ROOT}/.env" ] && chmod 600 "${REMOTE_ROOT}/.env" 2>/dev/null || true
 chmod -R 775 "${REMOTE_ROOT}/storage" 2>/dev/null || true

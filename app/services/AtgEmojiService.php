@@ -808,9 +808,71 @@ class AtgEmojiService
         ];
     }
 
+    private function compressDataUriForSvg(string $pngDataUri, int $maxDim = 384): string
+    {
+        if (!str_starts_with($pngDataUri, 'data:image/png;base64,') || !function_exists('imagecreatefromstring')) {
+            return $pngDataUri;
+        }
+        $raw = base64_decode(substr($pngDataUri, strlen('data:image/png;base64,')), true);
+        if ($raw === false || $raw === '') {
+            return $pngDataUri;
+        }
+        $src = @imagecreatefromstring($raw);
+        if (!$src) {
+            return $pngDataUri;
+        }
+        $w = imagesx($src);
+        $h = imagesy($src);
+        $target = $src;
+        if ($w > $maxDim || $h > $maxDim) {
+            $scale = min($maxDim / max(1, $w), $maxDim / max(1, $h));
+            $nw = max(1, (int)round($w * $scale));
+            $nh = max(1, (int)round($h * $scale));
+            $resized = imagecreatetruecolor($nw, $nh);
+            if ($resized) {
+                imagealphablending($resized, false);
+                imagesavealpha($resized, true);
+                imagecopyresampled($resized, $src, 0, 0, 0, 0, $nw, $nh, $w, $h);
+                imagedestroy($src);
+                $target = $resized;
+            }
+        } else {
+            imagealphablending($target, false);
+            imagesavealpha($target, true);
+        }
+
+        $encoded = null;
+        $mime = 'image/png';
+        if (function_exists('imagewebp')) {
+            ob_start();
+            $ok = imagewebp($target, null, 80);
+            $buf = (string)ob_get_clean();
+            if ($ok && $buf !== '') {
+                $encoded = $buf;
+                $mime = 'image/webp';
+            }
+        }
+        if ($encoded === null && function_exists('imagejpeg')) {
+            ob_start();
+            $ok = imagejpeg($target, null, 82);
+            $buf = (string)ob_get_clean();
+            if ($ok && $buf !== '') {
+                $encoded = $buf;
+                $mime = 'image/jpeg';
+            }
+        }
+        imagedestroy($target);
+
+        if ($encoded === null || strlen($encoded) >= strlen($raw)) {
+            return $pngDataUri;
+        }
+
+        return 'data:' . $mime . ';base64,' . base64_encode($encoded);
+    }
+
     /**
      * Build a self-contained Living Photo SVG that embeds the user's real portrait
-     * (`data:image/png;base64,...`) and animates breathing, eyelid blinking,
+     * (`data:image/webp;base64,...` or PNG fallback) and animates breathing, eyelid blinking,
      * smiling cheek-lift, and optional dance/wink choreography anywhere `<img>` is rendered.
      *
      * @param array<string, string> $traits
@@ -825,6 +887,7 @@ class AtgEmojiService
         bool $animated = true,
         string $avatarStyle = 'original'
     ): string {
+        $embeddedDataUri = $this->compressDataUriForSvg($pngDataUri, 384);
         $r = max(0, min(255, (int)($sampleRgb[0] ?? 138)));
         $g = max(0, min(255, (int)($sampleRgb[1] ?? 84)));
         $b = max(0, min(255, (int)($sampleRgb[2] ?? 52)));
@@ -872,13 +935,14 @@ class AtgEmojiService
             . '<defs>'
             . '<clipPath id="atgLpFrame"><rect x="0" y="0" width="384" height="384" rx="48"/></clipPath>'
             . '<clipPath id="atgLpSmileZone"><ellipse cx="192" cy="236" rx="86" ry="42"/></clipPath>'
+            . '<image id="atgLpPortrait" href="' . $embeddedDataUri . '" x="-8" y="-8" width="400" height="400" preserveAspectRatio="xMidYMid slice"/>'
             . '</defs>'
             . '<g clip-path="url(#atgLpFrame)">'
             . '<rect width="384" height="384" fill="#1e1b18"/>'
             . '<g class="atg-lp-stage">'
-            . '<image href="' . $pngDataUri . '" x="-8" y="-8" width="400" height="400" preserveAspectRatio="xMidYMid slice"/>'
+            . '<use href="#atgLpPortrait"/>'
             . '<g class="atg-lp-smile" clip-path="url(#atgLpSmileZone)">'
-            . '<image href="' . $pngDataUri . '" x="-8" y="-8" width="400" height="400" preserveAspectRatio="xMidYMid slice"/>'
+            . '<use href="#atgLpPortrait"/>'
             . '</g>'
             . '</g>'
             . '</g>'

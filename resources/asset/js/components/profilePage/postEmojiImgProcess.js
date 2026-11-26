@@ -2121,41 +2121,84 @@ const resetTagBuilder = () => {
 };
 
 // ── Inline @Mention Autocomplete for Composer ─────────────────────────────
-const composerEditor = document.getElementById('postMessageEditor');
-const composerMentionDropdown = document.getElementById('composerMentionDropdown');
-const composerMentionList = document.getElementById('composerMentionList');
+const getComposerEditorEl = () => document.getElementById('postMessageEditor');
+const getComposerMentionDropdownEl = () => document.getElementById('composerMentionDropdown');
+const getComposerMentionListEl = () => document.getElementById('composerMentionList');
+const composerEditor = getComposerEditorEl();
+const composerMentionDropdown = getComposerMentionDropdownEl();
+const composerMentionList = getComposerMentionListEl();
 let composerMentionMatches = [];
 let composerMentionActiveIndex = 0;
 let composerMentionDebounceTimer = null;
 
-function getComposerTextBeforeCursor(editorEl) {
-    if (!editorEl) return '';
+function seedCachedFamilyMembersFromBootstrap() {
+    if (cachedFamilyMembers.length > 0) return;
+    const roster = window.__FP_FEED_BOOTSTRAP__?.familyRoster;
+    if (!Array.isArray(roster) || roster.length === 0) return;
+    cachedFamilyMembers = roster
+        .filter(m => m && m.id)
+        .map(m => {
+            const first = String(m.firstName || '').trim();
+            const last = String(m.lastName || '').trim();
+            const rawImg = String(m.img || '').trim();
+            const profileImg = rawImg
+                ? ((rawImg.startsWith('/') || rawImg.startsWith('http')) ? rawImg : `/resources/images/profile/${rawImg}`)
+                : '/resources/images/profile/avatarM.png';
+            return {
+                id: String(m.id),
+                firstName: first,
+                lastName: last,
+                fullName: `${first} ${last}`.trim(),
+                profileImg,
+                famCode: String(m.famCode || ''),
+            };
+        });
+}
+
+function getComposerMentionQuery(editorEl) {
+    if (!editorEl) return null;
+    const mentionPattern = /(?:^|\s)@([A-Za-z0-9_'\- ]{0,40})$/;
     const sel = window.getSelection();
-    if (!sel || !sel.rangeCount || !editorEl.contains(sel.anchorNode)) {
-        return editorEl.innerText || editorEl.textContent || '';
+    if (sel && sel.rangeCount > 0 && editorEl.contains(sel.anchorNode)) {
+        try {
+            const range = sel.getRangeAt(0);
+            const preCaretRange = range.cloneRange();
+            preCaretRange.selectNodeContents(editorEl);
+            preCaretRange.setEnd(range.endContainer, range.endOffset);
+            const fullBefore = preCaretRange.toString();
+            const fullMatch = fullBefore.match(mentionPattern);
+            if (fullMatch) return fullMatch[1];
+
+            // Chrome/Safari Range.toString() omits newlines across <div>/<br> blocks in contenteditable;
+            // check the current text node before the caret directly as fallback.
+            if (sel.anchorNode && sel.anchorNode.nodeType === Node.TEXT_NODE) {
+                const nodeBefore = (sel.anchorNode.nodeValue || '').slice(0, sel.anchorOffset);
+                const nodeMatch = nodeBefore.match(mentionPattern);
+                if (nodeMatch) return nodeMatch[1];
+            }
+            return null;
+        } catch (_) {
+            // fall through to full text
+        }
     }
-    try {
-        const range = sel.getRangeAt(0);
-        const preCaretRange = range.cloneRange();
-        preCaretRange.selectNodeContents(editorEl);
-        preCaretRange.setEnd(range.endContainer, range.endOffset);
-        return preCaretRange.toString();
-    } catch (_) {
-        return editorEl.innerText || editorEl.textContent || '';
-    }
+    const raw = editorEl.innerText || editorEl.textContent || '';
+    const fallbackMatch = raw.match(mentionPattern);
+    return fallbackMatch ? fallbackMatch[1] : null;
 }
 
 function closeComposerMentionDropdown() {
-    if (composerMentionDropdown) {
-        composerMentionDropdown.classList.add('d-none');
+    const dd = getComposerMentionDropdownEl();
+    if (dd) {
+        dd.classList.add('d-none');
     }
     composerMentionMatches = [];
     composerMentionActiveIndex = 0;
 }
 
 function updateComposerMentionActiveItem() {
-    if (!composerMentionList) return;
-    const items = composerMentionList.querySelectorAll('.mention-autocomplete__item');
+    const listEl = getComposerMentionListEl();
+    if (!listEl) return;
+    const items = listEl.querySelectorAll('.mention-autocomplete__item');
     items.forEach((item, idx) => {
         const isActive = idx === composerMentionActiveIndex;
         item.classList.toggle('mention-autocomplete__item--active', isActive);
@@ -2167,13 +2210,15 @@ function updateComposerMentionActiveItem() {
 }
 
 function renderComposerMentionDropdown() {
-    if (!composerMentionDropdown || !composerMentionList) return;
+    const dd = getComposerMentionDropdownEl();
+    const listEl = getComposerMentionListEl();
+    if (!dd || !listEl) return;
     if (!composerMentionMatches.length) {
         closeComposerMentionDropdown();
         return;
     }
 
-    composerMentionList.innerHTML = '';
+    listEl.innerHTML = '';
     composerMentionMatches.forEach((m, idx) => {
         const isActive = idx === composerMentionActiveIndex;
         const btn = document.createElement('button');
@@ -2212,10 +2257,10 @@ function renderComposerMentionDropdown() {
             selectComposerMention(m);
         });
 
-        composerMentionList.appendChild(btn);
+        listEl.appendChild(btn);
     });
 
-    composerMentionDropdown.classList.remove('d-none');
+    dd.classList.remove('d-none');
 }
 
 function selectComposerMention(member) {
@@ -2323,25 +2368,31 @@ function filterAndShowComposerMentions(rawQuery) {
 
 function handleComposerInput(ev) {
     const target = ev.target;
-    const isEditor = target === composerEditor;
-    const isTextarea = target === postMessageArea;
+    const editorEl = getComposerEditorEl();
+    const textareaEl = document.getElementById('postMessage') || postMessageArea;
+    const isEditor = !!(editorEl && (target === editorEl || editorEl.contains(target)));
+    const isTextarea = !!(textareaEl && target === textareaEl);
     if (!isEditor && !isTextarea) return;
 
-    const textBefore = isEditor
-        ? getComposerTextBeforeCursor(composerEditor)
-        : (target.value ? target.value.slice(0, target.selectionEnd ?? target.value.length) : '');
+    let query = null;
+    if (isEditor) {
+        query = getComposerMentionQuery(editorEl);
+    } else {
+        const textBefore = target.value ? target.value.slice(0, target.selectionEnd ?? target.value.length) : '';
+        const m = textBefore.match(/(?:^|\s)@([A-Za-z0-9_'\- ]{0,40})$/);
+        query = m ? m[1] : null;
+    }
 
-    const match = textBefore.match(/(?:^|\s)@([A-Za-z0-9_'\- ]{0,40})$/);
-
-    if (match) {
+    if (query !== null) {
         if (addTagBtn) addTagBtn.classList.add('tag-active');
+        seedCachedFamilyMembersFromBootstrap();
 
         if (!cachedFamilyMembers.length) {
             fetchSuggestions('').then(() => {
-                filterAndShowComposerMentions(match[1]);
+                filterAndShowComposerMentions(query);
             });
         } else {
-            filterAndShowComposerMentions(match[1]);
+            filterAndShowComposerMentions(query);
         }
     } else {
         closeComposerMentionDropdown();
@@ -2349,7 +2400,8 @@ function handleComposerInput(ev) {
 }
 
 function handleComposerKeydown(ev) {
-    if (!composerMentionDropdown || composerMentionDropdown.classList.contains('d-none') || !composerMentionMatches.length) {
+    const dd = getComposerMentionDropdownEl();
+    if (!dd || dd.classList.contains('d-none') || !composerMentionMatches.length) {
         return;
     }
 
@@ -2398,29 +2450,19 @@ window.autoTagMentionedUsersInText = function() {
     renderSelectedTags();
 };
 
-if (composerEditor) {
-    composerEditor.addEventListener('input', handleComposerInput);
-    composerEditor.addEventListener('keyup', (ev) => {
-        if (ev.key === '@' || ev.key === 'Backspace' || ev.key.length === 1) {
-            handleComposerInput(ev);
-        }
-    });
-    composerEditor.addEventListener('keydown', handleComposerKeydown);
-}
-
-if (postMessageArea) {
-    postMessageArea.addEventListener('input', handleComposerInput);
-    postMessageArea.addEventListener('keyup', (ev) => {
-        if (ev.key === '@' || ev.key === 'Backspace' || ev.key.length === 1) {
-            handleComposerInput(ev);
-        }
-    });
-    postMessageArea.addEventListener('keydown', handleComposerKeydown);
-}
+document.addEventListener('input', handleComposerInput);
+document.addEventListener('keyup', (ev) => {
+    if (ev.key === '@' || ev.key === 'Backspace' || ev.key === 'Unidentified' || ev.key.length === 1) {
+        handleComposerInput(ev);
+    }
+});
+document.addEventListener('keydown', handleComposerKeydown);
 
 document.addEventListener('click', (ev) => {
-    if (composerMentionDropdown && !composerMentionDropdown.classList.contains('d-none')) {
-        if (!composerMentionDropdown.contains(ev.target) && ev.target !== composerEditor) {
+    const dd = getComposerMentionDropdownEl();
+    const editorEl = getComposerEditorEl();
+    if (dd && !dd.classList.contains('d-none')) {
+        if (!dd.contains(ev.target) && !(editorEl && editorEl.contains(ev.target))) {
             closeComposerMentionDropdown();
         }
     }

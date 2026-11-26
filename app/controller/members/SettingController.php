@@ -204,6 +204,7 @@ final class SettingController extends BaseController
             'email_notifications' => (string) ($accountData['email_notifications'] ?? 'on'),
             'post_email_notifications' => (string) ($accountData['post_email_notifications'] ?? 'off'),
             'sms_notifications' => (string) ($accountData['sms_notifications'] ?? 'on'),
+            'kinship_honorifics' => \App\services\KinshipHonorificService::normalisePreference($accountData['kinship_honorifics'] ?? 'on'),
             'two_factor_auth' => (string) ($accountData['two_factor_auth'] ?? 'off'),
             'profile_visibility' => (string) ($accountData['profile_visibility'] ?? 'Public'),
             'show_my_profile' => (string) ($accountData['show_my_profile'] ?? 'on'),
@@ -390,25 +391,32 @@ final class SettingController extends BaseController
 
                 $ensureContactRow = static function (string $uid): void {
                     $db = Db::connect2();
+                    \App\services\KinshipHonorificService::ensureSchema($db);
                     $chk = $db->prepare('SELECT id FROM contact WHERE id = ? LIMIT 1');
                     $chk->execute([$uid]);
                     if (!$chk->fetch()) {
                         $email = (string) ($_SESSION['auth']['email'] ?? $_SESSION['email'] ?? '');
-                        $ins = $db->prepare('INSERT INTO contact (id, email, country, mobile, profile_visibility, show_my_profile, email_notifications, post_email_notifications, sms_notifications) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
-                        $ins->execute([$uid, substr($email, 0, 50), '', '', 'Public', 'on', 'on', 'off', 'on']);
+                        $ins = $db->prepare('INSERT INTO contact (id, email, country, mobile, profile_visibility, show_my_profile, email_notifications, post_email_notifications, sms_notifications, kinship_honorifics) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+                        $ins->execute([$uid, substr($email, 0, 50), '', '', 'Public', 'on', 'on', 'off', 'on', 'on']);
                     }
                 };
 
                 // 2. Preferences
                 if ($action === 'updatePreferences') {
-                    $ensureContactRow((string) $_POST['id']);
+                    $uidStr = (string) $_POST['id'];
+                    $ensureContactRow($uidStr);
+                    $kinshipHonorifics = array_key_exists('kinship_honorifics', $_POST)
+                        ? $normalizeSwitch($_POST['kinship_honorifics'])
+                        : \App\services\KinshipHonorificService::getViewerPreference($uidStr);
                     $data = [
-                        'id' => $_POST['id'],
+                        'id' => $uidStr,
                         'email_notifications' => $normalizeSwitch($_POST['email_notifications'] ?? 'off'),
                         'post_email_notifications' => $normalizeSwitch($_POST['post_email_notifications'] ?? 'off'),
                         'sms_notifications' => $normalizeSwitch($_POST['sms_notifications'] ?? 'off'),
+                        'kinship_honorifics' => $kinshipHonorifics,
                     ];
                     UpdateFn::updateMultiple('contact', $data, 'id');
+                    \App\services\KinshipHonorificService::clearPreferenceCache($uidStr);
                     msgSuccess(200, "Preferences successfully updated.");
                     return;
                 }

@@ -34,7 +34,7 @@ final class PostShareController
 
         try {
             $db = Db::connect2();
-            $stmt = $db->prepare('SELECT post_no, id, fullName, postMessage, postFamCode, profileImg, post_img0, post_img1, post_img2, voice_capsule_url, date_created FROM post WHERE post_no = ? AND date_deleted IS NULL LIMIT 1');
+            $stmt = $db->prepare('SELECT post_no, id, fullName, postMessage, postFamCode, profileImg, post_img0, post_img1, post_img2, voice_capsule_url, media_meta, date_created FROM post WHERE post_no = ? AND date_deleted IS NULL LIMIT 1');
             $stmt->execute([$postNo]);
             $post = $stmt->fetch(\PDO::FETCH_ASSOC);
 
@@ -48,6 +48,8 @@ final class PostShareController
                 redirect('/profilePage');
                 return;
             }
+
+            $isShareable = \App\controller\members\PostMessage::isPostShareable($post);
 
             // Prepare rich post metadata for social crawlers (WhatsApp, X, Facebook, LinkedIn, etc.)
             $authorName = trim((string)($post['fullName'] ?? 'A Family Member'));
@@ -97,7 +99,7 @@ final class PostShareController
             $authorId = (string)($post['id'] ?? '');
             $hasRestrictions = $authorId !== '' && \App\services\MemberRestrictionService::authorHasAnyRestriction($db, $authorId, 'posts');
 
-            if ($hasRestrictions) {
+            if ($hasRestrictions || !$isShareable) {
                 $ogImage = $appUrl . '/public/img/favicon/android-chrome-512x512.png';
                 $ogTitle = 'Family Memory on FamilyPlatform';
                 $ogDescription = 'Sign in to FamilyPlatform to view moments shared with your family circle.';
@@ -229,10 +231,9 @@ final class PostShareController
     }
 
     /**
-     * Author-Only API to generate or verify a post share link.
-     *
-     * SEC-1: Strict Author Ownership Gate (Marcus PoC Neutralisation).
-     * Only the original author can share this post.
+     * Family-Member & Author API to generate or verify a post share link,
+     * enforce the author's `allow_sharing` preference, and dispatch an immediate
+     * Web Push + in-app notification to the post author when a relative shares their post.
      *
      * @param int|string|null $postNo
      */
@@ -259,7 +260,26 @@ final class PostShareController
         }
 
         $userId = (string)($_SESSION['id'] ?? '');
-        $postNo = (int)($postNo ?: ($_POST['post_no'] ?? $_GET['post_no'] ?? 0));
+
+        // SEC: this endpoint now has side effects (in-app + Web Push to the author), so it
+        // must be CSRF-protected and rate-limited to stop cross-site notification spam.
+        try {
+            BaseController::validateCsrf();
+            \Src\Limiter::limit($userId . ':postshare', 'post');
+        } catch (\Throwable $csrfEx) {
+            http_response_code(403);
+            echo json_encode(['status' => 'error', 'message' => 'Forbidden: invalid or missing security token.']);
+            return;
+        }
+
+        $rawBody = file_get_contents('php://input');
+        $jsonBody = is_string($rawBody) && $rawBody !== '' ? json_decode($rawBody, true) : null;
+        $input = is_array($jsonBody) ? $jsonBody : $_POST;
+
+        $postNo = (int)($postNo ?: ($input['post_no'] ?? $_POST['post_no'] ?? $_GET['post_no'] ?? 0));
+        $channel = isset($input['channel']) && is_string($input['channel'])
+            ? trim($input['channel'])
+            : (isset($_GET['channel']) && is_string($_GET['channel']) ? trim($_GET['channel']) : 'link');
 
         if ($postNo <= 0 || $userId === '') {
             http_response_code(400);
@@ -269,7 +289,7 @@ final class PostShareController
 
         try {
             $db = Db::connect2();
-            $stmt = $db->prepare('SELECT post_no, id, fullName, postMessage, postFamCode FROM post WHERE post_no = ? AND date_deleted IS NULL LIMIT 1');
+            $stmt = $db->prepare('SELECT post_no, id, fullName, postMessage, postFamCode, media_meta FROM post WHERE post_no = ? AND date_deleted IS NULL LIMIT 1');
             $stmt->execute([$postNo]);
             $post = $stmt->fetch(\PDO::FETCH_ASSOC);
 
@@ -279,11 +299,42 @@ final class PostShareController
                 return;
             }
 
-            // Marcus & SecOps Author Ownership Gate
-            if ((string)($post['id'] ?? '') !== $userId) {
-                http_response_code(403);
-                echo json_encode(['status' => 'error', 'message' => 'Unauthorised: Only the author can share this post.']);
-                return;
+            $authorId = (string)($post['id'] ?? '');
+            $isAuthor = ($authorId === $userId);
+            $allowSharing = \App\controller\members\PostMessage::isPostShareable($post);
+
+            if (!$isAuthor) {
+                if (!$allowSharing) {
+                    http_response_code(403);
+                    echo json_encode([
+                        'status' => 'error',
+                        'message' => 'Unauthorised: The author has disabled sharing for this post.',
+                    ]);
+                    return;
+                }
+
+                $audienceSvc = new \App\services\FamilyPostAudienceService($db);
+                if (!$audienceSvc->canUserAccessPost($postNo, $userId)) {
+                    http_response_code(403);
+                    echo json_encode([
+                        'status' => 'error',
+                        'message' => 'Unauthorised: Only authorised family members or the author can share this post.',
+                    ]);
+                    return;
+                }
+            }
+
+            $authorNotified = false;
+            if (!$isAuthor && $authorId !== '') {
+                $sharerName = \App\controller\members\PostMessage::resolveUserDisplayName($db, $userId);
+                $authorNotified = \App\controller\members\PostMessage::notifyAuthorOfPostShare(
+                    $db,
+                    $postNo,
+                    $authorId,
+                    $userId,
+                    $sharerName,
+                    $channel
+                );
             }
 
             $appUrl = rtrim((string)($_ENV['APP_URL'] ?? 'http://localhost'), '/');
@@ -293,12 +344,14 @@ final class PostShareController
                 'status'  => 'success',
                 'message' => 'Post share link generated successfully.',
                 'data'    => [
-                    'post_no'   => $postNo,
-                    'share_url' => $shareUrl,
-                    'title'     => ($post['fullName'] ?? 'Family Member') . '\'s Family Memory',
-                    'text'      => (string)($post['postMessage'] ?? ''),
-                    'fam_code'  => (string)($post['postFamCode'] ?? ''),
-                    'is_author' => true,
+                    'post_no'         => $postNo,
+                    'share_url'       => $shareUrl,
+                    'title'           => ($post['fullName'] ?? 'Family Member') . '\'s Family Memory',
+                    'text'            => (string)($post['postMessage'] ?? ''),
+                    'fam_code'        => (string)($post['postFamCode'] ?? ''),
+                    'is_author'       => $isAuthor,
+                    'allow_sharing'   => $allowSharing,
+                    'author_notified' => $authorNotified,
                 ],
             ]);
         } catch (\Throwable $e) {
@@ -317,7 +370,7 @@ final class PostShareController
         $postNo = (int)$postNo;
         try {
             $db = Db::connect2();
-            $stmt = $db->prepare('SELECT post_no, id, fullName, postMessage, post_img0, voice_capsule_url FROM post WHERE post_no = ? AND date_deleted IS NULL LIMIT 1');
+            $stmt = $db->prepare('SELECT post_no, id, fullName, postMessage, post_img0, voice_capsule_url, media_meta FROM post WHERE post_no = ? AND date_deleted IS NULL LIMIT 1');
             $stmt->execute([$postNo]);
             $post = $stmt->fetch(\PDO::FETCH_ASSOC);
             if (!$post) {
@@ -327,6 +380,10 @@ final class PostShareController
 
             $authorId = (string)($post['id'] ?? '');
             $viewerId = trim((string)($_SESSION['id'] ?? ''));
+            if (!\App\controller\members\PostMessage::isPostShareable($post) && ($viewerId === '' || $viewerId !== $authorId)) {
+                http_response_code(403);
+                return;
+            }
             if ($authorId !== '') {
                 if ($viewerId !== '' && \App\services\MemberRestrictionService::isRestricted($db, $authorId, $viewerId, 'posts')) {
                     http_response_code(403);

@@ -163,6 +163,8 @@ class MemoryMilestoneService
     {
         $milestones = [];
         $today = new \DateTimeImmutable('today');
+        $cleanViewerId = trim($userId);
+        $fallbackFamCode = MilestoneSurpriseBridgeService::normalizeFamilyCode((string)($famCodes[0] ?? ''));
 
         // 1. Collect birthdays from `personal` table
         $birthdays = $this->fetchPersonalBirthdays($famCodes);
@@ -178,25 +180,39 @@ class MemoryMilestoneService
                 $name = trim(($bday['firstName'] ?? '') . ' ' . ($bday['lastName'] ?? ''));
                 $age = $calc['target_age'];
                 $milestoneTag = $this->getBirthdayMilestoneTag($age);
+                $bdayUserId = trim((string)($bday['id'] ?? ''));
+                $bdayFamCode = MilestoneSurpriseBridgeService::normalizeFamilyCode((string)($bday['famCode'] ?? ''));
+                if ($bdayFamCode === '') {
+                    $bdayFamCode = $fallbackFamCode;
+                }
+                $targetYear = $calc['target_year'];
+                $isSubject = ($cleanViewerId === '' || $bdayUserId === '' || $cleanViewerId === $bdayUserId);
+                $mKey = ($bdayFamCode !== '' && $bdayUserId !== '')
+                    ? MilestoneSurpriseBridgeService::buildMilestoneKey($bdayFamCode, 'birthday', $bdayUserId, $targetYear)
+                    : '';
 
                 $milestones[] = [
                     'type' => 'birthday',
                     'title' => $name !== '' ? "{$name}'s Birthday" : "Family Birthday",
                     'subtitle' => $milestoneTag ?: 'Birthday Celebration',
-                    'first_name' => (string)($bday['firstName'] ?? ''),
-                    'full_name' => $name,
+                    'first_name' => trim((string)($bday['firstName'] ?? '')),
+                    'full_name' => $name !== '' ? $name : 'Family Member',
                     'age' => $age,
                     'landmark_tag' => $milestoneTag,
                     'meaningful_message' => $this->getBirthdayMeaningfulMessage($age, $name),
                     'target_date' => $calc['event_date_str'],
+                    'iso_date' => $calc['iso_date'],
                     'days_remaining' => $calc['days_remaining'],
                     'date_badge' => $calc['date_badge'],
-                    'user_id' => (string)($bday['id'] ?? ''),
+                    'user_id' => $bdayUserId,
                     'profile_img' => (string)($bday['profile_img'] ?? ''),
                     'icon' => 'bi-gift-fill',
                     'color_class' => 'bg-warning text-dark',
                     'graphic_type' => 'birthday',
                     'accent_color' => '#b8202c',
+                    '_milestone_key' => $mKey,
+                    '_entity_id' => $bdayUserId,
+                    '_is_subject' => $isSubject,
                 ];
             }
         }
@@ -229,30 +245,58 @@ class MemoryMilestoneService
                 if ($calc !== null) {
                     $yearsMarried = $calc['target_age'];
                     $anniversaryTag = $this->getAnniversaryMilestoneTag($yearsMarried);
-                    $title = ($union['p1_name'] && $union['p2_name'])
-                        ? "{$union['p1_name']} & {$union['p2_name']}'s Anniversary"
+                    $p1Clean = trim((string)($union['p1_name'] ?? ''));
+                    $p2Clean = trim((string)($union['p2_name'] ?? ''));
+                    $coupleFullName = ($p1Clean !== '' && $p2Clean !== '')
+                        ? "{$p1Clean} & {$p2Clean}"
+                        : ($p1Clean !== '' ? $p1Clean : ($p2Clean !== '' ? $p2Clean : 'Wedding Anniversary'));
+                    $title = ($p1Clean !== '' && $p2Clean !== '')
+                        ? "{$p1Clean} & {$p2Clean}'s Anniversary"
                         : "Wedding Anniversary";
+
+                    $unionId = trim((string)($union['id'] ?? ''));
+                    $p1Uid = trim((string)($union['p1_user_id'] ?? ''));
+                    $p2Uid = trim((string)($union['p2_user_id'] ?? ''));
+                    $unionFamCode = MilestoneSurpriseBridgeService::normalizeFamilyCode((string)($union['family_code'] ?? ''));
+                    if ($unionFamCode === '') {
+                        $unionFamCode = $fallbackFamCode;
+                    }
+                    $targetYear = $calc['target_year'];
+                    $isSubject = (
+                        $cleanViewerId === ''
+                        || $unionId === ''
+                        || ($p1Uid !== '' && $cleanViewerId === $p1Uid)
+                        || ($p2Uid !== '' && $cleanViewerId === $p2Uid)
+                    );
+                    $mKey = ($unionFamCode !== '' && $unionId !== '')
+                        ? MilestoneSurpriseBridgeService::buildMilestoneKey($unionFamCode, 'anniversary', $unionId, $targetYear)
+                        : '';
 
                     $milestones[] = [
                         'type' => 'anniversary',
                         'title' => $title,
+                        'full_name' => $coupleFullName,
                         'subtitle' => $anniversaryTag ?: ($yearsMarried ? "{$yearsMarried} Years Together" : 'Wedding Anniversary'),
                         'years_married' => $yearsMarried,
                         'anniversary_tag' => $anniversaryTag,
                         'meaningful_message' => $this->getAnniversaryMeaningfulMessage($yearsMarried, $title),
-                        'p1_name' => (string)($union['p1_name'] ?? ''),
-                        'p2_name' => (string)($union['p2_name'] ?? ''),
+                        'p1_name' => $p1Clean,
+                        'p2_name' => $p2Clean,
                         'p1_img' => (string)($union['p1_img'] ?? ''),
                         'p2_img' => (string)($union['p2_img'] ?? ''),
                         'target_date' => $calc['event_date_str'],
+                        'iso_date' => $calc['iso_date'],
                         'days_remaining' => $calc['days_remaining'],
                         'date_badge' => $calc['date_badge'],
-                        'user_id' => (string)($union['partner_1_id'] ?? ''),
+                        'user_id' => $p1Uid !== '' ? $p1Uid : (string)($union['partner_1_id'] ?? ''),
                         'profile_img' => (string)($union['p1_img'] ?? ''),
                         'icon' => 'bi-heart-fill',
                         'color_class' => 'bg-danger text-white',
                         'graphic_type' => 'anniversary',
                         'accent_color' => '#ec4899',
+                        '_milestone_key' => $mKey,
+                        '_entity_id' => $unionId,
+                        '_is_subject' => $isSubject,
                     ];
                 }
             }
@@ -285,6 +329,7 @@ class MemoryMilestoneService
                 $milestones[] = [
                     'type' => 'event',
                     'title' => $evName,
+                    'full_name' => $evName,
                     'subtitle' => $evType,
                     'meaningful_message' => $this->getEventMeaningfulMessage($evName, $evType),
                     'target_date' => date('M j, Y', $evTime),
@@ -296,12 +341,93 @@ class MemoryMilestoneService
                     'color_class' => 'bg-primary text-white',
                     'graphic_type' => 'event',
                     'accent_color' => '#0d9488',
+                    '_milestone_key' => '',
+                    '_entity_id' => '',
+                    '_is_subject' => true,
                 ];
             }
         }
 
         // Sort milestones chronologically (days remaining ascending)
         usort($milestones, fn(array $a, array $b) => (int)$a['days_remaining'] <=> (int)$b['days_remaining']);
+
+        // 4. Batch-enrich surprise celebration links while strictly shielding celebrants & couples
+        $candidateKeys = [];
+        foreach ($milestones as $msItem) {
+            if (empty($msItem['_is_subject']) && !empty($msItem['_milestone_key'])) {
+                $candidateKeys[] = $msItem['_milestone_key'];
+            }
+        }
+
+        $linkedMap = [];
+        if ($candidateKeys !== []) {
+            try {
+                $bridge = new MilestoneSurpriseBridgeService($this->db);
+                $linkedMap = $bridge->findLinksForKeys($candidateKeys);
+            } catch (\Throwable $bridgeErr) {
+                \error_log('[MemoryMilestoneService::getUpcomingMilestones] bridge lookup warning: ' . $bridgeErr->getMessage());
+            }
+        }
+
+        foreach ($milestones as &$msItem) {
+            $isSubj = $msItem['_is_subject'];
+            $mKey   = $msItem['_milestone_key'];
+            $mEntId = $msItem['_entity_id'];
+            $mType  = $msItem['type'];
+
+            if (!$isSubj && $mEntId !== '' && in_array($mType, ['birthday', 'anniversary'], true)) {
+                $linkedRow = ($mKey !== '' && isset($linkedMap[$mKey])) ? $linkedMap[$mKey] : null;
+                $claimedBy = is_array($linkedRow) ? trim((string)($linkedRow['claimed_by_user_id'] ?? '')) : '';
+                $isOrganiser = ($cleanViewerId !== '' && $claimedBy !== '' && $claimedBy === $cleanViewerId);
+
+                $msItem['can_contribute_surprise'] = true;
+                $msItem['surprise_claimed'] = ($linkedRow !== null);
+                $msItem['is_surprise_organiser'] = $isOrganiser;
+                $msItem['sign_card_url'] = '/member/milestones/surprise-launch?' . http_build_query([
+                    'type' => $mType,
+                    'entity_id' => $mEntId,
+                    'feature' => 'card',
+                ]);
+                $msItem['record_video_url'] = '/member/milestones/surprise-launch?' . http_build_query([
+                    'type' => $mType,
+                    'entity_id' => $mEntId,
+                    'feature' => 'goodwill',
+                ]);
+                $msItem['manage_cards_url'] = $isOrganiser ? ('/member/milestones/surprise-launch?' . http_build_query([
+                    'type' => $mType,
+                    'entity_id' => $mEntId,
+                    'feature' => 'manage_cards',
+                ])) : '';
+                $msItem['manage_videos_url'] = $isOrganiser ? ('/member/milestones/surprise-launch?' . http_build_query([
+                    'type' => $mType,
+                    'entity_id' => $mEntId,
+                    'feature' => 'manage_videos',
+                ])) : '';
+            } else {
+                $msItem['can_contribute_surprise'] = false;
+                $msItem['surprise_claimed'] = false;
+                $msItem['is_surprise_organiser'] = false;
+                $msItem['sign_card_url'] = '';
+                $msItem['record_video_url'] = '';
+                $msItem['manage_cards_url'] = '';
+                $msItem['manage_videos_url'] = '';
+            }
+
+            if (function_exists('optimiseLocalImageUrl')) {
+                foreach (['profile_img', 'p1_img', 'p2_img'] as $imgKey) {
+                    if (!empty($msItem[$imgKey])) {
+                        $rawImg = (string) $msItem[$imgKey];
+                        $fullImg = (str_starts_with($rawImg, '/') || str_starts_with($rawImg, 'http'))
+                            ? $rawImg
+                            : '/resources/images/profile/' . $rawImg;
+                        $msItem[$imgKey] = optimiseLocalImageUrl($fullImg, 160);
+                    }
+                }
+            }
+
+            unset($msItem['_milestone_key'], $msItem['_entity_id'], $msItem['_is_subject']);
+        }
+        unset($msItem);
 
         return $milestones;
     }
@@ -1106,8 +1232,10 @@ class MemoryMilestoneService
 
             $whereClause = implode(' OR ', $inClauses);
             $sqlTemplate = "SELECT fu.*, 
-                             CONCAT(COALESCE(fn1.first_name, ''), ' ', COALESCE(fn1.last_name, '')) as p1_name,
-                             CONCAT(COALESCE(fn2.first_name, ''), ' ', COALESCE(fn2.last_name, '')) as p2_name,
+                             COALESCE(fn1.user_id, '') as p1_user_id,
+                             COALESCE(fn2.user_id, '') as p2_user_id,
+                             TRIM(CONCAT(COALESCE(fn1.first_name, ''), ' ', COALESCE(fn1.last_name, ''))) as p1_name,
+                             TRIM(CONCAT(COALESCE(fn2.first_name, ''), ' ', COALESCE(fn2.last_name, ''))) as p2_name,
                              COALESCE(pp1.img, fn1.avatar_url, '') as p1_img,
                              COALESCE(pp2.img, fn2.avatar_url, '') as p2_img
                       FROM family_unions fu
@@ -1223,7 +1351,7 @@ class MemoryMilestoneService
     /**
      * Calculates days until next occurrence and target milestone age/anniversary.
      *
-     * @return array{days_remaining: int, target_age: int|null, date_badge: string, event_date_str: string}|null
+     * @return array{days_remaining: int, target_age: int|null, date_badge: string, event_date_str: string, target_year: int, iso_date: string}|null
      */
     private function calculateMilestoneCountdown(
         int $day,
@@ -1266,6 +1394,8 @@ class MemoryMilestoneService
             'target_age' => $targetAge,
             'date_badge' => $badge,
             'event_date_str' => $targetDate->format('M j, Y'),
+            'target_year' => (int)$targetDate->format('Y'),
+            'iso_date' => $targetDate->format('Y-m-d'),
         ];
     }
 
@@ -1340,17 +1470,13 @@ class MemoryMilestoneService
     }
 
     /**
-     * Crafts an emotionally rich, meaningful message for a birthday celebration.
+     * Crafts an emotionally rich, meaningful message for landmark jubilee birthdays only.
+     * Generic non-landmark 'Another wonderful year...' copy is intentionally omitted.
      */
     public function getBirthdayMeaningfulMessage(?int $age, string $name): string
     {
-        $shortName = trim(explode(' ', $name)[0] ?? 'our loved one');
-        if ($shortName === '') {
-            $shortName = 'our family member';
-        }
-
         if ($age === null || $age <= 0) {
-            return "Honouring {$shortName}'s special day and celebrating the warmth, joy, and blessings they bring to our family circle.";
+            return '';
         }
 
         return match ($age) {
@@ -1365,7 +1491,7 @@ class MemoryMilestoneService
             80 => "Oak milestone: 80 years of strong roots, protective branches, and a lifetime of unconditional love.",
             90 => "A revered milestone of 90 years of longevity, ancestral stories, and generational triumph.",
             100 => "Centenary celebration: A majestic century of living history, wisdom, and family nobility.",
-            default => "Another wonderful year of laughter, growth, and shared memories that enrich our family legacy.",
+            default => '',
         };
     }
 

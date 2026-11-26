@@ -100,6 +100,14 @@
                 <span>Connected Kin</span>
               </span>
             </template>
+            <template x-if="post.allow_sharing === false || post.allow_sharing === 0 || post.allow_sharing === '0'">
+              <span class="badge rounded-pill bg-light text-secondary border d-inline-flex align-items-center gap-1"
+                    style="font-size: 0.75rem; font-weight: 600; padding: 2px 8px; white-space: nowrap; flex-shrink: 0;"
+                    :title="isOwnPost(post) ? 'You turned off sharing for this post' : 'The author has turned off sharing for this post'">
+                <i class="bi bi-lock-fill"></i>
+                <span>Sharing off</span>
+              </span>
+            </template>
           </div>
         </div>
         <div class="dropdown">
@@ -131,6 +139,12 @@
                   </a>
                 </li>
                 <li>
+                  <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="#" style="min-height: 44px; white-space: nowrap;" @click.prevent="togglePostAllowSharing(post)">
+                    <i class="bi" :class="(post.allow_sharing === false || post.allow_sharing === 0 || post.allow_sharing === '0') ? 'bi-unlock-fill text-success' : 'bi-lock-fill text-warning'"></i>
+                    <span x-text="(post.allow_sharing === false || post.allow_sharing === 0 || post.allow_sharing === '0') ? 'Allow Family Sharing' : 'Turn Off Sharing'"></span>
+                  </a>
+                </li>
+                <li>
                   <a class="dropdown-item py-2 d-flex align-items-center gap-2 text-danger" href="#" style="min-height: 44px;" @click.prevent="deletePost(post.post_no)">
                     <i class="bi bi-trash3"></i> {{ __('feed.delete_post', 'Delete Post') }}
                   </a>
@@ -139,6 +153,20 @@
             </template>
             <template x-if="!isOwnPost(post)">
               <div>
+                <template x-if="canSharePost(post)">
+                  <div>
+                    <li>
+                      <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="#" style="min-height: 44px; white-space: nowrap;" @click.prevent.stop="sharePost(post)">
+                        <i class="bi bi-send-fill text-success" style="transform: rotate(-15deg); display: inline-block;"></i> {{ __('feed.share_post', 'Share Post') }}
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="#" style="min-height: 44px; white-space: nowrap;" @click.prevent="repostPost(post)">
+                        <i class="bi bi-arrow-repeat text-primary"></i> {{ __('feed.repost_to_feed', 'Repost to Feed') }}
+                      </a>
+                    </li>
+                  </div>
+                </template>
                 <template x-if="post.id && post.id !== 'FAM_PLATFORM_OFFICIAL' && post.id !== 'FAMILY_HISTORIAN'">
                   <li>
                     <a class="dropdown-item py-2 d-flex align-items-center gap-2" href="#" style="min-height: 44px; white-space: nowrap;" @click.prevent="restrictPostAuthor(post)">

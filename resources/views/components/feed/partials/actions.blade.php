@@ -71,16 +71,24 @@
         <i class="bi bi-chat-quote-fill" style="font-size: 1.3rem; line-height: 1;"></i>
       </button>
 
-      <!-- Share Button (The Swift Aerodynamic Glider - Author Only) -->
-      <template x-if="isOwnPost(post)">
+      <!-- Share Button (The Swift Aerodynamic Glider - Author or Permitted Family Members) -->
+      <template x-if="canSharePost(post)">
         <button class="btn btn-action-glyph btn-action-share rounded-circle"
                 style="min-width: 44px; min-height: 44px;"
                 type="button"
-                title="Share with family relatives or via social apps"
+                :title="isOwnPost(post) ? 'Share with family relatives or via social apps' : ('Share ' + (post.fullName || 'this') + ' post (author will be notified via Web Push)')"
                 aria-label="Share this memory"
                 @click.stop="sharePost(post)">
           <i class="bi bi-send-fill" style="font-size: 1.15rem; line-height: 1; transform: rotate(-15deg); display: inline-block;"></i>
         </button>
+      </template>
+      <template x-if="!canSharePost(post)">
+        <span class="d-inline-flex align-items-center justify-content-center text-muted rounded-circle"
+              style="min-width: 44px; min-height: 44px; opacity: 0.55;"
+              title="The author has turned off sharing for this post"
+              aria-label="Sharing turned off by author">
+          <i class="bi bi-lock-fill" style="font-size: 1.1rem; line-height: 1;"></i>
+        </span>
       </template>
 
     </div>

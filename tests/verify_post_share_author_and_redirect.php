@@ -96,7 +96,23 @@ try {
     $hasFeedRedirect = str_contains($authRedirectLoc, '/member/profilePage?post_no=' . $testPostNo);
     assertShare($authFeedRedirect = $hasFeedRedirect, "Authenticated visitor to /post/{$testPostNo} is redirected to /member/profilePage?post_no={$testPostNo}#post{$testPostNo} (Got: '{$authRedirectLoc}')");
 
-    // 4. Test Author-Only API: Author can generate share link
+    // 4. Test Post Share API: CSRF gate first (a forged cross-site request must never notify an author)
+    $_SESSION['id'] = $authorId;
+    $_SESSION['token'] = bin2hex(random_bytes(32));
+    unset($_SERVER['HTTP_X_CSRF_TOKEN'], $_SERVER['HTTP_X_XSRF_TOKEN'], $_POST['token']);
+    http_response_code(200);
+    ob_start();
+    $controller->sharePostApi($testPostNo);
+    $noCsrfJson = ob_get_clean();
+    $noCsrfData = json_decode((string)$noCsrfJson, true);
+    assertShare(
+        ($noCsrfData['status'] ?? '') === 'error' && str_contains($noCsrfData['message'] ?? '', 'security token'),
+        "Share API rejects requests without a CSRF token (anti notification-spam)"
+    );
+    $_SERVER['HTTP_X_CSRF_TOKEN'] = $_SESSION['token'];
+    http_response_code(200);
+
+    // Author can generate share link (is_author = true, author_notified = false)
     $_SESSION['id'] = $authorId;
     ob_start();
     $controller->sharePostApi($testPostNo);
@@ -104,12 +120,54 @@ try {
 
     $authorData = json_decode((string)$authorResponseJson, true);
     assertShare(
-        is_array($authorData) && ($authorData['status'] ?? '') === 'success' && str_contains($authorData['data']['share_url'] ?? '', '/post/' . $testPostNo),
-        "Author can generate post share link via POST /api/posts/{$testPostNo}/share"
+        is_array($authorData)
+            && ($authorData['status'] ?? '') === 'success'
+            && str_contains($authorData['data']['share_url'] ?? '', '/post/' . $testPostNo)
+            && ($authorData['data']['is_author'] ?? false) === true
+            && ($authorData['data']['author_notified'] ?? true) === false,
+        "Author can generate post share link via POST /api/posts/{$testPostNo}/share without self-notification"
     );
 
-    // 5. Test Author-Only API: Non-Author is BLOCKED with 403 Forbidden
+    // 5. Test Post Share API: Authorised family member CAN share when allow_sharing is enabled AND author receives notification
+    $familyRelativeId = 'test_share_relative_' . bin2hex(random_bytes(4));
+    $db->prepare('INSERT INTO personal (id, firstName, lastName, famCode) VALUES (?, ?, ?, ?)')->execute([
+        $familyRelativeId,
+        'Cousin',
+        'Kemi',
+        $testFamCode,
+    ]);
+    $_SESSION['id'] = $familyRelativeId;
+    $_SESSION['fName'] = 'Cousin';
+    $_SESSION['lName'] = 'Kemi';
+    $_SESSION['famCode'] = $testFamCode;
+    $_GET['channel'] = 'whatsapp';
+    http_response_code(200);
+    ob_start();
+    $controller->sharePostApi($testPostNo);
+    $relativeResponseJson = ob_get_clean();
+    unset($_GET['channel']);
+
+    $relativeData = json_decode((string)$relativeResponseJson, true);
+    assertShare(
+        is_array($relativeData)
+            && ($relativeData['status'] ?? '') === 'success'
+            && ($relativeData['data']['is_author'] ?? true) === false
+            && ($relativeData['data']['allow_sharing'] ?? false) === true
+            && ($relativeData['data']['author_notified'] ?? false) === true,
+        "Authorised family member ({$familyRelativeId}) can share post {$testPostNo} and triggers Web Push + in-app alert to author"
+    );
+
+    $notifStmt = $db->prepare("SELECT notification_content FROM notification WHERE sender_id = ? AND receiver_id = ? AND notification_type = 'PostShare' ORDER BY notification_date DESC LIMIT 1");
+    $notifStmt->execute([$familyRelativeId, $authorId]);
+    $notifContent = (string)$notifStmt->fetchColumn();
+    assertShare(
+        str_contains($notifContent, 'Cousin Kemi shared your post on WhatsApp'),
+        "Author notification record created in DB ('{$notifContent}')"
+    );
+
+    // 5b. Test Post Share API: Unrelated cross-family user is BLOCKED with 403 Forbidden (IDOR protection)
     $_SESSION['id'] = $otherUserId;
+    $_SESSION['famCode'] = 'OTHER999';
     http_response_code(200);
     ob_start();
     $controller->sharePostApi($testPostNo);
@@ -117,9 +175,33 @@ try {
 
     $otherData = json_decode((string)$otherResponseJson, true);
     assertShare(
-        ($otherData['status'] ?? '') === 'error' && str_contains($otherData['message'] ?? '', 'Only the author can share this post'),
-        "Non-author ({$otherUserId}) is blocked with 403 Forbidden when attempting to share post {$testPostNo}"
+        ($otherData['status'] ?? '') === 'error'
+            && str_contains($otherData['message'] ?? '', 'Only authorised family members or the author can share this post'),
+        "Cross-family non-member ({$otherUserId}) is blocked with 403 Forbidden when attempting to share post {$testPostNo}"
     );
+
+    // 5c. Test Author Locking Sharing (allow_sharing = false): Even same-family relative is BLOCKED with 403 Forbidden
+    $db->prepare('UPDATE post SET media_meta = ? WHERE post_no = ?')->execute([
+        json_encode(['allow_sharing' => false]),
+        $testPostNo,
+    ]);
+    $_SESSION['id'] = $familyRelativeId;
+    $_SESSION['famCode'] = $testFamCode;
+    http_response_code(200);
+    ob_start();
+    $controller->sharePostApi($testPostNo);
+    $lockedResponseJson = ob_get_clean();
+    $lockedData = json_decode((string)$lockedResponseJson, true);
+    assertShare(
+        ($lockedData['status'] ?? '') === 'error'
+            && str_contains($lockedData['message'] ?? '', 'author has disabled sharing'),
+        "When author locks sharing (allow_sharing=false), family relative is blocked with 403 Forbidden"
+    );
+
+    // Restore allow_sharing = true for remaining crawler tests and clean up relative fixture
+    $db->prepare('UPDATE post SET media_meta = NULL WHERE post_no = ?')->execute([$testPostNo]);
+    $db->prepare('DELETE FROM personal WHERE id = ?')->execute([$familyRelativeId]);
+    $db->prepare("DELETE FROM notification WHERE sender_id = ? AND receiver_id = ? AND notification_type = 'PostShare'")->execute([$familyRelativeId, $authorId]);
 
     // 6. Test Unauthenticated caller to API: BLOCKED with 401 Unauthorised
     $_SESSION = [];

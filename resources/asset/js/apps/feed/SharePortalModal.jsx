@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'preact/hooks';
+import { apiFetch } from '../shared/apiClient';
 import { notifyToast } from '../shared/bootstrap';
 import { Portal } from '../shared/Portal';
-import { getAvatarUrl, getPostImageUrl, stripStyleToken } from './feedUtils';
+import { getAvatarUrl, getPostImageUrl, isOwnPost, stripStyleToken } from './feedUtils';
 
 function cleanRawCaption(post) {
     let raw = stripStyleToken(post?.displayMessage || post?.postMessage || '').trim();
@@ -75,12 +76,15 @@ export function getWhatsAppShareText(post, shareUrl) {
     return lines.join('\n');
 }
 
-export function SharePortalModal({ isOpen, post, onClose }) {
+export function SharePortalModal({ isOpen, post, bootstrap, onUpdatePost, onClose }) {
     const [copied, setCopied] = useState(false);
+    const [reposting, setReposting] = useState(false);
+    const [togglingPerm, setTogglingPerm] = useState(false);
 
     useEffect(() => {
         if (!isOpen) {
             setCopied(false);
+            setReposting(false);
             return undefined;
         }
         const onKey = (e) => {
@@ -91,6 +95,78 @@ export function SharePortalModal({ isOpen, post, onClose }) {
     }, [isOpen, onClose]);
 
     if (!isOpen || !post || !post.post_no) return null;
+
+    const currentUserId = String(bootstrap?.userId || '');
+    const ownPost = isOwnPost(post, currentUserId);
+    const allowSharing = post.allow_sharing !== false && post.allow_sharing !== 0 && post.allow_sharing !== '0';
+
+    const recordShareAndNotifyAuthor = (channel = 'link') => {
+        if (!post?.post_no) return;
+        apiFetch(
+            `/api/posts/${encodeURIComponent(post.post_no)}/share`,
+            {
+                method: 'POST',
+                body: { channel },
+            },
+            bootstrap
+        ).catch(() => {});
+    };
+
+    const handleRepostToFeed = async () => {
+        if (reposting) return;
+        setReposting(true);
+        try {
+            const res = await apiFetch(
+                `/post/${encodeURIComponent(post.post_no)}/repost`,
+                {
+                    method: 'POST',
+                    body: { reflection_message: '' },
+                    timeoutMs: 30000,
+                },
+                bootstrap
+            );
+            notifyToast(
+                ownPost
+                    ? 'Reposted to your family feed!'
+                    : (res?.author_notified ? `Shared to family feed (${author} notified via Web Push)!` : 'Shared to your family feed!'),
+                'success'
+            );
+            onClose?.();
+        } catch (err) {
+            notifyToast(err?.message || 'Unable to share to family feed.', 'error');
+        } finally {
+            setReposting(false);
+        }
+    };
+
+    const handleToggleSharePermission = async () => {
+        if (!ownPost || togglingPerm) return;
+        const nextAllow = !allowSharing;
+        setTogglingPerm(true);
+        onUpdatePost?.(post.post_no, { allow_sharing: nextAllow });
+        try {
+            await apiFetch(
+                `/post/${encodeURIComponent(post.post_no)}`,
+                {
+                    method: 'PUT',
+                    body: { allow_sharing: nextAllow },
+                    timeoutMs: 30000,
+                },
+                bootstrap
+            );
+            notifyToast(
+                nextAllow
+                    ? 'Family members can share this post (you will be notified)'
+                    : 'Sharing locked — only you can share this post',
+                'success'
+            );
+        } catch (err) {
+            onUpdatePost?.(post.post_no, { allow_sharing: !nextAllow });
+            notifyToast(err?.message || 'Could not update sharing setting.', 'error');
+        } finally {
+            setTogglingPerm(false);
+        }
+    };
 
     const origin =
         typeof window !== 'undefined' && window.location?.origin
@@ -137,12 +213,14 @@ export function SharePortalModal({ isOpen, post, onClose }) {
     const emailUrl = `mailto:?subject=${encodeURIComponent(shareTitle)}&body=${encodeURIComponent(`${shareText}\n\n${shareUrl}`)}`;
 
     const handleCopyLink = async () => {
+        recordShareAndNotifyAuthor('copy');
         try {
+            const toastMsg = ownPost ? 'Post link copied to clipboard!' : `Post link copied (${author} notified)!`;
             if (typeof window !== 'undefined' && typeof window.$clipboard === 'function') {
-                window.$clipboard(shareUrl, 'Post link copied to clipboard!');
+                window.$clipboard(shareUrl, toastMsg);
             } else if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
                 await navigator.clipboard.writeText(shareUrl);
-                notifyToast('Post link copied to clipboard!', 'success');
+                notifyToast(toastMsg, 'success');
             } else {
                 window.prompt('Copy this share link:', shareUrl);
             }
@@ -154,6 +232,7 @@ export function SharePortalModal({ isOpen, post, onClose }) {
     };
 
     const handleSystemShare = async () => {
+        recordShareAndNotifyAuthor('system');
         if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
             try {
                 await navigator.share({
@@ -358,25 +437,105 @@ export function SharePortalModal({ isOpen, post, onClose }) {
                             </div>
                         </div>
 
-                        {/* 2. Primary WhatsApp Hero CTA */}
-                        <a
-                            href={whatsappUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            data-testid="share-portal-whatsapp-cta"
-                            className="btn w-100 py-2 rounded-3 fw-bold d-flex align-items-center justify-content-center gap-2 text-white text-decoration-none shadow-sm mb-3"
-                            style={{
-                                backgroundColor: '#15803d',
-                                border: 'none',
-                                minHeight: '48px',
-                                fontSize: '0.96rem',
-                                whiteSpace: 'nowrap',
-                                flexShrink: 0,
-                            }}
-                        >
-                            <i className="bi bi-whatsapp" style={{ fontSize: '1.2rem' }} aria-hidden="true" />
-                            <span>Share via WhatsApp</span>
-                        </a>
+                        {/* Author Share Permission Control or Relative Web Push Notification Notice */}
+                        {ownPost ? (
+                            <div
+                                className="p-2.5 mb-3 rounded-3 d-flex align-items-center justify-content-between gap-2 border"
+                                style={{
+                                    background: allowSharing ? 'rgba(16, 185, 129, 0.08)' : 'rgba(245, 158, 11, 0.1)',
+                                    borderColor: allowSharing ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.35)',
+                                }}
+                                data-testid="share-portal-author-permission-bar"
+                            >
+                                <div className="d-flex align-items-center gap-2 min-w-0">
+                                    <i
+                                        className={`bi ${allowSharing ? 'bi-bell-fill text-success' : 'bi-lock-fill text-warning'}`}
+                                        aria-hidden="true"
+                                    />
+                                    <div className="small">
+                                        <div className="fw-bold" style={{ fontSize: '0.82rem', color: 'var(--text-main, #0f172a)' }}>
+                                            {allowSharing ? 'Family sharing enabled' : 'Sharing locked to you'}
+                                        </div>
+                                        <div className="text-muted" style={{ fontSize: '0.74rem' }}>
+                                            {allowSharing
+                                                ? 'Relatives can share & you receive a Web Push alert'
+                                                : 'Other family members cannot share this post'}
+                                        </div>
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    className={`btn btn-sm rounded-pill px-3 fw-semibold ${allowSharing ? 'btn-outline-secondary' : 'btn-success text-white'}`}
+                                    style={{ minHeight: '44px', whiteSpace: 'nowrap', flexShrink: 0, fontSize: '0.78rem' }}
+                                    disabled={togglingPerm}
+                                    data-spin="true"
+                                    data-testid="share-portal-toggle-permission-btn"
+                                    onClick={handleToggleSharePermission}
+                                >
+                                    {togglingPerm ? 'Saving…' : (allowSharing ? 'Lock Sharing' : 'Allow Sharing')}
+                                </button>
+                            </div>
+                        ) : (
+                            <div
+                                className="px-3 py-2 mb-3 rounded-3 d-flex align-items-center gap-2 border"
+                                style={{
+                                    background: 'rgba(14, 165, 233, 0.08)',
+                                    borderColor: 'rgba(14, 165, 233, 0.25)',
+                                    fontSize: '0.78rem',
+                                }}
+                                data-testid="share-portal-author-notify-notice"
+                            >
+                                <i className="bi bi-bell-fill text-primary" aria-hidden="true" />
+                                <span>
+                                    <strong>{author}</strong> allows sharing on this post and will receive a Web Push notification when you share it.
+                                </span>
+                            </div>
+                        )}
+
+                        {/* 2. Primary WhatsApp & Family Feed Repost Actions */}
+                        <div className="d-flex flex-column gap-2 mb-3">
+                            <a
+                                href={whatsappUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                data-testid="share-portal-whatsapp-cta"
+                                onClick={() => recordShareAndNotifyAuthor('whatsapp')}
+                                className="btn w-100 py-2 rounded-3 fw-bold d-flex align-items-center justify-content-center gap-2 text-white text-decoration-none shadow-sm"
+                                style={{
+                                    backgroundColor: '#15803d',
+                                    border: 'none',
+                                    minHeight: '48px',
+                                    fontSize: '0.96rem',
+                                    whiteSpace: 'nowrap',
+                                    flexShrink: 0,
+                                }}
+                            >
+                                <i className="bi bi-whatsapp" style={{ fontSize: '1.2rem' }} aria-hidden="true" />
+                                <span>Share via WhatsApp</span>
+                            </a>
+
+                            <button
+                                type="button"
+                                data-testid="share-portal-repost-feed-btn"
+                                data-spin="true"
+                                disabled={reposting}
+                                onClick={handleRepostToFeed}
+                                className="btn btn-outline-primary w-100 py-2 rounded-3 fw-bold d-flex align-items-center justify-content-center gap-2"
+                                style={{
+                                    minHeight: '46px',
+                                    fontSize: '0.9rem',
+                                    whiteSpace: 'nowrap',
+                                    flexShrink: 0,
+                                }}
+                            >
+                                {reposting ? (
+                                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
+                                ) : (
+                                    <i className="bi bi-arrow-repeat" style={{ fontSize: '1.1rem' }} aria-hidden="true" />
+                                )}
+                                <span>{reposting ? 'Sharing to Family Feed…' : 'Repost to Family Feed'}</span>
+                            </button>
+                        </div>
 
                         {/* 3. Direct Social Media Channels Grid */}
                         <div className="text-muted small fw-semibold mb-2" style={{ fontSize: '0.78rem' }}>
@@ -398,6 +557,7 @@ export function SharePortalModal({ isOpen, post, onClose }) {
                                     target={ch.sameTab ? undefined : '_blank'}
                                     rel={ch.sameTab ? undefined : 'noopener noreferrer'}
                                     data-testid={`share-channel-${ch.key}`}
+                                    onClick={() => recordShareAndNotifyAuthor(ch.key)}
                                     className="btn p-2 rounded-3 d-flex flex-column align-items-center justify-content-center gap-1 text-white text-decoration-none shadow-xs"
                                     style={{
                                         background: ch.bg,

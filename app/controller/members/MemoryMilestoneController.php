@@ -4,16 +4,22 @@ declare(strict_types=1);
 namespace App\controller\members;
 
 use App\services\MemoryMilestoneService;
+use App\services\MilestoneSurpriseBridgeService;
 use Src\CheckToken;
-use Src\Db;
+use Src\Exceptions\ForbiddenException;
+use Src\Exceptions\NotFoundException;
 
 final class MemoryMilestoneController
 {
     private MemoryMilestoneService $memoryService;
+    private MilestoneSurpriseBridgeService $surpriseBridge;
 
-    public function __construct(?MemoryMilestoneService $memoryService = null)
-    {
+    public function __construct(
+        ?MemoryMilestoneService $memoryService = null,
+        ?MilestoneSurpriseBridgeService $surpriseBridge = null
+    ) {
         $this->memoryService = $memoryService ?? new MemoryMilestoneService();
+        $this->surpriseBridge = $surpriseBridge ?? new MilestoneSurpriseBridgeService();
     }
 
     /**
@@ -121,6 +127,59 @@ final class MemoryMilestoneController
             http_response_code(400);
             header('Content-Type: application/json');
             echo json_encode(['status' => 'error', 'message' => $th->getMessage()]);
+        }
+    }
+
+    /**
+     * GET /member/milestones/surprise-launch
+     *
+     * Verifies family membership & celebrant/partner privacy shield, then redirects
+     * either to PartyPlatform's standalone claim flow (first clicker) or directly
+     * to the shared group card / goodwill video recorder (all subsequent relatives).
+     */
+    public function launchSurpriseCelebration(): void
+    {
+        try {
+            $userId = $_SESSION['id'] ?? null;
+            if (!is_string($userId) || trim($userId) === '') {
+                http_response_code(401);
+                echo 'Authentication is required.';
+                return;
+            }
+
+            $primaryFamCode = is_string($_SESSION['famCode'] ?? null) ? $_SESSION['famCode'] : '';
+            $famCodes = $_SESSION['famCodes'] ?? ($primaryFamCode !== '' ? [$primaryFamCode] : []);
+
+            $type     = is_string($_GET['type'] ?? null) ? trim($_GET['type']) : '';
+            $entityId = is_string($_GET['entity_id'] ?? null) ? trim($_GET['entity_id']) : '';
+            $feature  = is_string($_GET['feature'] ?? null) ? trim($_GET['feature']) : 'card';
+
+            \releaseSessionLock();
+
+            $redirectUrl = $this->surpriseBridge->resolveLaunchRedirectUrl(
+                $userId,
+                array_map('strval', (array) $famCodes),
+                $type,
+                $entityId,
+                $feature
+            );
+
+            if (!headers_sent()) {
+                header('Location: ' . $redirectUrl, true, 302);
+            }
+        } catch (ForbiddenException $e) {
+            http_response_code(403);
+            echo htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
+        } catch (NotFoundException $e) {
+            http_response_code(404);
+            echo htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
+        } catch (\InvalidArgumentException $e) {
+            http_response_code(400);
+            echo htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
+        } catch (\Throwable $e) {
+            error_log('[MemoryMilestoneController::launchSurpriseCelebration] ' . $e->getMessage());
+            http_response_code(500);
+            echo 'Unable to launch celebration workspace right now. Please try again.';
         }
     }
 }

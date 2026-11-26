@@ -75,6 +75,7 @@ final class RouteDispatch
             // Headless Kinship REST API handles API key authentication
             'App\controller\api\KinshipApiController',
             'App\controller\api\SovereignStudioApiController',
+            'App\controller\api\EcosystemMilestoneCallbackController', // S2S HMAC-signed milestone link callback from PartyPlatform
             'App\controller\PlaybookController',
             'App\controller\LocaleController',
             'App\controller\About',

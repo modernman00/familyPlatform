@@ -16,6 +16,7 @@ vi.mock('../../components/profilePage/sovereignRealtimeBridge', () => ({
 }));
 
 import { FeedShell } from './FeedShell';
+import { PostComposer } from './PostComposer';
 
 describe('Profile Feed Preact Island (Phases 1–4)', () => {
     const baseBootstrap = {
@@ -2221,5 +2222,249 @@ describe('Profile Feed Preact Island (Phases 1–4)', () => {
         const layer = scenicCard.querySelector(`.fp-scenic-layer--${slug}`);
         expect(layer).toBeTruthy();
         expect(layer.querySelector(expectedSelector)).toBeTruthy();
+    });
+
+    it('suggests matching themes as users type for text-only posts, requires explicit approval, and hides when media is attached', async () => {
+        const { container } = render(
+            <PostComposer
+                bootstrap={{
+                    ...baseBootstrap,
+                    userId: 'u_owner',
+                }}
+            />
+        );
+
+        const textarea = container.querySelector('textarea[aria-label="Share a family moment"]');
+        expect(textarea).toBeTruthy();
+
+        fireEvent.input(textarea, { target: { value: 'Getting ready for the birthday party tonight!' } });
+        const suggestionBox = container.querySelector('[data-testid="composer-theme-suggestion"]');
+        expect(suggestionBox).toBeTruthy();
+        expect(suggestionBox.textContent).toContain('Prism');
+
+        // Must NOT auto-apply before user approval
+        expect(container.querySelector('.fp-text-stage--aurora_prism')).toBeFalsy();
+
+        // Approve & Apply
+        const approveBtn = container.querySelector('[data-testid="composer-theme-approve-btn"]');
+        fireEvent.click(approveBtn);
+        expect(container.querySelector('.fp-text-stage--aurora_prism')).toBeTruthy();
+        expect(container.querySelector('[data-testid="composer-theme-suggestion"]')).toBeFalsy();
+
+        // Reset to plain and verify Xmas suggestion + media suppression
+        const plainBtn = Array.from(container.querySelectorAll('button')).find((b) => b.textContent.includes('Plain (Aa)'));
+        if (plainBtn) fireEvent.click(plainBtn);
+
+        fireEvent.input(textarea, { target: { value: 'Merry Xmas everyone!' } });
+        expect(container.querySelector('[data-testid="composer-theme-suggestion"]').textContent).toContain('Cosy Hearth');
+
+        // Attaching a file must suppress the suggestion (text-only only)
+        const fileInput = container.querySelector('input[type="file"]');
+        const file = new File(['abc'], 'photo.png', { type: 'image/png' });
+        fireEvent.change(fileInput, { target: { files: [file] } });
+        expect(container.querySelector('[data-testid="composer-theme-suggestion"]')).toBeFalsy();
+    });
+
+    it('supports inline categorisation of posts by person via the People tray and person_id query', async () => {
+        const kemiPost = {
+            ...samplePost,
+            post_no: '202',
+            id: 'u_2',
+            fullName: 'Kemi Olaogun',
+            postMessage: 'Gran’s recipe book from Lagos',
+            comments: [],
+            poll: null,
+        };
+
+        globalThis.fetch = vi.fn((url) => {
+            const urlStr = String(url);
+            if (urlStr.includes('/api/hashtags/trending')) {
+                return Promise.resolve({
+                    ok: true,
+                    status: 200,
+                    headers: new Headers({ 'content-type': 'application/json' }),
+                    json: async () => ({ status: 'success', tags: [{ tag: 'Heritage', count: 2 }] }),
+                });
+            }
+            if (urlStr.includes('person_id=u_2')) {
+                return Promise.resolve({
+                    ok: true,
+                    status: 200,
+                    headers: new Headers({ 'content-type': 'application/json' }),
+                    json: async () => ({
+                        status: 'success',
+                        message: { message: [kemiPost], pagination: { has_more: false } },
+                    }),
+                });
+            }
+            return Promise.resolve({
+                ok: true,
+                status: 200,
+                headers: new Headers({ 'content-type': 'application/json' }),
+                json: async () => ({
+                    status: 'success',
+                    message: { message: [samplePost, kemiPost], pagination: { has_more: false } },
+                }),
+            });
+        });
+
+        render(
+            <FeedShell
+                bootstrap={{
+                    ...baseBootstrap,
+                    initialPosts: [samplePost, kemiPost],
+                    initialHasMore: false,
+                }}
+            />
+        );
+
+        // Both posts visible initially
+        expect(screen.getByText(/Sunday jollof/i)).toBeTruthy();
+        expect(screen.getByText(/Gran’s recipe book/i)).toBeTruthy();
+
+        // Open the inline People tray
+        const peopleToggle = screen.getByRole('button', { name: /People/i });
+        fireEvent.click(peopleToggle);
+        expect(screen.getByText('Filter by Person')).toBeTruthy();
+
+        // Select Kemi Olaogun from the People tray
+        const kemiPill = screen.getByRole('button', { name: /Kemi Olaogun/i });
+        fireEvent.click(kemiPill);
+
+        await waitFor(() => {
+            expect(globalThis.fetch).toHaveBeenCalledWith(
+                expect.stringContaining('person_id=u_2'),
+                expect.any(Object)
+            );
+            expect(screen.getByText(/Memories by or featuring Kemi Olaogun/i)).toBeTruthy();
+        });
+
+        // Clear back to all posts
+        fireEvent.click(screen.getByRole('button', { name: /Show All Posts/i }));
+        await waitFor(() => {
+            expect(screen.getByText(/Sunday jollof/i)).toBeTruthy();
+        });
+    });
+
+    it('renders explicit dark ink on pink scrapbook banner and falls back to initials when person avatar fails to load', async () => {
+        const postWithRelativeAvatar = {
+            ...samplePost,
+            post_no: 801,
+            id: 'u_99',
+            firstName: 'Laf',
+            lastName: 'Olaogun',
+            fullName: 'Laf Olaogun',
+            profilePics: 'laf-avatar.jpg',
+        };
+
+        globalThis.fetch = vi.fn().mockResolvedValue({
+            ok: true,
+            status: 200,
+            headers: new Headers({ 'content-type': 'application/json' }),
+            json: async () => ({
+                status: 'success',
+                message: { message: [postWithRelativeAvatar], pagination: { has_more: false } },
+            }),
+        });
+
+        render(
+            <FeedShell
+                bootstrap={{
+                    ...baseBootstrap,
+                    initialPosts: [postWithRelativeAvatar],
+                    initialHasMore: false,
+                }}
+            />
+        );
+
+        // Open People tray, verify relative avatar resolves to /resources/images/profile/ and falls back to initials on error
+        fireEvent.click(screen.getByRole('button', { name: /People/i }));
+        const lafPill = screen.getByRole('button', { name: /Laf Olaogun/i });
+        const img = lafPill.querySelector('img');
+        expect(img).toBeTruthy();
+        expect(img.getAttribute('src')).toBe('/resources/images/profile/laf-avatar.jpg');
+
+        fireEvent.error(img);
+        await waitFor(() => {
+            expect(lafPill.querySelector('img')).toBeNull();
+            expect(lafPill.textContent).toContain('LO');
+        });
+
+        // Switch to Tagged With You banner and verify explicit dark ink (not .text-dark)
+        fireEvent.click(screen.getByRole('tab', { name: /Tagged With You/i }));
+        const bannerTitle = screen.getByText('Your Living Heritage Scrapbook');
+        expect(bannerTitle.className).not.toContain('text-dark');
+        expect(bannerTitle.style.color).toBe('rgb(15, 23, 42)');
+    });
+
+    it('lets any family member share a permitted post, hides share action when author locks sharing, and lets author toggle allow_sharing', async () => {
+        const relativePostOpen = {
+            ...samplePost,
+            post_no: '9501',
+            id: 'u_2',
+            fullName: 'Kemi Olaogun',
+            postMessage: 'Family recipe open for sharing!',
+            allow_sharing: true,
+        };
+        const relativePostLocked = {
+            ...samplePost,
+            post_no: '9502',
+            id: 'u_2',
+            fullName: 'Kemi Olaogun',
+            postMessage: 'Private note locked by author',
+            allow_sharing: false,
+        };
+        const ownPostItem = {
+            ...samplePost,
+            post_no: '9503',
+            id: 'u_1',
+            fullName: 'Tunde Olaogun',
+            postMessage: 'My own shareable update',
+            allow_sharing: true,
+        };
+
+        globalThis.fetch = vi.fn().mockResolvedValue({
+            ok: true,
+            status: 200,
+            headers: new Headers({ 'content-type': 'application/json' }),
+            json: async () => ({ status: 'success', message: { allow_sharing: false } }),
+        });
+
+        const { container } = render(
+            <FeedShell
+                bootstrap={{
+                    ...baseBootstrap,
+                    userId: 'u_1',
+                    initialPosts: [relativePostOpen, relativePostLocked, ownPostItem],
+                    initialHasMore: false,
+                }}
+            />
+        );
+
+        // 1. Relative's open post has the share button visible for u_1
+        const openCard = container.querySelector('#post9501');
+        expect(openCard.querySelector('[data-testid="post-share-action-btn"]')).toBeTruthy();
+
+        // 2. Relative's locked post hides the share button and shows 'Sharing off' badge
+        const lockedCard = container.querySelector('#post9502');
+        expect(lockedCard.querySelector('[data-testid="post-share-action-btn"]')).toBeNull();
+        expect(lockedCard.querySelector('[data-testid="post-sharing-locked-badge"]')).toBeTruthy();
+
+        // 3. Own post has 'Turn Off Sharing' in the options menu and sends PUT /post/9503 with allow_sharing: false
+        const ownCard = container.querySelector('#post9503');
+        const toggleBtn = ownCard.querySelector('[data-testid="toggle-post-share-pref-btn"]');
+        expect(toggleBtn).toBeTruthy();
+        expect(toggleBtn.textContent).toContain('Turn Off Sharing');
+        fireEvent.click(toggleBtn);
+
+        await waitFor(() => {
+            expect(globalThis.fetch).toHaveBeenCalledWith(
+                expect.stringContaining('/post/9503'),
+                expect.objectContaining({
+                    method: 'PUT',
+                })
+            );
+            expect(ownCard.querySelector('[data-testid="post-sharing-locked-badge"]')).toBeTruthy();
+        });
     });
 });

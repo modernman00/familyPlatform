@@ -593,6 +593,8 @@ export const CommentThread = memo(function CommentThread({
                                     <RichTextTokens
                                         text={comment.comment}
                                         onSelectHashtag={onSelectHashtag}
+                                        bootstrap={bootstrap}
+                                        postTags={post?.post_tags}
                                     />
                                 </div>
                             )}

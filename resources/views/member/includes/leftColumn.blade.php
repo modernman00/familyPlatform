@@ -16,7 +16,7 @@
                 aria-haspopup="menu"
                 onclick="openCoverMenu(event)"
                 onkeydown="if (event.key === 'Enter' || event.key === ' ') { openCoverMenu(event); }"
-                @if($hasCover) style="background-image: url('{{ $cover['url'] }}'); background-position: {{ (int) $cover['x'] }}% {{ (int) $cover['y'] }}%;" @endif>
+                @if($hasCover) style="background-image: url('{{ optimiseLocalImageUrl((string) $cover['url'], 960) }}'); background-position: {{ (int) $cover['x'] }}% {{ (int) $cover['y'] }}%;" @endif>
                 <!-- Only shown on the empty gradient (never over a photo) so members can discover the feature -->
                 <span class="cover-photo__add {{ $hasCover ? 'd-none' : '' }}" id="coverPhotoAddHint" aria-hidden="true">
                     <i class="bi bi-image"></i> Add cover photo
@@ -50,7 +50,16 @@
             @endphp
             <div class="avatar-container position-absolute w-100" title="Click to enlarge profile photo" role="button" tabindex="0" aria-label="View {{ ucwords(strtolower($data['firstName'] ?? '')) }}'s profile photo in full size">
                 <div class="position-relative d-inline-block">
-                    <img src="{{ str_starts_with($data['img'] ?? '', '/') ? $data['img'] : '/resources/images/profile/' . ($data['img'] ?? $data['profilePics'] ?? 'avatarM.png') }}" 
+                    @php
+                        $rawLeftAvatar = (string) ($data['img'] ?? $data['profilePics'] ?? 'avatarM.png');
+                        $leftAvatarSrc = optimiseLocalImageUrl(
+                            str_starts_with($rawLeftAvatar, '/') || str_starts_with($rawLeftAvatar, 'http')
+                                ? $rawLeftAvatar
+                                : '/resources/images/profile/' . $rawLeftAvatar,
+                            240
+                        );
+                    @endphp
+                    <img src="{{ $leftAvatarSrc }}" 
                          alt="{{ ucwords(strtolower($data['firstName'] ?? '')) }} {{ ucwords(strtolower($data['lastName'] ?? '')) }}" 
                          class="avatar profileImg profile-avatar-interactive shadow-sm" 
                          id="leftColProfileAvatar"
@@ -98,12 +107,12 @@
 
         <div class="card-body pt-5 mt-3 d-flex flex-column align-items-center">
 
-            <h4 class="card-title fw-bold mb-1" id="leftColProfileName" style="color: var(--text-color); font-size: 1.25rem; letter-spacing: -0.01em;">
+            <h2 class="h4 card-title fw-bold mb-1" id="leftColProfileName" style="color: var(--text-color); font-size: 1.25rem; letter-spacing: -0.01em;">
                 <span class="js-profile-name-text">{{ ucwords(strtolower($data['firstName'])) }} {{ ucwords(strtolower($data['lastName'])) }}</span>
                 @if(empty($isPendingApproval))
-                <i class="bi bi-patch-check-fill profile-verified-tick" title="{{ __('profile.verified', 'Verified') }}" aria-label="{{ __('profile.verified', 'Verified') }}"></i>
+                <i class="bi bi-patch-check-fill profile-verified-tick" role="img" title="{{ __('profile.verified', 'Verified') }}" aria-label="{{ __('profile.verified', 'Verified') }}"></i>
                 @endif
-            </h4>
+            </h2>
             @if(!empty($isPendingApproval))
             <span class="badge bg-warning text-dark fw-bold px-2.5 py-1 rounded-pill mb-2" style="font-size: 0.72rem; letter-spacing: 0.04em;">
                 <i class="bi bi-hourglass-split me-1"></i> PENDING APPROVAL
@@ -120,7 +129,7 @@
 
             <!-- Family Code Headline & Tonal Pill(s) (Headline with Married - XXX and Birth - XXX badges) -->
             <div class="family-code-container d-flex flex-column align-items-center gap-1 mb-2 w-100" style="background:#faf6f0;border:1px solid #e6dfd5;border-radius:14px;padding:8px 12px;" id="leftColumnDualFamilyCodes" role="group" aria-label="{{ __('profile.family_codes', 'Married and Birth Family Codes') }}">
-                <span class="family-code-headline text-uppercase fw-bold mb-1" style="font-size: 0.72rem; letter-spacing: 0.08em; color: var(--text-muted, #64748b);">
+                <span class="family-code-headline text-uppercase fw-bold mb-1" style="font-size: 0.72rem; letter-spacing: 0.08em; color: var(--text-muted-aa, #475569);">
                     <i class="bi bi-qr-code me-1 opacity-75"></i>{{ $leftMarriedCode !== '' ? __('profile.family_codes_headline', 'Family Codes') : __('profile.family_code_headline', 'Family Code') }}
                 </span>
                 <div class="d-flex flex-row flex-wrap justify-content-center align-items-center gap-1.5 w-100">
@@ -147,9 +156,9 @@
 
             {{-- Whisper Direct Portal (Under Family Codes, Above Quick Actions) --}}
             @php
-                $leftWhisperUnreadCount = !empty($_SESSION['id'])
-                    ? \App\services\KinWhisperService::getUnreadWhisperCount((string)$_SESSION['id'])
-                    : 0;
+                $leftWhisperUnreadCount = isset($navWhisperUnreadCount)
+                    ? (int)$navWhisperUnreadCount
+                    : (!empty($_SESSION['id']) ? \App\services\KinWhisperService::getUnreadWhisperCount((string)$_SESSION['id']) : 0);
             @endphp
             <div class="w-100 px-2 mb-2" id="leftColumnKinWhispersPortal">
                 <a href="/kin-whispers" class="btn w-100 d-inline-flex align-items-center justify-content-between text-decoration-none position-relative shadow-sm"

@@ -243,4 +243,39 @@ describe('FeedVideoGallery & VideoModal Aspect Ratio & Framing', () => {
         const modalCcBtn = container.querySelector('[data-testid="modal-video-cc-btn"]');
         expect(modalCcBtn).toBeTruthy();
     });
+
+    it('frames portrait YouTube Shorts and 9/16 watch embeds in a 9/16 centred stage without pillarboxes', () => {
+        const { container } = render(
+            <FeedVideoGallery
+                videos={[{
+                    type: 'youtube',
+                    embedUrl: 'https://www.youtube.com/embed/abc12345678?autoplay=1&rel=0&playsinline=1',
+                    originalUrl: 'https://www.youtube.com/watch?v=abc12345678',
+                    aspect_ratio: '9 / 16',
+                }]}
+            />
+        );
+
+        const stage = container.querySelector('.iframe-embed-stage');
+        expect(stage).toBeTruthy();
+        expect(stage.style.aspectRatio).toBe('9 / 16');
+        expect(stage.style.maxWidth).toBe('min(460px, 100%)');
+    });
+
+    it('frames landscape YouTube embeds in native 16/9 full-width stage', () => {
+        const { container } = render(
+            <FeedVideoGallery
+                videos={[{
+                    type: 'youtube',
+                    embedUrl: 'https://www.youtube.com/embed/xyz98765432?autoplay=1&rel=0&playsinline=1',
+                    originalUrl: 'https://www.youtube.com/watch?v=xyz98765432',
+                }]}
+            />
+        );
+
+        const stage = container.querySelector('.iframe-embed-stage');
+        expect(stage).toBeTruthy();
+        expect(stage.style.aspectRatio).toBe('16 / 9');
+        expect(stage.style.maxWidth).toBe('100%');
+    });
 });

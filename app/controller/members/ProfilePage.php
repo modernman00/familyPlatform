@@ -64,10 +64,13 @@ final class ProfilePage extends ProcessImg
     public function index(): void
     {
         try {
+            $tStartNs = hrtime(true);
 
             // The profile view renders its feed client-side via the feed API, so skip the
             // legacy server-side posts/comments/pics payload (unused by the template).
+            $tProfileStartNs = hrtime(true);
             $data = $this->profileService->getProfileData($this->id, false);
+            $tProfileMs = (hrtime(true) - $tProfileStartNs) / 1e6;
 
             // clean session assignment
             $_SESSION['fName'] = $data['memberData']['firstName'];
@@ -75,24 +78,31 @@ final class ProfilePage extends ProcessImg
             $_SESSION['famCode'] = $data['famCode'];
             $_SESSION['currentTime'] = time();
 
+            // Release the file-backed PHP session lock immediately after all session writes
+            // so concurrent AJAX/API requests are not serialised behind feed/widget queries.
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                session_write_close();
+            }
+
+            // Curated Video, Family Historian, and Weekly Activity Reels are handled by
+            // scheduled cron workers (cron/curated_video_cron.php, scripts/run_family_historian.php,
+            // cron/weekly_activity_curation_cron.php) so they never block web TTFB or PHP-FPM workers.
+
+            $tWidgetsStartNs = hrtime(true);
             $recentReels = \App\model\Reel::getReelsFeed($this->id, (string)($data['famCode'] ?? ''), 30, 0);
             $groupedReels = \App\model\Reel::groupReelsByCreator($recentReels);
-            $suggestedKin = \App\services\KinshipEngineService::getSuggestedKin($this->id, 5);
+            $suggestedKin = \App\services\ProfileMicroCache::remember(
+                'kinship_sugg_' . (string)$this->id,
+                120,
+                fn (): array => \App\services\KinshipEngineService::getSuggestedKin($this->id, 5)
+            );
             $radarSettings = \App\services\KinshipEngineService::getRadarSettings($this->id);
 
             // Check and process 18th birthday graduation milestone
             $adulthoodGraduation = \App\services\AdulthoodTransitionService::checkAndProcessUserGraduation($this->id);
 
-            // Opportunistically ensure Curated Video Content Engine & Family Historian weekly fun-fact digest are fresh
-            if (empty($data['isPendingApproval'])) {
-                (new \App\services\CuratedVideoEngineService())->ensureFreshEngagementPost();
-                \App\services\FamilyHistorianService::ensureWeeklyDigestForFamily((string)($data['famCode'] ?? ''));
-            }
-
-            // Fetch or automatically curate this week's Family Fun Facts activity reel awaiting approval
-            $pendingWeeklyReel = empty($data['isPendingApproval'])
-                ? \App\services\WeeklyActivityVideoCuratorService::getOrCurateWeeklyReel((string)$this->id, (string)($data['famCode'] ?? ''))
-                : \App\services\WeeklyActivityVideoCuratorService::getPendingReel((string)$this->id, (string)($data['famCode'] ?? ''));
+            // Weekly Fun Facts now auto-publish directly to the feed without a manual approval gate
+            $pendingWeeklyReel = null;
 
             // Dual-Lineage post audiences (all, birth, married codes)
             $postAudiences = (new \App\services\FamilyPostAudienceService())->resolveUserAudiences((string)$this->id);
@@ -112,7 +122,12 @@ final class ProfilePage extends ProcessImg
                     (string) ($data['maternalFamCode'] ?? ''),
                 ], static fn (string $c): bool => $c !== '')));
                 if ($famCodesForWishlists !== []) {
-                    $allWishlists = (new \App\services\GiftWishlistService())->listWishlistsForFamilyCodes($famCodesForWishlists);
+                    $wishlistCacheKey = 'wishlists_' . md5(implode(',', $famCodesForWishlists));
+                    $allWishlists = \App\services\ProfileMicroCache::remember(
+                        $wishlistCacheKey,
+                        60,
+                        static fn (): array => (new \App\services\GiftWishlistService())->listWishlistsForFamilyCodes($famCodesForWishlists)
+                    );
                     $pinnedWishlists = array_values(array_filter(
                         $allWishlists,
                         static fn (array $w): bool => !empty($w['is_pinned'])
@@ -124,7 +139,10 @@ final class ProfilePage extends ProcessImg
 
             $whatsNewPath = dirname(__DIR__, 3) . '/resources/data/whats_new.php';
             $whatsNewData = is_file($whatsNewPath) ? require $whatsNewPath : null;
+            $cover = (new \App\services\CoverPhotoService())->getCurrent((string) $this->id);
+            $tWidgetsMs = (hrtime(true) - $tWidgetsStartNs) / 1e6;
 
+            $tFeedStartNs = hrtime(true);
             $initialPosts = null;
             $initialHasMore = false;
             $initialNextCursor = null;
@@ -149,6 +167,23 @@ final class ProfilePage extends ProcessImg
                 }
             }
 
+            $kinshipHonorificsPref = \App\services\KinshipHonorificService::getViewerPreference((string)$this->id);
+            $rosterWithSelf = is_array($data['familyRoster'] ?? null) ? $data['familyRoster'] : [];
+            $selfFullParts = \App\services\NameFormatterService::formatFirstAndLast(
+                (string)($data['memberData']['firstName'] ?? ''),
+                (string)($data['memberData']['lastName'] ?? '')
+            );
+            $rosterWithSelf[] = [
+                'id' => (string)$this->id,
+                'firstName' => (string)($data['memberData']['firstName'] ?? ''),
+                'lastName' => (string)($data['memberData']['lastName'] ?? ''),
+                'fullName' => $selfFullParts['full_name'],
+                'kinship' => 'You',
+                'honorific' => null,
+                'displayFullName' => $selfFullParts['full_name'],
+            ];
+            $mentionDirectory = \App\services\KinshipHonorificService::indexEnrichedRosterByName($rosterWithSelf);
+
             $feedBootstrapJson = json_encode([
                 'famCode' => (string)($data['famCode'] ?? ''),
                 'userId' => (string)$this->id,
@@ -156,7 +191,9 @@ final class ProfilePage extends ProcessImg
                 'lastName' => (string)($data['memberData']['lastName'] ?? ''),
                 'avatar' => (string)($data['memberData']['img'] ?? $data['memberData']['profilePics'] ?? ''),
                 'csrfToken' => (string)($_SESSION['token'] ?? ''),
+                'kinshipHonorifics' => $kinshipHonorificsPref,
                 'familyRoster' => $data['familyRoster'] ?? [],
+                'mentionDirectory' => $mentionDirectory,
                 'postAudiences' => $postAudiences,
                 'pusherKey' => (string)($_ENV['MIX_PUSHER_APP_KEY'] ?? getenv('MIX_PUSHER_APP_KEY') ?: ''),
                 'pusherCluster' => (string)($_ENV['MIX_PUSHER_APP_CLUSTER'] ?? getenv('MIX_PUSHER_APP_CLUSTER') ?: 'eu'),
@@ -165,6 +202,18 @@ final class ProfilePage extends ProcessImg
                 'initialHasMore' => $initialHasMore,
                 'initialNextCursor' => $initialNextCursor,
             ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?: '{}';
+            $tFeedMs = (hrtime(true) - $tFeedStartNs) / 1e6;
+
+            $tPreViewMs = (hrtime(true) - $tStartNs) / 1e6;
+            if (!headers_sent()) {
+                header(sprintf(
+                    'Server-Timing: profile_svc;dur=%.1f, widgets;dur=%.1f, feed_hydrate;dur=%.1f, total_pre_view;dur=%.1f',
+                    $tProfileMs,
+                    $tWidgetsMs,
+                    $tFeedMs,
+                    $tPreViewMs
+                ));
+            }
 
             view('member/profilePage', [
                 'data' => $data['memberData'],
@@ -193,7 +242,7 @@ final class ProfilePage extends ProcessImg
                 'radarSettings' => $radarSettings,
                 'adulthoodGraduation' => $adulthoodGraduation,
                 'pendingWeeklyReel' => $pendingWeeklyReel,
-                'cover' => (new \App\services\CoverPhotoService())->getCurrent((string) $this->id),
+                'cover' => $cover,
                 'isPendingApproval' => $data['isPendingApproval'] ?? false,
                 'pendingApprovalData' => $data['pendingApprovalData'] ?? null,
                 'profileTourDismissed' => $profileTourDismissed,
@@ -504,7 +553,7 @@ final class ProfilePage extends ProcessImg
                 'then_now', 'then_label', 'now_label', 'reply_to_post',
                 'comparison_mode', 'mystery_year', 'then_now_voice_base64',
                 'attached_ar_emoji', 'target_scope', 'target_fam_code', 'post_style',
-                'audience_choice', 'audience_choice_radio', 'media_meta',
+                'audience_choice', 'audience_choice_radio', 'media_meta', 'allow_sharing',
                 'submit', 'button',
                 'g-recaptcha-response', 'grecaptcharesponse', 'siteKey', 'action',
                 'website_hp', 'hp_username', 'hp_email', 'fax_number', 'phone_number_hp', 'company_website_trap'
@@ -519,11 +568,20 @@ final class ProfilePage extends ProcessImg
             $pollOptionsRaw = is_array($_POST['poll_options'] ?? null) ? $_POST['poll_options'] : [];
             $rawTaggedInput = $_POST['tagged_user_ids'] ?? [];
             $mediaMeta = \App\classes\VideoParser::normaliseMediaMeta($_POST['media_meta'] ?? null);
+            $allowSharing = true;
+            if (array_key_exists('allow_sharing', $_POST)) {
+                $rawAllow = $_POST['allow_sharing'];
+                $allowSharing = !($rawAllow === false || $rawAllow === 0 || $rawAllow === '0' || $rawAllow === 'false' || $rawAllow === 'off');
+            }
+            if (!$allowSharing) {
+                $mediaMeta = is_array($mediaMeta) ? $mediaMeta : [];
+                $mediaMeta['allow_sharing'] = false;
+            }
             unset(
                 $_POST['poll_question'], $_POST['poll_options'], $_POST['tagged_user_ids'],
-                $_POST['shared_temp_images'], $_POST['attached_video_urls'], $_POST['media_meta'],
+                $_POST['shared_temp_images'], $_POST['attached_video_urls'], $_POST['media_meta'], $_POST['allow_sharing'],
                 $_REQUEST['poll_question'], $_REQUEST['poll_options'], $_REQUEST['tagged_user_ids'],
-                $_REQUEST['shared_temp_images'], $_REQUEST['attached_video_urls'], $_REQUEST['media_meta']
+                $_REQUEST['shared_temp_images'], $_REQUEST['attached_video_urls'], $_REQUEST['media_meta'], $_REQUEST['allow_sharing']
             );
 
            $result =  SubmitPostData::submitToOneTablenImage(
@@ -541,7 +599,7 @@ final class ProfilePage extends ProcessImg
                     'postFamCode', 'profileImg',
                     'then_now', 'then_label', 'now_label', 'reply_to_post',
                     'comparison_mode', 'mystery_year', 'then_now_voice_base64',
-                    'ar_emoji', 'attached_ar_emoji', 'post_style', 'media_meta',
+                    'ar_emoji', 'attached_ar_emoji', 'post_style', 'media_meta', 'allow_sharing',
                     'target_scope', 'target_fam_code', 'audience_choice', 'audience_choice_radio'
                 ]
             );
@@ -811,6 +869,13 @@ final class ProfilePage extends ProcessImg
                                     $mediaMeta['aspect_ratio'] = $resolvedRatio;
                                     break;
                                 }
+                            } elseif ($parsedCand && $parsedCand['type'] === 'youtube') {
+                                $resolvedRatio = $parsedCand['aspect_ratio'] ?? \App\services\LinkPreviewService::resolveYoutubeVideoAspectRatio((string)$candUrl);
+                                if ($resolvedRatio !== null) {
+                                    $mediaMeta = is_array($mediaMeta) ? $mediaMeta : [];
+                                    $mediaMeta['aspect_ratio'] = $resolvedRatio;
+                                    break;
+                                }
                             }
                         }
                     } catch (\Throwable $fbRatioErr) {
@@ -921,6 +986,7 @@ final class ProfilePage extends ProcessImg
                     ]));
                     $newPost['ar_emoji'] = $arEmoji ?: ($newPost['ar_emoji'] ?? null);
                     $newPost['post_style'] = $postStyle ?: ($newPost['post_style'] ?? null);
+                    $newPost['allow_sharing'] = $allowSharing;
                     if (empty($newPost['link_preview'])) {
                         if (
                             !empty($extractedMedia['preview'])

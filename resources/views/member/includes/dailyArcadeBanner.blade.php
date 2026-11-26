@@ -801,6 +801,12 @@
                 }
             },
 
+            playInteractiveMove() {
+                this.playing = false;
+                this.stopLoop();
+                this.step = (this.step + 1) % cfg.frames.length;
+            },
+
             get frame() {
                 return cfg.frames[this.step] ? cfg.frames[this.step] : cfg.frames[0];
             },
@@ -932,10 +938,19 @@
 
                 <button type="button"
                         class="fp-arcade-motion-btn"
+                        x-on:click="playInteractiveMove()"
+                        aria-label="Play Live Move — Step through interactive move inside banner"
+                        title="Play a live move right inside the banner">
+                    <i class="bi bi-hand-index-thumb-fill" aria-hidden="true"></i>
+                    <span>Try Live Move</span>
+                </button>
+
+                <button type="button"
+                        class="fp-arcade-motion-btn"
                         x-on:click="togglePlay()"
-                        :aria-label="playing ? 'Pause live gameplay preview' : 'Play live gameplay preview'"
+                        :aria-label="playing ? 'Pause Demo — Pause live gameplay preview' : 'Watch Demo — Play live gameplay preview'"
                         :title="playing ? 'Pause preview' : 'Play preview'"
-                        aria-label="Pause live gameplay preview">
+                        aria-label="Pause Demo — Pause live gameplay preview">
                     <i class="bi" :class="playing ? 'bi-pause-fill' : 'bi-play-fill'" aria-hidden="true"></i>
                     <span x-text="playing ? 'Pause Demo' : 'Watch Demo'">Pause Demo</span>
                 </button>
@@ -946,8 +961,8 @@
         <a href="/arcade?game={{ $arcadeGame }}"
            data-spin="true"
            class="fp-arcade-stage-card"
-           aria-label="Watch live gameplay preview of {{ $arcadeGameLabel }} and tap to play">
-            <div class="fp-arcade-stage-top">
+           aria-label="LIVE PLAY {{ $arcadeProfile['tag'] }} — Watch live gameplay preview of {{ $arcadeGameLabel }} and tap to play">
+            <div class="fp-arcade-stage-top" aria-hidden="true">
                 <span class="fp-arcade-live-badge">
                     <span class="fp-arcade-live-dot" :class="{ 'is-paused': !playing }" aria-hidden="true"></span>
                     <span>LIVE PLAY</span>
@@ -1132,7 +1147,7 @@
                 @endswitch
             </div>
 
-            <div class="fp-arcade-caption" x-text="statusText">{{ $initialCaption }}</div>
+            <div class="fp-arcade-caption" aria-hidden="true" x-text="statusText">{{ $initialCaption }}</div>
         </a>
     </div>
 </div>

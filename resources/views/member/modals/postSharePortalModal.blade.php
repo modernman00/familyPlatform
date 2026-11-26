@@ -86,6 +86,7 @@
                 <!-- WhatsApp -->
                 <div class="col-2">
                     <a :href="getSharePortalWhatsappUrl()" 
+                       @click="notifyAuthorOfShare('Whatsapp'.toLowerCase())"
                        target="_blank" 
                        rel="noopener noreferrer" 
                        class="btn w-100 p-0 rounded-3 d-flex align-items-center justify-content-center text-white text-decoration-none shadow-xs" 
@@ -99,6 +100,7 @@
                 <!-- X / Twitter -->
                 <div class="col-2">
                     <a :href="getSharePortalXUrl()" 
+                       @click="notifyAuthorOfShare('X'.toLowerCase())"
                        target="_blank" 
                        rel="noopener noreferrer" 
                        class="btn w-100 p-0 rounded-3 d-flex align-items-center justify-content-center text-white text-decoration-none shadow-xs" 
@@ -112,6 +114,7 @@
                 <!-- LinkedIn -->
                 <div class="col-2">
                     <a :href="getSharePortalLinkedinUrl()" 
+                       @click="notifyAuthorOfShare('Linkedin'.toLowerCase())"
                        target="_blank" 
                        rel="noopener noreferrer" 
                        class="btn w-100 p-0 rounded-3 d-flex align-items-center justify-content-center text-white text-decoration-none shadow-xs" 
@@ -125,6 +128,7 @@
                 <!-- Facebook -->
                 <div class="col-2">
                     <a :href="getSharePortalFacebookUrl()" 
+                       @click="notifyAuthorOfShare('Facebook'.toLowerCase())"
                        target="_blank" 
                        rel="noopener noreferrer" 
                        class="btn w-100 p-0 rounded-3 d-flex align-items-center justify-content-center text-white text-decoration-none shadow-xs" 
@@ -138,6 +142,7 @@
                 <!-- Telegram -->
                 <div class="col-2">
                     <a :href="getSharePortalTelegramUrl()" 
+                       @click="notifyAuthorOfShare('Telegram'.toLowerCase())"
                        target="_blank" 
                        rel="noopener noreferrer" 
                        class="btn w-100 p-0 rounded-3 d-flex align-items-center justify-content-center text-white text-decoration-none shadow-xs" 

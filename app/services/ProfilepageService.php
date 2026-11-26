@@ -25,7 +25,9 @@ final class ProfilepageService
     {
         $setData = new SingleCustomerData();
 
-        $tables = ['personal', 'contact', 'otherFamily', 'post', 'profilePics'];
+        $tables = $includeFeedPayload
+            ? ['personal', 'contact', 'otherFamily', 'post', 'profilePics']
+            : ['personal', 'contact', 'otherFamily', 'profilePics'];
         $memberData = $setData->getCustomerData($userId, $tables);
 
         if (!$memberData || !is_array($memberData)) {
@@ -102,12 +104,7 @@ final class ProfilepageService
 
         $approvalService = new \App\service\FamilyCodeApprovalService(\Src\Db::connect2());
 
-        // Dynamic 20-minute escalation: broadcast any overdue pending requests to all family members
-        try {
-            $approvalService->escalateOverdueRequests(null, 5);
-        } catch (\Throwable $escErr) {
-            error_log('[ProfilepageService] Escalation check warning: ' . $escErr->getMessage());
-        }
+        // Overdue escalation is handled by cron/family_code_approval_cron.php so page loads remain read-only.
 
         // Check if the current user has an active pending approval request (unapproved status)
         $userPendingRequest = null;
@@ -165,12 +162,15 @@ final class ProfilepageService
         }
 
         $allFamilyMembers = !$isPendingApproval ? (new DataAll())->getAllMembers($userId) : [];
-        $familyRoster = array_values(array_map(static fn(array $m): array => [
+        $rawFamilyRoster = array_values(array_map(static fn(array $m): array => [
             'id' => (string)($m['id'] ?? ''),
             'firstName' => (string)($m['firstName'] ?? ''),
             'lastName' => (string)($m['lastName'] ?? ''),
             'img' => (string)($m['img'] ?? ($m['profilePics'] ?? '')),
         ], $allFamilyMembers));
+        $familyRoster = !$isPendingApproval
+            ? KinshipHonorificService::enrichRosterForViewer($userId, $rawFamilyRoster)
+            : $rawFamilyRoster;
 
         return [
             'memberData' => $memberData,
@@ -189,7 +189,11 @@ final class ProfilepageService
             'pics' => $includeFeedPayload ? Post::getAllPostPics($userId) : [],
             'totalFamilyMembers' => count($allFamilyMembers),
             'familyRoster' => $familyRoster,
-            'unclaimedMatch' => !$isPendingApproval ? FamilyClaimService::findFuzzyUnclaimedMatches($famCode, $userId, $memberData) : null,
+            'unclaimedMatch' => !$isPendingApproval ? ProfileMicroCache::remember(
+                'unclaimed_match_' . $userId . '_' . $famCode,
+                300,
+                static fn (): mixed => FamilyClaimService::findFuzzyUnclaimedMatches($famCode, $userId, $memberData)
+            ) : null,
             'pendingFamilyRequests' => $pendingFamilyRequests,
             'pendingMigrations' => $pendingMigrations,
             'isPendingApproval' => $isPendingApproval,

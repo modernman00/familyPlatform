@@ -286,6 +286,18 @@
   html.dark-mode .fp-spark-card .form-control::placeholder {
     color: #94a3b8 !important;
   }
+  .fp-spark-delete-btn {
+    color: #b91c1c;
+    border-color: #b91c1c;
+  }
+  body.dark-mode .fp-spark-delete-btn,
+  body.dark-theme .fp-spark-delete-btn,
+  [data-bs-theme="dark"] .fp-spark-delete-btn,
+  html.dark .fp-spark-delete-btn,
+  html.dark-mode .fp-spark-delete-btn {
+    color: #fca5a5 !important;
+    border-color: #fca5a5 !important;
+  }
   .fp-spark-skeleton {
     height: 16px;
     border-radius: 8px;
@@ -368,8 +380,10 @@
         <!-- Optional Archive Flashback Photo -->
         <template x-if="spark.media_url">
           <div class="rounded-3 overflow-hidden border" style="max-height: 280px; background: #0f172a;">
-            <img :src="spark.media_url"
+            <img :src="sparkMediaUrl(spark.media_url)"
                  alt="Family archive memory"
+                 width="640"
+                 height="280"
                  class="w-100 object-fit-cover"
                  style="max-height: 280px;"
                  loading="lazy"
@@ -465,7 +479,7 @@
                           <span>Edit</span>
                         </button>
                         <button type="button"
-                                class="btn btn-sm btn-outline-danger rounded-pill px-3 fp-spark-btn-action d-inline-flex align-items-center gap-1"
+                                class="btn btn-sm btn-outline-danger rounded-pill px-3 fp-spark-btn-action fp-spark-delete-btn d-inline-flex align-items-center gap-1"
                                 @click="deleteReply(reply)"
                                 :disabled="deletingReplyId === reply.id"
                                 aria-label="Delete reply"
@@ -800,6 +814,14 @@ function dailyFamilySparkWidget() {
     sparkMeStickersError: false,
     sparkSticker: null,
 
+    sparkMediaUrl(url) {
+      if (!url || typeof url !== 'string') return '';
+      if (/^https:\/\/lh3\.googleusercontent\.com\/.+=[sw]\d+(?:-no)?$/i.test(url)) {
+        return url.replace(/=[sw]\d+(?:-no)?$/i, '=w720');
+      }
+      return url;
+    },
+
     get sparkEmojiPalette() {
       const tone = this.sparkSkinTone || 0;
       return this.sparkEmojiItems.map(item => (typeof item === 'string' ? item : ((item.skins && item.skins[tone]) ? item.skins[tone] : item.base)));
@@ -998,7 +1020,51 @@ function dailyFamilySparkWidget() {
         return `<span class="${liveClass}" role="button" tabindex="0" onclick="event.stopPropagation(); window.AtgEmojiEngine && window.AtgEmojiEngine.tapLive(this, '${id}')"><img src="/public/img/emoji/${id}.svg?v=20261107a" onerror="this.src='/img/emoji/${id}.svg?v=20261107a'" class="atg-3d-emoji" loading="lazy" width="26" height="26" alt="${id}" title="Tap to play"></span>`;
       });
 
-      return esc.replace(/(^|\s)(@[A-Za-z0-9_'\-]+(?:\s+[A-Za-z0-9_'\-]+)?)/g, '$1<span class="mention-chip">$2</span>');
+      const honorificsOn = String(this.spark?.kinship_honorifics || 'on').toLowerCase() !== 'off';
+      const dir = (this.spark?.kinship_directory && typeof this.spark.kinship_directory === 'object')
+        ? this.spark.kinship_directory
+        : {};
+      const meId = String(this.spark?.current_user_id || '').trim();
+      const escAttr = (s) => String(s || '').replace(/[&<>"']/g, (c) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+      }[c]));
+      const mentionRe = /(?:(\b(?:grandpa|grandad|granddad|grandfather|grandma|gran|nanny|nan|grandmother|great-grandpa|great-grandma|great-grandfather|great-grandmother|great-uncle|great-aunt|great-aunty|dad|daddy|father|pa|papa|baba|mum|mummy|mom|mommy|mother|ma|mama|uncle|aunt|aunty|auntie)[ \t]+))?(?<![\w@])@([A-Za-z\u00C0-\u024F0-9_.'-]+(?:&#0*39;[A-Za-z\u00C0-\u024F0-9_.-]+)?(?:[ \t]+[A-Za-z\u00C0-\u024F0-9_.'-]+(?:&#0*39;[A-Za-z\u00C0-\u024F0-9_.-]+)?){0,2})(?![\w])/gi;
+
+      return esc.replace(mentionRe, (full, vocative, captured) => {
+        const words = String(captured || '').split(/[ \t]+/);
+        let matched = null;
+        let used = 0;
+        for (let len = Math.min(words.length, 3); len >= 1; len -= 1) {
+          const cand = words.slice(0, len).join(' ').replace(/&#0*39;/g, "'").replace(/&amp;/g, '&').toLowerCase().trim();
+          if (dir[cand]) {
+            matched = dir[cand];
+            used = len;
+            break;
+          }
+        }
+        if (!matched || matched.ambiguous) {
+          const cnt = Math.min(words.length, 2);
+          const mPart = words.slice(0, cnt).join(' ');
+          const rest = words.slice(cnt).length ? ' ' + words.slice(cnt).join(' ') : '';
+          return `${vocative || ''}<span class="mention-chip">@${mPart}</span>${rest}`;
+        }
+        const rest = words.slice(used).length ? ' ' + words.slice(used).join(' ') : '';
+        const targetId = String(matched.id || '').trim();
+        const isSelf = Boolean(meId && targetId && meId === targetId);
+        const hon = (!isSelf && honorificsOn && matched.honorific) ? String(matched.honorific) : '';
+        const labelName = hon ? (matched.displayFullName || `${hon} ${matched.fullName}`) : matched.fullName;
+        const href = targetId ? (isSelf ? '/profilePage' : `/allMembers/seeProfile/${encodeURIComponent(targetId)}`) : '';
+        const tip = isSelf
+          ? `Mentioned you (${matched.fullName})`
+          : (matched.kinship && !['Family Member', 'Relative', 'Extended Relative'].includes(matched.kinship)
+            ? `${matched.kinship} · ${matched.fullName}`
+            : `Mentioned: ${matched.fullName}`);
+        const prefix = hon ? '' : (vocative || '');
+        if (href) {
+          return `${prefix}<a href="${escAttr(href)}" class="mention-chip mention-chip--link" title="${escAttr(tip)}">@${escAttr(labelName)}</a>${rest}`;
+        }
+        return `${prefix}<span class="mention-chip" title="${escAttr(tip)}">@${escAttr(labelName)}</span>${rest}`;
+      });
     },
 
     startEditReply(reply) {
