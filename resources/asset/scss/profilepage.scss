@@ -1746,12 +1746,13 @@ html.dark-mode {
     border-radius: 14px;
     padding: 6px;
     box-shadow: 0 12px 30px -6px rgba(15, 23, 42, 0.22), 0 8px 12px -6px rgba(15, 23, 42, 0.12);
-    z-index: 1060;
+    z-index: 1080;
 
     &--below {
         top: calc(100% + 4px);
         bottom: auto;
-        width: min(360px, 92vw);
+        width: min(360px, 100%);
+        max-width: 100%;
     }
 
     &__header {
@@ -1762,8 +1763,10 @@ html.dark-mode {
     }
 
     &__list {
-        max-height: 220px;
+        max-height: min(220px, 34dvh);
         overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
         display: flex;
         flex-direction: column;
         gap: 2px;

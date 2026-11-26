@@ -80,7 +80,7 @@ export const CommentThread = memo(function CommentThread({
     const [selectedSticker, setSelectedSticker] = useState(null);
     const [selectedLivingEmojis, setSelectedLivingEmojis] = useState([]);
     const [pickerTab, setPickerTab] = useState(null); // null | 'standard' | 'living' | 'me' | 'gif'
-    const [mentionQuery, setMentionQuery] = useState('');
+    const [mentionQuery, setMentionQuery] = useState(null);
     const [mentionIndex, setMentionIndex] = useState(0);
     const [brokenAvatars, setBrokenAvatars] = useState({});
     const inputRef = useRef(null);
@@ -142,25 +142,33 @@ export const CommentThread = memo(function CommentThread({
         }
         const nextVal = extracted.length > 0 ? cleaned.replace(/^\s+/, '') : value;
         setDraft(nextVal);
-        const match = nextVal.match(/@([A-Za-z0-9_.-]{1,24})$/);
-        setMentionQuery(match ? match[1].toLowerCase() : '');
+        const match = String(nextVal || '').match(/(?:^|\s)@([A-Za-z\u00C0-\u024F0-9_.'\- ]{0,40})$/);
+        setMentionQuery(match ? match[1].trim().toLowerCase() : null);
         setMentionIndex(0);
     };
 
-    const mentionMatches = mentionQuery
+    const mentionMatches = mentionQuery !== null
         ? familyRoster
             .filter((m) => {
-                const full = `${m.firstName || ''} ${m.lastName || ''}`.toLowerCase();
-                return full.includes(mentionQuery);
+                if (currentUserId && String(m.id) === currentUserId) return false;
+                const first = String(m.firstName || '').trim();
+                const last = String(m.lastName || '').trim();
+                if (!first && !last) return false;
+                const full = `${first} ${last}`.toLowerCase();
+                if (!mentionQuery) return true;
+                return full.includes(mentionQuery) || first.toLowerCase().startsWith(mentionQuery) || last.toLowerCase().startsWith(mentionQuery);
             })
-            .slice(0, 5)
+            .slice(0, 6)
         : [];
 
     const insertMention = (member) => {
         const name = `${member.firstName || ''} ${member.lastName || ''}`.trim();
-        const next = draft.replace(/@[A-Za-z0-9_.-]{1,24}$/, `@${name} `);
+        const next = draft.replace(/(?:^|\s)@([A-Za-z\u00C0-\u024F0-9_.'\- ]*)$/, (m) => {
+            const prefix = /^\s/.test(m) ? m[0] : '';
+            return `${prefix}@${name} `;
+        });
         setDraft(next);
-        setMentionQuery('');
+        setMentionQuery(null);
         setMentionIndex(0);
         inputRef.current?.focus();
     };
@@ -178,7 +186,7 @@ export const CommentThread = memo(function CommentThread({
             const chosen = mentionMatches[mentionIndex] || mentionMatches[0];
             if (chosen) insertMention(chosen);
         } else if (e.key === 'Escape') {
-            setMentionQuery('');
+            setMentionQuery(null);
         }
     };
 
@@ -373,7 +381,7 @@ export const CommentThread = memo(function CommentThread({
         const livingToSend = [...selectedLivingEmojis];
 
         setDraft('');
-        setMentionQuery('');
+        setMentionQuery(null);
         setReplyingTo(null);
         setAttachedFile(null);
         setSelectedGifUrl('');
@@ -999,6 +1007,8 @@ export const CommentThread = memo(function CommentThread({
                                         className={`mention-autocomplete__item d-flex align-items-center gap-2 w-100 text-start px-2 py-1 border-0 ${mentionIndex === idx ? 'mention-autocomplete__item--active' : ''}`}
                                         style={{ minHeight: '44px' }}
                                         aria-selected={mentionIndex === idx}
+                                        onPointerDown={(e) => e.preventDefault()}
+                                        onMouseDown={(e) => e.preventDefault()}
                                         onClick={() => insertMention(m)}
                                     >
                                         <span className="mention-autocomplete__name">@{m.firstName} {m.lastName}</span>

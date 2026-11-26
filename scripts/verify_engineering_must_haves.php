@@ -467,6 +467,36 @@ if (file_exists($navbarCssFile)) {
     }
 }
 
+// --- CHECK 11: SERVICE WORKER & CSS SOURCE PARITY GUARD ---
+$rootSwFile = $targetDir . '/public/sw.js';
+if (file_exists($rootSwFile)) {
+    $swSrc = file_get_contents($rootSwFile) ?: '';
+    if (!preg_match('/^const\s+SW_VERSION\s*=\s*[\'"][^\'"]+[\'"]\s*;/m', $swSrc)) {
+        $violations[] = [
+            'severity' => 'CRITICAL',
+            'rule' => 'MUST-HAVE #11: Missing SW_VERSION Constant in public/sw.js',
+            'file' => $rootSwFile,
+            'line' => 1,
+            'remediation' => 'Declare `const SW_VERSION = \'...\';` in public/sw.js so production builds and deploy.sh can bust mobile PWA caches reliably.',
+        ];
+        $exitCode = 1;
+    }
+}
+$profilePageCssFile = $targetDir . '/public/css/profilepage.css';
+if (file_exists($profilePageCssFile)) {
+    $profileCssSrc = file_get_contents($profilePageCssFile) ?: '';
+    if (!str_contains($profileCssSrc, '.composer-prompt') || !str_contains($profileCssSrc, '.composer-pill-btn')) {
+        $violations[] = [
+            'severity' => 'CRITICAL',
+            'rule' => 'MUST-HAVE #11: Truncated or Overwritten public/css/profilepage.css',
+            'file' => $profilePageCssFile,
+            'line' => 1,
+            'remediation' => 'Do not overwrite public/css/profilepage.css by compiling resources/asset/scss/profilepage.scss directly; restore missing composer/feed/dark-mode rules.',
+        ];
+        $exitCode = 1;
+    }
+}
+
 // Display report
 if (empty($violations)) {
     echo "✅ ALL MUST-HAVE CHECKS PASSED!\n";

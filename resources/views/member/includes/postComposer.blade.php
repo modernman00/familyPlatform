@@ -18,18 +18,18 @@
         </span>
         <div class="min-w-0">
           <div class="post-composer__title">{{ __('feed.share_moment_heading', 'Share a Moment') }}</div>
-          <div class="post-composer__subtitle d-none d-sm-block">{{ __('feed.share_moment_subheading', 'Photos, milestones, stories & polls for your family') }}</div>
+          <div class="post-composer__subtitle">{{ __('feed.share_moment_subheading', 'Photos, milestones, stories & polls for your family') }}</div>
         </div>
       </div>
 
       <button type="button"
-              class="btn btn-primary post-composer__cta rounded-pill px-3 fw-semibold d-inline-flex align-items-center gap-2 flex-shrink-0"
+              class="btn btn-primary post-composer__cta rounded-pill px-3 fw-bold d-inline-flex align-items-center gap-2 flex-shrink-0"
               data-bs-toggle="modal"
               data-bs-target="#postModal"
               title="Create Post - Share stories, photos, and milestones with family"
-              aria-label="{{ __('feed.post_btn', 'Post') }}">
-        <i class="bi bi-plus-lg"></i>
-        <span>{{ __('feed.post_btn', 'Post') }}</span>
+              aria-label="{{ __('feed.share_moment_cta', 'Share Moment') }}">
+        <i class="bi bi-plus-circle-fill" aria-hidden="true"></i>
+        <span>{{ __('feed.share_moment_cta', 'Share Moment') }}</span>
       </button>
     </div>
 
@@ -47,8 +47,11 @@
            data-bs-target="#postModal"
            aria-label="{{ __('feed.share_prompt', 'Share a moment with your family...') }}">
         <span class="composer-prompt__text">{{ __('feed.share_prompt', 'Share a moment with your family...') }}</span>
-        <span class="composer-prompt__icon flex-shrink-0" aria-hidden="true">
-          @include('member.includes.composerActionIcon', ['type' => 'prompt', 'prefix' => $svgPrefix])
+        <span class="d-inline-flex align-items-center gap-2 flex-shrink-0">
+          <span class="composer-prompt__action d-none d-sm-inline-flex align-items-center">{{ __('feed.tap_to_write', 'Write') }}</span>
+          <span class="composer-prompt__icon flex-shrink-0" aria-hidden="true">
+            @include('member.includes.composerActionIcon', ['type' => 'prompt', 'prefix' => $svgPrefix])
+          </span>
         </span>
       </button>
     </div>

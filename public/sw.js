@@ -13,7 +13,7 @@
 
 'use strict';
 
-const SW_VERSION = 'v2.5.8'; // bumped to flush stale mobile PWA bundle for composerConfirmShareBtn
+const SW_VERSION = 'build-6f400a0b'; // bumped to flush stale mobile PWA bundles for @mention & composer reliability
 const STATIC_CACHE = `fp-static-${SW_VERSION}`;
 const DYNAMIC_CACHE = `fp-dynamic-${SW_VERSION}`;
 const IMAGE_CACHE = `fp-images-${SW_VERSION}`;

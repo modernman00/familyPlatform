@@ -70,18 +70,25 @@ function familyPlatformBuildPlugin(isProd) {
                 JSON.stringify(mixManifest, null, 4)
             );
 
-            // Bump Service Worker version on production builds
+            // Sync public/sw.js SW_VERSION from mix-manifest.json hash on production builds
             if (isProd) {
-                const swPath = path.resolve(__dirname, 'service-worker.js');
+                const swPath = path.resolve(publicDir, 'sw.js');
                 if (fs.existsSync(swPath)) {
-                    let swContent = fs.readFileSync(swPath, 'utf8');
-                    const newVersion = Date.now().toString();
-                    swContent = swContent.replace(
-                        /const Version = ".*";/,
-                        `const Version = "${newVersion}";`
+                    const manifestHash = crypto
+                        .createHash('md5')
+                        .update(JSON.stringify(mixManifest))
+                        .digest('hex')
+                        .slice(0, 8);
+                    const targetVersion = `build-${manifestHash}`;
+                    const swContent = fs.readFileSync(swPath, 'utf8');
+                    const updatedContent = swContent.replace(
+                        /^const SW_VERSION = '[^']*';/m,
+                        `const SW_VERSION = '${targetVersion}';`
                     );
-                    fs.writeFileSync(swPath, swContent);
-                    console.log(`\n[Service Worker] Bumped version to ${newVersion}`);
+                    if (updatedContent !== swContent) {
+                        fs.writeFileSync(swPath, updatedContent);
+                        console.log(`\n[Service Worker] Synced public/sw.js SW_VERSION to ${targetVersion}`);
+                    }
                 }
             }
         },

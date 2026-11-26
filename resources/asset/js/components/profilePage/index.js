@@ -20,17 +20,26 @@ const ensureComposerBundle = () => {
         composerBundlePromise = Promise.all([
             import(/* webpackChunkName: 'profile-composer' */ "./allEvents"),
             import(/* webpackChunkName: 'profile-composer' */ "./postEmojiImgProcess"),
-        ]).catch((err) => console.error('[ComposerChunk]', err));
+        ]).catch((err) => {
+            composerBundlePromise = null;
+            console.error('[ComposerChunk]', err);
+            throw err;
+        });
     }
     return composerBundlePromise;
 };
+window.__ensureComposerBundleInternal = ensureComposerBundle;
 window.ensureComposerBundle = ensureComposerBundle;
 
 let createEventBundlePromise = null;
 const ensureCreateEventBundle = () => {
     if (!createEventBundlePromise) {
         createEventBundlePromise = import(/* webpackChunkName: 'profile-create-event' */ "./createEvent")
-            .catch((err) => console.error('[CreateEventChunk]', err));
+            .catch((err) => {
+                createEventBundlePromise = null;
+                console.error('[CreateEventChunk]', err);
+                throw err;
+            });
     }
     return createEventBundlePromise;
 };
@@ -59,9 +68,12 @@ const runBootHooks = () => {
         }
     });
 
-    // Warm both chunks quietly during browser idle time after initial mobile scroll/paint settles
+    // Immediately preload composer bundle so #postModal, #imageUpload, #submitPost, and @mention
+    // are always ready on mobile and desktop without an idle race window.
+    ensureComposerBundle();
+
+    // Warm createEvent chunk quietly during browser idle time after initial mobile scroll/paint settles
     const warmModalChunks = () => {
-        ensureComposerBundle();
         ensureCreateEventBundle();
     };
     if (typeof window.requestIdleCallback === 'function') {

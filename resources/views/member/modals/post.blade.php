@@ -1416,7 +1416,12 @@ window.openComposerWithTrivia = function(type = 'guess_who') {
                 traverse(child);
             }
             textarea.value = text.replace(/\u00A0/g, ' ').replace(/ {2,}/g, ' ');
-            textarea.dispatchEvent(new Event('input', { bubbles: true }));
+            window.__fpInternalTextareaSync = true;
+            try {
+                textarea.dispatchEvent(new Event('input', { bubbles: true }));
+            } finally {
+                window.__fpInternalTextareaSync = false;
+            }
         } finally {
             isInternalSync = false;
         }

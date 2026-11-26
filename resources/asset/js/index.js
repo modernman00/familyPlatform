@@ -212,20 +212,64 @@ if (window.location.pathname === '/register') {
 ) {
   if (qSel('.profilePageNav')) qSel('.profilePageNav').style.display = 'none'; // navbar mgt
 
-  // Do NOT block Alpine.start() behind the profilePage auxiliary modal chunk on mobile:
-  // load lightweight profile listeners immediately after paint and defer heavy composer/event chunks to idle/intent.
+  // Load profilePage chunk promptly and expose retry-safe composer boot hooks immediately so
+  // mobile PWA taps (#openPostModalTriggerMobile, #pwaQuickCameraBtn, #postModal) never race
+  // ahead of lazy chunk initialisation.
+  let profilePageBundlePromise = null;
   const bootProfilePageChunk = () => {
-    import(
-      /* webpackChunkName: 'profilePage' */
-      './components/profilePage/'
-    )
-      .then((module) => module.default)
-      .catch((err) => showError(err));
+    if (!profilePageBundlePromise) {
+      profilePageBundlePromise = import(
+        /* webpackChunkName: 'profilePage' */
+        './components/profilePage/'
+      )
+        .then((module) => module.default)
+        .catch((err) => {
+          profilePageBundlePromise = null;
+          showError(err);
+        });
+    }
+    return profilePageBundlePromise;
   };
-  if (typeof window.requestIdleCallback === 'function') {
-    window.requestIdleCallback(bootProfilePageChunk, { timeout: 600 });
+
+  window.ensureComposerBundle = () =>
+    bootProfilePageChunk().then(() => {
+      if (typeof window.__ensureComposerBundleInternal === 'function') {
+        return window.__ensureComposerBundleInternal();
+      }
+      return null;
+    });
+
+  const warmComposerOnIntent = () => {
+    window.ensureComposerBundle().catch(() => {});
+  };
+
+  const bindEarlyComposerIntentHooks = () => {
+    if (window.__fpEarlyComposerHooksBound) return;
+    window.__fpEarlyComposerHooksBound = true;
+    document.addEventListener('show.bs.modal', (e) => {
+      if (e?.target?.id === 'postModal') warmComposerOnIntent();
+    });
+    document.addEventListener('pointerdown', (e) => {
+      if (
+        e?.target?.closest?.(
+          '#openPostModalTrigger, #openPostModalTriggerMobile, #pwaQuickCameraBtn, [data-bs-target="#postModal"]'
+        )
+      ) {
+        warmComposerOnIntent();
+      }
+    }, { passive: true, capture: true });
+    document.addEventListener('focusin', (e) => {
+      if (e?.target?.closest?.('#postModal, #postMessageEditor')) {
+        warmComposerOnIntent();
+      }
+    }, { passive: true, capture: true });
+  };
+
+  bindEarlyComposerIntentHooks();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => { bootProfilePageChunk(); }, { once: true });
   } else {
-    setTimeout(bootProfilePageChunk, 80);
+    bootProfilePageChunk();
   }
 } else if (window.location.pathname === '/login/changePW' || window.location.pathname === '/changePW') {
   if (qSel('.login')) qSel('.login').style.display = 'none'; // navbar mgt

@@ -2555,12 +2555,13 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .swal2-title, .tour-title, .modal-title, 
     border-radius: 14px;
     padding: 6px;
     box-shadow: 0 12px 30px -6px rgba(15, 23, 42, 0.22), 0 8px 12px -6px rgba(15, 23, 42, 0.12);
-    z-index: 1060;
+    z-index: 1080;
 }
 .mention-autocomplete--below {
     top: calc(100% + 4px);
     bottom: auto;
-    width: min(360px, 92vw);
+    width: min(360px, 100%);
+    max-width: 100%;
 }
 .mention-autocomplete__header {
     border-bottom: 1px solid var(--border-color, #f1f5f9);
@@ -2569,8 +2570,10 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .swal2-title, .tour-title, .modal-title, 
     gap: 8px;
 }
 .mention-autocomplete__list {
-    max-height: 220px;
+    max-height: min(220px, 34dvh);
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
     display: flex;
     flex-direction: column;
     gap: 2px;

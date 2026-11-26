@@ -2122,18 +2122,58 @@ const resetTagBuilder = () => {
 
 // ── Inline @Mention Autocomplete for Composer ─────────────────────────────
 const getComposerEditorEl = () => document.getElementById('postMessageEditor');
+const composerEditor = typeof document !== 'undefined' ? getComposerEditorEl() : null;
 const getComposerMentionDropdownEl = () => document.getElementById('composerMentionDropdown');
 const getComposerMentionListEl = () => document.getElementById('composerMentionList');
-const composerEditor = getComposerEditorEl();
-const composerMentionDropdown = getComposerMentionDropdownEl();
-const composerMentionList = getComposerMentionListEl();
+const MENTION_QUERY_PATTERN = /(?:^|\s)@([A-Za-z\u00C0-\u024F0-9_.'\-]+(?: [A-Za-z\u00C0-\u024F0-9_.'\-]*)?|)$/;
 let composerMentionMatches = [];
 let composerMentionActiveIndex = 0;
 let composerMentionDebounceTimer = null;
+let lastComposerSelectionRange = null;
+
+function normalizeMentionLookupText(raw) {
+    return String(raw || '').replace(/\u200B/g, '').replace(/\u00A0/g, ' ');
+}
+
+function readFeedBootstrapData() {
+    if (typeof window !== 'undefined' && window.__FP_FEED_BOOTSTRAP__ && typeof window.__FP_FEED_BOOTSTRAP__ === 'object') {
+        return window.__FP_FEED_BOOTSTRAP__;
+    }
+    if (typeof document === 'undefined') return null;
+    const el = document.getElementById('feed-bootstrap');
+    if (!el || !el.textContent) return null;
+    try {
+        const parsed = JSON.parse(el.textContent);
+        if (parsed && typeof parsed === 'object') {
+            if (typeof window !== 'undefined') {
+                window.__FP_FEED_BOOTSTRAP__ = parsed;
+            }
+            return parsed;
+        }
+    } catch (_) {
+        // ignore malformed bootstrap JSON
+    }
+    return null;
+}
+
+function getActiveUserId() {
+    if (typeof window !== 'undefined' && window.currentUserId) {
+        return String(window.currentUserId);
+    }
+    const boot = readFeedBootstrapData();
+    if (boot && boot.userId) {
+        return String(boot.userId);
+    }
+    if (typeof document !== 'undefined') {
+        const metaId = document.querySelector('meta[name="user-id"]')?.getAttribute('content');
+        if (metaId) return String(metaId);
+    }
+    return '';
+}
 
 function seedCachedFamilyMembersFromBootstrap() {
     if (cachedFamilyMembers.length > 0) return;
-    const roster = window.__FP_FEED_BOOTSTRAP__?.familyRoster;
+    const roster = readFeedBootstrapData()?.familyRoster;
     if (!Array.isArray(roster) || roster.length === 0) return;
     cachedFamilyMembers = roster
         .filter(m => m && m.id)
@@ -2155,34 +2195,65 @@ function seedCachedFamilyMembersFromBootstrap() {
         });
 }
 
-function getComposerMentionQuery(editorEl) {
-    if (!editorEl) return null;
-    const mentionPattern = /(?:^|\s)@([A-Za-z0-9_'\- ]{0,40})$/;
+function snapshotComposerSelection() {
+    const editorEl = getComposerEditorEl();
+    if (!editorEl || typeof window === 'undefined' || !window.getSelection) return;
     const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0 && editorEl.contains(sel.anchorNode)) {
+        try {
+            lastComposerSelectionRange = sel.getRangeAt(0).cloneRange();
+        } catch (_) {}
+    }
+}
+
+function isCompletedSelectedMention(beforeText) {
+    if (!beforeText || !selectedTags || selectedTags.size === 0) return false;
+    const normalized = normalizeMentionLookupText(beforeText);
+    for (const tag of selectedTags.values()) {
+        const name = (tag.fullName || `${tag.firstName || ''} ${tag.lastName || ''}`).trim();
+        if (name && new RegExp(`(?:^|\\s)@${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s+$`, 'i').test(normalized)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+export function getComposerMentionQuery(editorEl) {
+    if (!editorEl) return null;
+    const sel = typeof window !== 'undefined' && window.getSelection ? window.getSelection() : null;
     if (sel && sel.rangeCount > 0 && editorEl.contains(sel.anchorNode)) {
         try {
             const range = sel.getRangeAt(0);
             const preCaretRange = range.cloneRange();
             preCaretRange.selectNodeContents(editorEl);
             preCaretRange.setEnd(range.endContainer, range.endOffset);
-            const fullBefore = preCaretRange.toString();
-            const fullMatch = fullBefore.match(mentionPattern);
+            const fullBefore = normalizeMentionLookupText(preCaretRange.toString());
+            if (isCompletedSelectedMention(fullBefore)) return null;
+            const fullMatch = fullBefore.match(MENTION_QUERY_PATTERN);
             if (fullMatch) return fullMatch[1];
 
             // Chrome/Safari Range.toString() omits newlines across <div>/<br> blocks in contenteditable;
             // check the current text node before the caret directly as fallback.
             if (sel.anchorNode && sel.anchorNode.nodeType === Node.TEXT_NODE) {
-                const nodeBefore = (sel.anchorNode.nodeValue || '').slice(0, sel.anchorOffset);
-                const nodeMatch = nodeBefore.match(mentionPattern);
+                const nodeBefore = normalizeMentionLookupText((sel.anchorNode.nodeValue || '').slice(0, sel.anchorOffset));
+                if (isCompletedSelectedMention(nodeBefore)) return null;
+                const nodeMatch = nodeBefore.match(MENTION_QUERY_PATTERN);
                 if (nodeMatch) return nodeMatch[1];
             }
-            return null;
+
+            // On iOS WebKit virtual keyboards, Range.toString() can briefly read empty at offset 0
+            // right after typing "@" into a previously empty contenteditable box; only fall through
+            // to innerText when preCaretRange produced nothing.
+            if (fullBefore !== '') {
+                return null;
+            }
         } catch (_) {
             // fall through to full text
         }
     }
-    const raw = editorEl.innerText || editorEl.textContent || '';
-    const fallbackMatch = raw.match(mentionPattern);
+    const raw = normalizeMentionLookupText(editorEl.innerText || editorEl.textContent || '');
+    if (isCompletedSelectedMention(raw)) return null;
+    const fallbackMatch = raw.match(MENTION_QUERY_PATTERN);
     return fallbackMatch ? fallbackMatch[1] : null;
 }
 
@@ -2224,7 +2295,7 @@ function renderComposerMentionDropdown() {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = `mention-autocomplete__item d-flex align-items-center gap-2 w-100 text-start px-2 py-1.5 border-0 ${isActive ? 'mention-autocomplete__item--active' : ''}`;
-        btn.style.cssText = 'border-radius: 8px; cursor: pointer; min-height: 44px;';
+        btn.style.cssText = 'border-radius: 8px; cursor: pointer; min-height: 44px; touch-action: manipulation;';
         btn.setAttribute('role', 'option');
         btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
 
@@ -2248,12 +2319,18 @@ function renderComposerMentionDropdown() {
             updateComposerMentionActiveItem();
         });
 
+        // Prevent both pointerdown (touch) and mousedown (desktop) from blurring #postMessageEditor
+        // before click completes on iOS/Android PWAs.
+        btn.addEventListener('pointerdown', (ev) => {
+            ev.preventDefault();
+        });
         btn.addEventListener('mousedown', (ev) => {
             ev.preventDefault();
         });
 
         btn.addEventListener('click', (ev) => {
             ev.preventDefault();
+            ev.stopPropagation();
             selectComposerMention(m);
         });
 
@@ -2261,6 +2338,11 @@ function renderComposerMentionDropdown() {
     });
 
     dd.classList.remove('d-none');
+    try {
+        dd.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } catch (_) {
+        // ignore in jsdom
+    }
 }
 
 function selectComposerMention(member) {
@@ -2283,18 +2365,34 @@ function selectComposerMention(member) {
     closeComposerMentionDropdown();
 }
 
-function replaceComposerMentionText(member) {
+export function replaceComposerMentionText(member) {
     const fullName = member.fullName || `${member.firstName} ${member.lastName}`.trim();
-    if (!composerEditor) return;
-    composerEditor.focus();
+    const editorEl = getComposerEditorEl();
+    if (!editorEl) return;
 
-    const sel = window.getSelection();
-    if (sel && sel.rangeCount > 0 && composerEditor.contains(sel.anchorNode)) {
-        const range = sel.getRangeAt(0);
+    const sel = window.getSelection ? window.getSelection() : null;
+    // Restore the saved caret range BEFORE focusing so iOS Safari tap-focus never clobbers anchorNode
+    if (sel && (!sel.rangeCount || !editorEl.contains(sel.anchorNode)) && lastComposerSelectionRange && editorEl.contains(lastComposerSelectionRange.startContainer)) {
+        try {
+            sel.removeAllRanges();
+            sel.addRange(lastComposerSelectionRange);
+        } catch (_) {}
+    }
+
+    editorEl.focus();
+
+    if (sel && sel.rangeCount > 0 && editorEl.contains(sel.anchorNode)) {
         let node = sel.anchorNode;
-        if (node.nodeType === Node.TEXT_NODE) {
+        let offset = sel.anchorOffset;
+        if (node.nodeType === Node.ELEMENT_NODE && offset > 0) {
+            const child = node.childNodes[offset - 1];
+            if (child && child.nodeType === Node.TEXT_NODE) {
+                node = child;
+                offset = (child.nodeValue || '').length;
+            }
+        }
+        if (node && node.nodeType === Node.TEXT_NODE) {
             const text = node.nodeValue || '';
-            const offset = sel.anchorOffset;
             const before = text.slice(0, offset);
             const after = text.slice(offset);
             const atIndex = before.lastIndexOf('@');
@@ -2309,6 +2407,7 @@ function replaceComposerMentionText(member) {
                 newRange.collapse(true);
                 sel.removeAllRanges();
                 sel.addRange(newRange);
+                lastComposerSelectionRange = newRange.cloneRange();
                 if (typeof window.syncEditorToTextarea === 'function') {
                     window.syncEditorToTextarea();
                 }
@@ -2317,13 +2416,40 @@ function replaceComposerMentionText(member) {
         }
     }
 
-    // Fallback: replace on full text string
-    const currentText = composerEditor.innerText || composerEditor.textContent || '';
-    const replaced = currentText.replace(/(?:^|\s)@([A-Za-z0-9_'\- ]*)$/, (m) => {
-        const p = m.startsWith(' ') ? ' ' : '';
-        return `${p}@${fullName} `;
-    });
-    composerEditor.innerText = replaced;
+    // Fallback: locate the last text node containing an @mention (preserves inline 3D emojis / Me-stickers)
+    const walker = document.createTreeWalker(editorEl, NodeFilter.SHOW_TEXT, null);
+    let lastAtNode = null;
+    let cur;
+    while ((cur = walker.nextNode())) {
+        if (/(?:^|[\s\u00A0])@([A-Za-z\u00C0-\u024F0-9_.'\- ]*)$/.test(normalizeMentionLookupText(cur.nodeValue || ''))) {
+            lastAtNode = cur;
+        }
+    }
+    if (lastAtNode) {
+        const val = lastAtNode.nodeValue || '';
+        const replaced = val.replace(/(?:^|[\s\u00A0])@([A-Za-z\u00C0-\u024F0-9_.'\- ]*)$/, (m) => {
+            const p = /^[\s\u00A0]/.test(m) ? m[0] : '';
+            return `${p}@${fullName} `;
+        });
+        lastAtNode.nodeValue = replaced;
+        if (sel) {
+            try {
+                const r = document.createRange();
+                r.setStart(lastAtNode, lastAtNode.nodeValue.length);
+                r.collapse(true);
+                sel.removeAllRanges();
+                sel.addRange(r);
+                lastComposerSelectionRange = r.cloneRange();
+            } catch (_) {}
+        }
+    } else {
+        const currentText = editorEl.innerText || editorEl.textContent || '';
+        const replaced = currentText.replace(/(?:^|[\s\u00A0])@([A-Za-z\u00C0-\u024F0-9_.'\- ]*)$/, (m) => {
+            const p = /^[\s\u00A0]/.test(m) ? m[0] : '';
+            return `${p}@${fullName} `;
+        });
+        editorEl.innerText = replaced;
+    }
     if (typeof window.syncEditorToTextarea === 'function') {
         window.syncEditorToTextarea();
     }
@@ -2331,10 +2457,10 @@ function replaceComposerMentionText(member) {
 
 function filterAndShowComposerMentions(rawQuery) {
     const query = (rawQuery || '').trim().toLowerCase();
-    const currentUserId = String(window.currentUserId || '');
+    const currentUserId = getActiveUserId();
 
     const matches = (cachedFamilyMembers || []).filter(m => {
-        if (String(m.id) === currentUserId) return false;
+        if (currentUserId && String(m.id) === currentUserId) return false;
         const first = (m.firstName || '').trim().toLowerCase();
         const last = (m.lastName || '').trim().toLowerCase();
         const full = (m.fullName || `${first} ${last}`).trim().toLowerCase();
@@ -2352,7 +2478,7 @@ function filterAndShowComposerMentions(rawQuery) {
         if (composerMentionDebounceTimer) clearTimeout(composerMentionDebounceTimer);
         composerMentionDebounceTimer = setTimeout(async () => {
             const serverMembers = await fetchSuggestions(query);
-            const filtered = (serverMembers || []).filter(m => String(m.id) !== currentUserId).slice(0, 8);
+            const filtered = (serverMembers || []).filter(m => !currentUserId || String(m.id) !== currentUserId).slice(0, 8);
             composerMentionMatches = filtered;
             composerMentionActiveIndex = 0;
             if (filtered.length > 0) {
@@ -2366,20 +2492,32 @@ function filterAndShowComposerMentions(rawQuery) {
     }
 }
 
-function handleComposerInput(ev) {
-    const target = ev.target;
+export function handleComposerInput(ev) {
+    const target = ev?.target;
+    if (!target) return;
     const editorEl = getComposerEditorEl();
     const textareaEl = document.getElementById('postMessage') || postMessageArea;
     const isEditor = !!(editorEl && (target === editorEl || editorEl.contains(target)));
     const isTextarea = !!(textareaEl && target === textareaEl);
     if (!isEditor && !isTextarea) return;
 
+    // Never let internal mirror-sync events on the hidden d-none #postMessage textarea
+    // override #postMessageEditor (on iOS WebKit a hidden textarea reports selectionEnd === 0,
+    // which otherwise slices to "" and immediately closes the mention dropdown).
+    if (isTextarea && (window.__fpInternalTextareaSync || (editorEl && !editorEl.classList.contains('d-none')))) {
+        return;
+    }
+
+    if (isEditor) {
+        snapshotComposerSelection();
+    }
+
     let query = null;
     if (isEditor) {
         query = getComposerMentionQuery(editorEl);
     } else {
         const textBefore = target.value ? target.value.slice(0, target.selectionEnd ?? target.value.length) : '';
-        const m = textBefore.match(/(?:^|\s)@([A-Za-z0-9_'\- ]{0,40})$/);
+        const m = normalizeMentionLookupText(textBefore).match(MENTION_QUERY_PATTERN);
         query = m ? m[1] : null;
     }
 
@@ -2389,7 +2527,13 @@ function handleComposerInput(ev) {
 
         if (!cachedFamilyMembers.length) {
             fetchSuggestions('').then(() => {
-                filterAndShowComposerMentions(query);
+                const latestEditor = getComposerEditorEl();
+                const latestQuery = isEditor && latestEditor ? getComposerMentionQuery(latestEditor) : query;
+                if (latestQuery !== null) {
+                    filterAndShowComposerMentions(latestQuery);
+                } else {
+                    closeComposerMentionDropdown();
+                }
             });
         } else {
             filterAndShowComposerMentions(query);
@@ -2426,9 +2570,11 @@ function handleComposerKeydown(ev) {
 
 // Global auto-tag scan before submit
 window.autoTagMentionedUsersInText = function() {
-    const text = (document.getElementById('postMessage')?.value || composerEditor?.innerText || '').trim();
+    seedCachedFamilyMembersFromBootstrap();
+    const editorEl = getComposerEditorEl();
+    const text = normalizeMentionLookupText(document.getElementById('postMessage')?.value || editorEl?.innerText || '').trim();
     if (!text || !cachedFamilyMembers.length) return;
-    const mentionRegex = /(?:^|\s)@([A-Za-z0-9_'\- ]{2,50})/g;
+    const mentionRegex = /(?:^|\s)@([A-Za-z\u00C0-\u024F0-9_.'\- ]{2,50})/g;
     let m;
     while ((m = mentionRegex.exec(text)) !== null) {
         const nameQuery = m[1].trim().toLowerCase();
@@ -2451,11 +2597,13 @@ window.autoTagMentionedUsersInText = function() {
 };
 
 document.addEventListener('input', handleComposerInput);
+document.addEventListener('compositionend', handleComposerInput);
 document.addEventListener('keyup', (ev) => {
-    if (ev.key === '@' || ev.key === 'Backspace' || ev.key === 'Unidentified' || ev.key.length === 1) {
+    if (typeof ev?.key === 'string' && (ev.key === '@' || ev.key === 'Backspace' || ev.key === 'Unidentified' || ev.key.length === 1)) {
         handleComposerInput(ev);
     }
 });
+document.addEventListener('selectionchange', snapshotComposerSelection);
 document.addEventListener('keydown', handleComposerKeydown);
 
 document.addEventListener('click', (ev) => {
@@ -2467,6 +2615,15 @@ document.addEventListener('click', (ev) => {
         }
     }
 });
+
+// Retroactive trigger: if the user already opened #postModal and typed @ before this async chunk loaded,
+// evaluate immediately once the module mounts.
+{
+    const activeEditor = getComposerEditorEl();
+    if (activeEditor && getComposerMentionQuery(activeEditor) !== null) {
+        handleComposerInput({ target: activeEditor });
+    }
+}
 
 if (addTagBtn && tagContainer) {
     addTagBtn.addEventListener('click', (e) => {

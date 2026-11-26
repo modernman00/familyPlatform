@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(feed): prevent double-mount wiping SharePortalModal state on dynamic chunk import",
+    "title": "Test(share): decode JSON preview payload before asserting ogImage path",
     "notes": [
-        "Fix(feed): prevent double-mount wiping SharePortalModal state on dynamic chunk import",
-        "Author-controlled post sharing with Web Push notifications, kinship mentions, and feed updates",
-        "Feat(feed): add video subtitles service, scenic motion layer, and feed updates"
+        "Test(share): decode JSON preview payload before asserting ogImage path",
+        "Fix(poster): clamp resized dimensions to >=1px for PHPStan int<1, max>",
+        "Feat(share): user handles, external share name, OG cards, video gallery & UI polish"
     ],
     "released_at": "2026-11-26",
-    "commit": "01687383"
+    "commit": "7e99d9d0"
 }
