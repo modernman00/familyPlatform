@@ -117,8 +117,12 @@ final class PostShareCardRenditionTest extends TestCase
         $controller->handlePostLink($postNo);
         $html = (string)ob_get_clean();
 
-        $this->assertStringContainsString('/post/' . $postNo . '/card.jpg', $html);
-        $this->assertStringNotContainsString('android-chrome-512x512.png', $html);
-        $this->assertStringContainsString('My Smart Beautiful Jummy', $html);
+        $payload = json_decode($html, true);
+        $ogImage = is_array($payload) ? (string)($payload['ogImage'] ?? '') : $html;
+        $ogTitle = is_array($payload) ? (string)($payload['ogTitle'] ?? '') : $html;
+
+        $this->assertStringContainsString('/post/' . $postNo . '/card.jpg', $ogImage);
+        $this->assertStringNotContainsString('android-chrome-512x512.png', $ogImage);
+        $this->assertStringContainsString('My Smart Beautiful Jummy', $ogTitle);
     }
 }
