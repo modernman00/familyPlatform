@@ -808,13 +808,21 @@ final class PartyPlatformBridgeService
             }
 
             $baseUrl = self::resolvePartyBaseUrl();
+            $partyAppKey = trim((string) ($_ENV['PARTY_APP_KEY'] ?? getenv('PARTY_APP_KEY') ?: ''));
+            $cardUrl = $baseUrl . '/celebrate/card?event_id=' . rawurlencode($eventCode);
+            if ($partyAppKey !== '') {
+                $cardToken = substr(hash_hmac('sha256', 'card:' . $eventCode, $partyAppKey), 0, 24);
+                $cardUrl .= '&token=' . rawurlencode($cardToken);
+            }
 
             return [
                 'party_event_id'         => $eventCode,
                 'slug'                   => $slug,
                 'invite_token'           => $inviteToken,
-                'rsvp_url'               => $baseUrl . '/e/' . rawurlencode($slug),
-                'card_url'               => $baseUrl . '/celebrate/card?event_id=' . rawurlencode($eventCode),
+                'rsvp_url'               => $inviteToken !== ''
+                    ? ($baseUrl . '/i/' . rawurlencode($inviteToken))
+                    : ($baseUrl . '/e/' . rawurlencode($slug)),
+                'card_url'               => $cardUrl,
                 'studio_url'             => $baseUrl . '/guest-builder/' . rawurlencode($eventCode),
                 'manager_id'             => $managerId,
                 'seeded_prospects_count' => $seededCount,
