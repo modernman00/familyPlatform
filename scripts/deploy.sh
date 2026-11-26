@@ -342,7 +342,7 @@ fi
 
 if [ -f "phpstan.neon" ] && [ -n "$PHPSTAN_BIN" ]; then
     echo -e "\n🔍 Running PHPStan Static Analysis..."
-    "$PHPSTAN_BIN" analyse --no-progress --quiet || {
+    "$PHPSTAN_BIN" analyse --memory-limit=1G --no-progress --quiet || {
         echo "🛑 FATAL: PHPStan static analysis failed."
         exit 1
     }
