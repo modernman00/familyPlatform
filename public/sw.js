@@ -30,7 +30,6 @@ const PRECACHE_ASSETS = [
   '/public/js/manifest.js',
   '/public/js/vendor.js',
   '/public/js/vendor/kinshiptree.js',
-  '/public/js/index.js',
   '/public/js/pwa-notifications.js',
   '/public/img/favicon/android-chrome-192x192.png',
   '/public/img/favicon/android-chrome-512x512.png',
@@ -356,6 +355,10 @@ async function staleWhileRevalidateStrategy(request, cacheName) {
   try {
     const cache = await caches.open(cacheName);
     const cachedResponse = await cache.match(request);
+    const reqUrl = new URL(request.url);
+    const isLocalBundle =
+      reqUrl.origin === self.location.origin &&
+      (reqUrl.pathname.startsWith('/public/js/') || reqUrl.pathname.startsWith('/public/css/'));
 
     const fetchPromise = fetch(request)
       .then((networkResponse) => {
@@ -367,6 +370,11 @@ async function staleWhileRevalidateStrategy(request, cacheName) {
           : (cachedResponse instanceof Response ? cachedResponse : new Response('', { status: 504, statusText: 'Offline' }));
       })
       .catch(() => (cachedResponse instanceof Response ? cachedResponse : new Response('', { status: 504, statusText: 'Offline' })));
+
+    // Always prefer fresh network response for local /public/js/ and /public/css/ bundles when online
+    if (isLocalBundle && (!self.navigator || self.navigator.onLine !== false)) {
+      return fetchPromise;
+    }
 
     return cachedResponse instanceof Response ? cachedResponse : fetchPromise;
   } catch (err) {

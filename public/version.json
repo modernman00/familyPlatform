@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Feat(composer): improve mobile mention, emoji, and post composer UX",
+    "title": "Fix(composer): restore synchronous composer loading, mobile @mention reliability & SW version auto-sync",
     "notes": [
+        "Fix(composer): restore synchronous composer loading, mobile @mention reliability & SW version auto-sync",
         "Feat(composer): improve mobile mention, emoji, and post composer UX",
-        "Test(share): decode JSON preview payload before asserting ogImage path",
-        "Fix(poster): clamp resized dimensions to >=1px for PHPStan int<1, max>"
+        "Test(share): decode JSON preview payload before asserting ogImage path"
     ],
     "released_at": "2026-11-26",
-    "commit": "c0c23039"
+    "commit": "9e9c5fec"
 }

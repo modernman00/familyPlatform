@@ -2223,6 +2223,10 @@ window.selectPostAudience = function(scope, label, iconClass, famCode) {
                     window.__submitPostModalForm(confirmBtn);
                     return;
                 }
+                if (typeof window.__inlineFallbackSubmitPostModal === 'function') {
+                    window.__inlineFallbackSubmitPostModal(confirmBtn);
+                    return;
+                }
                 const submitBtn = document.getElementById('submitPost');
                 if (submitBtn) {
                     submitBtn.disabled = false;
@@ -2247,6 +2251,272 @@ window.selectPostAudience = function(scope, label, iconClass, famCode) {
             }
         }
     });
+
+    // ── Zero-Dependency Inline Fallback for Post Submission & @Mention (Mobile PWA Resilience) ──
+    // Guarantees Confirm & Share Post (#composerConfirmShareBtn), Post (#submitPost), and @mention
+    // work immediately from server-rendered HTML even if an installed Mobile PWA has a stale cached JS chunk.
+    window.__inlineFallbackSubmitPostModal = async function(triggerBtn) {
+        const form = document.getElementById('formPostMessageModal');
+        const submitBtn = triggerBtn || document.getElementById('composerConfirmShareBtn') || document.getElementById('submitPost');
+        if (!form || !submitBtn) return;
+        if (submitBtn.getAttribute('data-inline-submitting') === 'true') return;
+        submitBtn.setAttribute('data-inline-submitting', 'true');
+
+        try {
+            if (typeof window.syncEditorToTextarea === 'function') {
+                window.syncEditorToTextarea();
+            }
+            if (typeof window.autoTagMentionedUsersInText === 'function') {
+                const txt = document.getElementById('postMessage')?.value || '';
+                window.autoTagMentionedUsersInText(txt);
+            }
+            if (window.ScoreTenantSpinner) {
+                window.ScoreTenantSpinner.start(submitBtn);
+            } else {
+                submitBtn.disabled = true;
+            }
+
+            const formData = new FormData(form);
+            const editPostNo = document.getElementById('editPostNo')?.value || '';
+            const endpoint = editPostNo ? '/member/profilePage/editPost' : '/member/profilePage/post';
+            const csrfCookie = (document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/) || [])[1];
+            const csrfToken = csrfCookie
+                ? decodeURIComponent(csrfCookie)
+                : (document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || form.querySelector('input[name="token"]')?.value || '');
+
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'X-XSRF-TOKEN': csrfToken
+                },
+                body: formData
+            });
+            const data = await res.json().catch(function() { return {}; });
+            if (res.ok && data && data.status !== 'error' && data.success !== false) {
+                const modalEl = document.getElementById('postModal');
+                if (modalEl && window.bootstrap && window.bootstrap.Modal) {
+                    const inst = window.bootstrap.Modal.getInstance(modalEl);
+                    if (inst) inst.hide();
+                }
+                if (typeof window.__flushPostComposer === 'function') {
+                    window.__flushPostComposer();
+                }
+                window.dispatchEvent(new CustomEvent('fp:feed-refresh'));
+                window.location.reload();
+                return;
+            }
+            const errMsg = (data && (data.message || data.error)) || 'Could not share your post. Please try again.';
+            if (window.Swal) {
+                window.Swal.fire({ icon: 'error', title: 'Unable to Post', text: errMsg, confirmButtonColor: '#a31621' });
+            }
+        } catch (err) {
+            if (window.Swal) {
+                window.Swal.fire({ icon: 'error', title: 'Network Error', text: 'Please check your connection and try again.', confirmButtonColor: '#a31621' });
+            }
+        } finally {
+            submitBtn.removeAttribute('data-inline-submitting');
+            submitBtn.removeAttribute('data-submitting');
+            if (window.ScoreTenantSpinner) {
+                window.ScoreTenantSpinner.stop(submitBtn);
+            } else {
+                submitBtn.disabled = false;
+            }
+        }
+    };
+
+    // Fallback listener on #submitPost when single-lineage (or step2 confirmed) and external allEvents.js hasn't bound yet
+    document.addEventListener('click', function(e) {
+        const submitBtn = e.target.closest('#submitPost, .submitPost');
+        if (!submitBtn || e.defaultPrevented) return;
+        if (typeof window.__submitPostModalForm === 'function') return;
+        e.preventDefault();
+        window.__inlineFallbackSubmitPostModal(submitBtn);
+    });
+
+    // Inline @mention fallback on #postMessageEditor if external postEmojiImgProcess.js hasn't bound yet
+    (function initInlineComposerMentionFallback() {
+        const editor = document.getElementById('postMessageEditor');
+        const dropdown = document.getElementById('composerMentionDropdown');
+        const listEl = document.getElementById('composerMentionList');
+        if (!editor || !dropdown || !listEl) return;
+
+        let inlineRoster = null;
+        let savedRange = null;
+
+        function getActiveUid() {
+            if (window.currentUserId) return String(window.currentUserId);
+            return String(document.querySelector('meta[name="user-id"]')?.getAttribute('content') || '');
+        }
+
+        function loadInlineRoster() {
+            if (Array.isArray(inlineRoster) && inlineRoster.length > 0) return Promise.resolve(inlineRoster);
+            try {
+                const el = document.getElementById('feed-bootstrap');
+                if (el && el.textContent) {
+                    const parsed = JSON.parse(el.textContent);
+                    const raw = Array.isArray(parsed?.familyRoster) ? parsed.familyRoster : [];
+                    if (raw.length > 0) {
+                        const myId = getActiveUid();
+                        inlineRoster = raw
+                            .filter(function(m) { return m && (m.id || m.user_id) && String(m.id || m.user_id) !== myId; })
+                            .map(function(m) {
+                                const first = String(m.firstName || m.firstname || '').trim();
+                                const last = String(m.lastName || m.lastname || '').trim();
+                                return {
+                                    id: String(m.id || m.user_id),
+                                    firstName: first,
+                                    lastName: last,
+                                    fullName: String(m.fullName || (first + ' ' + last)).trim(),
+                                    avatar: m.avatar || m.profile_img || '/resources/images/avatarM.png',
+                                    kinshipLabel: m.kinship_label || m.kinshipLabel || 'Family'
+                                };
+                            });
+                    }
+                }
+            } catch (_) {}
+            return fetch('/api/members/tag-suggestions?q=', {
+                credentials: 'same-origin',
+                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+            })
+                .then(function(r) { return r.ok ? r.json() : null; })
+                .then(function(json) {
+                    const raw = (json && (json.members || (json.message && json.message.members) || json.data)) || [];
+                    if (Array.isArray(raw) && raw.length > 0) {
+                        const myId = getActiveUid();
+                        inlineRoster = raw
+                            .filter(function(m) { return m && (m.id || m.user_id) && String(m.id || m.user_id) !== myId; })
+                            .map(function(m) {
+                                const first = String(m.firstName || m.firstname || '').trim();
+                                const last = String(m.lastName || m.lastname || '').trim();
+                                return {
+                                    id: String(m.id || m.user_id),
+                                    firstName: first,
+                                    lastName: last,
+                                    fullName: String(m.fullName || (first + ' ' + last)).trim(),
+                                    avatar: m.avatar || m.profile_img || '/resources/images/avatarM.png',
+                                    kinshipLabel: m.kinship_label || m.kinshipLabel || 'Family'
+                                };
+                            });
+                    }
+                    return inlineRoster || [];
+                })
+                .catch(function() { return inlineRoster || []; });
+        }
+
+        function saveRange() {
+            const sel = window.getSelection && window.getSelection();
+            if (sel && sel.rangeCount > 0 && editor.contains(sel.anchorNode)) {
+                savedRange = sel.getRangeAt(0).cloneRange();
+            }
+        }
+
+        function extractQuery() {
+            let before = '';
+            const sel = window.getSelection && window.getSelection();
+            if (sel && sel.rangeCount > 0 && editor.contains(sel.anchorNode)) {
+                const range = sel.getRangeAt(0).cloneRange();
+                range.collapse(true);
+                const pre = range.cloneRange();
+                pre.selectNodeContents(editor);
+                pre.setEnd(range.endContainer, range.endOffset);
+                before = pre.toString();
+            }
+            before = String(before || '').replace(/[\u200B-\u200D\uFEFF]/g, '').replace(/\u00A0/g, ' ');
+            if (!before) {
+                before = String(editor.innerText || editor.textContent || '').replace(/[\u200B-\u200D\uFEFF]/g, '').replace(/\u00A0/g, ' ');
+            }
+            const m = before.match(/(?:^|\s)@([A-Za-z\u00C0-\u024F0-9_.'\- ]{0,40})$/);
+            return m ? m[1] : null;
+        }
+
+        function escHtml(str) {
+            return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function insertInlineMention(member) {
+            if (!member || !member.fullName) return;
+            const replacement = '@' + member.fullName.trim() + ' ';
+            const rawText = String(editor.innerText || editor.textContent || '').replace(/[\u200B-\u200D\uFEFF]/g, '').replace(/\u00A0/g, ' ');
+            const updated = rawText.replace(/(^|\s)@([A-Za-z\u00C0-\u024F0-9_.'\- ]{0,40})$/, '$1' + replacement);
+            editor.innerText = updated !== rawText ? updated : (rawText + replacement);
+            if (typeof window.syncEditorToTextarea === 'function') {
+                window.syncEditorToTextarea();
+            }
+            const tagsBox = document.getElementById('selectedTagsInputs');
+            if (tagsBox && member.id && !tagsBox.querySelector('input[value="' + member.id + '"]')) {
+                const inp = document.createElement('input');
+                inp.type = 'hidden';
+                inp.name = 'tagged_user_ids[]';
+                inp.value = String(member.id);
+                tagsBox.appendChild(inp);
+            }
+            dropdown.classList.add('d-none');
+            editor.focus();
+        }
+
+        function checkInlineMention() {
+            saveRange();
+            setTimeout(function() {
+                // Yield if external postEmojiImgProcess.js already handled & opened the dropdown
+                if (!dropdown.classList.contains('d-none') && listEl.children.length > 0 && !dropdown.hasAttribute('data-inline-fallback')) {
+                    return;
+                }
+                const q = extractQuery();
+                if (q === null) {
+                    if (dropdown.hasAttribute('data-inline-fallback')) {
+                        dropdown.classList.add('d-none');
+                        dropdown.removeAttribute('data-inline-fallback');
+                    }
+                    return;
+                }
+                loadInlineRoster().then(function(roster) {
+                    if (!dropdown.classList.contains('d-none') && !dropdown.hasAttribute('data-inline-fallback')) {
+                        return;
+                    }
+                    const qLower = q.trim().toLowerCase();
+                    if (q.endsWith(' ') && qLower && (roster || []).some(function(m) { return m.fullName.toLowerCase() === qLower; })) {
+                        dropdown.classList.add('d-none');
+                        return;
+                    }
+                    const matches = (roster || []).filter(function(m) {
+                        return !qLower || m.fullName.toLowerCase().includes(qLower);
+                    }).slice(0, 6);
+                    if (matches.length === 0) {
+                        dropdown.classList.add('d-none');
+                        return;
+                    }
+                    dropdown.setAttribute('data-inline-fallback', '1');
+                    listEl.innerHTML = matches.map(function(m, idx) {
+                        return '<button type="button" class="mention-autocomplete__item d-flex align-items-center gap-2 w-100 text-start px-2 py-1.5 border-0 ' + (idx === 0 ? 'mention-autocomplete__item--active' : '') + '" data-inline-idx="' + idx + '" style="min-height:44px;">' +
+                            '<img src="' + escHtml(m.avatar) + '" alt="" class="rounded-circle flex-shrink-0" width="28" height="28" style="object-fit:cover;" onerror="this.onerror=null;this.src=\'/resources/images/avatarM.png\'">' +
+                            '<div class="flex-grow-1 min-w-0"><span class="mention-autocomplete__name text-truncate d-block">' + escHtml(m.fullName) + '</span></div>' +
+                            '<span class="badge rounded-pill mention-autocomplete__badge flex-shrink-0">' + escHtml(m.kinshipLabel || 'Family') + '</span>' +
+                            '</button>';
+                    }).join('');
+                    listEl.querySelectorAll('[data-inline-idx]').forEach(function(btn) {
+                        const member = matches[Number(btn.getAttribute('data-inline-idx'))];
+                        btn.addEventListener('pointerdown', function(ev) {
+                            ev.preventDefault();
+                            insertInlineMention(member);
+                        });
+                        btn.addEventListener('click', function(ev) {
+                            ev.preventDefault();
+                            insertInlineMention(member);
+                        });
+                    });
+                    dropdown.classList.remove('d-none');
+                });
+            }, 25);
+        }
+
+        ['input', 'keyup', 'click', 'compositionend'].forEach(function(evt) {
+            editor.addEventListener(evt, checkInlineMention);
+        });
+    })();
 
     window.__flushPostComposer = function() {
         const editorEl = document.getElementById('postMessageEditor');

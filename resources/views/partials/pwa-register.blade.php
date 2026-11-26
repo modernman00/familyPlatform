@@ -135,6 +135,19 @@
   };
 
   if ('serviceWorker' in navigator) {
+    // Immediate one-time self-healing cache purge so existing Mobile PWAs drop stale 1-year JS/SW caches on load
+    try {
+      var swPurgeKey = 'fp_sw_purge_20261126_v5';
+      if (localStorage.getItem(swPurgeKey) !== '1') {
+        localStorage.setItem(swPurgeKey, '1');
+        if ('caches' in window) {
+          caches.keys().then(function(keys) {
+            return Promise.all(keys.map(function(k) { return caches.delete(k); }));
+          }).catch(function() {});
+        }
+      }
+    } catch (_) {}
+
     window.addEventListener('load', function() {
       navigator.serviceWorker.register('/sw.js', { scope: '/' })
         .then(function(reg) {

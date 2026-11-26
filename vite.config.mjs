@@ -71,7 +71,22 @@ function familyPlatformBuildPlugin(isProd) {
             );
 
             // Sync public/sw.js SW_VERSION from mix-manifest.json hash on production builds
+            // and stamp any relative './index.js' imports in dynamic chunks so browsers never
+            // resolve './index.js' against a stale 1-year HTTP disk cache entry.
             if (isProd) {
+                const indexHash = (mixManifest['/js/index.js'] || '').split('?id=')[1] || Date.now().toString();
+                for (const file of fs.readdirSync(jsDir)) {
+                    if (!file.endsWith('.js') || file === 'index.js') continue;
+                    const chunkPath = path.join(jsDir, file);
+                    const src = fs.readFileSync(chunkPath, 'utf8');
+                    if (src.includes('./index.js')) {
+                        const patched = src.replace(/from\s*(["'])\.\/*index\.js\1/g, `from$1./index.js?id=${indexHash}$1`);
+                        if (patched !== src) {
+                            fs.writeFileSync(chunkPath, patched);
+                        }
+                    }
+                }
+
                 const swPath = path.resolve(publicDir, 'sw.js');
                 if (fs.existsSync(swPath)) {
                     const manifestHash = crypto
