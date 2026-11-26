@@ -82,6 +82,8 @@ self.addEventListener('activate', (event) => {
         for (const client of clientList) {
           if (client.url && client.url.includes('offline.html')) {
             client.navigate('/?pwa_rescue=' + Date.now());
+          } else {
+            client.postMessage({ type: 'SW_ACTIVATED', version: SW_VERSION });
           }
         }
       } catch (_) {}

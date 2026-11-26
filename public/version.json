@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Fix(composer): restore synchronous composer loading, mobile @mention reliability & SW version auto-sync",
+    "title": "Fix(pwa): add zero-dep inline @mention & confirm-share fallback, cache-bust chunk ./index.js imports, and purge stale SW caches",
     "notes": [
+        "Fix(pwa): add zero-dep inline @mention & confirm-share fallback, cache-bust chunk ./index.js imports, and purge stale SW caches",
         "Fix(composer): restore synchronous composer loading, mobile @mention reliability & SW version auto-sync",
-        "Feat(composer): improve mobile mention, emoji, and post composer UX",
-        "Test(share): decode JSON preview payload before asserting ogImage path"
+        "Feat(composer): improve mobile mention, emoji, and post composer UX"
     ],
     "released_at": "2026-11-26",
-    "commit": "9e9c5fec"
+    "commit": "0a26080e"
 }

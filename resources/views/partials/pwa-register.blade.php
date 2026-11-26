@@ -148,9 +148,68 @@
       }
     } catch (_) {}
 
+    var hadController = !!navigator.serviceWorker.controller;
+    var swReg = null;
+    var pendingRealtimeReload = false;
+
+    function isUserActivelyComposing() {
+      if (document.querySelector('.modal.show')) return true;
+      var active = document.activeElement;
+      if (!active) return false;
+      var tag = active.tagName;
+      return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || active.isContentEditable === true;
+    }
+
+    function applyRealTimePwaReload() {
+      try {
+        var now = Date.now();
+        var last = parseInt(sessionStorage.getItem('fp_sw_reloaded_at') || '0', 10);
+        if (last && (now - last) < 30000) return;
+
+        if (isUserActivelyComposing()) {
+          if (!pendingRealtimeReload) {
+            pendingRealtimeReload = true;
+            var retryWhenIdle = function() {
+              if (!pendingRealtimeReload || isUserActivelyComposing()) return;
+              pendingRealtimeReload = false;
+              document.removeEventListener('hidden.bs.modal', retryWhenIdle);
+              document.removeEventListener('focusout', retryWhenIdle);
+              applyRealTimePwaReload();
+            };
+            document.addEventListener('hidden.bs.modal', retryWhenIdle);
+            document.addEventListener('focusout', retryWhenIdle);
+          }
+          return;
+        }
+
+        sessionStorage.setItem('fp_sw_reloaded_at', String(now));
+        window.location.reload();
+      } catch (_) {}
+    }
+
+    navigator.serviceWorker.addEventListener('controllerchange', function() {
+      if (!hadController) {
+        hadController = true;
+        return;
+      }
+      applyRealTimePwaReload();
+    });
+
+    navigator.serviceWorker.addEventListener('message', function(event) {
+      if (!event || !event.data || event.data.type !== 'SW_ACTIVATED' || !event.data.version) return;
+      try {
+        var prevVer = localStorage.getItem('fp_sw_version');
+        localStorage.setItem('fp_sw_version', String(event.data.version));
+        if (prevVer && prevVer !== String(event.data.version)) {
+          applyRealTimePwaReload();
+        }
+      } catch (_) {}
+    });
+
     window.addEventListener('load', function() {
-      navigator.serviceWorker.register('/sw.js', { scope: '/' })
+      navigator.serviceWorker.register('/sw.js', { scope: '/', updateViaCache: 'none' })
         .then(function(reg) {
+          swReg = reg;
           if (reg.installing) {
             console.log('[PWA] Service Worker installing:', reg.scope);
           } else if (reg.waiting) {
@@ -191,20 +250,32 @@
       }
     });
 
-    // Re-sync push subscription whenever tab regains visibility/focus (throttled to at most once per 60s)
+    // Check for SW updates & re-sync push subscription whenever app returns to foreground (throttled)
     var lastVisibilitySync = 0;
+    var lastSwCheck = 0;
     document.addEventListener('visibilitychange', function() {
-      if (document.visibilityState === 'visible' && 'Notification' in window && Notification.permission === 'granted') {
+      if (document.visibilityState !== 'visible') return;
+      var now = Date.now();
+      if (swReg && (now - lastSwCheck) > 30000) {
+        lastSwCheck = now;
+        try { swReg.update(); } catch (_) {}
+      }
+      if ('Notification' in window && Notification.permission === 'granted') {
         var pathname = (window.location && window.location.pathname) ? window.location.pathname.toLowerCase() : '';
         var isAuth = pathname.startsWith('/login') || pathname.startsWith('/register') || pathname.includes('/verify-email') || pathname.includes('/auth/');
         var hasUser = !!(document.querySelector('meta[name="user-id"]')?.getAttribute('content')?.trim());
         if (!isAuth && hasUser) {
-          var now = Date.now();
           if (now - lastVisibilitySync > 60000) {
             lastVisibilitySync = now;
             window.syncPushSubscription().catch(function() {});
           }
         }
+      }
+    });
+
+    window.addEventListener('online', function() {
+      if (swReg) {
+        try { swReg.update(); } catch (_) {}
       }
     });
   }
