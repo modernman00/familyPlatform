@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Feat(feed): add video subtitles service, scenic motion layer, and feed updates",
+    "title": "Author-controlled post sharing with Web Push notifications, kinship mentions, and feed updates",
     "notes": [
+        "Author-controlled post sharing with Web Push notifications, kinship mentions, and feed updates",
         "Feat(feed): add video subtitles service, scenic motion layer, and feed updates",
-        "Feat(feed): deploy keyset pagination, profile updates, and preflight fixes",
-        "Fix(weekly-fun-facts): render 60fps presentation in feed and fix ms timestamp"
+        "Feat(feed): deploy keyset pagination, profile updates, and preflight fixes"
     ],
-    "released_at": "2026-11-25",
-    "commit": "bea9fc46"
+    "released_at": "2026-11-26",
+    "commit": "a3cd994d"
 }

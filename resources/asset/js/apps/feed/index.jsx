@@ -6,7 +6,8 @@ import { FeedShell } from './FeedShell';
 export function mountFeed() {
     if (typeof document === 'undefined') return;
     const root = document.getElementById('feed-root');
-    if (!root) return;
+    if (!root || root.dataset.fpFeedMounted === '1') return;
+    root.dataset.fpFeedMounted = '1';
     const bootstrap = readIslandBootstrap('feed-bootstrap', {});
     render(
         <IslandErrorBoundary name="FamilyFeed" fallbackTitle="Unable to load your family feed right now.">
