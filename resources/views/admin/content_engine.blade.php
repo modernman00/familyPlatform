@@ -196,7 +196,15 @@
                                         </p>
                                     </div>
 
-                                    <div x-show="previewOpen" x-collapse class="rounded-xl overflow-hidden border border-gray-800 bg-black aspect-video">
+                                    @php
+                                        $isQueuedShort = \App\services\CuratedVideoEngineService::isLikelyShortVideo(
+                                            (string)($item['video_url'] ?? ''),
+                                            (string)($item['title'] ?? ''),
+                                            (string)($item['suggested_caption'] ?? ''),
+                                            (string)($item['author_name'] ?? '')
+                                        );
+                                    @endphp
+                                    <div x-show="previewOpen" x-collapse class="rounded-xl overflow-hidden border border-gray-800 bg-black {{ $isQueuedShort ? 'aspect-[9/16] max-w-[320px] mx-auto' : 'aspect-video' }}">
                                         @if(($item['provider'] ?? '') === 'youtube')
                                             <iframe class="w-full h-full" src="https://www.youtube.com/embed/{{ htmlspecialchars((string)$item['external_video_id']) }}?rel=0" title="Video preview" allowfullscreen loading="lazy"></iframe>
                                         @elseif(($item['provider'] ?? '') === 'vimeo')

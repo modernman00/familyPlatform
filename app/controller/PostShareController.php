@@ -50,9 +50,11 @@ final class PostShareController
             }
 
             $isShareable = \App\controller\members\PostMessage::isPostShareable($post);
+            $authorId = (string)($post['id'] ?? '');
 
             // Prepare rich post metadata for social crawlers (WhatsApp, X, Facebook, LinkedIn, etc.)
-            $authorName = trim((string)($post['fullName'] ?? 'A Family Member'));
+            // Privacy Invariant: External preview strings resolve via UserHandleService (defaults to First Name + Initial or @handle)
+            $authorName = \App\services\UserHandleService::resolveExternalAuthorName($db, $authorId, (string)($post['fullName'] ?? 'A Family Member'));
             $rawFamCode = (string)($post['postFamCode'] ?? '');
             $cleanFamCode = preg_replace('/^#+/', '', $rawFamCode);
             $rawMessage = (string)($post['postMessage'] ?? '');
@@ -69,15 +71,15 @@ final class PostShareController
             $hasVoice = !empty($post['voice_capsule_url']);
 
             // Compose rich, app-promoting headline & description
-            $mediaLabel = 'Family Memory';
+            $mediaLabel = 'Post';
             if ($hasVideo) {
-                $mediaLabel = 'Video Memory';
+                $mediaLabel = 'Video';
             } elseif ($hasPhoto) {
-                $mediaLabel = 'Photo Memory';
+                $mediaLabel = 'Photo';
             } elseif ($hasVoice) {
-                $mediaLabel = 'Voice Capsule';
+                $mediaLabel = 'Voice Note';
             }
-            $kind = $hasVideo ? 'family video memory' : ($hasPhoto ? 'photo memory' : ($hasVoice ? 'voice note' : 'family moment'));
+            $kind = $hasVideo ? 'video' : ($hasPhoto ? 'photo' : ($hasVoice ? 'voice note' : 'post'));
 
             if ($cleanCaption !== '') {
                 $snippet = mb_strlen($cleanCaption) > 65 ? mb_substr($cleanCaption, 0, 62) . '…' : $cleanCaption;
@@ -97,16 +99,16 @@ final class PostShareController
             }
 
             $authorId = (string)($post['id'] ?? '');
-            $hasRestrictions = $authorId !== '' && \App\services\MemberRestrictionService::authorHasAnyRestriction($db, $authorId, 'posts');
 
-            if ($hasRestrictions || !$isShareable) {
-                $ogImage = $appUrl . '/public/img/favicon/android-chrome-512x512.png';
+            if (!$isShareable) {
+                // Fanciful golden heritage card fallback when sharing is disabled outside family
+                $ogImage = $appUrl . '/public/img/og-invite.jpg';
                 $ogTitle = 'Family Memory on FamilyPlatform';
                 $ogDescription = 'Sign in to FamilyPlatform to view moments shared with your family circle.';
                 $mediaLabel = 'Family Memory';
                 $hasVideo = false;
             } else {
-                // Designed preview card (photo, words and author in FamilyPlatform's couture style)
+                // Designed preview card (photo excerpt, quote, author & wax seal in FamilyPlatform couture style)
                 $ogImage = $appUrl . '/post/' . $postNo . '/card.jpg?v=' . substr(md5($rawMessage . ($post['post_img0'] ?? '')), 0, 8);
             }
 
@@ -370,10 +372,17 @@ final class PostShareController
         $postNo = (int)$postNo;
         try {
             $db = Db::connect2();
-            $stmt = $db->prepare('SELECT post_no, id, fullName, postMessage, post_img0, voice_capsule_url, media_meta FROM post WHERE post_no = ? AND date_deleted IS NULL LIMIT 1');
+            $stmt = $db->prepare('SELECT post_no, id, fullName, postMessage, post_img0, post_img1, post_img2, post_img3, post_img4, post_img5, voice_capsule_url, media_meta FROM post WHERE post_no = ? AND date_deleted IS NULL LIMIT 1');
             $stmt->execute([$postNo]);
             $post = $stmt->fetch(\PDO::FETCH_ASSOC);
             if (!$post) {
+                $fallback = dirname(__DIR__, 2) . '/public/img/og-invite.jpg';
+                if (is_file($fallback)) {
+                    header('Content-Type: image/jpeg');
+                    header('Cache-Control: public, max-age=3600');
+                    readfile($fallback);
+                    return;
+                }
                 http_response_code(404);
                 return;
             }
@@ -381,15 +390,18 @@ final class PostShareController
             $authorId = (string)($post['id'] ?? '');
             $viewerId = trim((string)($_SESSION['id'] ?? ''));
             if (!\App\controller\members\PostMessage::isPostShareable($post) && ($viewerId === '' || $viewerId !== $authorId)) {
+                $fallback = dirname(__DIR__, 2) . '/public/img/og-invite.jpg';
+                if (is_file($fallback)) {
+                    header('Content-Type: image/jpeg');
+                    header('Cache-Control: public, max-age=3600');
+                    readfile($fallback);
+                    return;
+                }
                 http_response_code(403);
                 return;
             }
             if ($authorId !== '') {
                 if ($viewerId !== '' && \App\services\MemberRestrictionService::isRestricted($db, $authorId, $viewerId, 'posts')) {
-                    http_response_code(403);
-                    return;
-                }
-                if ($viewerId === '' && \App\services\MemberRestrictionService::authorHasAnyRestriction($db, $authorId, 'posts')) {
                     http_response_code(403);
                     return;
                 }
@@ -402,11 +414,36 @@ final class PostShareController
                 || \App\classes\VideoParser::extractVideoFromText($raw) !== null;
 
             $img = trim((string)($post['post_img0'] ?? ''));
+            if ($img === '') {
+                for ($i = 1; $i <= 5; $i++) {
+                    if (!empty($post['post_img' . $i])) {
+                        $img = trim((string)$post['post_img' . $i]);
+                        break;
+                    }
+                }
+            }
             $heroUrl = '';
             if ($img !== '' && !preg_match('#^https?://#i', $img) && !str_contains($img, '..')) {
-                $heroUrl = (str_starts_with($img, '/resources/') || str_starts_with($img, '/public/'))
-                    ? $img
-                    : '/resources/images/post/' . basename($img);
+                $baseName = basename($img);
+                $root = \App\services\AtgFestiveCardService::projectRoot();
+                $candidates = [
+                    '/resources/images/post/' . $baseName,
+                    '/public/img/post/' . $baseName,
+                    '/public/images/post/' . $baseName,
+                    '/resources/images/' . $baseName,
+                    '/public/images/' . $baseName,
+                ];
+                foreach ($candidates as $cand) {
+                    if (is_file($root . $cand)) {
+                        $heroUrl = $cand;
+                        break;
+                    }
+                }
+                if ($heroUrl === '') {
+                    $heroUrl = (str_starts_with($img, '/resources/') || str_starts_with($img, '/public/'))
+                        ? $img
+                        : '/resources/images/post/' . $baseName;
+                }
             }
 
             // Headline = first sentence (short); verse = the rest, capped
@@ -422,7 +459,7 @@ final class PostShareController
             if (mb_strlen($verse) > 220) {
                 $verse = rtrim(mb_substr($verse, 0, 217)) . '…';
             }
-            $kind = $isVideo ? 'A FAMILY VIDEO' : ($heroUrl !== '' ? 'A FAMILY PHOTO' : (!empty($post['voice_capsule_url']) ? 'A FAMILY VOICE NOTE' : 'A FAMILY UPDATE'));
+            $kind = $isVideo ? 'A VIDEO' : ($heroUrl !== '' ? 'A PHOTO' : (!empty($post['voice_capsule_url']) ? 'A VOICE NOTE' : 'AN UPDATE'));
             if ($headline === '') {
                 $headline = ucwords(strtolower($kind));
             }
@@ -437,11 +474,11 @@ final class PostShareController
                 'headline' => $headline,
                 'verse' => $verse,
                 'sign_off' => 'Shared with love by',
-                'sender_name' => (static function (string $n): string {
-                    $n = trim($n);
-                    // Script fonts read badly in ALL CAPS: "OLAW OLAOGUN" -> "Olaw Olaogun"
-                    return $n === '' ? 'A family member' : ($n === mb_strtoupper($n) ? mb_convert_case(mb_strtolower($n), MB_CASE_TITLE) : $n);
-                })((string)($post['fullName'] ?? '')),
+                'sender_name' => \App\services\UserHandleService::resolveExternalAuthorName(
+                    $db,
+                    (string)($post['id'] ?? ''),
+                    (string)($post['fullName'] ?? '')
+                ),
                 'recipient_name' => '',
                 'hero_photo_url' => $heroUrl,
             ]);
@@ -456,6 +493,13 @@ final class PostShareController
             }
         } catch (\Throwable $e) {
             error_log('[PostShareController::cardImage] ' . $e->getMessage());
+            $fallback = dirname(__DIR__, 2) . '/public/img/og-invite.jpg';
+            if (is_file($fallback)) {
+                header('Content-Type: image/jpeg');
+                header('Cache-Control: public, max-age=3600');
+                readfile($fallback);
+                return;
+            }
             http_response_code(500);
         }
     }

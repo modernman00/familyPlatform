@@ -16,11 +16,51 @@ function cleanRawCaption(post) {
     return raw;
 }
 
+export function formatExternalAuthorName(post) {
+    if (!post) return 'A relative';
+    const preference = String(post.external_share_name || '').toLowerCase();
+    const handle = String(post.app_handle || post.handle || '').replace(/^@+/, '').trim();
+    if (preference === 'anonymous') {
+        return 'A family member';
+    }
+    if (preference === 'handle' && handle) {
+        return `@${handle}`;
+    }
+    const f = (post.firstName || '').trim();
+    const l = (post.lastName || '').trim();
+    const cleanFirst = f ? f.charAt(0).toUpperCase() + f.slice(1).toLowerCase() : '';
+    const cleanLast = l ? l.charAt(0).toUpperCase() + l.slice(1).toLowerCase() : '';
+
+    if (preference === 'first_only' && cleanFirst) {
+        return cleanFirst;
+    }
+    if (preference === 'full_name' && (cleanFirst || cleanLast)) {
+        return `${cleanFirst} ${cleanLast}`.trim();
+    }
+    // Default / first_initial:
+    if (cleanFirst && cleanLast) {
+        return `${cleanFirst} ${cleanLast.charAt(0)}.`;
+    }
+    if (cleanFirst) {
+        return cleanFirst;
+    }
+    // Fallback: parse fullName
+    const full = (post.fullName || '').trim();
+    if (!full || full.toLowerCase() === 'family member' || full.toLowerCase() === 'a relative') {
+        return handle ? `@${handle}` : 'A family member';
+    }
+    const parts = full.split(/\s+/);
+    if (parts.length > 1) {
+        const first = parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase();
+        const initial = parts[parts.length - 1].charAt(0).toUpperCase();
+        return `${first} ${initial}.`;
+    }
+    return parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase();
+}
+
 export function getCleanShareText(post) {
     if (!post) return 'Check out this memory on FamilyPlatform';
-    const author =
-        (post.fullName || `${post.firstName || ''} ${post.lastName || ''}`).trim() ||
-        'A family relative';
+    const author = formatExternalAuthorName(post);
     const raw = cleanRawCaption(post);
 
     if (raw.length > 0) {
@@ -38,33 +78,31 @@ export function getCleanShareText(post) {
     );
 
     if (hasVideo) {
-        return `Watch ${author}’s family video memory on FamilyPlatform`;
+        return `Watch ${author}’s video on FamilyPlatform`;
     }
     if (Array.isArray(post.images) && post.images.length > 0) {
-        return `View ${author}’s family photo on FamilyPlatform`;
+        return `View ${author}’s photo on FamilyPlatform`;
     }
     if (post.voice_capsule_url) {
         return `Listen to ${author}’s voice capsule on FamilyPlatform`;
     }
-    return `${author} shared a family memory on FamilyPlatform`;
+    return `${author} shared a post on FamilyPlatform`;
 }
 
 export function getWhatsAppShareText(post, shareUrl) {
-    const author =
-        (post?.fullName || `${post?.firstName || ''} ${post?.lastName || ''}`).trim() ||
-        'A relative';
+    const author = formatExternalAuthorName(post);
     const raw = cleanRawCaption(post);
     const hasVideo = Boolean(
         post && (post.video || (Array.isArray(post.videos) && post.videos.length > 0))
     );
     const hasPhoto = Boolean(post && Array.isArray(post.images) && post.images.length > 0);
     const kind = hasVideo
-        ? ['🎬', 'a family video']
+        ? ['🎬', 'a video']
         : hasPhoto
-            ? ['📸', 'a family photo']
+            ? ['📸', 'a photo']
             : post?.voice_capsule_url
                 ? ['🎙️', 'a voice note']
-                : ['💬', 'a family update'];
+                : ['💬', 'an update'];
 
     const lines = [`${kind[0]} *${author}* shared ${kind[1]} on FamilyPlatform`];
     if (raw) {
@@ -173,9 +211,7 @@ export function SharePortalModal({ isOpen, post, bootstrap, onUpdatePost, onClos
             ? window.location.origin
             : 'https://familyplatform.co.uk';
     const shareUrl = `${origin}/post/${encodeURIComponent(post.post_no)}`;
-    const author =
-        (post.fullName || `${post.firstName || ''} ${post.lastName || ''}`).trim() ||
-        'Family Member';
+    const author = formatExternalAuthorName(post);
 
     const hasVideo = Boolean(
         post.video ||
@@ -187,10 +223,10 @@ export function SharePortalModal({ isOpen, post, bootstrap, onUpdatePost, onClos
     const hasPhoto = Boolean(Array.isArray(post.images) && post.images.length > 0);
 
     const shareTitle = hasVideo
-        ? `${author}'s Family Video`
+        ? `${author}'s Video`
         : hasPhoto
-            ? `${author}'s Family Photo`
-            : `${author}'s Family Memory`;
+            ? `${author}'s Photo`
+            : `${author}'s Post`;
 
     const shareText = getCleanShareText(post);
     const waText = getWhatsAppShareText(post, shareUrl);

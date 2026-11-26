@@ -723,9 +723,21 @@ export function extractRawMedia(raw, cleanMsg = '') {
         return trimmed;
     };
 
+    let rawMediaMeta = null;
+    if (raw?.media_meta) {
+        try {
+            rawMediaMeta = typeof raw.media_meta === 'string' ? JSON.parse(raw.media_meta) : raw.media_meta;
+        } catch {
+            rawMediaMeta = null;
+        }
+    }
+    const metaAspectRatio = typeof rawMediaMeta?.aspect_ratio === 'string' && rawMediaMeta.aspect_ratio.trim()
+        ? rawMediaMeta.aspect_ratio.trim()
+        : null;
+
     const pushVideoDesc = (candidate) => {
         if (!candidate) return;
-        let desc = formatVideoDescriptor(candidate);
+        let desc = formatVideoDescriptor(candidate, cleanMsg);
         if (!desc) return;
 
         if (typeof candidate === 'object') {
@@ -741,12 +753,23 @@ export function extractRawMedia(raw, cleanMsg = '') {
                 embedUrl: rawEmbed.startsWith('/resources/videos/') ? rawEmbed : (desc.embedUrl || rawEmbed || rawOrig),
                 originalUrl: rawOrig || desc.originalUrl || rawEmbed,
                 thumbnailUrl: candidate.thumbnailUrl || desc.thumbnailUrl || derivedThumb,
+                isShort: Boolean(candidate.isShort || desc.isShort),
+                aspect_ratio: candidate.aspect_ratio || candidate.aspectRatio || desc.aspect_ratio || metaAspectRatio || undefined,
             };
         } else if (typeof desc === 'object' && !desc.thumbnailUrl && typeof desc.originalUrl === 'string' && desc.originalUrl.includes('googleusercontent.com')) {
             desc = {
                 ...desc,
                 thumbnailUrl: desc.originalUrl.replace(/=.*$/i, '=s1600-no'),
             };
+        }
+        if (metaAspectRatio && !desc.aspect_ratio) {
+            desc.aspect_ratio = metaAspectRatio;
+        }
+        if (typeof desc.aspect_ratio === 'string') {
+            const rMatch = desc.aspect_ratio.match(/^\s*(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)\s*$/);
+            if (rMatch && parseFloat(rMatch[2]) > 0 && (parseFloat(rMatch[1]) / parseFloat(rMatch[2])) < 0.88) {
+                desc.isShort = true;
+            }
         }
 
         const descOrigKey = normalizeVideoDedupKey(desc.originalUrl);

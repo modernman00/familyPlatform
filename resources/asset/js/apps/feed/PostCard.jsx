@@ -1533,6 +1533,35 @@ export const PostCard = memo(function PostCard({
                                     })}
                                 </div>
 
+                                {/* Animate Active Photo Pill on Carousel */}
+                                <button
+                                    type="button"
+                                    className="btn btn-sm rounded-pill d-inline-flex align-items-center gap-1"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onOpenLightbox?.(resolvedImages, safeIdx, post, true);
+                                    }}
+                                    style={{
+                                        position: 'absolute',
+                                        right: 12,
+                                        bottom: 12,
+                                        zIndex: 5,
+                                        minHeight: '44px',
+                                        padding: '6px 14px',
+                                        background: 'rgba(15, 23, 42, 0.86)',
+                                        color: '#ffffff',
+                                        border: '1px solid rgba(251, 191, 36, 0.65)',
+                                        fontWeight: 600,
+                                        whiteSpace: 'nowrap',
+                                        flexShrink: 0,
+                                        backdropFilter: 'blur(6px)',
+                                    }}
+                                    title="Animate this photo with 60fps living motion and share to feed"
+                                >
+                                    <span aria-hidden="true">🎬</span>
+                                    <span>Animate</span>
+                                </button>
+
                                 {/* Holographic Dynasty Specular Foil Shimmer Sheen */}
                                 <div className="vse-holo-foil-glint" aria-hidden="true" />
                             </div>

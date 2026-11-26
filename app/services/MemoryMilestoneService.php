@@ -800,9 +800,13 @@ class MemoryMilestoneService
             $isBirthdayEvent = $msType === 'birthday'
                 || stripos($subtitle, 'birthday') !== false
                 || stripos($title, 'birthday') !== false;
-            $cardMeaningfulMessage = ($msType === 'event' && $isBirthdayEvent)
-                ? $this->getBirthdayMeaningfulMessage(null, $cardTitle)
-                : (string)($ms['meaningful_message'] ?? 'Honouring this cherished milestone in our family.');
+            $rawMeaningful = trim((string)($ms['meaningful_message'] ?? ''));
+            $cardMeaningfulMessage = $rawMeaningful !== ''
+                ? $rawMeaningful
+                : ($isBirthdayEvent
+                    ? ($this->getBirthdayMeaningfulMessage(isset($ms['age']) && is_numeric($ms['age']) ? (int)$ms['age'] : null, $cardTitle)
+                        ?: 'Another wonderful year of laughter, growth, and shared memories that enrich our family legacy.')
+                    : 'Honouring this cherished milestone in our family.');
 
             $cardData = [
                 'title' => $cardTitle,

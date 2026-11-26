@@ -28,6 +28,13 @@ window.loadHls = () =>
         window.Hls = m.default || m;
         return window.Hls;
       });
+window.loadHyperReality3D = () =>
+  window.HyperReality3DEngine
+    ? Promise.resolve(window.HyperReality3DEngine)
+    : import(/* webpackChunkName: 'hyper-reality-3d' */ '@modernman00/shared-js-lib/HyperReality3DEngine').then((m) => {
+        window.HyperReality3DEngine = m.HyperReality3DEngine || m.default || m;
+        return window.HyperReality3DEngine;
+      });
 window.swalToast = swalToast;
 window.swalSuccess = swalSuccess;
 window.swalError = swalError;

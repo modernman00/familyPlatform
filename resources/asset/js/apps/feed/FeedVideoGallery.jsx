@@ -129,8 +129,11 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo, playerId }) {
     const numericRatio = parseAspectRatioValue(detectedRatio);
     const isShortHint = Boolean(
         vid?.isShort
-        || (typeof vid?.originalUrl === 'string' && (vid.originalUrl.includes('/shorts/') || /\/reel\/\d+/i.test(vid.originalUrl)))
-        || (typeof vid?.embedUrl === 'string' && /\/reel(?:\/|%2F)\d+/i.test(vid.embedUrl))
+        || vid?.type === 'tiktok'
+        || vid?.provider === 'tiktok'
+        || (typeof vid?.originalUrl === 'string' && (vid.originalUrl.includes('/shorts/') || /\/reels?\/\d+/i.test(vid.originalUrl)))
+        || (typeof vid?.embedUrl === 'string' && /\/reels?(?:\/|%2F)\d+/i.test(vid.embedUrl))
+        || /(?:^|[\s"'(])#(?:shorts?|reels?|tiktok|afv)\b/i.test(String(vid?.title || vid?.hook || vid?.hookText || ''))
     );
     const isFacebookEmbed = !isDirect && (
         vid?.type === 'facebook'
@@ -742,7 +745,10 @@ function MultiVideoCard({
     const [progressPct, setProgressPct] = useState(0);
     const isPortraitHint = Boolean(
         vid?.isShort
-        || (typeof vid?.originalUrl === 'string' && (vid.originalUrl.includes('/shorts/') || /\/reel\/\d+/i.test(vid.originalUrl)))
+        || vid?.type === 'tiktok'
+        || vid?.provider === 'tiktok'
+        || (typeof vid?.originalUrl === 'string' && (vid.originalUrl.includes('/shorts/') || /\/reels?\/\d+/i.test(vid.originalUrl)))
+        || /(?:^|[\s"'(])#(?:shorts?|reels?|tiktok|afv)\b/i.test(String(vid?.title || vid?.hook || vid?.hookText || ''))
         || (parseAspectRatioValue(vid?.aspectRatio || vid?.aspect_ratio) !== null && parseAspectRatioValue(vid?.aspectRatio || vid?.aspect_ratio) < 0.88)
     );
     const [isLandscape, setIsLandscape] = useState(vid?.type && vid.type !== 'direct' && !isPortraitHint && vid?.type !== 'facebook');

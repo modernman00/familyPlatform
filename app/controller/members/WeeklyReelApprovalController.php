@@ -227,4 +227,41 @@ final class WeeklyReelApprovalController extends BaseController
             echo json_encode(['success' => false, 'error' => 'Failed to generate weekly reel.'], JSON_UNESCAPED_SLASHES);
         }
     }
+
+    /**
+     * API: Return the 60fps Weekly Fun Facts storyboard payload for canvas playback.
+     * GET /api/weekly-reel/canvas-player
+     */
+    public function canvasPlayer(): void
+    {
+        if (empty($_SESSION['id'])) {
+            http_response_code(401);
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'error' => 'Unauthorised'], JSON_UNESCAPED_SLASHES);
+            return;
+        }
+
+        $userId = (string)$_SESSION['id'];
+        $famCode = (string)($_SESSION['famCode'] ?? '');
+        $week = trim((string)($_GET['week'] ?? ''));
+        $videoUrl = $week !== '' ? ('/api/weekly-reel/canvas-player?week=' . preg_replace('/[^0-9\-]/', '', $week)) : '/api/weekly-reel/canvas-player';
+
+        header('Content-Type: application/json');
+        $reel = \App\model\Reel::getReelsFeed($userId, $famCode, 20, 0);
+        foreach ($reel as $item) {
+            if ((string)($item['video_url'] ?? '') === $videoUrl && !empty($item['weekly_storyboard'])) {
+                echo json_encode([
+                    'success' => true,
+                    'storyboard' => $item['weekly_storyboard'],
+                ], JSON_UNESCAPED_SLASHES);
+                return;
+            }
+        }
+
+        $pending = WeeklyActivityVideoCuratorService::getPendingReel($userId, $famCode);
+        echo json_encode([
+            'success' => true,
+            'storyboard' => $pending['storyboard'] ?? null,
+        ], JSON_UNESCAPED_SLASHES);
+    }
 }

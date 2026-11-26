@@ -2212,17 +2212,33 @@ window.selectPostAudience = function(scope, label, iconClass, famCode) {
                 confirmBtn.disabled = true;
                 confirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1.5" role="status" aria-hidden="true"></span> Sharing...';
             }
+
+            const dispatchModalSubmission = function() {
+                if (typeof window.__submitPostModalForm === 'function') {
+                    window.__submitPostModalForm(confirmBtn);
+                    return;
+                }
+                const submitBtn = document.getElementById('submitPost');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.removeAttribute('aria-busy');
+                    submitBtn.removeAttribute('data-submitting');
+                    submitBtn.click();
+                } else if (window.ScoreTenantSpinner) {
+                    window.ScoreTenantSpinner.stop(confirmBtn);
+                }
+            };
+
             if (typeof window.__submitPostModalForm === 'function') {
-                window.__submitPostModalForm(confirmBtn);
-                return;
-            }
-            const submitBtn = document.getElementById('submitPost');
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.removeAttribute('aria-busy');
-                submitBtn.click();
-            } else if (window.ScoreTenantSpinner) {
-                window.ScoreTenantSpinner.stop(confirmBtn);
+                dispatchModalSubmission();
+            } else if (typeof window.ensureComposerBundle === 'function') {
+                window.ensureComposerBundle().then(function() {
+                    dispatchModalSubmission();
+                }).catch(function() {
+                    dispatchModalSubmission();
+                });
+            } else {
+                dispatchModalSubmission();
             }
         }
     });

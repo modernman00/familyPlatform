@@ -8,6 +8,7 @@ declare(strict_types=1);
  */
 
 $router->map('GET', '/api/weekly-reel/pending', 'App\controller\members\WeeklyReelApprovalController@getPending', 'api_weekly_reel_pending');
+$router->map('GET', '/api/weekly-reel/canvas-player', 'App\controller\members\WeeklyReelApprovalController@canvasPlayer', 'api_weekly_reel_canvas_player');
 $router->map('POST', '/api/weekly-reel/approve', 'App\controller\members\WeeklyReelApprovalController@approve', 'api_weekly_reel_approve');
 $router->map('POST', '/api/weekly-reel/dismiss', 'App\controller\members\WeeklyReelApprovalController@dismiss', 'api_weekly_reel_dismiss');
 $router->map('POST', '/api/weekly-reel/generate', 'App\controller\members\WeeklyReelApprovalController@generate', 'api_weekly_reel_generate');

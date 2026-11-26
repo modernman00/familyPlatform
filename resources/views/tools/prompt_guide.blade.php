@@ -1,6 +1,7 @@
 @extends('layouts.landing_layout')
 
 @section('title', ($guide['title'] ?? 'Family Memory Prompt Guide') . ' | FamilyPlatform')
+@section('og_image', rtrim((string) ($_ENV['APP_URL'] ?? getenv('APP_URL') ?: 'https://myfamilyplatform.com'), '/') . '/public/images/og-prompt-guide.jpg?v=1')
 @section('meta_description', $guide['meta_description'] ?? 'Oral history interview questions and memory recording guide for families.')
 @section('og_title', ($guide['title'] ?? 'Family Memory Prompt Guide') . ' | FamilyPlatform')
 @section('og_description', $guide['meta_description'] ?? 'Oral history interview questions and memory recording guide for families.')

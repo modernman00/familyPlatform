@@ -1,6 +1,7 @@
 @extends('layouts.landing_layout')
 
 @section('title', 'Why FamilyPlatform vs WhatsApp | The Living Dynasty Sanctuary')
+@section('og_image', rtrim((string) ($_ENV['APP_URL'] ?? getenv('APP_URL') ?: 'https://myfamilyplatform.com'), '/') . '/public/images/og-why-familyplatform.jpg?v=1')
 @section('meta_description', 'Discover why families are choosing FamilyPlatform over chaotic WhatsApp groups. Preserve uncompressed memories, living family trees, elder voice capsules, and structured reunions.')
 @section('data-page-id', 'why-familyplatform')
 

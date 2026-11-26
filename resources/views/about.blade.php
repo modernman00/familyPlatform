@@ -1,6 +1,7 @@
 @extends('layouts.landing_layout')
 
 @section('title', 'About Us')
+@section('og_image', rtrim((string) ($_ENV['APP_URL'] ?? getenv('APP_URL') ?: 'https://myfamilyplatform.com'), '/') . '/public/images/og-about.jpg?v=1')
 @section('data-page-id', 'about')
 
 @section('content')

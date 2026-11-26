@@ -24,6 +24,7 @@ const ensureComposerBundle = () => {
     }
     return composerBundlePromise;
 };
+window.ensureComposerBundle = ensureComposerBundle;
 
 let createEventBundlePromise = null;
 const ensureCreateEventBundle = () => {

@@ -172,6 +172,105 @@ final class PosterStudioController
         }
     }
 
+    /**
+     * POST /api/poster-studio/share-snapshot
+     * Saves a WhatsApp-safe (< 300 KB) JPEG snapshot of the rendered poster for Open Graph previews.
+     */
+    public function shareSnapshot(): void
+    {
+        header('Content-Type: application/json');
+        try {
+            CheckToken::tokenCheck();
+
+            $userId = $_SESSION['id'] ?? null;
+            $famCode = is_string($_SESSION['famCode'] ?? null) ? $_SESSION['famCode'] : '';
+            if (!$userId || !is_string($userId)) {
+                $this->fail(401, 'Please sign in again to share this poster.');
+                return;
+            }
+
+            $file = $_FILES['poster'] ?? null;
+            if (!is_array($file) || (int)($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || !is_uploaded_file((string)$file['tmp_name'])) {
+                $this->fail(422, 'The poster image did not upload. Please try again.');
+                return;
+            }
+            if ((int)($file['size'] ?? 0) > 15 * 1024 * 1024) {
+                $this->fail(422, 'That poster is too large to share.');
+                return;
+            }
+
+            $info = @getimagesize((string)$file['tmp_name']);
+            $mime = is_array($info) ? (string)$info['mime'] : '';
+            $src = match ($mime) {
+                'image/png' => @imagecreatefrompng((string)$file['tmp_name']),
+                'image/jpeg' => @imagecreatefromjpeg((string)$file['tmp_name']),
+                default => false,
+            };
+            if (!$src || imagesx($src) > 3000 || imagesy($src) > 3000) {
+                $this->fail(422, 'That poster image could not be read.');
+                return;
+            }
+
+            $w = imagesx($src);
+            $h = imagesy($src);
+            $maxW = 1200;
+            if ($w > $maxW) {
+                $newW = $maxW;
+                $newH = (int)round($h * ($maxW / $w));
+            } else {
+                $newW = $w;
+                $newH = $h;
+            }
+            $dst = imagecreatetruecolor($newW, $newH);
+            imagefill($dst, 0, 0, (int)imagecolorallocate($dst, 255, 255, 255));
+            imagecopyresampled($dst, $src, 0, 0, 0, 0, $newW, $newH, $w, $h);
+            imagedestroy($src);
+
+            $dir = dirname(__DIR__, 3) . '/public/uploads/poster_shares';
+            if (!is_dir($dir) && !@mkdir($dir, 0755, true) && !is_dir($dir)) {
+                imagedestroy($dst);
+                $this->fail(500, 'Share image storage is unavailable right now.');
+                return;
+            }
+
+            $hash = bin2hex(random_bytes(10));
+            $jpgPath = $dir . '/' . $hash . '.jpg';
+            imageinterlace($dst, true);
+            $quality = 84;
+            imagejpeg($dst, $jpgPath, $quality);
+            while (is_file($jpgPath) && filesize($jpgPath) > 280 * 1024 && $quality > 55) {
+                $quality -= 8;
+                imagejpeg($dst, $jpgPath, $quality);
+            }
+            imagedestroy($dst);
+
+            $title = mb_substr(trim(strip_tags((string)($_POST['title'] ?? ''))), 0, 140);
+            $when = mb_substr(trim(strip_tags((string)($_POST['when'] ?? ''))), 0, 100);
+            $venue = mb_substr(trim(strip_tags((string)($_POST['venue'] ?? ''))), 0, 120);
+            @file_put_contents($dir . '/' . $hash . '.json', json_encode([
+                'title' => $title,
+                'when' => $when,
+                'venue' => $venue,
+            ], JSON_UNESCAPED_UNICODE));
+
+            $appUrl = rtrim((string)($_ENV['APP_URL'] ?? (getenv('APP_URL') ?: 'https://myfamilyplatform.com')), '/ ');
+            $query = $famCode !== ''
+                ? '?famCode=' . rawurlencode(ltrim($famCode, '#')) . '&ref=poster&ps=' . $hash
+                : '?ref=poster&ps=' . $hash;
+
+            echo json_encode([
+                'status' => 'success',
+                'shareUrl' => $appUrl . '/register' . $query,
+                'imageUrl' => $appUrl . '/public/uploads/poster_shares/' . $hash . '.jpg',
+            ], JSON_UNESCAPED_UNICODE);
+        } catch (\Src\Exceptions\UnauthorisedException $e) {
+            $this->fail(403, 'Your session has expired. Please refresh the page and try again.');
+        } catch (\Throwable $e) {
+            error_log('[PosterStudio::shareSnapshot] ' . $e->getMessage());
+            $this->fail(500, 'We could not prepare the share preview right now.');
+        }
+    }
+
     private function fail(int $code, string $message): void
     {
         http_response_code($code);

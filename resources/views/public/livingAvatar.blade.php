@@ -7,6 +7,7 @@
     @include('partials.og-meta', [
         'ogTitle' => $ogTitle,
         'ogDescription' => $ogDescription,
+        'ogImage' => rtrim((string) ($_ENV['APP_URL'] ?? getenv('APP_URL') ?: 'https://myfamilyplatform.com'), '/') . '/public/images/og-living-avatar.jpg?v=1',
     ])
     <link rel="stylesheet" href="/public/css/main.css?v={{ assetVersion('css/main.css') }}">
     <link rel="stylesheet" href="/public/css/atg-emoji.css?v={{ assetVersion('css/atg-emoji.css') }}">

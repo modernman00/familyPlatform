@@ -1208,6 +1208,24 @@ final class AtgFestiveCardService
         if (is_file($root . '/public' . $url)) {
             return '/public' . $url;
         }
+
+        // Support post/profile images stored across candidate directories
+        $base = basename($url);
+        $candidates = [
+            '/resources/images/post/' . $base,
+            '/public/img/post/' . $base,
+            '/public/images/post/' . $base,
+            '/resources/images/' . $base,
+            '/public/images/' . $base,
+            '/resources/images/profile/' . $base,
+            '/public/img/profile/' . $base,
+        ];
+        foreach ($candidates as $cand) {
+            if (is_file($root . $cand)) {
+                return $cand;
+            }
+        }
+
         return $url;
     }
 

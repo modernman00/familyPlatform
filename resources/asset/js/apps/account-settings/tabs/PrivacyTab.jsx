@@ -32,6 +32,8 @@ export function PrivacyTab({
     const [profileVisibility, setProfileVisibility] = useState(accountData.profile_visibility || 'Public');
     const [showMyProfile, setShowMyProfile] = useState((accountData.show_my_profile || 'on') === 'on');
     const [showBirthYear, setShowBirthYear] = useState((accountData.show_birth_year || 'off') === 'on');
+    const [appHandle, setAppHandle] = useState((accountData.app_handle || '').replace(/^@+/, ''));
+    const [externalShareName, setExternalShareName] = useState(accountData.external_share_name || 'first_initial');
     const [saving, setSaving] = useState(false);
     const [status, setStatus] = useState({ type: 'info', message: '' });
 
@@ -50,18 +52,24 @@ export function PrivacyTab({
         setProfileVisibility(accountData.profile_visibility || 'Public');
         setShowMyProfile((accountData.show_my_profile || 'on') === 'on');
         setShowBirthYear((accountData.show_birth_year || 'off') === 'on');
+        setAppHandle((accountData.app_handle || '').replace(/^@+/, ''));
+        setExternalShareName(accountData.external_share_name || 'first_initial');
     }, [
         accountData.two_factor_auth,
         accountData.profile_visibility,
         accountData.show_my_profile,
         accountData.show_birth_year,
+        accountData.app_handle,
+        accountData.external_share_name,
     ]);
 
     const isDirty =
         twoFactor !== ((accountData.two_factor_auth || 'off') === 'on') ||
         profileVisibility !== (accountData.profile_visibility || 'Public') ||
         showMyProfile !== ((accountData.show_my_profile || 'on') === 'on') ||
-        showBirthYear !== ((accountData.show_birth_year || 'off') === 'on');
+        showBirthYear !== ((accountData.show_birth_year || 'off') === 'on') ||
+        appHandle !== (accountData.app_handle || '').replace(/^@+/, '') ||
+        externalShareName !== (accountData.external_share_name || 'first_initial');
 
     useEffect(() => {
         if (typeof onDirtyChange === 'function') {
@@ -78,6 +86,22 @@ export function PrivacyTab({
         }
     };
 
+    const computedPreviewName = (pref) => {
+        const f = (accountData.firstName || '').trim();
+        const l = (accountData.lastName || '').trim();
+        const cleanFirst = f ? f.charAt(0).toUpperCase() + f.slice(1).toLowerCase() : 'Alex';
+        const cleanLast = l ? l.charAt(0).toUpperCase() + l.slice(1).toLowerCase() : 'Taylor';
+        if (pref === 'anonymous') return 'A family member';
+        if (pref === 'handle') {
+            const h = (appHandle || accountData.app_handle || '').trim().replace(/^@+/, '');
+            return h ? `@${h}` : `${cleanFirst} ${cleanLast ? cleanLast.charAt(0) + '.' : ''}`.trim();
+        }
+        if (pref === 'first_only') return cleanFirst;
+        if (pref === 'full_name') return `${cleanFirst} ${cleanLast}`.trim();
+        // Default 'first_initial'
+        return cleanLast ? `${cleanFirst} ${cleanLast.charAt(0)}.` : cleanFirst;
+    };
+
     const handleSubmit = async (e) => {
         if (e && e.preventDefault) e.preventDefault();
         if (saving) return;
@@ -92,6 +116,8 @@ export function PrivacyTab({
                 profile_visibility: profileVisibility,
                 show_my_profile: showMyProfile ? 'on' : 'off',
                 show_birth_year: showBirthYear ? 'on' : 'off',
+                app_handle: appHandle.trim().replace(/^@+/, ''),
+                external_share_name: externalShareName,
             };
             const res = await postAccountForm(payload, bootstrap);
             if (res.ok) {
@@ -100,6 +126,8 @@ export function PrivacyTab({
                     profile_visibility: payload.profile_visibility,
                     show_my_profile: payload.show_my_profile,
                     show_birth_year: payload.show_birth_year,
+                    app_handle: payload.app_handle,
+                    external_share_name: payload.external_share_name,
                 });
                 if (typeof onDirtyChange === 'function') {
                     onDirtyChange('privacy', false);
@@ -387,6 +415,81 @@ export function PrivacyTab({
                     checked={showBirthYear}
                     onChange={setShowBirthYear}
                 />
+
+                {/* External Sharing & App Handle Identity */}
+                <div className={`p-4 mt-4 mb-4 rounded-3 border ${styles.subcard}`} style={{ borderColor: 'var(--as-border)' }}>
+                    <div className="d-flex align-items-center gap-2 mb-2">
+                        <i className="bi bi-shield-check text-primary fs-5" aria-hidden="true" />
+                        <h6 className="fw-bold mb-0" style={{ color: 'var(--as-ink)' }}>External Sharing &amp; App Identity</h6>
+                    </div>
+                    <p className="small mb-3" style={{ color: 'var(--as-muted)' }}>
+                        Customise how your name and persona appear to the outside world when your posts or memories are shared to WhatsApp, Messages/SMS, or social apps.
+                    </p>
+
+                    <div className="mb-3">
+                        <label className={styles.formLabel} htmlFor="privacy_app_handle">
+                            App Handle <span className="small text-muted fw-normal">(Optional)</span>
+                        </label>
+                        <div className="input-group">
+                            <span className="input-group-text fw-semibold" style={{ background: 'var(--as-surface-subtle)', borderColor: 'var(--as-border)', color: 'var(--as-ink)' }}>@</span>
+                            <input
+                                type="text"
+                                className={`form-control ${styles.formInput}`}
+                                id="privacy_app_handle"
+                                name="app_handle"
+                                value={appHandle}
+                                placeholder="e.g. modernman"
+                                maxLength={30}
+                                onInput={(e) => setAppHandle(e.currentTarget.value.replace(/^@+/, '').replace(/[^a-zA-Z0-9_]/g, '').toLowerCase())}
+                            />
+                        </div>
+                        <div className={styles.formHelp}>
+                            Used for in-app @mentions and your public card handle. Letters, numbers, and underscores only (2–30 characters).
+                        </div>
+                    </div>
+
+                    <div className="mb-3">
+                        <label className={styles.formLabel} htmlFor="privacy_external_share_name">
+                            External Share Display Name
+                        </label>
+                        <select
+                            className={`form-select ${styles.formSelect}`}
+                            name="external_share_name"
+                            id="privacy_external_share_name"
+                            value={externalShareName}
+                            onChange={(e) => setExternalShareName(e.currentTarget.value)}
+                        >
+                            <option value="first_initial">
+                                First Name &amp; Last Initial (e.g. {computedPreviewName('first_initial')}) [Recommended]
+                            </option>
+                            <option value="handle">
+                                App Handle (@{appHandle ? appHandle.replace(/^@+/, '') : (accountData.app_handle || 'handle')})
+                            </option>
+                            <option value="first_only">
+                                First Name Only (e.g. {computedPreviewName('first_only')})
+                            </option>
+                            <option value="full_name">
+                                Full Legal Name (e.g. {computedPreviewName('full_name')})
+                            </option>
+                            <option value="anonymous">
+                                Discreet / Anonymous (&quot;A family member&quot;)
+                            </option>
+                        </select>
+                        <div className={styles.formHelp}>
+                            When relatives share your posts outside FamilyPlatform, link previews will present your name using this format.
+                        </div>
+                    </div>
+
+                    {/* Live Preview Pill */}
+                    <div className="p-3 rounded-2 bg-light-subtle border" style={{ borderColor: 'var(--as-border)' }}>
+                        <div className="small fw-semibold text-muted text-uppercase mb-1" style={{ fontSize: '0.72rem', letterSpacing: '0.05em' }}>
+                            Live WhatsApp Share Preview
+                        </div>
+                        <div className="small" style={{ color: 'var(--as-ink)' }}>
+                            📸 <strong>{computedPreviewName(externalShareName)}</strong> shared a photo on FamilyPlatform
+                        </div>
+                    </div>
+                </div>
 
                 <SubmitButton
                     id="privacyBtn"

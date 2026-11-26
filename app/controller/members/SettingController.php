@@ -93,6 +93,7 @@ final class SettingController extends BaseController
         }
 
         $pdo = \Src\Db::connect2();
+        \App\services\UserHandleService::ensureSchema($pdo);
         $userId = (string) ($accountData['id'] ?? '');
         $approvalService = new \App\service\FamilyCodeApprovalService($pdo);
         $pendingFamilyRequest = $approvalService->getPendingRequestForUser($userId);
@@ -209,6 +210,8 @@ final class SettingController extends BaseController
             'profile_visibility' => (string) ($accountData['profile_visibility'] ?? 'Public'),
             'show_my_profile' => (string) ($accountData['show_my_profile'] ?? 'on'),
             'show_birth_year' => (string) ($accountData['show_birth_year'] ?? 'off'),
+            'app_handle' => (string) ($accountData['app_handle'] ?? ''),
+            'external_share_name' => \App\services\UserHandleService::normalisePreference((string) ($accountData['external_share_name'] ?? 'first_initial')),
             'img' => (string) ($accountData['img'] ?? ''),
         ];
 
@@ -392,12 +395,13 @@ final class SettingController extends BaseController
                 $ensureContactRow = static function (string $uid): void {
                     $db = Db::connect2();
                     \App\services\KinshipHonorificService::ensureSchema($db);
+                    \App\services\UserHandleService::ensureSchema($db);
                     $chk = $db->prepare('SELECT id FROM contact WHERE id = ? LIMIT 1');
                     $chk->execute([$uid]);
                     if (!$chk->fetch()) {
                         $email = (string) ($_SESSION['auth']['email'] ?? $_SESSION['email'] ?? '');
-                        $ins = $db->prepare('INSERT INTO contact (id, email, country, mobile, profile_visibility, show_my_profile, email_notifications, post_email_notifications, sms_notifications, kinship_honorifics) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-                        $ins->execute([$uid, substr($email, 0, 50), '', '', 'Public', 'on', 'on', 'off', 'on', 'on']);
+                        $ins = $db->prepare('INSERT INTO contact (id, email, country, mobile, profile_visibility, show_my_profile, email_notifications, post_email_notifications, sms_notifications, kinship_honorifics, app_handle, external_share_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+                        $ins->execute([$uid, substr($email, 0, 50), '', '', 'Public', 'on', 'on', 'off', 'on', 'on', null, 'first_initial']);
                     }
                 };
 
@@ -423,20 +427,51 @@ final class SettingController extends BaseController
 
                 // 3. Privacy
                 if ($action === 'updatePrivacy') {
-                    $ensureContactRow((string) $_POST['id']);
+                    $uidStr = (string) $_POST['id'];
+                    $ensureContactRow($uidStr);
                     $allowedVisibilities = ['Private', 'Public', 'Family Only'];
                     $visibility = in_array($_POST['profile_visibility'] ?? '', $allowedVisibilities, true)
                         ? (string) $_POST['profile_visibility']
                         : 'Public';
+
+                    $rawHandle = trim((string) ($_POST['app_handle'] ?? ''));
+                    $appHandle = null;
+                    if ($rawHandle !== '') {
+                        if (!\App\services\UserHandleService::isValidHandleFormat($rawHandle)) {
+                            msgException(400, "Handle can only contain letters, numbers, and underscores (2 to 30 characters).");
+                            return;
+                        }
+                        $cleanHandle = \App\services\UserHandleService::normaliseHandle($rawHandle);
+                        if (!\App\services\UserHandleService::isHandleAvailable(Db::connect2(), (string)$cleanHandle, $uidStr)) {
+                            msgException(400, "The handle @{$cleanHandle} is already registered by another member.");
+                            return;
+                        }
+                        $appHandle = $cleanHandle;
+                    }
+                    $extSharePref = \App\services\UserHandleService::normalisePreference((string) ($_POST['external_share_name'] ?? 'first_initial'));
+
                     $data = [
-                        'id' => $_POST['id'],
+                        'id' => $uidStr,
                         'two_factor_auth' => $normalizeSwitch($_POST['two_factor_auth'] ?? 'off'),
                         'profile_visibility' => $visibility,
                         'show_my_profile' => $normalizeSwitch($_POST['show_my_profile'] ?? 'off'),
                         'show_birth_year' => $normalizeSwitch($_POST['show_birth_year'] ?? 'off'),
+                        'app_handle' => $appHandle,
+                        'external_share_name' => $extSharePref,
                     ];
-                    UpdateFn::updateMultiple('contact', $data, 'id');
-                    msgSuccess(200, "Privacy settings successfully updated.");
+                    try {
+                        UpdateFn::updateMultiple('contact', $data, 'id');
+                    } catch (\PDOException $pdoEx) {
+                        if ($pdoEx->getCode() === '23000' && $appHandle !== null) {
+                            msgException(400, "The handle @{$appHandle} is already registered by another member.");
+                            return;
+                        }
+                        throw $pdoEx;
+                    }
+                    msgSuccess(200, "Privacy and external sharing settings successfully updated.", [
+                        'app_handle' => $appHandle,
+                        'external_share_name' => $extSharePref,
+                    ]);
                     return;
                 }
 

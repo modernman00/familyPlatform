@@ -1037,13 +1037,137 @@ final class Reel extends Select
         // Self-heal audio_url if it was omitted but a curated library track was chosen
         if (empty($reel['audio_url']) && !empty($reel['music_title']) && $reel['music_title'] !== 'Original Family Audio' && $reel['music_title'] !== 'Original Audio') {
             foreach (self::getAudioLibrary() as $libTrack) {
-                if (strcasecmp((string)$libTrack['title'], (string)$reel['music_title']) === 0) {
+                if (strcasecmp((string)$libTrack['title'], (string)$reel['music_title']) === 0 || str_contains(strtolower((string)$reel['music_title']), strtolower( explode(' ', (string)$libTrack['title'])[0] . ' ' . (explode(' ', (string)$libTrack['title'])[1] ?? '') ))) {
                     $reel['audio_url'] = $libTrack['url'];
                     break;
                 }
             }
         }
+        // Hydrate 60fps Weekly Fun Facts storyboard when video_url targets the canvas-player endpoint
+        $videoUrl = (string)($reel['video_url'] ?? '');
+        if (str_starts_with($videoUrl, '/api/weekly-reel/canvas-player') && empty($reel['weekly_storyboard'])) {
+            $reel['weekly_storyboard'] = self::resolveWeeklyStoryboardForReel($reel);
+        }
         return $reel;
+    }
+
+    /**
+     * Resolve or synthesise the 60fps Weekly Fun Facts storyboard for a canvas-player reel.
+     *
+     * @param array<string, mixed> $reel
+     * @return array<string, mixed>
+     */
+    private static function resolveWeeklyStoryboardForReel(array $reel): array
+    {
+        $userId = (string)($reel['user_id'] ?? '');
+        $famCode = (string)($reel['famCode'] ?? '');
+        $videoUrl = (string)($reel['video_url'] ?? '');
+        $caption = trim((string)($reel['caption'] ?? 'Our Family Fun Facts'));
+        $thumbUrl = (string)($reel['thumbnail_url'] ?? '');
+        $creatorName = trim(((string)($reel['firstName'] ?? 'Family')) . ' ' . ((string)($reel['lastName'] ?? '')));
+        if ($creatorName === '') {
+            $creatorName = 'Family Member';
+        }
+
+        try {
+            $pdo = self::connect2();
+            $stmt = $pdo->prepare(
+                "SELECT storyboard_json, duration_seconds, audio_url, music_title, title
+                 FROM weekly_activity_reels
+                 WHERE (user_id = :uid AND video_url = :vurl)
+                    OR (famCode = :fam AND video_url = :vurl2)
+                    OR (user_id = :uid2 AND status = 'approved')
+                    OR (famCode = :fam2 AND status = 'approved')
+                 ORDER BY (user_id = :uid3 AND video_url = :vurl3) DESC,
+                          (famCode = :fam3 AND video_url = :vurl4) DESC,
+                          (user_id = :uid4) DESC,
+                          id DESC
+                 LIMIT 1"
+            );
+            $stmt->execute([
+                ':uid' => $userId,
+                ':vurl' => $videoUrl,
+                ':fam' => $famCode,
+                ':vurl2' => $videoUrl,
+                ':uid2' => $userId,
+                ':fam2' => $famCode,
+                ':uid3' => $userId,
+                ':vurl3' => $videoUrl,
+                ':fam3' => $famCode,
+                ':vurl4' => $videoUrl,
+                ':uid4' => $userId,
+            ]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (is_array($row) && !empty($row['storyboard_json']) && is_string($row['storyboard_json'])) {
+                $decoded = json_decode($row['storyboard_json'], true);
+                if (is_array($decoded) && !empty($decoded['scenes']) && is_array($decoded['scenes'])) {
+                    return [
+                        'title' => (string)($decoded['title'] ?? $row['title'] ?? $caption),
+                        'duration_seconds' => (int)($decoded['duration_seconds'] ?? $row['duration_seconds'] ?? 30),
+                        'audio_url' => str_replace('/public/audio/reels/', '/audio/reels/', (string)($decoded['audio_url'] ?? $row['audio_url'] ?? '')),
+                        'music_title' => (string)($decoded['music_title'] ?? $row['music_title'] ?? 'Acoustic Warmth'),
+                        'aspect_ratio' => (string)($decoded['approved_aspect_ratio'] ?? ($reel['aspect_ratio'] ?? '9:16')),
+                        'scenes' => $decoded['scenes'],
+                        'fun_facts' => is_array($decoded['fun_facts'] ?? null) ? $decoded['fun_facts'] : [],
+                    ];
+                }
+            }
+        } catch (\Throwable $e) {
+            error_log('[Reel::resolveWeeklyStoryboardForReel] ' . $e->getMessage());
+        }
+
+        // Deterministic fallback storyboard if weekly_activity_reels record is absent
+        $fallbackScenes = [
+            [
+                'type' => 'fun_fact_intro',
+                'duration' => 5,
+                'badge' => 'WEEKLY FAMILY FUN FACTS',
+                'title' => $caption !== '' ? $caption : 'Our Family Week in Numbers',
+                'stat_value' => 1,
+                'caption' => 'Cherishing our favourite shared moments, milestones, and family memories.',
+                'accent' => '#38bdf8',
+            ],
+            [
+                'type' => 'fun_fact_leaderboard',
+                'duration' => 6,
+                'badge' => 'FUN FACT #1  •  TOP STORYTELLER',
+                'title' => $creatorName . ' led the family circle!',
+                'subtitle' => 'Keeping our family connected across generations.',
+                'leaderboard' => [
+                    ['name' => $creatorName, 'posts' => 1, 'likes' => 1],
+                ],
+                'accent' => '#0ea5e9',
+            ],
+        ];
+        if ($thumbUrl !== '') {
+            $fallbackScenes[] = [
+                'type' => 'milestone',
+                'duration' => 6,
+                'author' => $creatorName,
+                'title' => $caption !== '' ? $caption : 'Family Milestone Highlight',
+                'caption' => 'Captured in our private family sanctuary.',
+                'image_url' => $thumbUrl,
+                'accent' => '#f59e0b',
+            ];
+        }
+        $fallbackScenes[] = [
+            'type' => 'outro',
+            'duration' => 5,
+            'badge' => 'FAMILY SANCTUARY REELS',
+            'title' => 'One Family. Endless Love.',
+            'subtitle' => 'Private heritage highlights curated for your family circle.',
+            'accent' => '#10b981',
+        ];
+
+        return [
+            'title' => $caption !== '' ? $caption : 'Weekly Family Fun Facts',
+            'duration_seconds' => 22,
+            'audio_url' => '/audio/reels/library/acoustic_warmth.wav',
+            'music_title' => (string)($reel['music_title'] ?? 'Acoustic Warmth'),
+            'aspect_ratio' => (string)($reel['aspect_ratio'] ?? '9:16'),
+            'scenes' => $fallbackScenes,
+            'fun_facts' => [],
+        ];
     }
 
     /**

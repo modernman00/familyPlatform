@@ -43,7 +43,7 @@ final class ReelsController extends BaseController
                         $ogMeta = [
                             'title' => 'Family Reel on FamilyPlatform',
                             'description' => 'Sign in to FamilyPlatform to view moments shared with your family circle.',
-                            'image' => $baseUrl . '/public/img/favicon/android-chrome-512x512.png',
+                            'image' => $baseUrl . '/public/img/og-invite.jpg',
                             'url' => $baseUrl . '/reels',
                         ];
                     } else {
@@ -59,7 +59,7 @@ final class ReelsController extends BaseController
                         } elseif (!empty($targetReel['profilePics'])) {
                             $image = $baseUrl . '/resources/images/profile/' . basename((string)$targetReel['profilePics']);
                         } else {
-                            $image = $baseUrl . '/public/img/favicon/android-chrome-512x512.png';
+                            $image = $baseUrl . '/public/img/og-invite.jpg';
                         }
 
                         $ogMeta = [

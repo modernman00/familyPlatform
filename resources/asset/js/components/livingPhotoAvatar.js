@@ -808,8 +808,8 @@ export class AtgLivingPhotoAvatarStage {
     }
   }
 
-  async shareAnimatedVideo() {
-    if (this.isRecording || !this.isLoaded) return false;
+  async recordAnimatedVideoFile() {
+    if (this.isRecording || !this.isLoaded) return null;
     this.isRecording = true;
     this.exportStartMs = performance.now();
     this.unlockPack('royal_crown');
@@ -819,17 +819,30 @@ export class AtgLivingPhotoAvatarStage {
       const { blob, ext, mime } = await this._captureVideoBlob(this.exportDurationMs, 30);
       const file = new File([blob], `living-avatar-${this.currentReaction}.${ext}`, { type: mime });
       const spec = REACTION_CHOREOGRAPHY[this.currentReaction] || REACTION_CHOREOGRAPHY.hello;
-
-      return await ShareManager.share({
-        title: `My Living Avatar (${spec.label})`,
-        text: `See my Living Avatar ${this.hasDuet ? 'Duet ' : ''}in motion ${spec.emoji} — tap to try yours on FamilyPlatform!`,
-        url: this._buildChallengeUrl(),
+      return {
         file,
-      });
+        blob,
+        ext,
+        mime,
+        reaction: this.currentReaction,
+        label: spec.label,
+        emoji: spec.emoji,
+      };
     } finally {
       this.isRecording = false;
       this.exportStartMs = 0;
     }
+  }
+
+  async shareAnimatedVideo() {
+    const captured = await this.recordAnimatedVideoFile();
+    if (!captured) return false;
+    return await ShareManager.share({
+      title: `My Living Avatar (${captured.label})`,
+      text: `See my Living Avatar ${this.hasDuet ? 'Duet ' : ''}in motion ${captured.emoji} — tap to try yours on FamilyPlatform!`,
+      url: this._buildChallengeUrl(),
+      file: captured.file,
+    });
   }
 
   _captureVideoBlob(durationMs = 3200, fps = 30) {

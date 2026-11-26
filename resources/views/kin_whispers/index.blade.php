@@ -1,6 +1,7 @@
 @extends('layouts.profileBase')
 
 @section('title', 'FamChat & Artifact Messages — FamilyPlatform')
+@section('og_image', rtrim((string) ($_ENV['APP_URL'] ?? getenv('APP_URL') ?: 'https://myfamilyplatform.com'), '/') . '/public/images/og-famchat.jpg?v=1')
 @section('meta_description', 'Private, thoughtful messages and voice dedications anchored to your family photographs, memories and lineage.')
 
 @section('manifest_href', '/public/manifest-whispers.json')
@@ -92,12 +93,83 @@
     display: flex; align-items: center; justify-content: space-between; gap: 10px;
     padding: 16px 16px 12px; flex-shrink: 0;
 }
+.kw-side__brand {
+    display: flex; align-items: center; gap: 11px; min-width: 0; perspective: 360px;
+}
+.kw-3d-brand-orb {
+    position: relative; width: var(--tap-min, 44px); height: var(--tap-min, 44px); border-radius: var(--radius-md, 12px); flex-shrink: 0;
+    background:
+        radial-gradient(circle at 30% 24%, rgba(255,255,255,0.88) 0%, rgba(255,255,255,0) 42%),
+        linear-gradient(135deg, var(--accent-gold, #f59e0b) 0%, var(--brand-primary, #a31621) 70%, var(--brand-primary-hover, #8a1019) 100%);
+    box-shadow:
+        0 3.5px 0 var(--brand-primary-hover, #8a1019),
+        0 8px 18px var(--brand-primary-glow, rgba(163, 22, 33, 0.25)),
+        inset 0 1.5px 2px rgba(255,255,255,0.85),
+        inset 0 -2px 3px rgba(120,53,15,0.55);
+    display: inline-flex; align-items: center; justify-content: center;
+    transform-style: preserve-3d;
+    animation: kwBrandOrb3D 3.4s var(--ease, ease-in-out) infinite;
+    cursor: pointer;
+    overflow: hidden;
+}
+.kw-3d-brand-orb__sheen {
+    position: absolute; inset: -45%;
+    background: linear-gradient(115deg, transparent 34%, rgba(255,255,255,0.75) 50%, transparent 66%);
+    transform: translateX(-120%) rotate(18deg);
+    animation: kwBrandSheen 4s ease-in-out infinite;
+    pointer-events: none;
+}
+.kw-3d-brand-orb svg {
+    width: 22px; height: 22px; position: relative; z-index: 2;
+    transform: translateZ(6px);
+    filter: drop-shadow(0 2px 3px rgba(80, 7, 36, 0.6));
+}
+.kw-3d-empty-stage {
+    position: relative; width: 112px; height: 112px; margin: 0 auto 14px;
+    display: flex; align-items: center; justify-content: center;
+    perspective: 520px; transform-style: preserve-3d;
+}
+.kw-3d-empty-canvas {
+    width: 96px; height: 96px; border-radius: 24px;
+    box-shadow:
+        0 10px 26px rgba(163, 22, 33, 0.28),
+        0 0 0 2px rgba(251, 191, 36, 0.45);
+    cursor: grab;
+}
+.kw-3d-empty-canvas:active {
+    cursor: grabbing;
+}
+.kw-3d-orbit-ring {
+    position: absolute; inset: -6px; border-radius: 50%;
+    border: 1.5px dashed rgba(225, 29, 72, 0.35);
+    animation: kwOrbitSpin 14s linear infinite;
+    pointer-events: none;
+}
+@keyframes kwBrandOrb3D {
+    0%, 100% { transform: translateY(-1px) rotateX(14deg) rotateY(-16deg) rotateZ(-3deg); }
+    50% { transform: translateY(1.5px) rotateX(-12deg) rotateY(18deg) rotateZ(4deg) scale(1.05); }
+}
+@keyframes kwBrandSheen {
+    0%, 25% { transform: translateX(-120%) rotate(18deg); }
+    65%, 100% { transform: translateX(140%) rotate(18deg); }
+}
+@keyframes kwOrbitSpin {
+    from { transform: rotateZ(0deg) rotateX(22deg); }
+    to { transform: rotateZ(360deg) rotateX(22deg); }
+}
 .kw-side__actions {
     display: flex; align-items: center; gap: 8px; flex-shrink: 0;
 }
 .kw-side__title {
     font-family: 'Outfit', 'Inter', sans-serif; font-size: 1.375rem; font-weight: 800;
     letter-spacing: -0.02em; margin: 0; color: var(--kw-ink); line-height: 1.15;
+    display: inline-flex; align-items: center; gap: 6px;
+}
+.kw-side__3d-badge {
+    font-size: var(--text-xs, 0.75rem); font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+    padding: 2px var(--space-2, 8px); border-radius: 999px;
+    background: var(--brand-primary-gradient, linear-gradient(135deg, #a31621 0%, #8a1019 100%)); color: #ffffff;
+    box-shadow: 0 2px 6px var(--brand-primary-glow, rgba(163, 22, 33, 0.25));
 }
 .kw-side__sub {
     display: flex; align-items: center; gap: 5px; font-size: 0.75rem; font-weight: 500;
@@ -105,12 +177,15 @@
 }
 .kw-new-btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-    min-height: 44px; min-width: 44px; padding: 0 14px; border-radius: 999px; border: 0;
-    background: var(--kw-primary); color: #ffffff; font-size: 0.8125rem; font-weight: 700;
-    white-space: nowrap; flex-shrink: 0; cursor: pointer; transition: filter 0.15s ease, transform 0.15s ease;
+    min-height: 44px; min-width: 44px; padding: 0 14px; border-radius: 999px;
+    border: 1px solid rgba(251, 191, 36, 0.65);
+    background: linear-gradient(135deg, #a31621 0%, #be123c 55%, #881337 100%);
+    color: #ffffff; font-size: 0.8125rem; font-weight: 800;
+    box-shadow: 0 3px 0 #500724, 0 6px 14px rgba(163, 22, 33, 0.32), inset 0 1px 1px rgba(255, 255, 255, 0.45);
+    white-space: nowrap; flex-shrink: 0; cursor: pointer; transition: filter 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
-.kw-new-btn:hover { filter: brightness(1.06); }
-.kw-new-btn:active { transform: scale(0.98); }
+.kw-new-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.kw-new-btn:active { transform: scale(0.98) translateY(1px); box-shadow: 0 1px 0 #500724; }
 .kw-new-btn:focus-visible { outline: 2px solid var(--kw-primary); outline-offset: 2px; }
 
 /* Linked PWA Install & Pop-out Floating Popup */
@@ -1525,7 +1600,7 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
     font-weight: 700;
 }
 
-@media (prefers-reduced-motion: reduce) { .kw-rec__dot { animation: none; } .kw-btn, .kw-stream, .kw-theme-card { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .kw-rec__dot, .kw-3d-brand-orb, .kw-3d-brand-orb__sheen, .kw-3d-orbit-ring { animation: none !important; } .kw-btn, .kw-stream, .kw-theme-card { transition: none; } }
 </style>
 @endpush
 
@@ -1553,9 +1628,21 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
     {{-- Thread list --}}
     <aside class="kw-side" aria-label="Conversations">
       <div class="kw-side__head">
-        <div>
-          <h1 class="kw-side__title">FamChat</h1>
-          <p class="kw-side__sub"><i class="bi bi-lock"></i> Private &amp; supervised</p>
+        <div class="kw-side__brand">
+          <div class="kw-3d-brand-orb" @click="spinFamChat3DOrb()" title="FamChat 3D Living Sanctuary — tap to spin">
+            <span class="kw-3d-brand-orb__sheen" aria-hidden="true"></span>
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M12 3C6.48 3 2 6.82 2 11.5C2 13.68 2.98 15.66 4.6 17.16L3.4 21L7.72 19.3C9.07 19.75 10.51 20 12 20C17.52 20 22 16.18 22 11.5C22 6.82 17.52 3 12 3Z" fill="#ffffff" stroke="#78350f" stroke-width="1.2" stroke-linejoin="round"/>
+              <path d="M12 15.4C12 15.4 8.2 13.1 8.2 10.6C8.2 9.4 9.15 8.5 10.25 8.5C10.95 8.5 11.58 8.85 12 9.45C12.42 8.85 13.05 8.5 13.75 8.5C14.85 8.5 15.8 9.4 15.8 10.6C15.8 13.1 12 15.4 12 15.4Z" fill="#e11d48"/>
+            </svg>
+          </div>
+          <div>
+            <h1 class="kw-side__title">
+              <span>FamChat</span>
+              <span class="kw-side__3d-badge">3D Live</span>
+            </h1>
+            <p class="kw-side__sub"><i class="bi bi-lock"></i> Private &amp; supervised</p>
+          </div>
         </div>
         <div class="kw-side__actions">
           <button type="button" class="kw-new-btn" @click="openCompose()" aria-label="New whisper" title="Start a new whisper">
@@ -1802,7 +1889,7 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
                     <button type="button" class="kw-react-trigger kw-react-trigger--react" @click.stop="openReactionPopover(msg.id, $event)" aria-label="Add reaction" title="Add reaction">
                       <svg class="kw-action-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <circle cx="12" cy="12" r="10"></circle>
-                        <path d="M8 14s1.5 2 4 2 4-2"></path>
+                        <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
                         <line x1="9" y1="9" x2="9.01" y2="9"></line>
                         <line x1="15" y1="9" x2="15.01" y2="9"></line>
                       </svg>
@@ -2209,9 +2296,12 @@ mark.kw-highlight { background: #fef08a; color: #000; border-radius: 2px; paddin
       @if(empty($access_error))
       <template x-if="!activeThread">
         <div class="kw-empty">
-          <div class="kw-empty__icon"><i class="bi bi-chat-heart"></i></div>
+          <div class="kw-3d-empty-stage" x-init="$nextTick(() => initFamChat3DCube())">
+            <span class="kw-3d-orbit-ring" aria-hidden="true"></span>
+            <canvas id="famChat3DBeaconCanvas" class="kw-3d-empty-canvas" width="96" height="96" @click="spinFamChat3DOrb()" title="Drag or tap to spin the 3D FamChat Heritage Cube"></canvas>
+          </div>
           <h3>Choose a conversation</h3>
-          <p>Pick a thread on the left, or start a new whisper about a photo, memory or relative.</p>
+          <p>Pick a thread on the left, spin the 3D Heritage Cube, or start a new whisper about a photo, memory or relative.</p>
           <button type="button" class="kw-btn kw-btn--primary" @click="openCompose()"><i class="bi bi-plus-lg"></i><span>New whisper</span></button>
         </div>
       </template>
@@ -6101,6 +6191,83 @@ function kinWhisperApp() {
     toast(msg) {
       if (window.Swal) { Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: msg, showConfirmButton: false, timer: 3500 }); }
       else { alert(msg); }
+    },
+
+    _famChat3DEngine: null,
+
+    async initFamChat3DCube() {
+      const canvas = document.getElementById('famChat3DBeaconCanvas');
+      if (!canvas || this._famChat3DEngine) return;
+      const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      try {
+        if (typeof window.loadHyperReality3D === 'function') {
+          const Engine = await window.loadHyperReality3D();
+          const engine = new Engine(canvas, { width: 96, height: 96 });
+          if (engine && engine.gl) {
+            if (!reducedMotion) {
+              engine.spin3D(0.012, 0.02);
+              engine.start();
+            } else {
+              engine.render();
+            }
+
+            // Input-Focus Guard: pause WebGL animation while typing
+            document.addEventListener('focusin', (e) => {
+              const tag = (e.target && e.target.tagName || '').toLowerCase();
+              if (e.target && (e.target.isContentEditable || tag === 'input' || tag === 'textarea' || tag === 'select')) {
+                engine.stop();
+              }
+            }, true);
+            document.addEventListener('focusout', () => {
+              if (!reducedMotion && document.body.contains(canvas)) {
+                engine.start();
+              }
+            }, true);
+
+            this._famChat3DEngine = engine;
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('[FamChat3D] Falling back to 2D emblem:', err);
+      }
+
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        const grad = ctx.createLinearGradient(0, 0, 96, 96);
+        grad.addColorStop(0, '#fbbf24');
+        grad.addColorStop(0.5, '#a31621');
+        grad.addColorStop(1, '#8a1019');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, 96, 96);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 28px Outfit, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('💬', 48, 48);
+      }
+    },
+
+    spinFamChat3DOrb() {
+      if (this._famChat3DEngine) {
+        if (typeof this._famChat3DEngine.spin3D === 'function') {
+          this._famChat3DEngine.spin3D(0.09, 0.14);
+          if (typeof this._famChat3DEngine.start === 'function') {
+            this._famChat3DEngine.start();
+          }
+        } else if (typeof this._famChat3DEngine.spin === 'function') {
+          this._famChat3DEngine.spin();
+        }
+      }
+      const orb = document.querySelector('.kw-3d-brand-orb');
+      if (orb && typeof orb.animate === 'function') {
+        orb.animate([
+          { transform: 'rotateY(0deg) scale(1)' },
+          { transform: 'rotateY(360deg) scale(1.16)' },
+          { transform: 'rotateY(720deg) scale(1)' }
+        ], { duration: 680, easing: 'cubic-bezier(0.16, 1, 0.3, 1)' });
+      }
     }
   };
 }

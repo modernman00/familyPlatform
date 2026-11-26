@@ -680,7 +680,27 @@ class FamilyReelsPlayer {
         }
     }
 
-    getMediaEmbed(videoUrl, aspectRatio = '9:16') {
+    isWeeklyCanvasReel(reel) {
+        if (!reel) return false;
+        const vUrl = String(reel.video_url || '').trim();
+        if (vUrl.startsWith('/api/weekly-reel/canvas-player')) return true;
+        if (reel.weekly_storyboard && Array.isArray(reel.weekly_storyboard.scenes) && reel.weekly_storyboard.scenes.length > 0) return true;
+        return false;
+    }
+
+    getMediaEmbed(videoUrl, aspectRatio = '9:16', reel = null) {
+        const initialFitClass = (aspectRatio === '16:9' || aspectRatio === 'cinema') ? 'fit-cinema' : '';
+
+        if (this.isWeeklyCanvasReel(reel) || (videoUrl && String(videoUrl).trim().startsWith('/api/weekly-reel/canvas-player'))) {
+            const canvasW = initialFitClass ? 1280 : 720;
+            const canvasH = initialFitClass ? 720 : 1280;
+            return `
+            <div class="reel-canvas-wrapper" id="reelCanvasWrapper">
+                <canvas id="reelActiveCanvas" class="reel-video-element reel-weekly-canvas ${initialFitClass}" width="${canvasW}" height="${canvasH}"></canvas>
+            </div>
+            `;
+        }
+
         if (!videoUrl) {
             return '<div class="d-flex align-items-center justify-content-center h-100 text-white-50 small">No video source</div>';
         }
@@ -796,11 +816,11 @@ class FamilyReelsPlayer {
             `;
         }
 
-        const initialFitClass = (aspectRatio === '16:9' || aspectRatio === 'cinema') ? 'fit-cinema' : '';
+        const posterAttr = reel?.thumbnail_url ? `poster="${esc(String(reel.thumbnail_url))}"` : '';
 
         // Direct HTML5 Video File (MP4, WebM, MOV, server uploads) - no 'loop' attribute so 'ended' fires for continuous autoplay
         return `
-        <video class="reel-video-element atg-4k-video-render ${initialFitClass}" id="reelActiveVideo" playsinline webkit-playsinline preload="auto" ${this.isMuted ? 'muted' : ''} autoplay>
+        <video class="reel-video-element atg-4k-video-render ${initialFitClass}" id="reelActiveVideo" ${posterAttr} playsinline webkit-playsinline preload="auto" ${this.isMuted ? 'muted' : ''} autoplay>
             <source src="${esc(trimmed)}" type="video/mp4">
             <source src="${esc(trimmed)}" type="video/webm">
             Your browser does not support HTML5 video.
@@ -808,7 +828,556 @@ class FamilyReelsPlayer {
         `;
     }
 
+    stopWeeklyCanvasLoop() {
+        if (this.weeklyCanvasRaf) {
+            cancelAnimationFrame(this.weeklyCanvasRaf);
+            this.weeklyCanvasRaf = null;
+        }
+    }
+
+    startWeeklyCanvasPlayer(reel, segActiveIdx = 0) {
+        this.stopWeeklyCanvasLoop();
+        const canvas = document.getElementById('reelActiveCanvas');
+        if (!canvas) return;
+
+        const creatorName = `${reel.firstName || 'Family'} ${reel.lastName || ''}`.trim() || 'Family Member';
+        const caption = String(reel.caption || 'Our Family Fun Facts').trim();
+        const thumbUrl = String(reel.thumbnail_url || '').trim();
+        const sb = (reel.weekly_storyboard && typeof reel.weekly_storyboard === 'object') ? reel.weekly_storyboard : {};
+        let scenes = Array.isArray(sb.scenes) && sb.scenes.length > 0 ? sb.scenes : null;
+
+        if (!scenes) {
+            scenes = [
+                {
+                    type: 'fun_fact_intro',
+                    duration: 5,
+                    badge: 'WEEKLY FAMILY FUN FACTS',
+                    title: caption || 'Our Family Week in Numbers',
+                    stat_value: 1,
+                    caption: 'Cherishing our favourite shared moments, laughter, and celebrations together.',
+                    accent: '#38bdf8',
+                },
+                {
+                    type: 'fun_fact_leaderboard',
+                    duration: 6,
+                    badge: 'FUN FACT #1  •  TOP STORYTELLER',
+                    title: `${creatorName} led the family feed!`,
+                    subtitle: 'Keeping our family circle connected across generations.',
+                    leaderboard: [{ name: creatorName, posts: 1, likes: 1 }],
+                    accent: '#0ea5e9',
+                },
+                ...(thumbUrl ? [{
+                    type: 'milestone',
+                    duration: 6,
+                    author: creatorName,
+                    title: caption || 'Family Milestone Highlight',
+                    caption: 'Shared in our private family sanctuary.',
+                    image_url: thumbUrl,
+                    accent: '#f59e0b',
+                }] : []),
+                {
+                    type: 'outro',
+                    duration: 5,
+                    badge: 'FAMILY SANCTUARY REELS',
+                    title: 'One Family. Endless Love.',
+                    subtitle: 'Curated privately for your family circle.',
+                    accent: '#10b981',
+                },
+            ];
+        }
+
+        if (!this.weeklyImageCache) {
+            this.weeklyImageCache = {};
+        }
+
+        // Lazy-load SovereignNleEngine from @modernman00/shared-js-lib for atmospheric overlays,
+        // feathered lighting, procedural charts, vignette, and film grain post-processing.
+        if (!this._weeklyNleEngine && !this._weeklyNleLoading) {
+            this._weeklyNleLoading = true;
+            import(/* webpackChunkName: 'SovereignNleEngine' */ '@modernman00/shared-js-lib/SovereignNleEngine')
+                .then((mod) => {
+                    const NleCtor = mod.default || mod.SovereignNleEngine || window.SovereignNleEngine;
+                    if (typeof NleCtor === 'function') {
+                        this._weeklyNleEngine = new NleCtor({ aspectRatio: '9:16' });
+                    }
+                })
+                .catch(() => {})
+                .finally(() => {
+                    this._weeklyNleLoading = false;
+                });
+        }
+
+        const safeMediaUrl = (u) => {
+            if (!u || typeof u !== 'string') return '';
+            const t = u.trim();
+            if ((t.startsWith('/') && !t.startsWith('//')) || t.startsWith('https://') || t.startsWith('http://')) {
+                return t;
+            }
+            return '';
+        };
+
+        const preloadUrl = (rawUrl) => {
+            const url = safeMediaUrl(rawUrl);
+            if (url && !this.weeklyImageCache[url]) {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.src = url;
+                this.weeklyImageCache[url] = img;
+            }
+        };
+
+        if (thumbUrl) preloadUrl(thumbUrl);
+        scenes.forEach(s => preloadUrl(s.image_url));
+
+        let acc = 0;
+        const timings = scenes.map((s, idx) => {
+            const dur = Math.max(2500, Number(s.duration || 5) * 1000);
+            const item = { idx, scene: s, start: acc, end: acc + dur, dur };
+            acc += dur;
+            return item;
+        });
+        const totalMs = Math.max(5000, acc);
+
+        this.weeklyCanvasState = {
+            elapsedMs: 0,
+            totalMs,
+            timings,
+            isPlaying: true,
+            lastFrameTs: null,
+            autoAdvanced: false,
+            segActiveIdx,
+            thumbUrl,
+        };
+
+        const clamp01 = (v) => Math.max(0, Math.min(1, v));
+        const easeOutCubic = (t) => 1 - Math.pow(1 - clamp01(t), 3);
+        const springOut = (t) => {
+            const x = clamp01(t);
+            const c4 = (2 * Math.PI) / 3;
+            return x === 0 ? 0 : x === 1 ? 1 : Math.pow(2, -10 * x) * Math.sin((x * 10 - 0.75) * c4) + 1;
+        };
+
+        const wrapLines = (ctx, text, maxW) => {
+            const words = String(text || '').split(/\s+/);
+            const lines = [];
+            let cur = '';
+            for (const word of words) {
+                const test = cur ? `${cur} ${word}` : word;
+                if (ctx.measureText(test).width > maxW && cur) {
+                    lines.push(cur);
+                    cur = word;
+                } else {
+                    cur = test;
+                }
+            }
+            if (cur) lines.push(cur);
+            return lines;
+        };
+
+        const renderFrame = (ms) => {
+            const activeCanvas = document.getElementById('reelActiveCanvas');
+            if (!activeCanvas) return;
+            const ctx = activeCanvas.getContext('2d');
+            if (!ctx) return;
+
+            const isCinema = activeCanvas.classList.contains('fit-cinema');
+            const targetW = isCinema ? 1280 : 720;
+            const targetH = isCinema ? 720 : 1280;
+            if (activeCanvas.width !== targetW || activeCanvas.height !== targetH) {
+                activeCanvas.width = targetW;
+                activeCanvas.height = targetH;
+            }
+
+            const w = activeCanvas.width;
+            const h = activeCanvas.height;
+            const isVertical = h > w;
+
+            const current = timings.find(t => ms >= t.start && ms < t.end) || timings[timings.length - 1];
+            if (!current) return;
+
+            const s = current.scene;
+            const localMs = ms - current.start;
+            const accent = s.accent || '#38bdf8';
+
+            // Rich deep navy/indigo stage backdrop
+            const grad = ctx.createLinearGradient(0, 0, w, h);
+            grad.addColorStop(0, '#0b1120');
+            grad.addColorStop(0.55, '#17153b');
+            grad.addColorStop(1, '#090d16');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, w, h);
+
+            const drift = Math.sin(ms * 0.0012) * 35;
+            const g1 = ctx.createRadialGradient(w * 0.3 + drift, h * 0.28, 20, w * 0.3 + drift, h * 0.28, w * 0.6);
+            g1.addColorStop(0, `${accent}42`);
+            g1.addColorStop(1, 'transparent');
+            ctx.fillStyle = g1;
+            ctx.fillRect(0, 0, w, h);
+
+            const nle = this._weeklyNleEngine;
+            if (nle) {
+                nle.renderAtmosphericOverlay(ctx, 'dust_motes', w, h, ms / 1000);
+                nle._renderFeatheredLightGlow(ctx, 0, 0, w, h, 'amber', 0.28);
+            }
+
+            // Safe stage coordinates so top switcher, right action stack, and bottom caption card never obscure content
+            const leftPad = isVertical ? 48 : 72;
+            const rightReserve = isVertical ? 112 : 110;
+            const topSafe = isVertical ? 150 : 76;
+            const bottomReserve = isVertical ? 360 : 160;
+            const stageW = w - leftPad - rightReserve;
+            const stageCenterX = leftPad + stageW / 2;
+            const stageCenterY = topSafe + (h - topSafe - bottomReserve) / 2;
+
+            if (s.type === 'fun_fact_intro' || s.type === 'intro') {
+                const pop = springOut(localMs / 850);
+                const countTarget = Number(s.stat_value || 0);
+                const countNow = Math.round(countTarget * easeOutCubic((localMs - 450) / 1200));
+                ctx.save();
+                ctx.translate(stageCenterX, stageCenterY);
+                ctx.scale(0.88 + 0.12 * pop, 0.88 + 0.12 * pop);
+                ctx.globalAlpha = clamp01(localMs / 350);
+                ctx.textAlign = 'center';
+
+                ctx.fillStyle = '#fcd34d';
+                ctx.font = `700 ${isVertical ? 23 : 24}px system-ui, sans-serif`;
+                ctx.fillText(s.badge || 'WEEKLY FAMILY FUN FACTS', 0, isVertical ? -195 : -130);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = `800 ${isVertical ? 48 : 52}px system-ui, sans-serif`;
+                const titleLines = wrapLines(ctx, s.title || 'Our Family Week in Numbers', stageW - 16);
+                const titleLineH = isVertical ? 58 : 58;
+                const titleStartY = isVertical ? -125 : -70;
+                titleLines.slice(0, 3).forEach((ln, i) => ctx.fillText(ln, 0, titleStartY + i * titleLineH));
+
+                if (countTarget > 0) {
+                    ctx.fillStyle = '#38bdf8';
+                    ctx.font = `800 ${isVertical ? 132 : 124}px system-ui, sans-serif`;
+                    ctx.fillText(String(countNow), 0, isVertical ? 95 : 70);
+                    ctx.fillStyle = '#e2e8f0';
+                    ctx.font = `600 ${isVertical ? 28 : 28}px system-ui, sans-serif`;
+                    const capLines = wrapLines(ctx, s.caption || '', stageW - 16);
+                    capLines.slice(0, 3).forEach((ln, i) => ctx.fillText(ln, 0, (isVertical ? 160 : 125) + i * 38));
+                } else {
+                    ctx.fillStyle = '#cbd5e1';
+                    ctx.font = `500 ${isVertical ? 30 : 30}px system-ui, sans-serif`;
+                    const capLines = wrapLines(ctx, s.caption || s.subtitle || '', stageW - 16);
+                    capLines.slice(0, 3).forEach((ln, i) => ctx.fillText(ln, 0, (isVertical ? 65 : 55) + i * 40));
+                }
+                ctx.restore();
+            } else if (s.type === 'fun_fact_leaderboard') {
+                ctx.save();
+                ctx.globalAlpha = easeOutCubic(localMs / 500);
+                ctx.textAlign = 'left';
+                ctx.fillStyle = '#7dd3fc';
+                ctx.font = `700 ${isVertical ? 23 : 24}px system-ui, sans-serif`;
+                ctx.fillText(s.badge || 'FUN FACT #1', leftPad, topSafe + 24);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = `800 ${isVertical ? 40 : 42}px system-ui, sans-serif`;
+                const lines = wrapLines(ctx, s.title || '', stageW);
+                const titleLineH = 50;
+                lines.slice(0, 2).forEach((ln, i) => ctx.fillText(ln, leftPad, topSafe + 80 + i * titleLineH));
+
+                ctx.fillStyle = '#cbd5e1';
+                ctx.font = `400 ${isVertical ? 25 : 26}px system-ui, sans-serif`;
+                const subLines = wrapLines(ctx, s.subtitle || '', stageW);
+                const subStartY = topSafe + 80 + Math.min(2, lines.length) * titleLineH + 6;
+                subLines.slice(0, 2).forEach((ln, i) => ctx.fillText(ln, leftPad, subStartY + i * 34));
+
+                const lb = Array.isArray(s.leaderboard) ? s.leaderboard : [];
+                const maxPosts = Math.max(1, ...lb.map(b => Number(b.posts || 1)));
+                const subEndY = subStartY + Math.min(2, subLines.length) * 34;
+                const startY = isVertical ? Math.max(topSafe + 230, subEndY + 42) : Math.max(topSafe + 170, subEndY + 26);
+                const rowStep = isVertical ? 148 : 96;
+                const barH = isVertical ? 58 : 48;
+                const colors = ['#f59e0b', '#38bdf8', '#a78bfa'];
+                lb.slice(0, 3).forEach((b, idx) => {
+                    const y = startY + idx * rowStep;
+                    const prog = springOut((localMs - 250 - idx * 160) / 800);
+                    const barAreaW = isVertical ? stageW : (stageW - 260);
+                    const barX = isVertical ? leftPad : (leftPad + 250);
+                    const barY = isVertical ? (y + 30) : y;
+                    const targetW = Math.max(48, (Number(b.posts || 0) / maxPosts) * barAreaW * prog);
+
+                    ctx.fillStyle = '#f8fafc';
+                    ctx.font = `600 ${isVertical ? 28 : 26}px system-ui, sans-serif`;
+                    ctx.fillText(String(b.name || 'Member'), leftPad, y + (isVertical ? 14 : 34));
+
+                    ctx.fillStyle = 'rgba(255,255,255,0.1)';
+                    ctx.beginPath();
+                    ctx.roundRect(barX, barY, barAreaW, barH, 12);
+                    ctx.fill();
+
+                    ctx.fillStyle = colors[idx % colors.length];
+                    ctx.beginPath();
+                    ctx.roundRect(barX, barY, targetW, barH, 12);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = `700 ${isVertical ? 24 : 22}px system-ui, sans-serif`;
+                    ctx.fillText(`${b.posts || 0} ${Number(b.posts) === 1 ? 'post' : 'posts'}`, barX + 16, barY + (isVertical ? 38 : 32));
+                });
+                ctx.restore();
+            } else if (s.type === 'fun_fact_golden_hour') {
+                ctx.save();
+                ctx.globalAlpha = easeOutCubic(localMs / 500);
+                ctx.textAlign = 'left';
+                ctx.fillStyle = '#fcd34d';
+                ctx.font = `700 ${isVertical ? 23 : 24}px system-ui, sans-serif`;
+                ctx.fillText(s.badge || 'FUN FACT #2', leftPad, topSafe + 24);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = `800 ${isVertical ? 40 : 42}px system-ui, sans-serif`;
+                const lines = wrapLines(ctx, s.title || '', stageW);
+                const titleLineH = 50;
+                lines.slice(0, 2).forEach((ln, i) => ctx.fillText(ln, leftPad, topSafe + 80 + i * titleLineH));
+
+                ctx.fillStyle = '#cbd5e1';
+                ctx.font = `400 ${isVertical ? 25 : 26}px system-ui, sans-serif`;
+                const subLines = wrapLines(ctx, s.subtitle || '', stageW);
+                const subStartY = topSafe + 80 + Math.min(2, lines.length) * titleLineH + 6;
+                subLines.slice(0, 2).forEach((ln, i) => ctx.fillText(ln, leftPad, subStartY + i * 34));
+
+                const daily = s.daily_counts || { Mon: 1, Tue: 1, Wed: 2, Thu: 2, Fri: 3, Sat: 2, Sun: 4 };
+                const keys = Object.keys(daily);
+                const maxV = Math.max(1, ...Object.values(daily).map(Number));
+                const baseY = h - bottomReserve - (isVertical ? 40 : 30);
+                const maxH = isVertical ? 310 : 180;
+                const colW = stageW / keys.length;
+                const goldenShort = String(s.golden_day || 'Sunday').slice(0, 3);
+
+                keys.forEach((day, idx) => {
+                    const val = Number(daily[day] || 0);
+                    const p = springOut((localMs - 220 - idx * 75) / 780);
+                    const bh = Math.max(18, (val / maxV) * maxH * p);
+                    const x = leftPad + idx * colW + 6;
+                    const bw = Math.max(24, colW - 12);
+                    const isPeak = day === goldenShort;
+
+                    ctx.fillStyle = isPeak ? '#f59e0b' : 'rgba(148, 163, 184, 0.35)';
+                    ctx.beginPath();
+                    ctx.roundRect(x, baseY - bh, bw, bh, 10);
+                    ctx.fill();
+
+                    if (isPeak && p > 0.6) {
+                        ctx.fillStyle = '#fcd34d';
+                        ctx.font = `700 ${isVertical ? 19 : 20}px system-ui, sans-serif`;
+                        ctx.textAlign = 'center';
+                        ctx.fillText('★ PEAK', x + bw / 2, baseY - bh - 12);
+                    }
+                    ctx.fillStyle = isPeak ? '#ffffff' : '#94a3b8';
+                    ctx.font = isPeak ? `700 ${isVertical ? 22 : 22}px system-ui, sans-serif` : `500 ${isVertical ? 20 : 20}px system-ui, sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.fillText(day, x + bw / 2, baseY + 32);
+                });
+                ctx.restore();
+            } else if (s.type === 'fun_fact_most_loved') {
+                const cardPop = springOut((localMs - 180) / 780);
+                ctx.save();
+                ctx.globalAlpha = easeOutCubic(localMs / 500);
+                ctx.textAlign = 'left';
+                ctx.fillStyle = '#fda4af';
+                ctx.font = `700 ${isVertical ? 23 : 24}px system-ui, sans-serif`;
+                ctx.fillText(s.badge || 'FUN FACT #3', leftPad, topSafe + 24);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = `800 ${isVertical ? 40 : 42}px system-ui, sans-serif`;
+                const tLines = wrapLines(ctx, s.title || '', stageW);
+                tLines.slice(0, 2).forEach((ln, i) => ctx.fillText(ln, leftPad, topSafe + 80 + i * 50));
+
+                ctx.save();
+                const cardCenterY = isVertical ? (topSafe + 420) : (stageCenterY + 55);
+                ctx.translate(stageCenterX, cardCenterY);
+                ctx.scale(0.92 + 0.08 * cardPop, 0.92 + 0.08 * cardPop);
+                const cw = stageW;
+                const ch = isVertical ? 380 : 240;
+                ctx.fillStyle = 'rgba(255,255,255,0.09)';
+                ctx.strokeStyle = 'rgba(255,255,255,0.24)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.roundRect(-cw / 2, -ch / 2, cw, ch, 22);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = '#fcd34d';
+                ctx.font = `700 ${isVertical ? 20 : 20}px system-ui, sans-serif`;
+                ctx.fillText(`MOST CELEBRATED POST  •  ${String(s.quote_author || 'Family').toUpperCase()}`, -cw / 2 + 28, -ch / 2 + 46);
+
+                ctx.fillStyle = '#ffffff';
+                ctx.font = `600 ${isVertical ? 30 : 30}px system-ui, sans-serif`;
+                const qLines = wrapLines(ctx, `“${s.quote_text || ''}”`, cw - 56);
+                const maxQuoteLines = isVertical ? 4 : 3;
+                qLines.slice(0, maxQuoteLines).forEach((ln, i) => ctx.fillText(ln, -cw / 2 + 28, -ch / 2 + 100 + i * 42));
+
+                ctx.fillStyle = '#fda4af';
+                ctx.font = `700 ${isVertical ? 23 : 23}px system-ui, sans-serif`;
+                ctx.fillText(`❤️ ${s.quote_likes || 0} reactions   •   💬 ${s.quote_comments || 0} replies`, -cw / 2 + 28, ch / 2 - 32);
+                ctx.restore();
+                ctx.restore();
+            } else if (s.type === 'photo' || s.type === 'sanctuary' || s.type === 'milestone') {
+                const url = safeMediaUrl(s.image_url) || safeMediaUrl(thumbUrl);
+                const img = url ? this.weeklyImageCache[url] : null;
+                const zoom = 1 + 0.08 * (localMs / current.dur);
+                if (img && img.complete && img.naturalWidth > 0) {
+                    const scale = Math.max(w / img.naturalWidth, h / img.naturalHeight) * zoom;
+                    const dw = img.naturalWidth * scale;
+                    const dh = img.naturalHeight * scale;
+                    ctx.drawImage(img, (w - dw) / 2, (h - dh) / 2, dw, dh);
+                }
+                const shade = ctx.createLinearGradient(0, h * 0.35, 0, h);
+                shade.addColorStop(0, 'rgba(0,0,0,0.12)');
+                shade.addColorStop(1, 'rgba(0,0,0,0.88)');
+                ctx.fillStyle = shade;
+                ctx.fillRect(0, 0, w, h);
+
+                ctx.save();
+                ctx.globalAlpha = easeOutCubic(localMs / 500);
+                ctx.textAlign = 'left';
+                const textBaseY = h - bottomReserve - 36;
+                if (s.author) {
+                    ctx.fillStyle = '#fcd34d';
+                    ctx.font = `700 ${isVertical ? 22 : 22}px system-ui, sans-serif`;
+                    ctx.fillText(`SHARED BY ${String(s.author).toUpperCase()}`, leftPad, textBaseY - 90);
+                }
+                ctx.fillStyle = '#ffffff';
+                ctx.font = `700 ${isVertical ? 34 : 34}px system-ui, sans-serif`;
+                const cLines = wrapLines(ctx, s.caption || s.title || caption, stageW);
+                cLines.slice(0, 2).forEach((ln, i) => ctx.fillText(ln, leftPad, textBaseY - 42 + i * 42));
+                ctx.restore();
+            } else {
+                const pop = springOut(localMs / 800);
+                ctx.save();
+                ctx.translate(stageCenterX, stageCenterY);
+                ctx.scale(0.9 + 0.1 * pop, 0.9 + 0.1 * pop);
+                ctx.globalAlpha = clamp01(localMs / 400);
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#fcd34d';
+                ctx.font = `700 ${isVertical ? 23 : 24}px system-ui, sans-serif`;
+                ctx.fillText(s.badge || 'FAMILY CIRCLE HIGHLIGHTS', 0, -105);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = `800 ${isVertical ? 48 : 50}px system-ui, sans-serif`;
+                const oLines = wrapLines(ctx, s.title || 'One Family. Endless Love.', stageW);
+                oLines.slice(0, 2).forEach((ln, i) => ctx.fillText(ln, 0, -35 + i * 58));
+                ctx.fillStyle = '#cbd5e1';
+                ctx.font = `400 ${isVertical ? 27 : 28}px system-ui, sans-serif`;
+                const sLines = wrapLines(ctx, s.subtitle || '', stageW);
+                sLines.slice(0, 2).forEach((ln, i) => ctx.fillText(ln, 0, (oLines.length > 1 ? 75 : 35) + i * 38));
+                ctx.restore();
+            }
+
+            // SovereignNleEngine cinema post-processing (vignette + subtle film grain)
+            if (nle) {
+                nle._renderVignettePass(ctx, w, h, 0.28);
+                nle._renderFilmGrainPass(ctx, 0, 0, w, h, 0.04, ms / 1000);
+            }
+
+            // Sync progress bars
+            const pct = Math.min(100, Math.max(0, (ms / totalMs) * 100));
+            const progressFill = document.getElementById('reelProgressFill');
+            if (progressFill) progressFill.style.width = `${pct}%`;
+            const activeSegment = document.getElementById(`segmentFill_${segActiveIdx}`);
+            if (activeSegment) activeSegment.style.width = `${pct}%`;
+        };
+
+        this.renderWeeklyCanvasFrame = renderFrame;
+        renderFrame(0);
+
+        const step = (ts) => {
+            const st = this.weeklyCanvasState;
+            if (!st || !document.getElementById('reelActiveCanvas')) return;
+            if (st.lastFrameTs === null) st.lastFrameTs = ts;
+            const dt = Math.min(100, ts - st.lastFrameTs);
+            st.lastFrameTs = ts;
+
+            if (st.isPlaying) {
+                st.elapsedMs += dt;
+                if (st.elapsedMs >= st.totalMs) {
+                    if (!st.autoAdvanced && this.currentIndex < this.reels.length - 1) {
+                        st.autoAdvanced = true;
+                        this.nextReel();
+                        return;
+                    }
+                    st.elapsedMs = st.elapsedMs % st.totalMs;
+                }
+                renderFrame(st.elapsedMs);
+            }
+            this.weeklyCanvasRaf = requestAnimationFrame(step);
+        };
+        this.weeklyCanvasRaf = requestAnimationFrame(step);
+
+        // Wire scrubber seek, tap navigation & double-tap heart on canvas
+        const progressTrack = document.getElementById('reelProgressTrack');
+        if (progressTrack) {
+            progressTrack.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (!this.weeklyCanvasState) return;
+                const rect = progressTrack.getBoundingClientRect();
+                const ratio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+                this.weeklyCanvasState.elapsedMs = ratio * this.weeklyCanvasState.totalMs;
+                renderFrame(this.weeklyCanvasState.elapsedMs);
+            });
+        }
+
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const width = rect.width;
+            const st = this.weeklyCanvasState;
+            if (!st) return;
+
+            if (clickX < width * 0.22) {
+                const curIdx = st.timings.findIndex(t => st.elapsedMs >= t.start && st.elapsedMs < t.end);
+                if (curIdx > 0) {
+                    st.elapsedMs = st.timings[curIdx - 1].start + 10;
+                    renderFrame(st.elapsedMs);
+                } else {
+                    this.prevReel();
+                }
+            } else if (clickX > width * 0.78) {
+                const curIdx = st.timings.findIndex(t => st.elapsedMs >= t.start && st.elapsedMs < t.end);
+                if (curIdx >= 0 && curIdx < st.timings.length - 1) {
+                    st.elapsedMs = st.timings[curIdx + 1].start + 10;
+                    renderFrame(st.elapsedMs);
+                } else {
+                    this.nextReel();
+                }
+            } else {
+                this.togglePlayPause();
+            }
+        });
+
+        canvas.addEventListener('dblclick', (e) => {
+            if (this.viewport) {
+                const rect = this.viewport.getBoundingClientRect();
+                this.spawnDoubleTapHeart(e.clientX - rect.left, e.clientY - rect.top);
+            } else {
+                this.spawnFloatingEmoji('❤️');
+            }
+            this.toggleLike('like');
+        });
+
+        let lastTap = 0;
+        canvas.addEventListener('touchend', (e) => {
+            const currentTime = new Date().getTime();
+            const tapLength = currentTime - lastTap;
+            if (tapLength < 300 && tapLength > 0) {
+                const touch = e.changedTouches && e.changedTouches[0];
+                if (touch && this.viewport) {
+                    const rect = this.viewport.getBoundingClientRect();
+                    this.spawnDoubleTapHeart(touch.clientX - rect.left, touch.clientY - rect.top);
+                } else {
+                    this.spawnFloatingEmoji('❤️');
+                }
+                this.toggleLike('like');
+                e.preventDefault();
+            }
+            lastTap = currentTime;
+        });
+    }
+
     renderCurrentReel() {
+        this.stopWeeklyCanvasLoop();
         const reel = this.reels[this.currentIndex];
         if (!reel || !this.viewport) return;
 
@@ -842,7 +1411,7 @@ class FamilyReelsPlayer {
             </button>`;
         }).join('');
         const categoryLabel = esc(reel.category ? `#${String(reel.category).replace(/_/g, ' ').toUpperCase()}` : '#FAMILY');
-        const mediaHtml = this.getMediaEmbed(reel.video_url, reel.aspect_ratio || '9:16');
+        const mediaHtml = this.getMediaEmbed(reel.video_url, reel.aspect_ratio || '9:16', reel);
         const isOwner = this.currentUserId && String(reel.user_id) === String(this.currentUserId);
         const totalReels = this.reels.length;
 
@@ -1081,7 +1650,12 @@ class FamilyReelsPlayer {
             this.auxAudio.removeAttribute('src');
         }
 
-        // Wire video play / pause, smart aspect detection & progress bar
+        // Wire video play / pause, smart aspect detection & progress bar (or 60fps Weekly Fun Facts Canvas)
+        const activeCanvas = document.getElementById('reelActiveCanvas');
+        if (activeCanvas) {
+            this.startWeeklyCanvasPlayer(reel, segActiveIdx);
+        }
+
         const video = document.getElementById('reelActiveVideo');
         const progressTrack = document.getElementById('reelProgressTrack');
         const progressFill = document.getElementById('reelProgressFill');
@@ -1342,16 +1916,24 @@ class FamilyReelsPlayer {
             });
         });
 
-        // More (...) Popover Toggle
+        // More (...) Popover Toggle — recess bottom caption card while open so menu items are never obscured
         const btnReelMore = document.getElementById('btnReelMore');
         const reelMorePopover = document.getElementById('reelMorePopover');
+        const activeCardEl = document.getElementById('activeReelCard');
+        const syncPopoverOpenState = () => {
+            const isMoreVisible = reelMorePopover && !reelMorePopover.classList.contains('d-none');
+            const isReactVisible = document.getElementById('reelReactionPicker')?.classList.contains('open');
+            activeCardEl?.classList.toggle('reel-popover-open', Boolean(isMoreVisible || isReactVisible));
+        };
         if (btnReelMore && reelMorePopover) {
             btnReelMore.addEventListener('click', (e) => {
                 e.stopPropagation();
                 reelMorePopover.classList.toggle('d-none');
+                syncPopoverOpenState();
             });
             document.addEventListener('click', () => {
                 reelMorePopover.classList.add('d-none');
+                syncPopoverOpenState();
             }, { once: false });
         }
 
@@ -1527,7 +2109,7 @@ class FamilyReelsPlayer {
     }
 
     toggleFitMode() {
-        const video = document.getElementById('reelActiveVideo');
+        const video = document.getElementById('reelActiveVideo') || document.getElementById('reelActiveCanvas');
         if (!video) return;
         const isCurrentlyCinema = video.classList.contains('fit-cinema');
         if (isCurrentlyCinema) {
@@ -1538,6 +2120,9 @@ class FamilyReelsPlayer {
             video.classList.add('fit-cinema');
             this.fitMode = 'cinema';
             this.showToast('Switched to Uncropped Cinema Fit', 'info');
+        }
+        if (this.renderWeeklyCanvasFrame && this.weeklyCanvasState) {
+            this.renderWeeklyCanvasFrame(this.weeklyCanvasState.elapsedMs);
         }
     }
 
@@ -1631,7 +2216,34 @@ class FamilyReelsPlayer {
 
     togglePlayPause() {
         const video = document.getElementById('reelActiveVideo');
+        const canvas = document.getElementById('reelActiveCanvas');
         const feedback = document.getElementById('reelCenterFeedback');
+
+        if (canvas && this.weeklyCanvasState) {
+            this.weeklyCanvasState.isPlaying = !this.weeklyCanvasState.isPlaying;
+            if (this.weeklyCanvasState.isPlaying) {
+                this.weeklyCanvasState.lastFrameTs = null;
+                if (this.auxAudio && this.auxAudio.src && !this.isMuted) {
+                    this.auxAudio.play().catch(() => {});
+                }
+                if (feedback) {
+                    feedback.innerHTML = '<i class="bi bi-play-fill"></i>';
+                    feedback.classList.add('show');
+                    setTimeout(() => feedback.classList.remove('show'), 300);
+                }
+            } else {
+                if (this.auxAudio) {
+                    this.auxAudio.pause();
+                }
+                if (feedback) {
+                    feedback.innerHTML = '<i class="bi bi-pause-fill"></i>';
+                    feedback.classList.add('show');
+                    setTimeout(() => feedback.classList.remove('show'), 300);
+                }
+            }
+            return;
+        }
+
         if (!video) return;
 
         if (video.paused) {

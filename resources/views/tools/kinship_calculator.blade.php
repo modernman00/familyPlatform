@@ -1,6 +1,7 @@
 @extends('layouts.landing_layout')
 
 @section('title', '7-Generation Kinship & Relationship Degree Calculator | FamilyPlatform')
+@section('og_image', rtrim((string) ($_ENV['APP_URL'] ?? getenv('APP_URL') ?: 'https://myfamilyplatform.com'), '/') . '/public/images/og-kinship-calculator.jpg?v=1')
 @section('meta_description', 'Calculate exact genealogical relationships, degrees of kinship, and consanguinity percentage across your family tree. Free visual kinship calculator by FamilyPlatform.')
 @section('og_title', '7-Generation Kinship & Relationship Degree Calculator | FamilyPlatform')
 @section('og_description', 'Calculate exact genealogical relationships, degrees of kinship, and consanguinity percentage across your family tree. Free visual kinship calculator by FamilyPlatform.')

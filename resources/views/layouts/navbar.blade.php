@@ -23,11 +23,21 @@
             <i class="bi bi-search"></i>
         </button>
 
-        <!-- Quick mobile FamChat icon with bell & counter -->
-        <a href="/kin-whispers" class="btn btn-icon-stitch d-lg-none me-2 position-relative text-decoration-none" id="mobileWhispersBtn" aria-label="{{ __('nav.whisper', 'FamChat — Private family messages') }}" title="{{ __('nav.whisper', 'FamChat — Private family messages & audio dedications') }}">
-            <i class="bi bi-chat-dots-fill" style="color: #a31621; font-size: 1.05rem;"></i>
-            <i class="bi bi-bell-fill text-warning whisper-bell-indicator position-absolute {{ $navWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.55rem; top: 3px; right: 3px;" title="Unread FamChat messages"></i>
-            <span class="whisper-nav-badge position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger text-white {{ $navWhisperUnreadCount > 0 ? '' : 'd-none' }}" id="mobile_whisper_count" style="font-size: 0.6rem; padding: 2px 4px; pointer-events: none;">
+        <!-- Quick mobile FamChat 3D orb icon with bell & counter -->
+        <a href="/kin-whispers" class="btn famchat-3d-nav-btn famchat-3d-nav-btn--mobile d-lg-none me-2 position-relative text-decoration-none" id="mobileWhispersBtn" aria-label="{{ __('nav.whisper', 'FamChat — Private family messages') }}" title="{{ __('nav.whisper', 'FamChat — Private family messages & audio dedications') }}">
+            <span class="famchat-3d-orb-wrap" aria-hidden="true">
+                <span class="famchat-3d-orb">
+                    <span class="famchat-3d-sheen"></span>
+                    <svg class="famchat-3d-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 3C6.48 3 2 6.82 2 11.5C2 13.68 2.98 15.66 4.6 17.16L3.4 21L7.72 19.3C9.07 19.75 10.51 20 12 20C17.52 20 22 16.18 22 11.5C22 6.82 17.52 3 12 3Z" fill="#ffffff" stroke="#78350f" stroke-width="1.2" stroke-linejoin="round"/>
+                        <path d="M12 15.4C12 15.4 8.2 13.1 8.2 10.6C8.2 9.4 9.15 8.5 10.25 8.5C10.95 8.5 11.58 8.85 12 9.45C12.42 8.85 13.05 8.5 13.75 8.5C14.85 8.5 15.8 9.4 15.8 10.6C15.8 13.1 12 15.4 12 15.4Z" fill="#e11d48"/>
+                    </svg>
+                </span>
+                <span class="famchat-3d-spark famchat-3d-spark--1"></span>
+                <span class="famchat-3d-spark famchat-3d-spark--2"></span>
+            </span>
+            <i class="bi bi-bell-fill text-warning whisper-bell-indicator position-absolute {{ $navWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.58rem; top: 1px; right: 1px;" title="Unread FamChat messages"></i>
+            <span class="whisper-nav-badge position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger text-white {{ $navWhisperUnreadCount > 0 ? '' : 'd-none' }}" id="mobile_whisper_count" style="font-size: 0.62rem; padding: 2px 5px; border: 1.5px solid #ffffff; pointer-events: none;">
                 {{ $navWhisperUnreadCount > 0 ? $navWhisperUnreadCount : '' }}
             </span>
         </a>
@@ -163,12 +173,24 @@
                     <span class="d-inline d-xl-none">{{ __('nav.invite', 'Invite') }}</span>
                 </button>
 
-                <!-- FamChat Direct Action Button with Bell & Unread Counter (desktop; mobile uses top bar icon) -->
+                <!-- FamChat 3D Spatial Pill Button with Bell & Unread Counter (desktop; mobile uses top bar 3D orb) -->
                 <div class="whisper-nav-wrapper position-relative d-none d-lg-block">
-                    <a href="/kin-whispers" class="btn btn-icon-stitch text-decoration-none d-inline-flex align-items-center justify-content-center position-relative" id="navbarWhispersBtn" title="{{ __('nav.whisper', 'FamChat — Private family messages, artifact reflections & voice dedications') }}" aria-label="FamChat">
-                        <i class="bi bi-chat-dots-fill" style="color: #a31621; font-size: 1.15rem; pointer-events: none;"></i>
-                        <i class="bi bi-bell-fill text-warning whisper-bell-indicator position-absolute {{ $navWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.65rem; top: 4px; right: 4px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.35)); pointer-events: none;" title="Unread FamChat messages"></i>
-                        <span class="whisper-nav-badge position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger text-white {{ $navWhisperUnreadCount > 0 ? '' : 'd-none' }}" id="navbar_whisper_count" style="font-size: 0.68rem; padding: 2px 5px; font-weight: 700; box-shadow: 0 2px 6px rgba(220,53,69,0.45); pointer-events: none;">
+                    <a href="/kin-whispers" class="btn famchat-3d-nav-btn text-decoration-none d-inline-flex align-items-center justify-content-center position-relative" id="navbarWhispersBtn" title="{{ __('nav.whisper', 'FamChat — Private family messages, artifact reflections & voice dedications') }}" aria-label="FamChat">
+                        <span class="famchat-3d-orb-wrap" aria-hidden="true">
+                            <span class="famchat-3d-orb">
+                                <span class="famchat-3d-sheen"></span>
+                                <svg class="famchat-3d-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 3C6.48 3 2 6.82 2 11.5C2 13.68 2.98 15.66 4.6 17.16L3.4 21L7.72 19.3C9.07 19.75 10.51 20 12 20C17.52 20 22 16.18 22 11.5C22 6.82 17.52 3 12 3Z" fill="#ffffff" stroke="#78350f" stroke-width="1.2" stroke-linejoin="round"/>
+                                    <path d="M12 15.4C12 15.4 8.2 13.1 8.2 10.6C8.2 9.4 9.15 8.5 10.25 8.5C10.95 8.5 11.58 8.85 12 9.45C12.42 8.85 13.05 8.5 13.75 8.5C14.85 8.5 15.8 9.4 15.8 10.6C15.8 13.1 12 15.4 12 15.4Z" fill="#e11d48"/>
+                                </svg>
+                            </span>
+                            <span class="famchat-3d-spark famchat-3d-spark--1"></span>
+                            <span class="famchat-3d-spark famchat-3d-spark--2"></span>
+                        </span>
+                        <span class="famchat-nav-label">{{ __('nav.whisper_short', 'FamChat') }}</span>
+                        <span class="famchat-live-dot" aria-hidden="true"></span>
+                        <i class="bi bi-bell-fill text-warning whisper-bell-indicator position-absolute {{ $navWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.68rem; top: -3px; right: 12px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.45)); pointer-events: none;" title="Unread FamChat messages"></i>
+                        <span class="whisper-nav-badge position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger text-white {{ $navWhisperUnreadCount > 0 ? '' : 'd-none' }}" id="navbar_whisper_count" style="font-size: 0.7rem; padding: 2px 6px; font-weight: 800; border: 2px solid #ffffff; box-shadow: 0 2px 8px rgba(220,53,69,0.55); pointer-events: none;">
                             {{ $navWhisperUnreadCount > 0 ? $navWhisperUnreadCount : '' }}
                         </span>
                     </a>

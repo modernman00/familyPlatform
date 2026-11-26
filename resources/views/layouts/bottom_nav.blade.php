@@ -96,6 +96,58 @@ body.dark-theme .pwa-tab-center-action .pwa-center-btn-bubble,
 [data-bs-theme="dark"] .pwa-tab-center-action .pwa-center-btn-bubble {
     border-color: #141416 !important;
 }
+/* 3D Spatial FamChat Orb in Mobile Bottom Bar */
+.pwa-famchat-3d-orb {
+    position: relative;
+    width: var(--space-8, 32px);
+    height: var(--space-8, 32px);
+    border-radius: var(--radius-md, 12px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background:
+        radial-gradient(circle at 30% 24%, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0) 42%),
+        linear-gradient(135deg, var(--accent-gold, #f59e0b) 0%, var(--brand-primary, #a31621) 58%, var(--brand-primary-hover, #8a1019) 100%);
+    color: #ffffff !important;
+    box-shadow:
+        0 2.5px 0 var(--brand-primary-hover, #8a1019),
+        0 5px 12px var(--brand-primary-glow, rgba(163, 22, 33, 0.35)),
+        inset 0 1px 1.5px rgba(255, 255, 255, 0.8);
+    transform-style: preserve-3d;
+    animation: pwaFamchatOrbFloat 3.2s var(--ease, ease-in-out) infinite;
+}
+.pwa-famchat-3d-orb i {
+    color: #ffffff !important;
+    font-size: var(--text-base, 1rem) !important;
+    filter: drop-shadow(0 1px 2px rgba(80, 7, 36, 0.55));
+}
+.pwa-famchat-3d-orb::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: var(--space-2, 8px);
+    height: var(--space-2, 8px);
+    border-radius: 50%;
+    background: #4ade80;
+    border: 1.5px solid #ffffff;
+    box-shadow: 0 0 6px #4ade80;
+}
+#pwaWhisperTab .pwa-tab-label {
+    color: var(--brand-primary, #a31621) !important;
+    font-weight: 800;
+}
+body.dark-mode #pwaWhisperTab .pwa-tab-label,
+[data-bs-theme="dark"] #pwaWhisperTab .pwa-tab-label {
+    color: #fda4af !important;
+}
+@keyframes pwaFamchatOrbFloat {
+    0%, 100% { transform: translateY(0) rotateX(10deg) rotateY(-10deg); }
+    50% { transform: translateY(-2px) rotateX(-8deg) rotateY(12deg) scale(1.05); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .pwa-famchat-3d-orb { animation: none !important; }
+}
 </style>
 <!-- Mobile PWA Bottom Tab Navigation (Native App Store / Instagram Standard) -->
 <nav class="pwa-bottom-nav d-lg-none" id="pwaBottomNav" aria-label="Mobile App Navigation">
@@ -125,11 +177,12 @@ body.dark-theme .pwa-tab-center-action .pwa-center-btn-bubble,
         <span class="pwa-tab-label">{{ __('nav.add_photo', 'Add Photo') }}</span>
     </button>
 
-    <!-- FamChat (private kin messages) -->
+    <!-- FamChat (private kin messages — 3D Living Spatial Orb) -->
     <a href="/kin-whispers" class="pwa-tab-item position-relative" id="pwaWhisperTab" data-tab="whisper" title="{{ __('nav.whisper', 'FamChat') }} - Private kin notes and voice dedications">
         <div class="pwa-tab-icon-wrap position-relative">
-            <i class="bi bi-chat-dots pwa-tab-icon-outline"></i>
-            <i class="bi bi-chat-dots-fill pwa-tab-icon-filled"></i>
+            <span class="pwa-famchat-3d-orb" aria-hidden="true">
+                <i class="bi bi-chat-heart-fill"></i>
+            </span>
             <span class="pwa-tab-badge whisper-portal-unread-badge d-none"><span class="whisper-portal-unread-count"></span></span>
         </div>
         <span class="pwa-tab-label">{{ __('nav.whisper', 'FamChat') }}</span>
@@ -192,6 +245,9 @@ body.dark-theme .pwa-tab-center-action .pwa-center-btn-bubble,
         if (cameraBtn) {
             cameraBtn.addEventListener('click', function(e) {
                 e.preventDefault();
+                if (typeof window.ensureComposerBundle === 'function') {
+                    window.ensureComposerBundle();
+                }
                 var postModalEl = document.getElementById('postModal');
                 var fileInput = document.getElementById('imageUpload');
                 if (postModalEl && window.bootstrap && window.bootstrap.Modal) {
@@ -214,6 +270,9 @@ body.dark-theme .pwa-tab-center-action .pwa-center-btn-bubble,
         var urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('open_camera')) {
             window.history.replaceState({}, document.title, window.location.pathname);
+            if (typeof window.ensureComposerBundle === 'function') {
+                window.ensureComposerBundle();
+            }
             setTimeout(function() {
                 var postModalEl = document.getElementById('postModal');
                 var fileInput = document.getElementById('imageUpload');

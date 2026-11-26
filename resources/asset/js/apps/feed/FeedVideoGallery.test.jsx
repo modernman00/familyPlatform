@@ -89,6 +89,25 @@ describe('FeedVideoGallery & VideoModal Aspect Ratio & Framing', () => {
         expect(iframe.parentElement.classList.contains('ratio-16x9')).toBe(false);
     });
 
+    it('renders generated funny Reel / AFV Short videos in 9 / 16 portrait format in the feed', () => {
+        const { container } = render(
+            <FeedVideoGallery
+                videos={[{
+                    type: 'youtube',
+                    videoId: 'YBhwgEkJX-M',
+                    embedUrl: 'https://www.youtube.com/embed/YBhwgEkJX-M?autoplay=1&rel=0&playsinline=1',
+                    originalUrl: 'https://www.youtube.com/watch?v=YBhwgEkJX-M',
+                    hookText: 'The worst key toss you will see today #AFV #funny #comedy',
+                }]}
+            />
+        );
+
+        const stage = container.querySelector('.iframe-embed-stage');
+        expect(stage).toBeTruthy();
+        expect(stage.style.aspectRatio).toBe('9 / 16');
+        expect(stage.style.maxWidth).toBe('min(460px, 100%)');
+    });
+
     it('does not pause native <video controls> playback when clicked on iOS/mobile', () => {
         const { container } = render(
             <FeedVideoGallery

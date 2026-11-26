@@ -1300,10 +1300,11 @@ function posterStudio() {
             return 'familyplatform-' + slug.slice(0, 40) + '.' + ext;
         },
         blob(type) { return new Promise((res) => engine.canvas.toBlob(res, type || 'image/png', 0.92)); },
-        shareText() {
+        shareText(overrideUrl) {
             const when = [this.d.date, this.d.time].filter((s) => s && s.trim()).join(' · ');
             const title = [this.d.kicker, this.d.title, this.d.titleSecondary].filter((s) => s && s.trim()).join(' ').replace(/\s+/g, ' ');
-            return ['📣 *' + title + '*', when, this.d.venue, '', 'RSVP / join us: ' + (this.d.qrUrl || JOIN_URL)].filter((l, i) => l !== undefined && (l !== '' || i === 3)).join('\n');
+            const link = overrideUrl || this.d.qrUrl || JOIN_URL;
+            return ['*' + title + '*', when, this.d.venue, '', 'RSVP / join us: ' + link].filter((l, i) => l !== undefined && (l !== '' || i === 3)).join('\n');
         },
 
         async download() {
@@ -1320,13 +1321,31 @@ function posterStudio() {
             this.busy = true;
             try {
                 const b = await this.blob('image/jpeg');
+                let shareLink = this.d.qrUrl || JOIN_URL;
+                try {
+                    const fd = new FormData();
+                    fd.append('token', document.querySelector('input[name="token"]')?.value || '');
+                    const title = [this.d.kicker, this.d.title, this.d.titleSecondary].filter((s) => s && s.trim()).join(' ').replace(/\s+/g, ' ');
+                    const when = [this.d.date, this.d.time].filter((s) => s && s.trim()).join(' · ');
+                    fd.append('title', title);
+                    fd.append('when', when);
+                    fd.append('venue', this.d.venue || '');
+                    fd.append('poster', b, 'poster.jpg');
+                    const snapRes = await fetch('/api/poster-studio/share-snapshot', { method: 'POST', body: fd, headers: { 'Accept': 'application/json' } });
+                    const snapJson = await snapRes.json().catch(() => ({}));
+                    if (snapRes.ok && snapJson.status === 'success' && snapJson.shareUrl) {
+                        shareLink = snapJson.shareUrl;
+                    }
+                } catch (e) {}
+
+                const text = this.shareText(shareLink);
                 const file = new File([b], this.fileName('jpg'), { type: 'image/jpeg' });
                 if (FPCards.isTouch && navigator.canShare && navigator.canShare({ files: [file] })) {
-                    try { await navigator.share({ files: [file], text: this.shareText() }); }
-                    catch (e) { if (e && e.name !== 'AbortError') window.open('https://wa.me/?text=' + encodeURIComponent(this.shareText()), '_blank', 'noopener'); }
+                    try { await navigator.share({ files: [file], text }); }
+                    catch (e) { if (e && e.name !== 'AbortError') window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank', 'noopener'); }
                 } else {
                     await this.download();
-                    window.open('https://wa.me/?text=' + encodeURIComponent(this.shareText()), '_blank', 'noopener');
+                    window.open('https://api.whatsapp.com/send?text=' + encodeURIComponent(text), '_blank', 'noopener');
                     FPCards.toast('Poster downloaded — attach it in WhatsApp');
                 }
             } finally { this.busy = false; }

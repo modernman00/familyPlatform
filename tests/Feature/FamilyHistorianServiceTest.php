@@ -262,6 +262,32 @@ final class FamilyHistorianServiceTest extends TestCase
         $this->generatedImages[] = $rendered;
         $imgPath = dirname(__DIR__, 2) . '/resources/images/post/' . $rendered;
         $this->assertFileExists($imgPath);
-        $this->assertNotFalse(@getimagesize($imgPath));
+        $dims = @getimagesize($imgPath);
+        $this->assertIsArray($dims);
+        $this->assertSame(FamilyHistorianCardRenderer::WIDTH, $dims[0]);
+        $this->assertSame(720, $dims[1]);
+
+        $spotlightImg = FamilyHistorianCardRenderer::renderAndSave(
+            'milestone_spotlight',
+            [
+                'title' => "Taiwo Olaogun's Birthday",
+                'subtitle' => 'Birthday Celebration 🎂',
+                'days_remaining' => 7,
+                'target_date' => 'Dec 2, 2026',
+                'avatar' => '',
+                'meaningful_message' => '',
+            ],
+            $this->famCode,
+            'test_spotlight_' . time()
+        );
+        $this->assertNotNull($spotlightImg);
+        $this->generatedImages[] = $spotlightImg;
+        $spPath = dirname(__DIR__, 2) . '/resources/images/post/' . $spotlightImg;
+        $this->assertFileExists($spPath);
+        $spDims = @getimagesize($spPath);
+        $this->assertIsArray($spDims);
+        $this->assertSame(FamilyHistorianCardRenderer::WIDTH, $spDims[0]);
+        $this->assertSame(FamilyHistorianCardRenderer::SPOTLIGHT_HEIGHT, $spDims[1]);
+        $this->assertSame(1200, $spDims[1]);
     }
 }

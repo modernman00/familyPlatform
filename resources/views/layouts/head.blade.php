@@ -17,6 +17,7 @@
   @include('partials.og-meta', [
       'ogTitle' => trim((string) $__env->yieldContent('og_title', $__env->yieldContent('title', 'FamilyPlatform — Private Family Social Network & Living Heritage'))) ?: 'FamilyPlatform — Private Family Social Network & Living Heritage',
       'ogDescription' => trim((string) $__env->yieldContent('meta_description', 'Preserve precious family memories, build interactive family trees, and stay connected on FamilyPlatform.')) ?: 'Preserve precious family memories, build interactive family trees, and stay connected on FamilyPlatform.',
+      'ogImage' => trim((string) $__env->yieldContent('og_image', '')),
   ])
   <meta name="csrf-token" content="{{ $_SESSION['token'] ?? '' }}">
   <meta name="user-id" content="{{ $_SESSION['id'] ?? '' }}">

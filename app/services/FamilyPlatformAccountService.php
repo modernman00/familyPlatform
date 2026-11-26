@@ -161,9 +161,10 @@ class FamilyPlatformAccountService
      * @param string $message
      * @param string|null $img0
      * @param array{question?: string, options?: array<int, string>} $pollData
+     * @param array<string, mixed>|null $mediaMeta
      * @return int Created post_no
      */
-    public function publishPost(string $message, ?string $img0 = null, array $pollData = []): int
+    public function publishPost(string $message, ?string $img0 = null, array $pollData = [], ?array $mediaMeta = null): int
     {
         $this->ensureAccountExists();
 
@@ -196,6 +197,22 @@ class FamilyPlatformAccountService
         ]);
 
         $postNo = (int)$this->db->lastInsertId();
+
+        $normalisedMeta = \App\classes\VideoParser::normaliseMediaMeta($mediaMeta);
+        if ($normalisedMeta === null) {
+            $extractedVid = \App\classes\VideoParser::extractVideoFromText($cleanMessage);
+            if ($extractedVid !== null && !empty($extractedVid['aspect_ratio'])) {
+                $normalisedMeta = \App\classes\VideoParser::normaliseMediaMeta(['aspect_ratio' => $extractedVid['aspect_ratio']]);
+            }
+        }
+        if ($normalisedMeta !== null) {
+            try {
+                $metaStmt = $this->db->prepare('UPDATE post SET media_meta = ? WHERE post_no = ?');
+                $metaStmt->execute([json_encode($normalisedMeta, JSON_UNESCAPED_SLASHES), $postNo]);
+            } catch (\Throwable $metaErr) {
+                \error_log('[FamilyPlatformAccountService::publishPost media_meta] ' . $metaErr->getMessage());
+            }
+        }
 
         // Optional Poll Creation
         if (!empty($pollData['question']) && !empty($pollData['options']) && is_array($pollData['options'])) {

@@ -11,7 +11,12 @@ const renderVideoPlayer = (postMessage) => {
   const video = extractVideoFromText(postMessage);
   if (!video) return '';
 
-  const isShort = Boolean(video.isShort || video.type === 'tiktok' || (video.originalUrl && video.originalUrl.includes('/shorts/')));
+  const isShort = Boolean(
+    video.isShort
+    || video.type === 'tiktok'
+    || (video.originalUrl && video.originalUrl.includes('/shorts/'))
+    || /(?:^|[\s"'(])#(?:shorts?|reels?|tiktok|afv)\b/i.test(String(postMessage || ''))
+  );
 
   if (video.type === 'youtube' || video.type === 'vimeo' || video.type === 'cloudflare' || video.type === 'tiktok') {
     return `

@@ -24,5 +24,7 @@ export default defineConfig({
         include: ['resources/asset/js/apps/**/*.test.{js,jsx}'],
         globals: true,
         fileParallelism: false,
+        pool: 'vmThreads',
+        testTimeout: 15000,
     },
 });

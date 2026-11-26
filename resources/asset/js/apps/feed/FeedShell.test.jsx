@@ -17,6 +17,7 @@ vi.mock('../../components/profilePage/sovereignRealtimeBridge', () => ({
 
 import { FeedShell } from './FeedShell';
 import { PostComposer } from './PostComposer';
+import { AtgLivingPhotoAvatarStage } from '../../components/livingPhotoAvatar';
 
 describe('Profile Feed Preact Island (Phases 1–4)', () => {
     const baseBootstrap = {
@@ -2466,5 +2467,113 @@ describe('Profile Feed Preact Island (Phases 1–4)', () => {
             );
             expect(ownCard.querySelector('[data-testid="post-sharing-locked-badge"]')).toBeTruthy();
         });
+    });
+
+    it('lets members animate a photo in LightboxModal and share the animated clip directly to the post feed', async () => {
+        const initSpy = vi.spyOn(AtgLivingPhotoAvatarStage.prototype, 'init').mockResolvedValue(true);
+        const startSpy = vi.spyOn(AtgLivingPhotoAvatarStage.prototype, 'start').mockImplementation(() => {});
+        const triggerSpy = vi.spyOn(AtgLivingPhotoAvatarStage.prototype, 'triggerReaction').mockImplementation(() => {});
+        const recordSpy = vi.spyOn(AtgLivingPhotoAvatarStage.prototype, 'recordAnimatedVideoFile').mockResolvedValue({
+            file: new File(['fake-mp4-bytes'], 'living-avatar-hello.mp4', { type: 'video/mp4' }),
+            blob: new Blob(['fake-mp4-bytes'], { type: 'video/mp4' }),
+            ext: 'mp4',
+            mime: 'video/mp4',
+            reaction: 'hello',
+            label: 'Wave',
+            emoji: '👋',
+        });
+
+        const singlePhotoPost = {
+            ...samplePost,
+            post_no: '9601',
+            id: 'u_2',
+            fullName: 'Taiwo Olaogun',
+            postMessage: 'Birthday celebration card',
+            images: ['historian_milestone_spotlight_8b918edb8994.jpg'],
+            videos: [],
+            video: null,
+        };
+
+        globalThis.fetch = vi.fn().mockImplementation(async (url) => {
+            const urlStr = String(url);
+            if (urlStr.includes('/api/video/upload-file')) {
+                return {
+                    ok: true,
+                    status: 200,
+                    headers: new Headers({ 'content-type': 'application/json' }),
+                    json: async () => ({
+                        success: true,
+                        streamUrl: '/resources/videos/posts/post_vid_u_1_animated.mp4',
+                    }),
+                };
+            }
+            if (urlStr.includes('/member/profilePage/post')) {
+                return {
+                    ok: true,
+                    status: 200,
+                    headers: new Headers({ 'content-type': 'application/json' }),
+                    json: async () => ({
+                        status: 'success',
+                        message: {
+                            post_no: '9602',
+                            id: 'u_1',
+                            fullName: 'Tunde Olaogun',
+                            postMessage: "🎬 Animated a cherished family moment from Taiwo Olaogun's memory (Wave) ✨\n\n/resources/videos/posts/post_vid_u_1_animated.mp4",
+                            postFamCode: 'OLA001',
+                            post_likes: 0,
+                            comments: [],
+                            post_time: new Date().toISOString(),
+                        },
+                    }),
+                };
+            }
+            return {
+                ok: true,
+                status: 200,
+                headers: new Headers({ 'content-type': 'application/json' }),
+                json: async () => ({ status: 'success', tags: [] }),
+            };
+        });
+
+        const { container } = render(
+            <FeedShell
+                bootstrap={{
+                    ...baseBootstrap,
+                    userId: 'u_1',
+                    initialPosts: [singlePhotoPost],
+                    initialHasMore: false,
+                }}
+            />
+        );
+
+        const card = container.querySelector('#post9601');
+        const animateBtn = Array.from(card.querySelectorAll('button')).find((b) => b.textContent.includes('Animate'));
+        expect(animateBtn).toBeTruthy();
+        fireEvent.click(animateBtn);
+
+        const shareToFeedBtn = await screen.findByTestId('share-animation-to-feed-btn');
+        await waitFor(() => {
+            expect(shareToFeedBtn.disabled).toBe(false);
+        });
+
+        fireEvent.click(shareToFeedBtn);
+
+        await waitFor(() => {
+            expect(recordSpy).toHaveBeenCalledTimes(1);
+            expect(globalThis.fetch).toHaveBeenCalledWith(
+                expect.stringContaining('/api/video/upload-file'),
+                expect.objectContaining({ method: 'POST' })
+            );
+            expect(globalThis.fetch).toHaveBeenCalledWith(
+                expect.stringContaining('/member/profilePage/post'),
+                expect.objectContaining({ method: 'POST' })
+            );
+            expect(container.querySelector('#post9602')).toBeTruthy();
+        });
+
+        initSpy.mockRestore();
+        startSpy.mockRestore();
+        triggerSpy.mockRestore();
+        recordSpy.mockRestore();
     });
 });

@@ -6,12 +6,56 @@ namespace App\classes;
 final class VideoParser
 {
     /**
+     * Detect whether a URL or its surrounding post/title context indicates a vertical Short or Reel (9:16).
+     */
+    public static function isLikelyShortOrReel(?string $url, ?string $contextText = null): bool
+    {
+        $cleanUrl = trim((string)$url);
+        if ($cleanUrl !== '') {
+            if (
+                stripos($cleanUrl, '/shorts/') !== false
+                || preg_match('#/(?:reels?|shorts)/#i', $cleanUrl) === 1
+                || stripos($cleanUrl, 'tiktok.com/') !== false
+                || preg_match('/[?&](?:ig|fb)=/i', $cleanUrl) === 1
+            ) {
+                return true;
+            }
+        }
+
+        $cleanContext = trim((string)$contextText);
+        if ($cleanContext !== '') {
+            if (preg_match('/(?:^|[\s"\'(])#(?:shorts?|reels?|tiktok|afv)\b/i', $cleanContext) === 1) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Check whether an aspect ratio string (e.g. "9 / 16") represents a portrait frame (< 0.88).
+     */
+    public static function isPortraitAspectRatio(?string $aspectRatio): bool
+    {
+        if ($aspectRatio === null || trim($aspectRatio) === '') {
+            return false;
+        }
+        if (preg_match('/^\s*(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)\s*$/', $aspectRatio, $m) !== 1) {
+            return false;
+        }
+        $w = (float)$m[1];
+        $h = (float)$m[2];
+        return $w > 0.0 && $h > 0.0 && ($w / $h) < 0.88;
+    }
+
+    /**
      * Parse a single URL string for supported video providers (YouTube, Vimeo, Cloudflare, TikTok, Dropbox, Direct Video).
      *
      * @param string|null $url
+     * @param string|null $contextText
      * @return array{type: string, videoId: string|null, thumbnailUrl: string|null, embedUrl: string, originalUrl: string, hlsUrl?: string|null, trimStart?: float|null, trimEnd?: float|null, isShort?: bool, aspect_ratio?: string}|null
      */
-    public static function parseVideoUrl(?string $url): ?array
+    public static function parseVideoUrl(?string $url, ?string $contextText = null): ?array
     {
         if ($url === null) {
             return null;
@@ -27,7 +71,7 @@ final class VideoParser
         $ytRegex = '/(?:https?:\/\/)?(?:www\.|m\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?|shorts|live)\/|\S*?[?&]v[=_]?)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i';
         if (preg_match($ytRegex, $trimmed, $matches) === 1) {
             $videoId = $matches[1];
-            $isYtShort = stripos($trimmed, '/shorts/') !== false;
+            $isYtShort = self::isLikelyShortOrReel($trimmed, $contextText);
             $desc = [
                 'type' => 'youtube',
                 'videoId' => $videoId,
@@ -82,6 +126,8 @@ final class VideoParser
                 'thumbnailUrl' => null,
                 'embedUrl' => "https://www.tiktok.com/embed/v2/{$ttId}",
                 'originalUrl' => $trimmed,
+                'isShort' => true,
+                'aspect_ratio' => '9 / 16',
             ];
         }
 
@@ -272,13 +318,15 @@ final class VideoParser
      *
      * @param string $url
      * @param string|null $hookText
-     * @return array{type: string, videoId: string|null, thumbnailUrl: string|null, embedUrl: string, hlsUrl: string|null, originalUrl: string, trimStart: float|null, trimEnd: float|null, hook: string|null}
+     * @param string|null $contextText
+     * @return array{type: string, videoId: string|null, thumbnailUrl: string|null, embedUrl: string, hlsUrl: string|null, originalUrl: string, trimStart: float|null, trimEnd: float|null, hook: string|null, isShort?: bool, aspect_ratio?: string}
      */
-    public static function formatVideoDescriptor(string $url, ?string $hookText = null): array
+    public static function formatVideoDescriptor(string $url, ?string $hookText = null, ?string $contextText = null): array
     {
         $trimmed = trim($url);
         $hook = ($hookText !== null && trim($hookText) !== '') ? trim($hookText) : null;
-        $parsed = self::parseVideoUrl($trimmed);
+        $effectiveContext = $contextText !== null && trim($contextText) !== '' ? trim($contextText) : $hook;
+        $parsed = self::parseVideoUrl($trimmed, $effectiveContext);
 
         if ($parsed !== null) {
             $type = $parsed['type'];
@@ -313,7 +361,7 @@ final class VideoParser
                 }
             }
 
-            return [
+            $descriptor = [
                 'type' => $type,
                 'videoId' => $vidId,
                 'thumbnailUrl' => $thumb,
@@ -324,6 +372,14 @@ final class VideoParser
                 'trimEnd' => $trimEnd,
                 'hook' => $hook,
             ];
+            $isShort = !empty($parsed['isShort']) || self::isLikelyShortOrReel($origUrl, $effectiveContext);
+            if ($isShort) {
+                $descriptor['isShort'] = true;
+                $descriptor['aspect_ratio'] = $parsed['aspect_ratio'] ?? '9 / 16';
+            } elseif (!empty($parsed['aspect_ratio'])) {
+                $descriptor['aspect_ratio'] = $parsed['aspect_ratio'];
+            }
+            return $descriptor;
         }
 
         // Fallback for unrecognized external/local stream URLs
@@ -356,7 +412,7 @@ final class VideoParser
      *
      * @param string|null $text
      * @param int $max
-     * @return list<array{type: string, videoId: string|null, thumbnailUrl: string|null, embedUrl: string, originalUrl: string, trimStart: float|null, trimEnd: float|null, hook: string|null}>
+     * @return list<array{type: string, videoId: string|null, thumbnailUrl: string|null, embedUrl: string, originalUrl: string, trimStart: float|null, trimEnd: float|null, hook: string|null, isShort?: bool, aspect_ratio?: string}>
      */
     public static function extractAllVideosFromText(?string $text, int $max = 6): array
     {
@@ -375,9 +431,9 @@ final class VideoParser
                 if (isset($seen[$cleanUrl])) {
                     continue;
                 }
-                if (self::parseVideoUrl($cleanUrl) !== null) {
+                if (self::parseVideoUrl($cleanUrl, $text) !== null) {
                     $seen[$cleanUrl] = true;
-                    $results[] = self::formatVideoDescriptor($cleanUrl);
+                    $results[] = self::formatVideoDescriptor($cleanUrl, null, $text);
                     if (count($results) >= $max) {
                         break;
                     }
@@ -422,7 +478,7 @@ final class VideoParser
      * Extract the first supported video found within a text block.
      *
      * @param string|null $text
-     * @return array{type: string, videoId: string|null, thumbnailUrl: string|null, originalUrl: string, trimStart?: float|null, trimEnd?: float|null}|null
+     * @return array{type: string, videoId: string|null, thumbnailUrl: string|null, originalUrl: string, trimStart?: float|null, trimEnd?: float|null, isShort?: bool, aspect_ratio?: string}|null
      */
     public static function extractVideoFromText(?string $text): ?array
     {
@@ -435,7 +491,8 @@ final class VideoParser
             /** @var list<string> $matchedUrls */
             $matchedUrls = $matches[0];
             foreach ($matchedUrls as $url) {
-                $parsed = self::parseVideoUrl($url);
+                $cleanUrl = rtrim($url, '.,;:!?)');
+                $parsed = self::parseVideoUrl($cleanUrl, $text);
                 if ($parsed !== null) {
                     return $parsed;
                 }
@@ -569,6 +626,9 @@ final class VideoParser
         }
         if (isset($mediaMeta['aspect_ratio'])) {
             $descriptor['aspect_ratio'] = $mediaMeta['aspect_ratio'];
+            if (self::isPortraitAspectRatio((string)$mediaMeta['aspect_ratio'])) {
+                $descriptor['isShort'] = true;
+            }
         }
         if (isset($mediaMeta['duration_sec'])) {
             $descriptor['duration_sec'] = $mediaMeta['duration_sec'];

@@ -16,7 +16,7 @@ final class VideoParserTest extends TestCase
         $this->assertNotNull($result);
         $this->assertSame('youtube', $result['type']);
         $this->assertSame('rW9MbYQrTUI', $result['videoId']);
-        $this->assertSame('https://img.youtube.com/vi/rW9MbYQrTUI/hqdefault.jpg', $result['thumbnailUrl']);
+        $this->assertSame('https://i.ytimg.com/vi/rW9MbYQrTUI/hqdefault.jpg', $result['thumbnailUrl']);
     }
 
     public function test_parses_short_youtube_url(): void
@@ -27,7 +27,7 @@ final class VideoParserTest extends TestCase
         $this->assertNotNull($result);
         $this->assertSame('youtube', $result['type']);
         $this->assertSame('dQw4w9WgXcQ', $result['videoId']);
-        $this->assertSame('https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg', $result['thumbnailUrl']);
+        $this->assertSame('https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg', $result['thumbnailUrl']);
     }
 
     public function test_parses_youtube_shorts_url(): void
@@ -38,6 +38,24 @@ final class VideoParserTest extends TestCase
         $this->assertNotNull($result);
         $this->assertSame('youtube', $result['type']);
         $this->assertSame('abc123XYZ_-', $result['videoId']);
+        $this->assertTrue($result['isShort'] ?? false);
+        $this->assertSame('9 / 16', $result['aspect_ratio'] ?? null);
+
+        $formatted = VideoParser::formatVideoDescriptor($url);
+        $this->assertTrue($formatted['isShort'] ?? false);
+        $this->assertSame('9 / 16', $formatted['aspect_ratio'] ?? null);
+    }
+
+    public function test_detects_reel_or_short_from_post_message_context(): void
+    {
+        $postText = "Need a good laugh today? 😂 Have a watch of \"The worst key toss you will see today #AFV #funny #comedy\" (via America's Funniest Home Videos)!\n\nhttps://www.youtube.com/watch?v=YBhwgEkJX-M";
+        $videos = VideoParser::extractAllVideosFromText($postText, 6);
+
+        $this->assertCount(1, $videos);
+        $this->assertSame('youtube', $videos[0]['type']);
+        $this->assertSame('YBhwgEkJX-M', $videos[0]['videoId']);
+        $this->assertTrue($videos[0]['isShort'] ?? false);
+        $this->assertSame('9 / 16', $videos[0]['aspect_ratio'] ?? null);
     }
 
     public function test_parses_vimeo_url(): void

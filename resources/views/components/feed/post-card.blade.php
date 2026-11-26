@@ -697,7 +697,7 @@
   <template x-if="(!post.videos || post.videos.length <= 1) && post.video && (post.video.type === 'youtube' || post.video.type === 'vimeo' || post.video.type === 'cloudflare' || post.video.type === 'tiktok')">
     <div class="video-embed-container feed-video-breakout mb-3"
          x-data="{
-           isShort: Boolean(post.video.isShort || post.video.type === 'tiktok' || (post.video.originalUrl && post.video.originalUrl.includes('/shorts/')) || (post.video.aspect_ratio && (parseFloat(post.video.aspect_ratio.split('/')[0]) / (parseFloat(post.video.aspect_ratio.split('/')[1]) || 1)) < 0.88))
+           isShort: Boolean(post.video.isShort || post.video.type === 'tiktok' || (post.video.originalUrl && post.video.originalUrl.includes('/shorts/')) || (post.video.aspect_ratio && (parseFloat(post.video.aspect_ratio.split('/')[0]) / (parseFloat(post.video.aspect_ratio.split('/')[1]) || 1)) < 0.88) || /(?:^|[\s&quot;'(])#(?:shorts?|reels?|tiktok|afv)\b/i.test(String(post.postMessage || post.displayMessage || '')))
          }">
       <div class="video-rendition-frame overflow-hidden shadow-sm border border-light-subtle position-relative d-flex align-items-center justify-content-center"
            style="border-radius: 12px; width: 100%; max-width: 100%; background: #07090e;">

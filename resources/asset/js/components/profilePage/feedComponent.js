@@ -3015,9 +3015,49 @@ export function profileFeed(opts = {}) {
             }
         },
 
+        formatExternalAuthorName(post) {
+            if (!post) return 'A relative';
+            const preference = String(post.external_share_name || '').toLowerCase();
+            const handle = String(post.app_handle || post.handle || '').replace(/^@+/, '').trim();
+            if (preference === 'anonymous') {
+                return 'A family member';
+            }
+            if (preference === 'handle' && handle) {
+                return `@${handle}`;
+            }
+            const f = (post.firstName || '').trim();
+            const l = (post.lastName || '').trim();
+            const cleanFirst = f ? f.charAt(0).toUpperCase() + f.slice(1).toLowerCase() : '';
+            const cleanLast = l ? l.charAt(0).toUpperCase() + l.slice(1).toLowerCase() : '';
+
+            if (preference === 'first_only' && cleanFirst) {
+                return cleanFirst;
+            }
+            if (preference === 'full_name' && (cleanFirst || cleanLast)) {
+                return `${cleanFirst} ${cleanLast}`.trim();
+            }
+            if (cleanFirst && cleanLast) {
+                return `${cleanFirst} ${cleanLast.charAt(0)}.`;
+            }
+            if (cleanFirst) {
+                return cleanFirst;
+            }
+            const full = (post.fullName || '').trim();
+            if (!full || full.toLowerCase() === 'family member' || full.toLowerCase() === 'a relative') {
+                return handle ? `@${handle}` : 'A family member';
+            }
+            const parts = full.split(/\s+/);
+            if (parts.length > 1) {
+                const first = parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase();
+                const initial = parts[parts.length - 1].charAt(0).toUpperCase();
+                return `${first} ${initial}.`;
+            }
+            return parts[0].charAt(0).toUpperCase() + parts[0].slice(1).toLowerCase();
+        },
+
         getCleanShareText(post) {
             if (!post) return 'Check out this memory on FamilyPlatform';
-            const author = (post.fullName || '').trim() || 'A family relative';
+            const author = this.formatExternalAuthorName(post);
             let raw = (post.displayMessage || post.postMessage || '').trim();
 
             // Strip style tokens
@@ -3038,18 +3078,18 @@ export function profileFeed(opts = {}) {
                 || (typeof post.postMessage === 'string' && (post.postMessage.includes('/resources/videos/') || post.postMessage.includes('.webm') || post.postMessage.includes('.mp4'))));
 
             if (hasVideo) {
-                return `Watch ${author}’s family video memory on FamilyPlatform`;
+                return `Watch ${author}’s video on FamilyPlatform`;
             }
 
             if (Array.isArray(post.images) && post.images.length > 0) {
-                return `View ${author}’s family photo on FamilyPlatform`;
+                return `View ${author}’s photo on FamilyPlatform`;
             }
 
             if (post.voice_capsule_url) {
                 return `Listen to ${author}’s voice capsule on FamilyPlatform`;
             }
 
-            return `${author} shared a family memory on FamilyPlatform`;
+            return `${author} shared a post on FamilyPlatform`;
         },
 
         openSharePortal(post) {
@@ -3077,12 +3117,13 @@ export function profileFeed(opts = {}) {
                 || (Array.isArray(post.videos) && post.videos.length > 0) 
                 || (typeof post.postMessage === 'string' && (post.postMessage.includes('/resources/videos/') || post.postMessage.includes('.webm') || post.postMessage.includes('.mp4'))));
 
+            const author = this.formatExternalAuthorName(post);
             if (hasVideo) {
-                this.sharePortalTitle = post.fullName ? `${post.fullName}'s Family Video` : 'Family Video';
+                this.sharePortalTitle = `${author}'s Video`;
             } else if (Array.isArray(post.images) && post.images.length > 0) {
-                this.sharePortalTitle = post.fullName ? `${post.fullName}'s Family Photo` : 'Family Photo';
+                this.sharePortalTitle = `${author}'s Photo`;
             } else {
-                this.sharePortalTitle = post.fullName ? `${post.fullName}'s Family Memory` : 'Family Memory';
+                this.sharePortalTitle = `${author}'s Post`;
             }
 
             this.sharePortalText = this.getCleanShareText(post);
@@ -3168,14 +3209,14 @@ export function profileFeed(opts = {}) {
         // WhatsApp-native message: short teaser with *bold*/_italic_; the link goes last so WhatsApp
         // renders the designed preview card (/post/{n}/card.jpg) instead of repeating the whole post.
         getWhatsAppShareText(post) {
-            const author = ((post && post.fullName) || '').trim() || 'A relative';
+            const author = this.formatExternalAuthorName(post);
             let raw = ((post && (post.displayMessage || post.postMessage)) || '').trim();
             raw = raw.replace(/\[style:[a-z0-9_]+\]\s*/gi, '')
                 .replace(/(?:https?:\/\/[^\s]+|\/resources\/(?:videos|images|profile)\/[^\s]+|post_vid_[^\s]+|[a-f0-9_]+_Sho_[^\s]+|\.(?:webm|mp4|mov|jpg|jpeg|png|gif|webp|avif)(?:#[^\s]*)?)/gi, '')
                 .replace(/\s+/g, ' ').trim();
             const hasVideo = !!(post && (post.video || (Array.isArray(post.videos) && post.videos.length)));
             const hasPhoto = !!(post && Array.isArray(post.images) && post.images.length);
-            const kind = hasVideo ? ['🎬', 'a family video'] : hasPhoto ? ['📸', 'a family photo'] : (post && post.voice_capsule_url) ? ['🎙️', 'a voice note'] : ['💬', 'a family update'];
+            const kind = hasVideo ? ['🎬', 'a video'] : hasPhoto ? ['📸', 'a photo'] : (post && post.voice_capsule_url) ? ['🎙️', 'a voice note'] : ['💬', 'an update'];
             const lines = [`${kind[0]} *${author}* shared ${kind[1]}`];
             if (raw) {
                 const teaser = raw.length > 120 ? raw.slice(0, 117).replace(/\s+\S*$/, '') + '…' : raw;

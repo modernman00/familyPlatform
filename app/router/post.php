@@ -154,7 +154,7 @@ $router->map(
 );
 
 $router->map(
-  method: 'GET',
+  method: 'GET|HEAD',
   route: '/post/[i:postNo]',
   target: 'App\controller\PostShareController@handlePostLink',
   name: 'post_shareable_link'

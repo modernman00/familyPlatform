@@ -75,6 +75,7 @@ $router->map('GET', '/poster-studio-asset/[*:file]', function (string $file) {
     (new \Src\Media\UniversalPosterStudioController())->serveStudioAsset($file);
 }, 'poster_studio_asset');
 $router->map('POST', '/api/poster-studio/post-to-feed', 'App\controller\members\PosterStudioController@postToFeed', 'api_poster_studio_post_feed');
+$router->map('POST', '/api/poster-studio/share-snapshot', 'App\controller\members\PosterStudioController@shareSnapshot', 'api_poster_studio_share_snapshot');
 $router->map('GET|POST', '/api/poster-studio/render', function () {
     (new \Src\Media\UniversalPosterStudioController())->renderApiPoster();
 }, 'api_atg_poster_studio_render');

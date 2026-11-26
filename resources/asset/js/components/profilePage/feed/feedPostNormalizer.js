@@ -13,7 +13,7 @@ export const feedPostNormalizer = {
             }
             const cleanMsg = this.decodeHtml(p?.postMessage || '');
             let detectedVideos = (Array.isArray(p?.videos) && p.videos.length > 0)
-                ? p.videos.map(v => formatVideoDescriptor(v)).filter(Boolean)
+                ? p.videos.map(v => formatVideoDescriptor(v, cleanMsg)).filter(Boolean)
                 : [];
             const videoFilesFromSlots = this.extractVideosFromSlots(p);
             if (videoFilesFromSlots && videoFilesFromSlots.length > 0) {

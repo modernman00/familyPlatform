@@ -843,7 +843,7 @@ class FeedRepository
                     $hook = \App\dto\PostDto::deriveHookFromMessage($msg ?? ($post['postMessage'] ?? ''));
                     $formattedVideos = [];
                     foreach ($finalVideos as $vUrl) {
-                        $desc = \App\classes\VideoParser::formatVideoDescriptor((string)$vUrl, $hook);
+                        $desc = \App\classes\VideoParser::formatVideoDescriptor((string)$vUrl, $hook, $msg);
                         if ($desc['type'] === 'direct' && preg_match('#^https://(?:[a-zA-Z0-9_-]+\.)?(?:googleusercontent\.com|googlevideo\.com)/#i', $desc['originalUrl'])) {
                             $desc['embedUrl'] = \App\services\LinkPreviewService::getProxiedVideoUrl($desc['originalUrl']);
                         }
@@ -887,7 +887,7 @@ class FeedRepository
                     $hook = \App\dto\PostDto::deriveHookFromMessage($msg ?? ($post['postMessage'] ?? ''));
                     $formattedVideos = [];
                     foreach ($allVideoUrls as $vUrl) {
-                        $desc = \App\classes\VideoParser::formatVideoDescriptor((string)$vUrl, $hook);
+                        $desc = \App\classes\VideoParser::formatVideoDescriptor((string)$vUrl, $hook, $msg);
                         if ($desc['type'] === 'direct' && preg_match('#^https://(?:[a-zA-Z0-9_-]+\.)?(?:googleusercontent\.com|googlevideo\.com)/#i', $desc['originalUrl'])) {
                             $desc['embedUrl'] = \App\services\LinkPreviewService::getProxiedVideoUrl($desc['originalUrl']);
                         }
@@ -911,7 +911,7 @@ class FeedRepository
                     $hook = \App\dto\PostDto::deriveHookFromMessage($msg ?? ($post['postMessage'] ?? ''));
                     $formattedVideos = [];
                     foreach ($allVideoUrls as $vUrl) {
-                        $desc = \App\classes\VideoParser::formatVideoDescriptor((string)$vUrl, $hook);
+                        $desc = \App\classes\VideoParser::formatVideoDescriptor((string)$vUrl, $hook, $msg);
                         if ($desc['type'] === 'direct' && preg_match('#^https://(?:[a-zA-Z0-9_-]+\.)?(?:googleusercontent\.com|googlevideo\.com)/#i', $desc['originalUrl'])) {
                             $desc['embedUrl'] = \App\services\LinkPreviewService::getProxiedVideoUrl($desc['originalUrl']);
                         }

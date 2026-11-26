@@ -149,6 +149,96 @@ class CuratedVideoEngineService
             );
             $stmtGags->execute(['Just For Laughs Gags (Family Comedy)', 'youtube_channel', 'UC8E_wBqYhlQwWoOz0dKeEKw', 'funny']);
         }
+
+        $this->selfHealShortVideoUrls();
+    }
+
+    /**
+     * Detect whether a curated video is a vertical YouTube Short / Reel (9:16 portrait).
+     */
+    public static function isLikelyShortVideo(
+        string $url = '',
+        string $title = '',
+        string $description = '',
+        string $author = ''
+    ): bool {
+        return VideoParser::isLikelyShortOrReel($url, $title . ' ' . $description);
+    }
+
+    /**
+     * Build the canonical YouTube URL, preserving /shorts/{id} for vertical Shorts/Reels.
+     */
+    public static function buildYoutubeVideoUrl(string $videoId, bool $isShort = false): string
+    {
+        return $isShort
+            ? 'https://www.youtube.com/shorts/' . $videoId
+            : 'https://www.youtube.com/watch?v=' . $videoId;
+    }
+
+    /**
+     * Self-heal queued and already-published curated YouTube Shorts/Reels so they use
+     * /shorts/{id} and 9:16 portrait media_meta instead of pillarboxed 16:9 watch URLs.
+     */
+    private function selfHealShortVideoUrls(): void
+    {
+        try {
+            $stmt = $this->db->query(
+                "SELECT id, external_video_id, video_url, title, author_name, suggested_caption, published_post_no
+                 FROM curated_videos
+                 WHERE provider = 'youtube' AND external_video_id != ''"
+            );
+            if ($stmt === false) {
+                return;
+            }
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $updCurated = $this->db->prepare('UPDATE curated_videos SET video_url = ? WHERE id = ?');
+            $selPost = $this->db->prepare('SELECT postMessage, media_meta FROM post WHERE post_no = ? LIMIT 1');
+            $updPost = $this->db->prepare('UPDATE post SET postMessage = ?, media_meta = ? WHERE post_no = ?');
+
+            foreach ($rows as $row) {
+                $vidId = trim((string)($row['external_video_id'] ?? ''));
+                if ($vidId === '') {
+                    continue;
+                }
+                $oldUrl = trim((string)($row['video_url'] ?? ''));
+                $title = (string)($row['title'] ?? '');
+                $caption = (string)($row['suggested_caption'] ?? '');
+                $author = (string)($row['author_name'] ?? '');
+
+                if (!self::isLikelyShortVideo($oldUrl, $title, $caption, $author)) {
+                    continue;
+                }
+
+                $shortUrl = self::buildYoutubeVideoUrl($vidId, true);
+                if ($oldUrl !== $shortUrl) {
+                    $updCurated->execute([$shortUrl, (int)$row['id']]);
+                }
+
+                $pubPostNo = (int)($row['published_post_no'] ?? 0);
+                if ($pubPostNo > 0) {
+                    $selPost->execute([$pubPostNo]);
+                    $postRow = $selPost->fetch(PDO::FETCH_ASSOC);
+                    if (is_array($postRow)) {
+                        $msg = (string)($postRow['postMessage'] ?? '');
+                        $watchUrl = 'https://www.youtube.com/watch?v=' . $vidId;
+                        $newMsg = str_contains($msg, $watchUrl)
+                            ? str_replace($watchUrl, $shortUrl, $msg)
+                            : $msg;
+                        $existingMeta = VideoParser::normaliseMediaMeta($postRow['media_meta'] ?? null) ?? [];
+                        if (($existingMeta['aspect_ratio'] ?? '') !== '9 / 16' || $newMsg !== $msg) {
+                            $existingMeta['aspect_ratio'] = '9 / 16';
+                            $updPost->execute([
+                                $newMsg,
+                                json_encode($existingMeta, JSON_UNESCAPED_SLASHES),
+                                $pubPostNo,
+                            ]);
+                        }
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            // Non-blocking schema self-heal
+        }
     }
 
     /**
@@ -400,8 +490,9 @@ class CuratedVideoEngineService
 
         $provider = $parsed['type'];
         $videoId = (string)$parsed['videoId'];
+        $isShort = !empty($parsed['isShort']) || self::isLikelyShortVideo($cleanUrl, (string)$customTitle, '', '');
         $canonicalUrl = $provider === 'youtube'
-            ? 'https://www.youtube.com/watch?v=' . $videoId
+            ? self::buildYoutubeVideoUrl($videoId, $isShort)
             : (string)$parsed['originalUrl'];
 
         $title = trim((string)$customTitle);
@@ -409,7 +500,7 @@ class CuratedVideoEngineService
         $thumbnail = (string)($parsed['thumbnailUrl'] ?? '');
 
         if ($provider === 'youtube' && $title === '') {
-            $oembedUrl = 'https://www.youtube.com/oembed?url=' . rawurlencode($canonicalUrl) . '&format=json';
+            $oembedUrl = 'https://www.youtube.com/oembed?url=' . rawurlencode('https://www.youtube.com/watch?v=' . $videoId) . '&format=json';
             $oembedRes = ($this->httpFetcher)($oembedUrl);
             if (!empty($oembedRes['ok']) && $oembedRes['body'] !== '') {
                 $decoded = json_decode($oembedRes['body'], true);
@@ -419,8 +510,17 @@ class CuratedVideoEngineService
                     if (!empty($decoded['thumbnail_url']) && is_string($decoded['thumbnail_url'])) {
                         $thumbnail = $decoded['thumbnail_url'];
                     }
+                    $oembedW = (int)($decoded['width'] ?? 0);
+                    $oembedH = (int)($decoded['height'] ?? 0);
+                    if (($oembedW > 0 && $oembedH > $oembedW) || self::isLikelyShortVideo($cleanUrl, $title, '', $author)) {
+                        $isShort = true;
+                        $canonicalUrl = self::buildYoutubeVideoUrl($videoId, true);
+                    }
                 }
             }
+        } elseif ($provider === 'youtube' && !$isShort && self::isLikelyShortVideo($cleanUrl, $title, '', $author)) {
+            $isShort = true;
+            $canonicalUrl = self::buildYoutubeVideoUrl($videoId, true);
         }
 
         if ($title === '') {
@@ -485,18 +585,35 @@ class CuratedVideoEngineService
         ContentSafetyService::assertClean($caption, 'caption', 'curated_video');
 
         $videoUrl = trim((string)$video['video_url']);
+        $vidId = trim((string)($video['external_video_id'] ?? ''));
+        $isShort = (($video['provider'] ?? '') === 'youtube') && self::isLikelyShortVideo(
+            $videoUrl,
+            (string)($video['title'] ?? ''),
+            $caption,
+            (string)($video['author_name'] ?? '')
+        );
+        if ($isShort && $vidId !== '') {
+            $shortUrl = self::buildYoutubeVideoUrl($vidId, true);
+            $watchUrl = 'https://www.youtube.com/watch?v=' . $vidId;
+            if (str_contains($caption, $watchUrl)) {
+                $caption = str_replace($watchUrl, $shortUrl, $caption);
+            }
+            $videoUrl = $shortUrl;
+        }
+
         $postMessage = str_contains($caption, $videoUrl)
             ? $caption
             : $caption . "\n\n" . $videoUrl;
 
-        $postNo = $this->officialAccountService->publishPost($postMessage);
+        $mediaMeta = $isShort ? ['aspect_ratio' => '9 / 16'] : null;
+        $postNo = $this->officialAccountService->publishPost($postMessage, null, [], $mediaMeta);
 
         $upd = $this->db->prepare(
             "UPDATE curated_videos
-             SET status = 'published', suggested_caption = ?, published_post_no = ?, published_at = NOW()
+             SET status = 'published', video_url = ?, suggested_caption = ?, published_post_no = ?, published_at = NOW()
              WHERE id = ?"
         );
-        $upd->execute([$caption, $postNo, $curatedVideoId]);
+        $upd->execute([$videoUrl, $caption, $postNo, $curatedVideoId]);
 
         return $postNo;
     }
@@ -630,27 +747,30 @@ class CuratedVideoEngineService
         $fallbacks = [
             [
                 'video_id' => 'Imwf4spTmT0',
-                'title' => "Boy's got that GOAT in him 🐐 Funny Family Farm Moment",
+                'title' => "Boy's got that GOAT in him 🐐 #shorts #funnyanimals",
                 'author' => 'AFV Official',
                 'category' => 'funny',
+                'is_short' => true,
             ],
             [
                 'video_id' => 'YBhwgEkJX-M',
-                'title' => 'The funniest key toss you will see today! 😂',
+                'title' => 'The funniest key toss you will see today! 😂 #AFV #shorts',
                 'author' => 'AFV Official',
                 'category' => 'funny',
+                'is_short' => true,
             ],
             [
                 'video_id' => 'fUD1CyhBEZo',
                 'title' => 'Rescue Dog Finally Remembers How To Play Again',
                 'author' => 'The Dodo',
                 'category' => 'pets',
+                'is_short' => false,
             ],
         ];
 
         foreach ($fallbacks as $fb) {
             $vid = $fb['video_id'];
-            $url = 'https://www.youtube.com/watch?v=' . $vid;
+            $url = self::buildYoutubeVideoUrl($vid, !empty($fb['is_short']));
             $thumb = "https://i.ytimg.com/vi/{$vid}/hqdefault.jpg";
             $caption = $this->generateEngagingCaption($fb['title'], $fb['category'], $fb['author']);
             $this->insertQueuedVideo(
@@ -719,10 +839,12 @@ class CuratedVideoEngineService
                     $description = trim((string)$media->group->description);
                 }
 
+                $isShortEntry = self::isLikelyShortVideo($linkHref, $title, $description, $author);
+
                 $entries[] = [
                     'provider' => 'youtube',
                     'video_id' => $videoId,
-                    'video_url' => 'https://www.youtube.com/watch?v=' . $videoId,
+                    'video_url' => self::buildYoutubeVideoUrl($videoId, $isShortEntry),
                     'title' => $title !== '' ? $title : 'Family Video Spotlight',
                     'author' => $author,
                     'description' => $description,
@@ -745,15 +867,23 @@ class CuratedVideoEngineService
                     continue;
                 }
 
+                $itemTitle = trim((string)($item->title ?? 'Family Video Spotlight'));
+                $itemAuthor = trim((string)($xml->channel->title ?? ''));
+                $itemDesc = trim(strip_tags((string)($item->description ?? '')));
+                $isShortRss = $parsed['type'] === 'youtube' && (
+                    !empty($parsed['isShort'])
+                    || self::isLikelyShortVideo($link, $itemTitle, $itemDesc, $itemAuthor)
+                );
+
                 $entries[] = [
                     'provider' => (string)$parsed['type'],
                     'video_id' => (string)$parsed['videoId'],
                     'video_url' => $parsed['type'] === 'youtube'
-                        ? 'https://www.youtube.com/watch?v=' . $parsed['videoId']
+                        ? self::buildYoutubeVideoUrl((string)$parsed['videoId'], $isShortRss)
                         : $link,
-                    'title' => trim((string)($item->title ?? 'Family Video Spotlight')),
-                    'author' => trim((string)($xml->channel->title ?? '')),
-                    'description' => trim(strip_tags((string)($item->description ?? ''))),
+                    'title' => $itemTitle,
+                    'author' => $itemAuthor,
+                    'description' => $itemDesc,
                     'thumbnail_url' => (string)($parsed['thumbnailUrl'] ?? ''),
                 ];
 

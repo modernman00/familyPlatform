@@ -6,6 +6,7 @@
 @endphp
 
 @section('title', 'FamilyPlatform Journal — Stories, Heritage & Family Insights')
+@section('og_image', rtrim((string) ($_ENV['APP_URL'] ?? getenv('APP_URL') ?: 'https://myfamilyplatform.com'), '/') . '/public/images/og-journal.jpg?v=1')
 @section('meta_description', 'Discover inspiring family stories, memory preservation guides, parenting insights, and tips for celebrating milestones across generations.')
 @section('og_title', 'FamilyPlatform Journal — Stories, Heritage & Family Insights')
 @section('og_description', 'Discover inspiring family stories, memory preservation guides, parenting insights, and tips for celebrating milestones across generations.')

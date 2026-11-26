@@ -61,8 +61,10 @@ export function VideoModal({
     const isPortraitIframe = !isDirect && Boolean(
         rawItem?.isShort
         || rawItem?.type === 'tiktok'
-        || (typeof rawItem?.originalUrl === 'string' && (rawItem.originalUrl.includes('/shorts/') || /\/reel\/\d+/i.test(rawItem.originalUrl)))
-        || (typeof currentUrl === 'string' && /\/reel(?:\/|%2F)\d+/i.test(currentUrl))
+        || rawItem?.provider === 'tiktok'
+        || (typeof rawItem?.originalUrl === 'string' && (rawItem.originalUrl.includes('/shorts/') || /\/reels?\/\d+/i.test(rawItem.originalUrl)))
+        || (typeof currentUrl === 'string' && /\/reels?(?:\/|%2F)\d+/i.test(currentUrl))
+        || /(?:^|[\s"'(])#(?:shorts?|reels?|tiktok|afv)\b/i.test(String(rawItem?.title || rawItem?.hook || rawItem?.hookText || ''))
         || (numericRatio !== null && numericRatio < 0.88)
     );
     const useFramedStage = isPortraitIframe || (isFacebookIframe && (numericRatio === null || numericRatio <= 1.15));

@@ -92,6 +92,72 @@ XML;
         ));
     }
 
+    public function testDetectsShortReelsAndPublishesWithPortraitAspectRatio(): void
+    {
+        $shortXml = <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns:yt="http://www.youtube.com/xml/schemas/2015" xmlns:media="http://search.yahoo.com/mrss/" xmlns="http://www.w3.org/2005/Atom">
+  <title>America's Funniest Home Videos</title>
+  <entry>
+    <yt:videoId>YBhwgEkJX-M</yt:videoId>
+    <title>The worst key toss you will see today #AFV #funny #comedy</title>
+    <link rel="alternate" href="https://www.youtube.com/watch?v=YBhwgEkJX-M"/>
+    <author><name>America's Funniest Home Videos</name></author>
+    <media:group>
+      <media:description>Tossing someone the keys isn't as easy as it sounds #shorts</media:description>
+    </media:group>
+  </entry>
+</feed>
+XML;
+
+        $engine = new CuratedVideoEngineService($this->db);
+        $entries = $engine->parseFeedEntries($shortXml, 5);
+
+        $this->assertCount(1, $entries);
+        $this->assertSame('https://www.youtube.com/shorts/YBhwgEkJX-M', $entries[0]['video_url']);
+
+        $uniqueId = 'sh' . substr(md5((string)microtime(true)), 0, 9);
+        $watchUrl = 'https://www.youtube.com/watch?v=' . $uniqueId;
+
+        $mockFetcher = static function (string $url) use ($uniqueId): array {
+            if (str_contains($url, 'oembed')) {
+                return [
+                    'ok' => true,
+                    'body' => json_encode([
+                        'title' => 'Hilarious Family Reel #AFV #shorts',
+                        'author_name' => "America's Funniest Home Videos",
+                        'thumbnail_url' => "https://i.ytimg.com/vi/{$uniqueId}/hqdefault.jpg",
+                        'width' => 315,
+                        'height' => 560,
+                    ]) ?: '{}',
+                    'error' => '',
+                ];
+            }
+            return ['ok' => false, 'body' => '', 'error' => 'Not used'];
+        };
+
+        $officialService = new FamilyPlatformAccountService($this->db);
+        $shortEngine = new CuratedVideoEngineService($this->db, $officialService, $mockFetcher);
+
+        $curatedId = $shortEngine->importSingleVideoUrl($watchUrl, 'funny');
+        $this->createdVideoIds[] = $curatedId;
+
+        $postNo = $shortEngine->publishQueuedVideo($curatedId);
+        $this->createdPostNos[] = $postNo;
+
+        $stmt = $this->db->prepare('SELECT * FROM post WHERE post_no = ? LIMIT 1');
+        $stmt->execute([$postNo]);
+        $postRow = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $this->assertIsArray($postRow);
+        $this->assertStringContainsString('https://www.youtube.com/shorts/' . $uniqueId, (string)$postRow['postMessage']);
+
+        $dto = PostDto::fromDatabaseRow($postRow);
+        $this->assertNotNull($dto->video);
+        $this->assertTrue($dto->video['isShort'] ?? false);
+        $this->assertSame('9 / 16', $dto->video['aspect_ratio'] ?? null);
+    }
+
     public function testSsrfProtectionBlocksPrivateAndNonHttpsUrls(): void
     {
         $engine = new CuratedVideoEngineService($this->db);

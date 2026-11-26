@@ -26,7 +26,30 @@ export function normaliseDropboxStreamUrl(url) {
   }
 }
 
-export function parseVideoUrl(url) {
+export function isLikelyShortContext(text = '', url = '') {
+  const u = String(url || '').trim();
+  if (
+    /\/(?:shorts|reels?)\//i.test(u)
+    || /tiktok\.com\//i.test(u)
+    || /[?&](?:ig|fb)=/i.test(u)
+  ) {
+    return true;
+  }
+  const t = String(text || '').trim();
+  if (!t) return false;
+  return /(?:^|[\s"'(])#(?:shorts?|reels?|tiktok|afv)\b/i.test(t);
+}
+
+export function isPortraitRatioString(ratio) {
+  if (!ratio || typeof ratio !== 'string') return false;
+  const m = ratio.trim().match(/^(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)$/);
+  if (!m) return false;
+  const w = parseFloat(m[1]);
+  const h = parseFloat(m[2]);
+  return Number.isFinite(w) && Number.isFinite(h) && h > 0 && (w / h) < 0.88;
+}
+
+export function parseVideoUrl(url, contextText = '') {
   if (!url || typeof url !== 'string') return null;
 
   const trimmed = url.trim();
@@ -96,7 +119,7 @@ export function parseVideoUrl(url) {
   const ytRegex = /(?:https?:\/\/)?(?:www\.|m\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?|shorts|live)\/|\S*?[?&]v[=_]?)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
   const ytMatch = trimmed.match(ytRegex);
   if (ytMatch && ytMatch[1]) {
-    const isYtShort = /\/shorts\//i.test(trimmed);
+    const isYtShort = /\/shorts\//i.test(trimmed) || isLikelyShortContext(contextText, trimmed);
     return {
       type: 'youtube',
       videoId: ytMatch[1],
@@ -145,7 +168,9 @@ export function parseVideoUrl(url) {
       videoId: tiktokMatch[1],
       thumbnailUrl: null,
       embedUrl: `https://www.tiktok.com/embed/v2/${tiktokMatch[1]}`,
-      originalUrl: trimmed
+      originalUrl: trimmed,
+      isShort: true,
+      aspect_ratio: '9 / 16',
     };
   }
 
@@ -251,10 +276,10 @@ export function parseVideoUrl(url) {
 /**
  * Normalize a raw video URL or existing video descriptor object into a canonical video descriptor.
  */
-export function formatVideoDescriptor(videoOrUrl) {
+export function formatVideoDescriptor(videoOrUrl, contextText = '') {
   if (!videoOrUrl) return null;
   if (typeof videoOrUrl === 'string') {
-    const parsed = parseVideoUrl(videoOrUrl);
+    const parsed = parseVideoUrl(videoOrUrl, contextText);
     if (parsed) return parsed;
     const resolved = (videoOrUrl.startsWith('/') || videoOrUrl.startsWith('http'))
       ? videoOrUrl
@@ -271,8 +296,22 @@ export function formatVideoDescriptor(videoOrUrl) {
   }
   if (typeof videoOrUrl === 'object') {
     const candidateUrl = videoOrUrl.originalUrl || videoOrUrl.embedUrl || '';
-    const parsed = parseVideoUrl(candidateUrl);
+    const mergedContext = [
+      contextText,
+      videoOrUrl.hook,
+      videoOrUrl.hookText,
+      videoOrUrl.title,
+      videoOrUrl.sourceTitle,
+    ].filter(Boolean).join(' ');
+    const parsed = parseVideoUrl(candidateUrl, mergedContext);
     const hasProxiedEmbed = typeof videoOrUrl.embedUrl === 'string' && videoOrUrl.embedUrl.startsWith('/resources/videos/');
+    const explicitRatio = videoOrUrl.aspect_ratio || videoOrUrl.aspectRatio || (parsed && parsed.aspect_ratio) || undefined;
+    const isShort = Boolean(
+      videoOrUrl.isShort
+      || (parsed && parsed.isShort)
+      || isPortraitRatioString(explicitRatio)
+      || isLikelyShortContext(mergedContext, candidateUrl)
+    );
     if (parsed) {
       return {
         ...parsed,
@@ -282,7 +321,15 @@ export function formatVideoDescriptor(videoOrUrl) {
         thumbnailUrl: videoOrUrl.thumbnailUrl || parsed.thumbnailUrl || null,
         trimStart: videoOrUrl.trimStart ?? parsed.trimStart ?? null,
         trimEnd: videoOrUrl.trimEnd ?? parsed.trimEnd ?? null,
-        hook: videoOrUrl.hook || null,
+        hook: videoOrUrl.hook || videoOrUrl.hookText || null,
+        ...(isShort ? { isShort: true, aspect_ratio: explicitRatio || '9 / 16' } : (explicitRatio ? { aspect_ratio: explicitRatio } : {})),
+      };
+    }
+    if (isShort && !videoOrUrl.isShort) {
+      return {
+        ...videoOrUrl,
+        isShort: true,
+        aspect_ratio: explicitRatio || '9 / 16',
       };
     }
     return videoOrUrl;
@@ -313,11 +360,12 @@ export function extractVideosFromText(text, max = 6) {
 
   for (const url of matches) {
     if (videos.length >= max) break;
-    if (seenUrls.has(url)) continue;
-    const parsed = parseVideoUrl(url);
+    const cleanUrl = url.replace(/[.,;:!?)]+$/, '');
+    if (seenUrls.has(cleanUrl)) continue;
+    const parsed = parseVideoUrl(cleanUrl, text);
     if (parsed) {
       videos.push(parsed);
-      seenUrls.add(url);
+      seenUrls.add(cleanUrl);
     }
   }
 

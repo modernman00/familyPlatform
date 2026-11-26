@@ -95,6 +95,37 @@
 .fp-pw-header-link:active {
     transform: scale(0.98);
 }
+.fp-pw-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+.fp-pw-close {
+    min-width: 44px;
+    min-height: 44px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md, 10px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.fp-pw-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+.fp-pw-close:active {
+    transform: scale(0.98);
+}
+.fp-pw-close:focus-visible {
+    outline: 2px solid #fde68a;
+    outline-offset: 2px;
+}
 .fp-pw-body {
     padding: var(--space-5, 20px);
     display: grid;
@@ -468,7 +499,17 @@ html.dark .fp-fw-index-pill {
     }
 }
 </style>
-<section class="fp-pw-showcase" aria-labelledby="fp-pinned-wishlists-heading">
+@php
+    $fpPwSignature = implode('-', array_map(static fn (array $w): string => (string) ($w['id'] ?? '0'), $pinnedWishlists));
+@endphp
+<section
+    class="fp-pw-showcase"
+    aria-labelledby="fp-pinned-wishlists-heading"
+    x-data="{ dismissedSig: Alpine.$persist('').as('fp_pinned_registry_dismissed'), sig: @js($fpPwSignature) }"
+    x-show="dismissedSig !== sig"
+    x-transition.opacity.duration.200ms
+    x-cloak
+>
     {{-- Showcase Dark Slate Header Bar --}}
     <div class="fp-pw-header">
         <div class="fp-pw-header-brand">
@@ -487,10 +528,21 @@ html.dark .fp-fw-index-pill {
                 </h2>
             </div>
         </div>
-        <a href="/wishlists" class="fp-pw-header-link text-decoration-none">
-            <span>View all wishlists</span>
-            <i class="bi bi-arrow-right" aria-hidden="true"></i>
-        </a>
+        <div class="fp-pw-header-actions">
+            <a href="/wishlists" class="fp-pw-header-link text-decoration-none">
+                <span>View all wishlists</span>
+                <i class="bi bi-arrow-right" aria-hidden="true"></i>
+            </a>
+            <button
+                type="button"
+                class="fp-pw-close"
+                @click="dismissedSig = sig"
+                aria-label="Close pinned registry"
+                title="Close"
+            >
+                <i class="bi bi-x-lg" aria-hidden="true"></i>
+            </button>
+        </div>
     </div>
 
     {{-- Pinned Wishlists Body --}}

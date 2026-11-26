@@ -154,29 +154,40 @@
                 </div>
             </div>
 
-            {{-- Whisper Direct Portal (Under Family Codes, Above Quick Actions) --}}
+            {{-- Whisper Direct Portal (Under Family Codes, Above Quick Actions — 3D Spatial Portal Card) --}}
             @php
                 $leftWhisperUnreadCount = isset($navWhisperUnreadCount)
                     ? (int)$navWhisperUnreadCount
                     : (!empty($_SESSION['id']) ? \App\services\KinWhisperService::getUnreadWhisperCount((string)$_SESSION['id']) : 0);
             @endphp
-            <div class="w-100 px-2 mb-2" id="leftColumnKinWhispersPortal">
-                <a href="/kin-whispers" class="btn w-100 d-inline-flex align-items-center justify-content-between text-decoration-none position-relative shadow-sm"
-                   style="background: linear-gradient(135deg, #8b121c 0%, #a31621 60%, #be202e 100%); color: #ffffff !important; border: 1.5px solid rgba(212, 175, 55, 0.75); border-radius: 12px; padding: 10px 14px; min-height: 44px; white-space: nowrap; flex-shrink: 0; box-shadow: 0 4px 14px rgba(163, 22, 33, 0.28); transition: transform 0.15s ease, box-shadow 0.15s ease;"
+            <div class="w-100 px-2 mb-2" id="leftColumnKinWhispersPortal" style="perspective: 640px;">
+                <a href="/kin-whispers" class="btn w-100 d-inline-flex align-items-center justify-content-between text-decoration-none position-relative famchat-3d-portal-card"
                    title="{{ __('nav.whisper', 'FamChat — Private, artifact-anchored family messages and voice dedications') }}">
-                    <div class="d-inline-flex align-items-center gap-2 min-w-0">
-                        <span class="d-inline-flex align-items-center justify-content-center flex-shrink-0 position-relative" style="width: 28px; height: 28px; border-radius: 8px; background: rgba(255, 255, 255, 0.16); color: #ffd700;" aria-hidden="true">
-                            <i class="bi bi-chat-dots-fill" style="font-size: 0.95rem;"></i>
-                            <span class="whisper-portal-bell-dot position-absolute top-0 end-0 translate-middle p-1 bg-warning border border-light rounded-circle {{ $leftWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="width: 8px; height: 8px;" title="New incoming FamChat messages"></span>
+                    <span class="famchat-3d-portal-sheen" aria-hidden="true"></span>
+                    <div class="d-inline-flex align-items-center gap-2.5 min-w-0 position-relative" style="z-index: 2;">
+                        <span class="whisper-3d-icon d-inline-flex align-items-center justify-content-center flex-shrink-0 position-relative" aria-hidden="true">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 2px 3px rgba(0,0,0,0.4));">
+                                <path d="M12 3C6.48 3 2 6.82 2 11.5C2 13.68 2.98 15.66 4.6 17.16L3.4 21L7.72 19.3C9.07 19.75 10.51 20 12 20C17.52 20 22 16.18 22 11.5C22 6.82 17.52 3 12 3Z" fill="#ffffff"/>
+                                <path d="M12 15.4C12 15.4 8.2 13.1 8.2 10.6C8.2 9.4 9.15 8.5 10.25 8.5C10.95 8.5 11.58 8.85 12 9.45C12.42 8.85 13.05 8.5 13.75 8.5C14.85 8.5 15.8 9.4 15.8 10.6C15.8 13.1 12 15.4 12 15.4Z" fill="#e11d48"/>
+                            </svg>
+                            <span class="whisper-portal-bell-dot position-absolute top-0 end-0 translate-middle p-1 bg-warning border border-light rounded-circle {{ $leftWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="width: 9px; height: 9px;" title="New incoming FamChat messages"></span>
                         </span>
-                        <span class="fw-bold" style="font-size: 0.92rem; color: #ffffff !important; letter-spacing: 0.01em;">FamChat</span>
+                        <div class="d-flex flex-column align-items-start text-start min-w-0">
+                            <div class="d-inline-flex align-items-center gap-1.5">
+                                <span class="fw-extrabold" style="font-size: 0.98rem; color: #ffffff !important; letter-spacing: 0.01em; text-shadow: 0 1px 2px rgba(0,0,0,0.45);">FamChat</span>
+                                <span class="famchat-portal-live-pill">LIVE 3D</span>
+                            </div>
+                            <span style="font-size: 0.72rem; color: #fef3c7 !important; font-weight: 600; opacity: 0.95;">Voice notes, calls &amp; kin chat</span>
+                        </div>
                     </div>
-                    <div class="d-inline-flex align-items-center gap-1.5 flex-shrink-0">
-                        <i class="bi bi-bell-fill whisper-portal-bell-icon {{ $leftWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.8rem; color: #ffd700;" title="Unread FamChat messages available"></i>
-                        <span class="badge rounded-pill whisper-portal-unread-badge {{ $leftWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="background: #ffd700; color: #1e1b4b; font-size: 0.72rem; padding: 3px 8px; font-weight: 800; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
+                    <div class="d-inline-flex align-items-center gap-1.5 flex-shrink-0 position-relative" style="z-index: 2;">
+                        <i class="bi bi-bell-fill whisper-portal-bell-icon {{ $leftWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="font-size: 0.85rem; color: #ffd700;" title="Unread FamChat messages available"></i>
+                        <span class="badge rounded-pill whisper-portal-unread-badge {{ $leftWhisperUnreadCount > 0 ? '' : 'd-none' }}" style="background: #ffd700; color: #1e1b4b; font-size: 0.74rem; padding: 3px 8px; font-weight: 800; box-shadow: 0 2px 6px rgba(0,0,0,0.28);">
                             <span class="whisper-portal-unread-count">{{ $leftWhisperUnreadCount > 0 ? $leftWhisperUnreadCount : '' }}</span>
                         </span>
-                        <i class="bi bi-chevron-right" style="font-size: 0.95rem; color: #fef3c7;" aria-hidden="true"></i>
+                        <span class="famchat-portal-arrow" aria-hidden="true">
+                            <i class="bi bi-chevron-right"></i>
+                        </span>
                     </div>
                 </a>
             </div>
@@ -311,39 +322,108 @@
             @endif
 
             <style>
-            /* Whisper portal: glossy 3D chat bubble that draws the eye without shouting */
+            /* Whisper 3D Spatial Portal Card & Glossy 3D Chat Orb */
+            .famchat-3d-portal-card {
+                background: linear-gradient(135deg, #7f1019 0%, #a31621 48%, #be123c 100%) !important;
+                color: #ffffff !important;
+                border: 1.5px solid rgba(251, 191, 36, 0.85) !important;
+                border-radius: 14px !important;
+                padding: 10px 14px !important;
+                min-height: 56px !important;
+                white-space: nowrap;
+                flex-shrink: 0;
+                overflow: hidden;
+                transform-style: preserve-3d;
+                box-shadow:
+                    0 4px 0 #4c0519,
+                    0 10px 22px rgba(163, 22, 33, 0.38),
+                    inset 0 1px 2px rgba(255, 255, 255, 0.45) !important;
+                transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, filter 0.2s ease !important;
+            }
+            @media (hover: hover) {
+                .famchat-3d-portal-card:hover {
+                    transform: translateY(-2px) rotateX(5deg) rotateY(-3deg);
+                    filter: brightness(1.06);
+                    box-shadow:
+                        0 6px 0 #4c0519,
+                        0 14px 28px rgba(190, 18, 60, 0.5),
+                        0 0 0 3px rgba(251, 191, 36, 0.28),
+                        inset 0 1.5px 2px rgba(255, 255, 255, 0.65) !important;
+                }
+            }
+            .famchat-3d-portal-card:active {
+                transform: scale(0.98) translateY(1px) !important;
+                box-shadow:
+                    0 2px 0 #4c0519,
+                    0 5px 12px rgba(163, 22, 33, 0.35) !important;
+            }
+            .famchat-3d-portal-sheen {
+                position: absolute;
+                inset: -40%;
+                background: linear-gradient(115deg, transparent 36%, rgba(255, 255, 255, 0.35) 50%, transparent 64%);
+                transform: translateX(-120%) rotate(15deg);
+                animation: famchatPortalSheen 4.4s ease-in-out infinite;
+                pointer-events: none;
+                z-index: 1;
+            }
+            .famchat-portal-live-pill {
+                display: inline-flex;
+                align-items: center;
+                padding: 1px 6px;
+                border-radius: 999px;
+                font-size: 0.62rem;
+                font-weight: 800;
+                letter-spacing: 0.04em;
+                background: rgba(254, 240, 138, 0.22);
+                color: #fef08a !important;
+                border: 1px solid rgba(254, 240, 138, 0.6);
+            }
+            .famchat-portal-arrow {
+                width: 26px;
+                height: 26px;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.16);
+                color: #fef3c7 !important;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.85rem;
+            }
             .whisper-3d-icon {
-                width: 40px; height: 40px; border-radius: 50%;
+                width: 38px; height: 38px; border-radius: 12px;
                 font-size: 1.1rem;
                 background:
-                    radial-gradient(circle at 32% 24%, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0) 38%),
-                    radial-gradient(circle at 50% 120%, rgba(255,214,102,0.55) 0%, rgba(255,214,102,0) 55%),
-                    linear-gradient(145deg, #e63946 0%, #a31621 55%, #6e0d15 100%);
+                    radial-gradient(circle at 30% 24%, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0) 40%),
+                    linear-gradient(135deg, #fde047 0%, #f59e0b 45%, #e11d48 90%, #881337 100%);
                 box-shadow:
-                    inset 0 -4px 6px rgba(0,0,0,0.28),
-                    inset 0 2px 3px rgba(255,255,255,0.45),
-                    0 6px 12px rgba(163,22,33,0.45),
-                    0 2px 0 #6e0d15;
+                    inset 0 -3px 5px rgba(120,53,15,0.45),
+                    inset 0 1.5px 2px rgba(255,255,255,0.85),
+                    0 4px 10px rgba(0,0,0,0.32),
+                    0 2.5px 0 #78350f;
                 text-shadow: 0 2px 3px rgba(0,0,0,0.35);
                 animation: whisper3dFloat 3.2s ease-in-out infinite;
                 transform-style: preserve-3d;
             }
             .whisper-3d-icon::after {
-                content: ''; position: absolute; inset: -4px; border-radius: 50%;
-                border: 2px solid rgba(163,22,33,0.35);
+                content: ''; position: absolute; inset: -4px; border-radius: 14px;
+                border: 1.5px solid rgba(254,240,138,0.65);
                 animation: whisper3dRing 2.4s ease-out infinite;
                 pointer-events: none;
             }
             @keyframes whisper3dFloat {
-                0%, 100% { transform: translateY(0) rotateX(0deg); }
-                50% { transform: translateY(-2px) rotateX(8deg); }
+                0%, 100% { transform: translateY(0) rotateX(12deg) rotateY(-12deg); }
+                50% { transform: translateY(-2px) rotateX(-10deg) rotateY(14deg) scale(1.05); }
             }
             @keyframes whisper3dRing {
-                0% { transform: scale(0.9); opacity: 0.8; }
-                100% { transform: scale(1.35); opacity: 0; }
+                0% { transform: scale(0.92); opacity: 0.85; }
+                100% { transform: scale(1.32); opacity: 0; }
+            }
+            @keyframes famchatPortalSheen {
+                0%, 25% { transform: translateX(-120%) rotate(15deg); }
+                65%, 100% { transform: translateX(140%) rotate(15deg); }
             }
             @media (prefers-reduced-motion: reduce) {
-                .whisper-3d-icon, .whisper-3d-icon::after { animation: none; }
+                .whisper-3d-icon, .whisper-3d-icon::after, .famchat-3d-portal-sheen { animation: none !important; }
             }
             .highlight-section-pulse {
                 animation: profileWidgetPulse 2.5s ease-out;

@@ -1,6 +1,7 @@
 @extends('layouts.landing_layout')
 
 @section('title', 'Oral History & Family Journal Prompt Studio — Chronicle Your Elders | FamilyPlatform')
+@section('og_image', rtrim((string) ($_ENV['APP_URL'] ?? getenv('APP_URL') ?: 'https://myfamilyplatform.com'), '/') . '/public/images/og-memory-prompts.jpg?v=1')
 @section('meta_description', 'Generate sensory oral storytelling prompts to record grandparents, parents, and relatives before memories fade. Free interactive family journal tool with 1-click WhatsApp sharing.')
 @section('og_title', 'Oral History & Family Journal Prompt Studio — Chronicle Your Elders | FamilyPlatform')
 @section('og_description', 'Generate sensory oral storytelling prompts to record grandparents, parents, and relatives before memories fade. Free interactive family journal tool with 1-click WhatsApp sharing.')

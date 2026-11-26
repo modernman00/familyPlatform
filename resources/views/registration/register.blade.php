@@ -35,10 +35,31 @@
         $pageOgTitle = "Create Your Family Account | FamilyPlatform";
         $pageOgDesc = "Connect with your relatives, build your interactive family tree, and share memories securely on FamilyPlatform.";
     }
+    $appBaseUrl = rtrim($_ENV['APP_URL'] ?? getenv('APP_URL') ?: 'https://myfamilyplatform.com', '/');
+    $pageOgImage = $appBaseUrl . '/public/img/og-invite.jpg';
+
+    $psHash = (string)($_GET['ps'] ?? '');
+    if (($_GET['ref'] ?? '') === 'poster' && preg_match('/^[a-f0-9]{16,32}$/', $psHash)) {
+        $rootDir = defined('ROOT_DIR') ? (string)constant('ROOT_DIR') : (rtrim((string)($_SERVER['DOCUMENT_ROOT'] ?? ''), '/') ?: dirname(__DIR__, 2));
+        $psDir = $rootDir . '/public/uploads/poster_shares';
+        if (is_file($psDir . '/' . $psHash . '.jpg')) {
+            $pageOgImage = $appBaseUrl . '/public/uploads/poster_shares/' . $psHash . '.jpg';
+            $psMetaRaw = @file_get_contents($psDir . '/' . $psHash . '.json');
+            $psMeta = is_string($psMetaRaw) ? json_decode($psMetaRaw, true) : null;
+            if (is_array($psMeta)) {
+                if (!empty($psMeta['title'])) {
+                    $pageOgTitle = trim((string)$psMeta['title']) . ' | FamilyPlatform';
+                }
+                $psDetails = array_filter([trim((string)($psMeta['when'] ?? '')), trim((string)($psMeta['venue'] ?? ''))]);
+                $famLabel = !empty($familySurname) ? "the {$familySurname} family" : 'our family';
+                $pageOgDesc = ($psDetails !== [] ? implode(' · ', $psDetails) . ' — ' : '') . "RSVP and join {$famLabel} on FamilyPlatform.";
+            }
+        }
+    }
 @endphp
 @section('og_title', $pageOgTitle)
 @section('og_description', $pageOgDesc)
-@section('og_image', rtrim($_ENV['APP_URL'] ?? getenv('APP_URL') ?: '', '/') . '/public/img/og-invite.jpg')
+@section('og_image', $pageOgImage)
 @section('og_url', rtrim($_ENV['APP_URL'] ?? getenv('APP_URL') ?: '', '/') . ($_SERVER['REQUEST_URI'] ?? '/'))
 
 @section('extra_js')

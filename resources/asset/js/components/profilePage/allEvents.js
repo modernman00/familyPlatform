@@ -96,7 +96,7 @@ try {
     }
 
     const submitPostModalForm = async (triggerBtn = null) => {
-        const submitBtn = triggerBtn || document.getElementById('submitPost');
+        const submitBtn = triggerBtn || document.getElementById('composerConfirmShareBtn') || document.getElementById('submitPost');
         const confirmBtn = document.getElementById('composerConfirmShareBtn');
         const step1SubmitBtn = document.getElementById('submitPost');
         if (!submitBtn) return;

@@ -254,8 +254,8 @@ final class PostDto implements JsonSerializable
 
             if (!empty($finalVideos)) {
                 $hook = self::deriveHookFromMessage($message ?? ($row['postMessage'] ?? ''));
-                $rowVideos = array_map(function ($v) use ($hook) {
-                    $desc = \App\classes\VideoParser::formatVideoDescriptor((string)$v, $hook);
+                $rowVideos = array_map(function ($v) use ($hook, $message) {
+                    $desc = \App\classes\VideoParser::formatVideoDescriptor((string)$v, $hook, $message);
                     if ($desc['type'] === 'direct' && preg_match('#^https://(?:[a-zA-Z0-9_-]+\.)?(?:googleusercontent\.com|googlevideo\.com)/#i', $desc['originalUrl'])) {
                         $desc['embedUrl'] = \App\services\LinkPreviewService::getProxiedVideoUrl($desc['originalUrl']);
                     }
@@ -344,8 +344,8 @@ final class PostDto implements JsonSerializable
             }
             if (!empty($allVideoUrls)) {
                 $hook = self::deriveHookFromMessage($message ?? ($row['postMessage'] ?? ''));
-                $rowVideos = array_map(function ($v) use ($hook) {
-                    $desc = \App\classes\VideoParser::formatVideoDescriptor((string)$v, $hook);
+                $rowVideos = array_map(function ($v) use ($hook, $message) {
+                    $desc = \App\classes\VideoParser::formatVideoDescriptor((string)$v, $hook, $message);
                     if ($desc['type'] === 'direct' && preg_match('#^https://(?:[a-zA-Z0-9_-]+\.)?(?:googleusercontent\.com|googlevideo\.com)/#i', $desc['originalUrl'])) {
                         $desc['embedUrl'] = \App\services\LinkPreviewService::getProxiedVideoUrl($desc['originalUrl']);
                     }

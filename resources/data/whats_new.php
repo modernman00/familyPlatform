@@ -22,33 +22,33 @@
  * }
  */
 return [
-    'version_key' => '2026_11_w21',
+    'version_key' => '2026_11_w23',
     'badge' => 'What’s New',
-    'title' => 'Personalised Invite Picker (Uncle, Aunt & Custom Titles), Open Post Sharing & In-Feed Arcade',
-    'summary' => 'Invite Others now organises relatives into fast Close, Extended, and Custom tabs — adding Uncle, Aunt, and an Add Your Own personaliser so every WhatsApp or SMS invitation greets your relative by their exact family title and name!',
+    'title' => '3D Spatial FamChat Experience, 1-Tap Animate & Share to Feed, Full-Width Milestone Cards & In-Feed Arcade',
+    'summary' => 'Animate any family photo or milestone card in 60fps living motion and share it directly to your family post feed in one tap, enjoy full-width 1:1 Family Milestone Spotlight cards designed for crystal-clear mobile and desktop reading, and explore the 3D Spatial FamChat experience!',
     'primary_cta' => [
-        'label' => 'Explore Family Feed',
-        'url' => '/profilePage',
-        'icon' => 'bi-person-plus-fill',
+        'label' => 'Open 3D FamChat',
+        'url' => '/kin-whispers',
+        'icon' => 'bi-chat-heart-fill',
     ],
     'playbook_url' => '/playbook',
     'items' => [
         [
-            'title' => 'Personalised Uncle, Aunt & Custom Invites',
-            'description' => 'Navigate Close, Extended, and Custom kinship tabs in Invite Others — select Uncle, Aunt, or Add your own… to personalise any family title and name with reusable quick-picks.',
-            'icon' => 'bi-people-fill',
+            'title' => '3D Living FamChat Emblem & Interactive Cube',
+            'description' => 'Spot FamChat instantly across desktop and mobile with a 3D spatial heart-bubble orb, orbiting sparks, live presence indicator, and an interactive WebGL 3D Heritage Cube inside your chat sanctuary.',
+            'icon' => 'bi-chat-heart-fill',
             'color' => '#a31621',
         ],
         [
-            'title' => 'Open Post Sharing & Author Web Push Alerts',
-            'description' => 'Any authorised family member can share a relative’s post or repost it to the feed, automatically notifying the author via Web Push — or authors can lock sharing on individual posts in one tap.',
-            'icon' => 'bi-send-fill',
+            'title' => 'Animate Any Photo & Share Directly to Feed',
+            'description' => 'Tap 🎬 Animate on any feed photo or Family Historian card to bring portraits to life with 60fps reactions (Laugh, Dance, Love, Wave) and tap ✨ Share to Feed to publish the animated clip directly to your family timeline.',
+            'icon' => 'bi-film',
             'color' => '#15803d',
         ],
         [
-            'title' => 'Playable In-Feed Arcade Mini-Games',
-            'description' => 'Sow seeds in Ayò Olópon, flip 3D letters in KinWordie, echo harmonic pads in KinPulse, and solve Mate-in-1 Chess puzzles directly inside your family post stream before launching the full game.',
-            'icon' => 'bi-controller',
+            'title' => 'Full-Width 1:1 Family Milestone Spotlight Cards',
+            'description' => 'Family Historian birthday and anniversary spotlight cards now render in a bold 1200×1200 full-width centred portrait layout with large display typography and zero empty canvas space across mobile and desktop.',
+            'icon' => 'bi-award-fill',
             'color' => '#d97706',
         ],
         [

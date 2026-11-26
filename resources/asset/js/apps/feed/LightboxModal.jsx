@@ -25,6 +25,7 @@ export function LightboxModal({
     const [animateHere, setAnimateHere] = useState(false);
     const [animStatus, setAnimStatus] = useState('idle');
     const [exportBusy, setExportBusy] = useState(false);
+    const [postFeedBusy, setPostFeedBusy] = useState(false);
     const touchStartX = useRef(null);
     const liveViewportRef = useRef(null);
     const liveCanvasRef = useRef(null);
@@ -206,7 +207,7 @@ export function LightboxModal({
                                 <div className="d-flex flex-column align-items-center gap-2 text-center">
                                     <img
                                         src={currentSrc}
-                                        alt={`Family photo ${index + 1}`}
+                                        alt={`Photo ${index + 1}`}
                                         style={{ maxWidth: '100%', maxHeight: '46vh', objectFit: 'contain', borderRadius: 10 }}
                                     />
                                     <div className="small text-warning fw-semibold">
@@ -260,11 +261,91 @@ export function LightboxModal({
                                 ))}
                                 <button
                                     type="button"
+                                    className="btn btn-sm btn-success rounded-pill px-3 fw-semibold d-inline-flex align-items-center gap-1"
+                                    style={{ minHeight: '44px', whiteSpace: 'nowrap', flexShrink: 0 }}
+                                    data-spin="true"
+                                    data-testid="share-animation-to-feed-btn"
+                                    disabled={postFeedBusy || exportBusy || animStatus !== 'ready'}
+                                    onClick={async () => {
+                                        if (!liveStageRef.current || postFeedBusy || exportBusy) return;
+                                        setPostFeedBusy(true);
+                                        try {
+                                            const captured = await liveStageRef.current.recordAnimatedVideoFile();
+                                            if (!captured || !captured.file) {
+                                                throw new Error('Unable to record animated clip.');
+                                            }
+                                            const csrf = getCsrfToken(bootstrap);
+                                            const uploadFd = new FormData();
+                                            uploadFd.append('video_file', captured.file, captured.file.name);
+                                            uploadFd.append('trim_start', '0');
+                                            uploadFd.append('trim_end', '3.2');
+                                            uploadFd.append('client_duration', '3.2');
+                                            if (csrf) {
+                                                uploadFd.append('token', csrf);
+                                                uploadFd.append('csrf_token', csrf);
+                                            }
+                                            const uploadRes = await apiFetch(
+                                                '/api/video/upload-file',
+                                                { method: 'POST', body: uploadFd, timeoutMs: 45000 },
+                                                bootstrap
+                                            );
+                                            const videoUrl = uploadRes?.streamUrl || uploadRes?.rawUrl;
+                                            if (!videoUrl) {
+                                                throw new Error(uploadRes?.error || 'Could not upload animated video.');
+                                            }
+
+                                            const authorLabel = post?.fullName && post.fullName !== 'Family Historian'
+                                                ? ` from ${post.fullName}'s memory`
+                                                : '';
+                                            const caption = `🎬 Animated a cherished family moment${authorLabel} (${captured.label || 'Living Motion'}) ✨`;
+                                            const postFd = new FormData();
+                                            postFd.append('postMessage', caption);
+                                            postFd.append('attached_video_url', videoUrl);
+                                            postFd.append('attached_video_urls', JSON.stringify([videoUrl]));
+                                            const targetFamCode = post?.postFamCode || bootstrap?.famCode || '';
+                                            if (targetFamCode) {
+                                                postFd.append('postFamCode', String(targetFamCode));
+                                            }
+                                            if (csrf) {
+                                                postFd.append('token', csrf);
+                                                postFd.append('csrf_token', csrf);
+                                            }
+                                            const postRes = await apiFetch(
+                                                '/member/profilePage/post',
+                                                { method: 'POST', body: postFd, timeoutMs: 45000 },
+                                                bootstrap
+                                            );
+                                            const newPostData = postRes?.message && typeof postRes.message === 'object'
+                                                ? postRes.message
+                                                : null;
+                                            if (typeof window !== 'undefined' && newPostData) {
+                                                window.dispatchEvent(new CustomEvent('post-created', { detail: newPostData }));
+                                            }
+                                            notifyToast('Animated memory shared to your family feed!', 'success');
+                                            onClose?.();
+                                        } catch (err) {
+                                            notifyToast(err?.message || 'Could not share animated video to the feed.', 'error');
+                                        } finally {
+                                            setPostFeedBusy(false);
+                                        }
+                                    }}
+                                >
+                                    {postFeedBusy ? (
+                                        <>
+                                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
+                                            <span>Posting to Feed…</span>
+                                        </>
+                                    ) : (
+                                        <span>✨ Share to Feed</span>
+                                    )}
+                                </button>
+                                <button
+                                    type="button"
                                     className="btn btn-sm btn-warning rounded-pill px-3 fw-semibold"
                                     style={{ minHeight: '44px', whiteSpace: 'nowrap', flexShrink: 0 }}
-                                    disabled={exportBusy || animStatus !== 'ready'}
+                                    disabled={exportBusy || postFeedBusy || animStatus !== 'ready'}
                                     onClick={async () => {
-                                        if (!liveStageRef.current || exportBusy) return;
+                                        if (!liveStageRef.current || exportBusy || postFeedBusy) return;
                                         setExportBusy(true);
                                         try {
                                             await liveStageRef.current.downloadAnimatedVideo();
@@ -281,9 +362,9 @@ export function LightboxModal({
                                     type="button"
                                     className="btn btn-sm btn-outline-info rounded-pill px-3 fw-semibold"
                                     style={{ minHeight: '44px', whiteSpace: 'nowrap', flexShrink: 0 }}
-                                    disabled={exportBusy || animStatus !== 'ready'}
+                                    disabled={exportBusy || postFeedBusy || animStatus !== 'ready'}
                                     onClick={async () => {
-                                        if (!liveStageRef.current || exportBusy) return;
+                                        if (!liveStageRef.current || exportBusy || postFeedBusy) return;
                                         setExportBusy(true);
                                         try {
                                             await liveStageRef.current.shareAnimatedVideo();
@@ -301,7 +382,7 @@ export function LightboxModal({
                     ) : (
                         <img
                             src={currentSrc}
-                            alt={`Family photo ${index + 1}`}
+                            alt={`Photo ${index + 1}`}
                             style={{ maxWidth: '100%', maxHeight: '58vh', objectFit: 'contain', borderRadius: 10 }}
                         />
                     )}

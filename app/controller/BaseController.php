@@ -775,6 +775,8 @@ class BaseController
             'profile_visibility' => $data['profile_visibility'] ?? 'Public',
             'show_my_profile' => $data['show_my_profile'] ?? 'on',
             'show_birth_year' => $data['show_birth_year'] ?? 'off',
+            'app_handle' => $data['app_handle'] ?? null,
+            'external_share_name' => $data['external_share_name'] ?? 'first_initial',
             'email_notifications' => $data['email_notifications'] ?? 'on',
             'post_email_notifications' => $data['post_email_notifications'] ?? 'off',
             'sms_notifications' => $data['sms_notifications'] ?? 'on',
