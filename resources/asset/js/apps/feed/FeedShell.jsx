@@ -127,6 +127,8 @@ export function FeedShell({ bootstrap = {} }) {
     const hydratedPreviewPostNosRef = useRef(new Set());
     const viewedPostNosRef = useRef(new Set());
     const viewedCommentNosRef = useRef(new Set());
+    const prefetchedPagesRef = useRef(new Map());
+    const inflightPrefetchRef = useRef(new Map());
     const postsRef = useRef(posts);
     postsRef.current = posts;
 
@@ -209,38 +211,77 @@ export function FeedShell({ bootstrap = {} }) {
         };
     }, [profileBootstrap]);
 
+    const buildFeedPageUrl = useCallback(({ nextPage = 1, append = false, cursor = null, filter = streamFilter, tag = hashtagFilter, personId = personFilter?.id || '' } = {}) => {
+        if (tag) {
+            return `/api/hashtags/stream?tag=${encodeURIComponent(tag)}`;
+        }
+        const limit = 15;
+        const offset = (Math.max(1, nextPage) - 1) * limit;
+        const params = new URLSearchParams({
+            limit: String(limit),
+            page: String(nextPage),
+        });
+        if (append && cursor) {
+            params.set('cursor', String(cursor));
+        } else {
+            params.set('offset', String(offset));
+        }
+        if (filter === 'tagged') params.set('filter', 'tagged');
+        if (personId) params.set('person_id', String(personId));
+        return `/post/getAllPostCommentByFamCode?${params.toString()}`;
+    }, [streamFilter, hashtagFilter, personFilter]);
+
+    const fetchAndNormalizeSlice = useCallback(async (url) => {
+        if (prefetchedPagesRef.current.has(url)) {
+            const cached = prefetchedPagesRef.current.get(url);
+            prefetchedPagesRef.current.delete(url);
+            return cached;
+        }
+        if (inflightPrefetchRef.current.has(url)) {
+            return inflightPrefetchRef.current.get(url);
+        }
+        const promise = apiFetch(url, { method: 'GET', timeoutMs: 60000 }, bootstrap)
+            .then((res) => {
+                const { items, pagination } = unwrapFeedResponse(res);
+                const normalized = items.map(normalizePost).filter(Boolean);
+                return { normalized, pagination };
+            })
+            .finally(() => {
+                inflightPrefetchRef.current.delete(url);
+            });
+        inflightPrefetchRef.current.set(url, promise);
+        return promise;
+    }, [bootstrap]);
+
     const fetchFeed = useCallback(async ({ nextPage = 1, append = false, cursor = null, background = false, filter = streamFilter, tag = hashtagFilter, personId = personFilter?.id || '', attempt = 0 } = {}) => {
+        const url = buildFeedPageUrl({ nextPage, append, cursor, filter, tag, personId });
+
+        // Fast-path: if next cursor slice was already pre-fetched into memory during idle/touch,
+        // commit synchronously without flashing loadingMore spinner or waiting on 4G/5G RTT.
+        if (append && prefetchedPagesRef.current.has(url)) {
+            const { normalized, pagination } = prefetchedPagesRef.current.get(url);
+            prefetchedPagesRef.current.delete(url);
+            setPosts((prev) => {
+                const seen = new Set(prev.map((p) => String(p.post_no)));
+                const extra = normalized.filter((p) => !seen.has(String(p.post_no)));
+                return extra.length > 0 ? [...prev, ...extra] : prev;
+            });
+            setPage(nextPage);
+            setHasMore(Boolean(pagination?.has_more));
+            setNextCursor(pagination?.next_cursor || null);
+            return;
+        }
+
         if (append) {
             setLoadingMore(true);
         } else if (!background) {
+            prefetchedPagesRef.current.clear();
             setLoading(true);
             setErrorMessage('');
         }
 
         try {
-            let url = '';
-            if (tag) {
-                url = `/api/hashtags/stream?tag=${encodeURIComponent(tag)}`;
-            } else {
-                const limit = 15;
-                const offset = (Math.max(1, nextPage) - 1) * limit;
-                const params = new URLSearchParams({
-                    limit: String(limit),
-                    page: String(nextPage),
-                });
-                if (append && cursor) {
-                    params.set('cursor', String(cursor));
-                } else {
-                    params.set('offset', String(offset));
-                }
-                if (filter === 'tagged') params.set('filter', 'tagged');
-                if (personId) params.set('person_id', String(personId));
-                url = `/post/getAllPostCommentByFamCode?${params.toString()}`;
-            }
-
-            const res = await apiFetch(url, { method: 'GET', timeoutMs: 60000 }, bootstrap);
-            const { items, pagination } = unwrapFeedResponse(res);
-            const normalized = items.map(normalizePost).filter(Boolean);
+            const { normalized, pagination } = await fetchAndNormalizeSlice(url);
 
             setPosts((prev) => {
                 if (!append) return normalized;
@@ -272,7 +313,74 @@ export function FeedShell({ bootstrap = {} }) {
             setLoading(false);
             setLoadingMore(false);
         }
-    }, [bootstrap, streamFilter, hashtagFilter, personFilter]);
+    }, [bootstrap, buildFeedPageUrl, fetchAndNormalizeSlice, streamFilter, hashtagFilter, personFilter]);
+
+    // Proactive Next-Cursor Lookahead Prefetch: warms Page N+1 into memory on idle or first scroll/touch
+    // so mobile thumb-scrolling appends the next batch in 0ms with zero network stall.
+    useEffect(() => {
+        if (typeof window === 'undefined' || loading || loadingMore || !hasMore || !nextCursor || hashtagFilter) {
+            return undefined;
+        }
+        // Skip background lookahead inside synthetic unit-test environments lacking IntersectionObserver/matchMedia
+        if (typeof IntersectionObserver === 'undefined' || typeof window.matchMedia !== 'function') {
+            return undefined;
+        }
+        const nextUrl = buildFeedPageUrl({
+            nextPage: page + 1,
+            append: true,
+            cursor: nextCursor,
+            filter: streamFilter,
+            tag: '',
+            personId: personFilter?.id || '',
+        });
+        if (prefetchedPagesRef.current.has(nextUrl) || inflightPrefetchRef.current.has(nextUrl)) {
+            return undefined;
+        }
+
+        let cancelled = false;
+        let idleHandle = null;
+        let timerHandle = null;
+
+        const triggerPrefetch = () => {
+            if (cancelled || prefetchedPagesRef.current.has(nextUrl) || inflightPrefetchRef.current.has(nextUrl)) return;
+            fetchAndNormalizeSlice(nextUrl)
+                .then((slice) => {
+                    if (!cancelled && slice) {
+                        if (prefetchedPagesRef.current.size >= 4) {
+                            const oldest = prefetchedPagesRef.current.keys().next().value;
+                            prefetchedPagesRef.current.delete(oldest);
+                        }
+                        prefetchedPagesRef.current.set(nextUrl, slice);
+                    }
+                })
+                .catch(() => {});
+        };
+
+        // Trigger immediately on first user touch/scroll gesture OR quietly during browser idle window
+        const onFirstScrollGesture = () => {
+            window.removeEventListener('touchstart', onFirstScrollGesture);
+            window.removeEventListener('scroll', onFirstScrollGesture);
+            triggerPrefetch();
+        };
+        window.addEventListener('touchstart', onFirstScrollGesture, { once: true, passive: true });
+        window.addEventListener('scroll', onFirstScrollGesture, { once: true, passive: true });
+
+        if (typeof window.requestIdleCallback === 'function') {
+            idleHandle = window.requestIdleCallback(triggerPrefetch, { timeout: 1400 });
+        } else {
+            timerHandle = setTimeout(triggerPrefetch, 750);
+        }
+
+        return () => {
+            cancelled = true;
+            window.removeEventListener('touchstart', onFirstScrollGesture);
+            window.removeEventListener('scroll', onFirstScrollGesture);
+            if (idleHandle !== null && typeof window.cancelIdleCallback === 'function') {
+                window.cancelIdleCallback(idleHandle);
+            }
+            if (timerHandle !== null) clearTimeout(timerHandle);
+        };
+    }, [hasMore, nextCursor, page, loading, loadingMore, hashtagFilter, streamFilter, personFilter, buildFeedPageUrl, fetchAndNormalizeSlice]);
 
     const loadTrendingHashtags = useCallback(async () => {
         try {
@@ -431,14 +539,14 @@ export function FeedShell({ bootstrap = {} }) {
         };
     }, [loading]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // Infinite scroll sentinel (600px prefetch window)
+    // Infinite scroll sentinel (1400px ahead-of-viewport prefetch window to avoid mid-scroll stalls)
     useEffect(() => {
         if (typeof IntersectionObserver === 'undefined' || !sentinelRef.current) return;
         const obs = new IntersectionObserver((entries) => {
             if (entries[0]?.isIntersecting && hasMore && !loading && !loadingMore && !hashtagFilter) {
                 fetchFeed({ nextPage: page + 1, append: true, cursor: nextCursor });
             }
-        }, { rootMargin: '600px' });
+        }, { rootMargin: '1400px 0px' });
         obs.observe(sentinelRef.current);
         return () => obs.disconnect();
     }, [hasMore, loading, loadingMore, page, nextCursor, hashtagFilter, fetchFeed]);
@@ -720,9 +828,65 @@ export function FeedShell({ bootstrap = {} }) {
         setSharePortalPost(post);
     }, []);
 
-    // Record post & comment views when cards/comments scroll into view
+    // Record post & comment views when cards/comments scroll into view (idle-debounced so active scrolling stays 60fps)
     useEffect(() => {
         if (loading || typeof IntersectionObserver === 'undefined') return undefined;
+
+        const pendingPostViews = new Set();
+        const pendingCommentViews = new Set();
+        let flushTimer = null;
+
+        const scheduleIdleFlush = () => {
+            if (flushTimer !== null) return;
+            flushTimer = setTimeout(() => {
+                flushTimer = null;
+                const postBatch = Array.from(pendingPostViews);
+                const commentBatch = Array.from(pendingCommentViews);
+                pendingPostViews.clear();
+                pendingCommentViews.clear();
+
+                postBatch.forEach((postNo) => {
+                    apiFetch('/api/posts/view', { method: 'POST', body: { post_no: Number(postNo) || postNo } }, bootstrap)
+                        .then((res) => {
+                            if (typeof res?.views_count === 'number') {
+                                setPosts((prev) => {
+                                    const targetIdx = prev.findIndex((p) => String(p.post_no) === String(postNo));
+                                    if (targetIdx === -1) return prev;
+                                    const cur = prev[targetIdx];
+                                    if (Number(cur.views_count ?? cur.view_count ?? 0) === res.views_count) return prev;
+                                    const next = prev.slice();
+                                    next[targetIdx] = { ...cur, views_count: res.views_count, view_count: res.views_count };
+                                    return next;
+                                });
+                            }
+                        })
+                        .catch(() => {});
+                });
+
+                commentBatch.forEach((commentNo) => {
+                    apiFetch('/api/comments/view', { method: 'POST', body: { comment_no: Number(commentNo) || commentNo } }, bootstrap)
+                        .then((res) => {
+                            if (typeof res?.views_count === 'number') {
+                                setPosts((prev) => {
+                                    const pIdx = prev.findIndex((p) => Array.isArray(p.comments) && p.comments.some((c) => String(c.comment_no) === String(commentNo)));
+                                    if (pIdx === -1) return prev;
+                                    const parentPost = prev[pIdx];
+                                    const cIdx = parentPost.comments.findIndex((c) => String(c.comment_no) === String(commentNo));
+                                    if (cIdx === -1) return prev;
+                                    const curComment = parentPost.comments[cIdx];
+                                    if (Number(curComment.views_count ?? curComment.view_count ?? 0) === res.views_count) return prev;
+                                    const nextComments = parentPost.comments.slice();
+                                    nextComments[cIdx] = { ...curComment, views_count: res.views_count, view_count: res.views_count };
+                                    const next = prev.slice();
+                                    next[pIdx] = { ...parentPost, comments: nextComments };
+                                    return next;
+                                });
+                            }
+                        })
+                        .catch(() => {});
+                });
+            }, 350);
+        };
 
         const postObserver = new IntersectionObserver((entries) => {
             entries.forEach((entry) => {
@@ -731,16 +895,9 @@ export function FeedShell({ bootstrap = {} }) {
                 postObserver.unobserve(entry.target);
                 if (!postNo || viewedPostNosRef.current.has(postNo)) return;
                 viewedPostNosRef.current.add(postNo);
-                apiFetch('/api/posts/view', { method: 'POST', body: { post_no: Number(postNo) || postNo } }, bootstrap)
-                    .then((res) => {
-                        if (typeof res?.views_count === 'number') {
-                            setPosts((prev) =>
-                                prev.map((p) => (String(p.post_no) === String(postNo) ? { ...p, views_count: res.views_count, view_count: res.views_count } : p))
-                            );
-                        }
-                    })
-                    .catch(() => {});
+                pendingPostViews.add(postNo);
             });
+            if (pendingPostViews.size > 0) scheduleIdleFlush();
         }, { threshold: 0.35 });
 
         const commentObserver = new IntersectionObserver((entries) => {
@@ -750,28 +907,9 @@ export function FeedShell({ bootstrap = {} }) {
                 commentObserver.unobserve(entry.target);
                 if (!commentNo || String(commentNo).startsWith('temp_') || viewedCommentNosRef.current.has(commentNo)) return;
                 viewedCommentNosRef.current.add(commentNo);
-                apiFetch('/api/comments/view', { method: 'POST', body: { comment_no: Number(commentNo) || commentNo } }, bootstrap)
-                    .then((res) => {
-                        if (typeof res?.views_count === 'number') {
-                            setPosts((prev) =>
-                                prev.map((p) => {
-                                    if (!Array.isArray(p.comments) || !p.comments.some((c) => String(c.comment_no) === String(commentNo))) {
-                                        return p;
-                                    }
-                                    return {
-                                        ...p,
-                                        comments: p.comments.map((c) => (
-                                            String(c.comment_no) === String(commentNo)
-                                                ? { ...c, views_count: res.views_count, view_count: res.views_count }
-                                                : c
-                                        )),
-                                    };
-                                })
-                            );
-                        }
-                    })
-                    .catch(() => {});
+                pendingCommentViews.add(commentNo);
             });
+            if (pendingCommentViews.size > 0) scheduleIdleFlush();
         }, { threshold: 0.3 });
 
         const postEls = document.querySelectorAll('.feed-post-card[data-post-no]');
@@ -787,6 +925,7 @@ export function FeedShell({ bootstrap = {} }) {
         });
 
         return () => {
+            if (flushTimer !== null) clearTimeout(flushTimer);
             postObserver.disconnect();
             commentObserver.disconnect();
         };
@@ -1466,6 +1605,7 @@ export function FeedShell({ bootstrap = {} }) {
                             <PostCard
                                 post={post}
                                 bootstrap={profileBootstrap}
+                                isFirstPost={postIdx === 0}
                                 isHighlighted={String(highlightedPostNo) === String(post.post_no)}
                                 onReactPost={handleReactPost}
                                 onVotePoll={handleVotePoll}

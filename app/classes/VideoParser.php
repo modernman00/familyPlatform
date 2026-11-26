@@ -190,9 +190,9 @@ final class VideoParser
         // 6. Facebook Video / Reel / Watch (in-platform iframe via official Facebook video plugin)
         // Note: Opaque /share/r/ and /share/v/ links are excluded because Facebook's plugins/video.php
         // cannot play share-redirect URLs and renders "Video unavailable"; they render via Rich Link Preview instead.
-        $fbVideoRegex = '/^https?:\/\/(?:www\.|m\.|web\.)?(?:facebook\.com\/(?:[^\/\s]+\/videos\/\d+|watch\/?\?v=\d+|reel\/\d+|video\.php\?v=\d+)|fb\.watch\/[^\s"\'<>]+|fb\.com\/(?:watch|reel|[^\/\s]+\/videos)\/[^\s"\'<>]+)/i';
+        $fbVideoRegex = '/^https?:\/\/(?:www\.|m\.|web\.)?(?:facebook\.com\/(?:[^\/\s]+\/videos?\/\d+|watch\/?\?v=\d+|reels?\/\d+|video\.php\?v=\d+)|fb\.watch\/[^\s"\'<>]+|fb\.com\/(?:watch|reels?|[^\/\s]+\/videos?)\/[^\s"\'<>]+)/i';
         if (preg_match($fbVideoRegex, $trimmed) === 1) {
-            $isFbReel = preg_match('/(?:facebook\.com|fb\.com)\/reel\/\d+/i', $trimmed) === 1;
+            $isFbReel = preg_match('/(?:facebook\.com|fb\.com)\/reels?\/\d+/i', $trimmed) === 1;
             $desc = [
                 'type' => 'facebook',
                 'videoId' => null,

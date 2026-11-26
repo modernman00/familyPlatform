@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'preact/hooks';
+import { memo } from 'preact/compat';
 import styles from './FeedInteractiveShowcase.module.css';
 
 /**
@@ -167,7 +168,7 @@ export const SHOWCASE_ITEMS = [
     },
 ];
 
-export function FeedInteractiveShowcase({ slotIndex = 0, initialCategory = 'all' }) {
+export const FeedInteractiveShowcase = memo(function FeedInteractiveShowcase({ slotIndex = 0, initialCategory = 'all' }) {
     const startIdx = Math.abs(Number(slotIndex) || 0) % SHOWCASE_ITEMS.length;
     const [activeIndex, setActiveIndex] = useState(startIdx);
     const [categoryFilter, setCategoryFilter] = useState(initialCategory);
@@ -883,4 +884,4 @@ export function FeedInteractiveShowcase({ slotIndex = 0, initialCategory = 'all'
             </div>
         </aside>
     );
-}
+});

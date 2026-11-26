@@ -3159,9 +3159,14 @@ body.modal-open .pwa-bottom-nav { display: none !important; }
 
 .fp-stage-converter__row {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   gap: 8px;
-  overflow-x: visible;
-  padding: 4px 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;
+  padding: 4px 28px 4px 2px;
+  mask-image: linear-gradient(to right, #000000 calc(100% - 28px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, #000000 calc(100% - 28px), transparent 100%);
 }

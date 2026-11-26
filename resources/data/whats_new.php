@@ -22,17 +22,23 @@
  * }
  */
 return [
-    'version_key' => '2026_11_w20',
+    'version_key' => '2026_11_w21',
     'badge' => 'What’s New',
-    'title' => 'Family Post Sharing with Web Push Alerts, Playable In-Feed Games & Kinship @Mentions',
-    'summary' => 'Every family member can now share permitted posts across WhatsApp, social apps, or the family feed with an instant Web Push alert sent to the original author — while authors can toggle sharing on or off for any post at any time!',
+    'title' => 'Personalised Invite Picker (Uncle, Aunt & Custom Titles), Open Post Sharing & In-Feed Arcade',
+    'summary' => 'Invite Others now organises relatives into fast Close, Extended, and Custom tabs — adding Uncle, Aunt, and an Add Your Own personaliser so every WhatsApp or SMS invitation greets your relative by their exact family title and name!',
     'primary_cta' => [
         'label' => 'Explore Family Feed',
         'url' => '/profilePage',
-        'icon' => 'bi-share-fill',
+        'icon' => 'bi-person-plus-fill',
     ],
     'playbook_url' => '/playbook',
     'items' => [
+        [
+            'title' => 'Personalised Uncle, Aunt & Custom Invites',
+            'description' => 'Navigate Close, Extended, and Custom kinship tabs in Invite Others — select Uncle, Aunt, or Add your own… to personalise any family title and name with reusable quick-picks.',
+            'icon' => 'bi-people-fill',
+            'color' => '#a31621',
+        ],
         [
             'title' => 'Open Post Sharing & Author Web Push Alerts',
             'description' => 'Any authorised family member can share a relative’s post or repost it to the feed, automatically notifying the author via Web Push — or authors can lock sharing on individual posts in one tap.',
@@ -50,12 +56,6 @@ return [
             'description' => 'Tag any relative normally as @First Last — grandchildren automatically read @Grandpa, children read @Dad or @Mum, nephews read @Uncle, and peers see their full name, with a personal toggle in Account Settings.',
             'icon' => 'bi-at',
             'color' => '#059669',
-        ],
-        [
-            'title' => 'Secret Group Card & Goodwill Video Drop',
-            'description' => 'Tap Sign / Send a Card or Record Goodwill Video on any relative’s milestone — strictly hidden from the celebrant or couple themselves so the surprise stays intact.',
-            'icon' => 'bi-envelope-heart-fill',
-            'color' => '#1d72fe',
         ],
     ],
 ];

@@ -4222,9 +4222,14 @@ body.dark-mode .heirloom-reaction-btn.active {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .vse-skeleton-surface {
+  .vse-skeleton-surface:not(.is-media-loaded) {
     animation: vseSkeletonShimmer 1.8s linear infinite;
   }
+}
+
+.vse-skeleton-surface.is-media-loaded {
+  animation: none !important;
+  background-image: none !important;
 }
 
 @keyframes vseSkeletonShimmer {
@@ -4267,9 +4272,10 @@ body.dark-mode .heirloom-reaction-btn.active {
   transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
 }
 
-/* Ambient Backlight Aura breathes in theatre-grade synchrony with the photo */
+/* Ambient Backlight Aura — static GPU-friendly glow (zero continuous scroll repaint) */
 .feed-media-aura-container:has(.post-media-stage.is-living-active) .feed-media-aura-backdrop {
-  animation: livingCanvasAuraPulse 16s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
+  animation: none;
+  opacity: 0.42;
 }
 
 /* Keyframes: Cinematic slow breath zoom-in with subtle vertical pan */
@@ -4311,10 +4317,10 @@ body.dark-mode .heirloom-reaction-btn.active {
   }
 }
 
-/* Keyframes: Ambient Backlight Aura breathing pulse (Compositor-Only 60fps — Zero Per-Frame Blur Re-Raster) */
+/* Keyframes: Ambient Backlight Aura (Static Compositor-Friendly Blur — Zero Per-Frame Blur Re-Raster) */
 .feed-media-aura-backdrop {
-  filter: blur(36px) saturate(175%) brightness(1.14);
-  will-change: transform, opacity;
+  filter: blur(22px) saturate(155%) brightness(1.08);
+  contain: strict;
 }
 @keyframes livingCanvasAuraPulse {
   0% {
@@ -4413,6 +4419,12 @@ video.feed-post-video::-webkit-media-controls-play-button,
   .form-select {
     font-size: max(16px, 1rem) !important;
   }
+}
+
+/* Zero-cost style & layout containment for closed Bootstrap modals (19+ modals in Profile DOM) */
+.modal:not(.show) {
+  content-visibility: hidden;
+  contain: layout style paint;
 }
 
 /* 3. Mobile Bottom-Sheet Modals: Docks dialogs in the Natural Thumb Arc (< 768px) */

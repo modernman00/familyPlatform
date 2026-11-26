@@ -13,7 +13,7 @@
 
 'use strict';
 
-const SW_VERSION = 'v2.5.6'; // bumped to bypass IMAGE_CACHE for protected FamChat media assets
+const SW_VERSION = 'v2.5.7'; // bumped to flush stale mobile CSS/JS caches for Create Post modal
 const STATIC_CACHE = `fp-static-${SW_VERSION}`;
 const DYNAMIC_CACHE = `fp-dynamic-${SW_VERSION}`;
 const IMAGE_CACHE = `fp-images-${SW_VERSION}`;

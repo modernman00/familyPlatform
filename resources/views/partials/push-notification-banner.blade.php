@@ -3,9 +3,9 @@
   Prompts users to activate push notifications, provides browser unblocking guidance,
   and handles auto-sync for users who installed the app or authenticated.
 --}}
-<style>
-    /* WCAG AA: explicit surface + text colours so the banner never inherits washed-out theme text */
-    #push-notification-banner { display: none; max-width: 620px; position: fixed; top: 20px; left: 16px; right: 16px; z-index: 1060; border-radius: 16px; border: 1.5px solid rgba(163, 22, 33, 0.35); background: #ffffff; box-shadow: 0 16px 36px rgba(15, 23, 42, 0.25); font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif); }
+<style nonce="{{ csp_nonce($nonce ?? null) }}">
+    /* WCAG AA: explicit surface + text colours so the banner never inherits washed-out theme text; positioned below 68px #mainNavbar so top navigation controls remain 100% tappable */
+    #push-notification-banner { display: none; max-width: 620px; position: fixed; top: calc(76px + env(safe-area-inset-top, 0px)); left: 16px; right: 16px; z-index: 1035; border-radius: 16px; border: 1.5px solid rgba(163, 22, 33, 0.35); background: #ffffff; box-shadow: 0 16px 36px rgba(15, 23, 42, 0.25); font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif); }
     #push-notification-banner .push-banner-title { color: #0f172a; font-size: 1.125rem; font-weight: 700; line-height: 1.3; letter-spacing: -0.01em; }
     #push-notification-banner .push-banner-text { color: #334155; font-size: 0.875rem; font-weight: 500; line-height: 1.5; }
     #push-notification-banner .push-banner-icon { background: rgba(163, 22, 33, 0.1); color: #a31621; }

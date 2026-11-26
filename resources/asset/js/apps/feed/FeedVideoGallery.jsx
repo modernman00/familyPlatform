@@ -102,6 +102,7 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo, playerId }) {
     const [userActivatedIframe, setUserActivatedIframe] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isBuffering, setIsBuffering] = useState(false);
+    const [videoMediaReady, setVideoMediaReady] = useState(false);
     const [streamFailed, setStreamFailed] = useState(false);
     const [ccMenuOpen, setCcMenuOpen] = useState(false);
     const [detectedRatio, setDetectedRatio] = useState(() => safeAspectRatio(vid?.aspectRatio || vid?.aspect_ratio));
@@ -246,10 +247,12 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo, playerId }) {
         };
     }, [playSrc, vid?.hlsUrl, playerId]);
 
+    // Attach WebGL2 CAS enhancer ONLY while this video is the active playing viewport video
+    // (Prevents allocating 8–16 offscreen WebGL2 contexts across the feed and stalling mid-scroll)
     useEffect(() => {
         const video = videoRef.current;
         const canvas = canvasRef.current;
-        if (!isDirect || !video || !canvas || !webglActive) return undefined;
+        if (!isDirect || !isPlayerActive || !isPlaying || !video || !canvas || !webglActive) return undefined;
         const detach = attachWebGL4kCas(video, canvas, {
             onFallback: () => setWebglActive(false),
         });
@@ -258,7 +261,7 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo, playerId }) {
             return undefined;
         }
         return () => detach();
-    }, [isDirect, playSrc, webglActive]);
+    }, [isDirect, isPlayerActive, isPlaying, playSrc, webglActive]);
 
     const handleSingleError = (e) => {
         setIsBuffering(false);
@@ -368,7 +371,7 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo, playerId }) {
                         </div>
                     )}
                     <div
-                        className="video-rendition-frame position-relative overflow-hidden vse-skeleton-surface"
+                        className={`video-rendition-frame position-relative overflow-hidden vse-skeleton-surface ${videoMediaReady || Boolean(thumbUrl) ? 'is-media-loaded' : ''}`}
                         style={{
                             backgroundColor: '#0b0f19',
                             width: '100%',
@@ -523,6 +526,7 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo, playerId }) {
                             muted={globalMuted}
                             preload="metadata"
                             onLoadedMetadata={(e) => {
+                                setVideoMediaReady(true);
                                 const el = e.currentTarget;
                                 if (!detectedRatio && el.videoWidth > 0 && el.videoHeight > 0) {
                                     setDetectedRatio(`${(el.videoWidth / el.videoHeight).toFixed(4)} / 1`);
@@ -540,7 +544,10 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo, playerId }) {
                                 }
                             }}
                             onWaiting={() => setIsBuffering(true)}
-                            onCanPlay={() => setIsBuffering(false)}
+                            onCanPlay={() => {
+                                setVideoMediaReady(true);
+                                setIsBuffering(false);
+                            }}
                             onPlaying={() => {
                                 setIsBuffering(false);
                                 setIsPlaying(true);
@@ -556,7 +563,7 @@ function SingleDirectVideo({ vid, allVideos, onOpenVideo, playerId }) {
                             className="w-100 h-100 d-block atg-4k-video-render"
                             style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: focalPos, backgroundColor: '#0b0f19', cursor: 'pointer' }}
                         />
-                        {webglActive && (
+                        {webglActive && isPlayerActive && isPlaying && (
                             <canvas
                                 ref={canvasRef}
                                 aria-hidden="true"

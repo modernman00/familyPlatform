@@ -41,18 +41,16 @@
            width="44"
            height="44">
 
-      <div role="button"
-           tabindex="0"
-           class="composer-prompt composer-prompt--hero flex-grow-1 d-flex align-items-center justify-content-between gap-2 px-3 py-2"
+      <button type="button"
+           class="composer-prompt composer-prompt--hero flex-grow-1 d-flex align-items-center justify-content-between gap-2 px-3 py-2 text-start"
            data-bs-toggle="modal"
            data-bs-target="#postModal"
-           onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); this.click(); }"
            aria-label="{{ __('feed.share_prompt', 'Share a moment with your family...') }}">
         <span class="composer-prompt__text">{{ __('feed.share_prompt', 'Share a moment with your family...') }}</span>
         <span class="composer-prompt__icon flex-shrink-0" aria-hidden="true">
           @include('member.includes.composerActionIcon', ['type' => 'prompt', 'prefix' => $svgPrefix])
         </span>
-      </div>
+      </button>
     </div>
 
     <!-- Quick-Action Pills: Labeled, >=44px Tap Targets, Scroll-Safe on Mobile -->

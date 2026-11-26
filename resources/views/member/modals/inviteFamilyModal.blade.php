@@ -124,11 +124,23 @@
         gap: 8px !important;
     }
     #inviteFamilyModal .kinship-chip {
-        white-space: normal;
+        white-space: nowrap;
         justify-content: flex-start;
         padding: 6px 12px;
         font-size: 0.8rem;
         min-width: 0;
+        overflow: hidden;
+    }
+    #inviteFamilyModal .kinship-chip > span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    #inviteFamilyModal .ifm-cat-nav {
+        gap: 8px;
+    }
+    #inviteFamilyModal .ifm-cat-pill {
+        font-size: 0.76rem;
+        padding: 6px 8px;
     }
     #inviteFamilyModal .ifm-preview-card { max-height: 120px; }
     #inviteFamilyModal .ifm-secondary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -182,6 +194,8 @@
     align-items: center;
     gap: 6px;
     min-height: 44px;
+    min-width: 44px;
+    max-width: 100%;
     padding: 7px 14px;
     border-radius: 999px;
     border: 1px solid #e2d9cd;
@@ -191,17 +205,200 @@
     font-weight: 700;
     white-space: nowrap;
     flex-shrink: 0;
-    transition: all 0.15s ease;
+    overflow: hidden;
+    transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+#inviteFamilyModal .kinship-chip > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 170px;
+}
+#inviteFamilyModal .kinship-chip:active {
+    transform: scale(0.98);
+}
+#inviteFamilyModal .kinship-chip:focus-visible,
+#inviteFamilyModal .ifm-cat-pill:focus-visible,
+#inviteFamilyModal .ifm-preset-pill:focus-visible {
+    outline: 2px solid #a31621;
+    outline-offset: 2px;
 }
 #inviteFamilyModal .kinship-chip:hover:not(.active) {
     background: #faf6f0;
     border-color: #cbbba8;
     color: #1c1412;
 }
+#inviteFamilyModal .kinship-chip--custom:not(.active) {
+    border: 1.5px dashed #b09a88;
+    background: #fdfaf6;
+    color: #7a121b;
+}
+#inviteFamilyModal .kinship-chip--custom:hover:not(.active) {
+    background: #fdf2f2;
+    border-color: #a31621;
+    color: #7a121b;
+}
 #inviteFamilyModal .kinship-chip.active {
     background: #1c1412;
-    border-color: #1c1412;
+    border: 1.5px solid #1c1412;
     color: #ffffff;
+}
+#inviteFamilyModal .ifm-cat-nav {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 10px;
+}
+#inviteFamilyModal .ifm-cat-pill {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 7px 10px;
+    border-radius: 12px;
+    border: 1px solid #e2d9cd;
+    background: #faf6f0;
+    color: #3d322c;
+    font-size: 0.8rem;
+    font-weight: 700;
+    white-space: nowrap;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+#inviteFamilyModal .ifm-cat-pill:hover:not(.active) {
+    background: #f1eae0;
+    border-color: #cbbba8;
+    color: #1c1412;
+}
+#inviteFamilyModal .ifm-cat-pill:active,
+#inviteFamilyModal .ifm-preset-pill:active {
+    transform: scale(0.98);
+}
+#inviteFamilyModal .ifm-cat-pill.active {
+    background: #a31621;
+    border-color: #a31621;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(163, 22, 33, 0.18);
+}
+#inviteFamilyModal .ifm-selected-pill {
+    background: #fdf2f2;
+    color: #7a121b;
+    border: 1px solid #f3d0d3;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: none;
+    letter-spacing: 0;
+    padding: 3px 10px;
+    border-radius: 999px;
+    max-width: 190px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+#inviteFamilyModal .ifm-personalise-box {
+    background: #faf6f0;
+    border: 1px solid #e6dfd5;
+    border-radius: 14px;
+    padding: 12px;
+    margin-top: 10px;
+}
+#inviteFamilyModal .ifm-personalise-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #1c1412;
+}
+#inviteFamilyModal .ifm-personalise-hint {
+    font-size: 0.75rem;
+    color: #5c5049;
+}
+#inviteFamilyModal .ifm-preset-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+#inviteFamilyModal .ifm-preset-pill {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid #dcd1c2;
+    background: #ffffff;
+    color: #3d322c;
+    font-size: 0.76rem;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+#inviteFamilyModal .ifm-preset-pill:hover {
+    background: #fdf2f2;
+    border-color: #a31621;
+    color: #7a121b;
+}
+#inviteFamilyModal .ifm-preset-pill.active {
+    background: #a31621;
+    border-color: #a31621;
+    color: #ffffff;
+}
+#inviteFamilyModal .ifm-save-chip-btn {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    background: #1c1412;
+    color: #ffffff;
+    border: none;
+    font-size: 0.8rem;
+    font-weight: 700;
+    white-space: nowrap;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+#inviteFamilyModal .ifm-save-chip-btn:hover {
+    background: #332622;
+    color: #ffffff;
+}
+#inviteFamilyModal .ifm-clear-personalise-btn {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: #ffffff;
+    border: 1px solid #dcd1c2;
+    color: #3d322c;
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+#inviteFamilyModal .ifm-personalise-toggle-btn {
+    min-height: 44px;
+    padding: 6px 12px;
+    border-radius: 10px;
+    border: 1px dashed #cbbba8;
+    background: #faf6f0;
+    color: #3d322c;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 #inviteFamilyModal .ifm-preview-card {
     background: #faf6f0;
@@ -592,6 +789,114 @@ html.dark-mode #inviteFamilyModal .kinship-chip.active {
     color: #ffffff !important;
     box-shadow: 0 0 0 1px rgba(255, 77, 97, 0.28) !important;
 }
+body.dark-mode #inviteFamilyModal .kinship-chip--custom:not(.active),
+body.dark-theme #inviteFamilyModal .kinship-chip--custom:not(.active),
+[data-bs-theme="dark"] #inviteFamilyModal .kinship-chip--custom:not(.active),
+html.dark #inviteFamilyModal .kinship-chip--custom:not(.active),
+html.dark-mode #inviteFamilyModal .kinship-chip--custom:not(.active) {
+    background: rgba(255, 77, 97, 0.08) !important;
+    border: 1.5px dashed rgba(255, 143, 163, 0.5) !important;
+    color: #fecdd3 !important;
+}
+body.dark-mode #inviteFamilyModal .ifm-cat-pill:not(.active),
+body.dark-theme #inviteFamilyModal .ifm-cat-pill:not(.active),
+[data-bs-theme="dark"] #inviteFamilyModal .ifm-cat-pill:not(.active),
+html.dark #inviteFamilyModal .ifm-cat-pill:not(.active),
+html.dark-mode #inviteFamilyModal .ifm-cat-pill:not(.active) {
+    background: #1a1d26 !important;
+    border-color: rgba(255, 255, 255, 0.14) !important;
+    color: #e2e8f0 !important;
+}
+body.dark-mode #inviteFamilyModal .ifm-cat-pill:not(.active):hover,
+body.dark-theme #inviteFamilyModal .ifm-cat-pill:not(.active):hover,
+[data-bs-theme="dark"] #inviteFamilyModal .ifm-cat-pill:not(.active):hover,
+html.dark #inviteFamilyModal .ifm-cat-pill:not(.active):hover,
+html.dark-mode #inviteFamilyModal .ifm-cat-pill:not(.active):hover {
+    background: #242938 !important;
+    border-color: rgba(255, 255, 255, 0.26) !important;
+    color: #ffffff !important;
+}
+body.dark-mode #inviteFamilyModal .ifm-cat-pill.active,
+body.dark-theme #inviteFamilyModal .ifm-cat-pill.active,
+[data-bs-theme="dark"] #inviteFamilyModal .ifm-cat-pill.active,
+html.dark #inviteFamilyModal .ifm-cat-pill.active,
+html.dark-mode #inviteFamilyModal .ifm-cat-pill.active {
+    background: linear-gradient(135deg, #d91b38 0%, #b4142c 100%) !important;
+    border-color: #ff4d61 !important;
+    color: #ffffff !important;
+}
+body.dark-mode #inviteFamilyModal .ifm-selected-pill,
+body.dark-theme #inviteFamilyModal .ifm-selected-pill,
+[data-bs-theme="dark"] #inviteFamilyModal .ifm-selected-pill,
+html.dark #inviteFamilyModal .ifm-selected-pill,
+html.dark-mode #inviteFamilyModal .ifm-selected-pill {
+    background: rgba(255, 77, 97, 0.16) !important;
+    border-color: rgba(255, 77, 97, 0.35) !important;
+    color: #fecdd3 !important;
+}
+body.dark-mode #inviteFamilyModal .ifm-personalise-box,
+body.dark-theme #inviteFamilyModal .ifm-personalise-box,
+[data-bs-theme="dark"] #inviteFamilyModal .ifm-personalise-box,
+html.dark #inviteFamilyModal .ifm-personalise-box,
+html.dark-mode #inviteFamilyModal .ifm-personalise-box {
+    background: #181b24 !important;
+    border-color: rgba(255, 255, 255, 0.12) !important;
+    color: #f8fafc !important;
+}
+body.dark-mode #inviteFamilyModal .ifm-personalise-title,
+body.dark-theme #inviteFamilyModal .ifm-personalise-title,
+[data-bs-theme="dark"] #inviteFamilyModal .ifm-personalise-title,
+html.dark #inviteFamilyModal .ifm-personalise-title,
+html.dark-mode #inviteFamilyModal .ifm-personalise-title {
+    color: #f8fafc !important;
+}
+body.dark-mode #inviteFamilyModal .ifm-personalise-hint,
+body.dark-theme #inviteFamilyModal .ifm-personalise-hint,
+[data-bs-theme="dark"] #inviteFamilyModal .ifm-personalise-hint,
+html.dark #inviteFamilyModal .ifm-personalise-hint,
+html.dark-mode #inviteFamilyModal .ifm-personalise-hint {
+    color: #cbd5e1 !important;
+}
+body.dark-mode #inviteFamilyModal .ifm-preset-pill:not(.active),
+body.dark-theme #inviteFamilyModal .ifm-preset-pill:not(.active),
+[data-bs-theme="dark"] #inviteFamilyModal .ifm-preset-pill:not(.active),
+html.dark #inviteFamilyModal .ifm-preset-pill:not(.active),
+html.dark-mode #inviteFamilyModal .ifm-preset-pill:not(.active) {
+    background: #222736 !important;
+    border-color: rgba(255, 255, 255, 0.16) !important;
+    color: #e2e8f0 !important;
+}
+body.dark-mode #inviteFamilyModal .ifm-preset-pill.active,
+body.dark-theme #inviteFamilyModal .ifm-preset-pill.active,
+[data-bs-theme="dark"] #inviteFamilyModal .ifm-preset-pill.active,
+html.dark #inviteFamilyModal .ifm-preset-pill.active,
+html.dark-mode #inviteFamilyModal .ifm-preset-pill.active {
+    background: linear-gradient(135deg, #d91b38 0%, #b4142c 100%) !important;
+    border-color: #ff4d61 !important;
+    color: #ffffff !important;
+}
+body.dark-mode #inviteFamilyModal .ifm-save-chip-btn,
+body.dark-theme #inviteFamilyModal .ifm-save-chip-btn,
+[data-bs-theme="dark"] #inviteFamilyModal .ifm-save-chip-btn,
+html.dark #inviteFamilyModal .ifm-save-chip-btn,
+html.dark-mode #inviteFamilyModal .ifm-save-chip-btn {
+    background: linear-gradient(135deg, #d91b38 0%, #b4142c 100%) !important;
+    color: #ffffff !important;
+}
+body.dark-mode #inviteFamilyModal .ifm-clear-personalise-btn,
+body.dark-mode #inviteFamilyModal .ifm-personalise-toggle-btn,
+body.dark-theme #inviteFamilyModal .ifm-clear-personalise-btn,
+body.dark-theme #inviteFamilyModal .ifm-personalise-toggle-btn,
+[data-bs-theme="dark"] #inviteFamilyModal .ifm-clear-personalise-btn,
+[data-bs-theme="dark"] #inviteFamilyModal .ifm-personalise-toggle-btn,
+html.dark #inviteFamilyModal .ifm-clear-personalise-btn,
+html.dark #inviteFamilyModal .ifm-personalise-toggle-btn,
+html.dark-mode #inviteFamilyModal .ifm-clear-personalise-btn,
+html.dark-mode #inviteFamilyModal .ifm-personalise-toggle-btn {
+    background: #222736 !important;
+    border-color: rgba(255, 255, 255, 0.18) !important;
+    color: #e2e8f0 !important;
+}
 body.dark-mode #inviteFamilyModal .ifm-preview-card,
 body.dark-theme #inviteFamilyModal .ifm-preview-card,
 [data-bs-theme="dark"] #inviteFamilyModal .ifm-preview-card,
@@ -851,40 +1156,188 @@ html.dark-mode #inviteFamilyModal .btn-link.text-danger {
                                 </label>
                             </div>
                             <div class="text-muted mt-1.5 d-none" id="inviteModalLineageHint" style="font-size: 0.74rem;">
-                                Selecting Mum, Dad, Sister, Brother, or Grandparent automatically switches to your Birth / Maiden family code.
+                                Selecting Mum, Dad, Sister, Brother, Uncle, Aunt, or Grandparent automatically switches to your Birth / Maiden family code.
                             </div>
                         </div>
 
-                        <!-- Choice 2: Who are you inviting? (Line-icon chips, no emoji) -->
-                        <div class="mb-3">
+                        <!-- Choice 2: Who are you inviting? (Categorised picker + Uncle, Aunt & Add your own personaliser) -->
+                        <div class="mb-3" id="kinshipPickerSection" x-data="inviteKinshipPicker()" x-init="initPicker()">
                             <div class="ifm-section-label">
                                 <span>Who are you inviting?</span>
+                                <span class="ifm-selected-pill" id="kinshipActiveSummaryBadge" x-text="activeSummaryLabel()" title="Currently selected invite recipient">General family</span>
                             </div>
+
+                            <!-- 1-Tap Category Navigation (All | Close | Extended | Custom) -->
+                            <div class="ifm-cat-nav" id="kinshipCategoryNav" role="tablist" aria-label="Filter family relationships">
+                                <button type="button" class="ifm-cat-pill active" :class="{ 'active': activeCategory === 'all' }" @click="setCategory('all')" role="tab" :aria-selected="activeCategory === 'all' ? 'true' : 'false'">
+                                    <span>All</span>
+                                </button>
+                                <button type="button" class="ifm-cat-pill" :class="{ 'active': activeCategory === 'close' }" @click="setCategory('close')" role="tab" :aria-selected="activeCategory === 'close' ? 'true' : 'false'">
+                                    <span>Close</span>
+                                </button>
+                                <button type="button" class="ifm-cat-pill" :class="{ 'active': activeCategory === 'extended' }" @click="setCategory('extended')" role="tab" :aria-selected="activeCategory === 'extended' ? 'true' : 'false'">
+                                    <span>Extended</span>
+                                </button>
+                                <button type="button" class="ifm-cat-pill" :class="{ 'active': activeCategory === 'custom' }" @click="openCustomCreator()" role="tab" :aria-selected="activeCategory === 'custom' ? 'true' : 'false'">
+                                    <i class="bi bi-pencil-square" aria-hidden="true"></i>
+                                    <span>Custom</span>
+                                </button>
+                            </div>
+
+                            <!-- Relationship Chips -->
                             <div class="d-flex flex-wrap gap-2" id="kinshipChipsContainer">
-                                <button type="button" class="btn kinship-chip active" data-role="General" data-label="Family Member">
-                                    <i class="bi bi-people"></i> <span>General family</span>
+                                <button type="button" class="btn kinship-chip active" data-role="General" data-group="close" data-label="General family"
+                                        x-show="matchesGroup('close')" :class="{ 'active': selectedRole === 'General' && !isSavedCustomActive }" @click="selectPreset('General', 'General family')">
+                                    <i class="bi bi-people" aria-hidden="true"></i> <span>General family</span>
                                 </button>
-                                <button type="button" class="btn kinship-chip" data-role="Mum" data-label="Mum">
-                                    <i class="bi bi-heart"></i> <span>Mum</span>
+                                <button type="button" class="btn kinship-chip" data-role="Mum" data-group="close" data-label="Mum"
+                                        x-show="matchesGroup('close')" :class="{ 'active': selectedRole === 'Mum' && !isSavedCustomActive }" @click="selectPreset('Mum', 'Mum')">
+                                    <i class="bi bi-heart" aria-hidden="true"></i> <span>Mum</span>
                                 </button>
-                                <button type="button" class="btn kinship-chip" data-role="Dad" data-label="Dad">
-                                    <i class="bi bi-shield-check"></i> <span>Dad</span>
+                                <button type="button" class="btn kinship-chip" data-role="Dad" data-group="close" data-label="Dad"
+                                        x-show="matchesGroup('close')" :class="{ 'active': selectedRole === 'Dad' && !isSavedCustomActive }" @click="selectPreset('Dad', 'Dad')">
+                                    <i class="bi bi-shield-check" aria-hidden="true"></i> <span>Dad</span>
                                 </button>
-                                <button type="button" class="btn kinship-chip" data-role="Sister" data-label="Sister">
-                                    <i class="bi bi-person-heart"></i> <span>Sister</span>
+                                <button type="button" class="btn kinship-chip" data-role="Sister" data-group="close" data-label="Sister"
+                                        x-show="matchesGroup('close')" :class="{ 'active': selectedRole === 'Sister' && !isSavedCustomActive }" @click="selectPreset('Sister', 'Sister')">
+                                    <i class="bi bi-person-heart" aria-hidden="true"></i> <span>Sister</span>
                                 </button>
-                                <button type="button" class="btn kinship-chip" data-role="Brother" data-label="Brother">
-                                    <i class="bi bi-person-check"></i> <span>Brother</span>
+                                <button type="button" class="btn kinship-chip" data-role="Brother" data-group="close" data-label="Brother"
+                                        x-show="matchesGroup('close')" :class="{ 'active': selectedRole === 'Brother' && !isSavedCustomActive }" @click="selectPreset('Brother', 'Brother')">
+                                    <i class="bi bi-person-check" aria-hidden="true"></i> <span>Brother</span>
                                 </button>
-                                <button type="button" class="btn kinship-chip" data-role="Child" data-label="Son / Daughter">
-                                    <i class="bi bi-emoji-smile"></i> <span>Son / Daughter</span>
+                                <button type="button" class="btn kinship-chip" data-role="Partner" data-group="close" data-label="Spouse / Partner"
+                                        x-show="matchesGroup('close')" :class="{ 'active': selectedRole === 'Partner' && !isSavedCustomActive }" @click="selectPreset('Partner', 'Spouse / Partner')">
+                                    <i class="bi bi-hearts" aria-hidden="true"></i> <span>Spouse / Partner</span>
                                 </button>
-                                <button type="button" class="btn kinship-chip" data-role="Grandparent" data-label="Grandparent">
-                                    <i class="bi bi-award"></i> <span>Grandparent</span>
+                                <button type="button" class="btn kinship-chip" data-role="Child" data-group="close" data-label="Son / Daughter"
+                                        x-show="matchesGroup('close')" :class="{ 'active': selectedRole === 'Child' && !isSavedCustomActive }" @click="selectPreset('Child', 'Son / Daughter')">
+                                    <i class="bi bi-emoji-smile" aria-hidden="true"></i> <span>Son / Daughter</span>
                                 </button>
-                                <button type="button" class="btn kinship-chip" data-role="Cousin" data-label="Cousin">
-                                    <i class="bi bi-diagram-3"></i> <span>Cousin / Relative</span>
+                                <button type="button" class="btn kinship-chip" data-role="Uncle" data-group="extended" data-label="Uncle"
+                                        x-show="matchesGroup('extended')" :class="{ 'active': selectedRole === 'Uncle' && !isSavedCustomActive }" @click="selectPreset('Uncle', 'Uncle')">
+                                    <i class="bi bi-person-badge" aria-hidden="true"></i> <span>Uncle</span>
                                 </button>
+                                <button type="button" class="btn kinship-chip" data-role="Aunt" data-group="extended" data-label="Aunt"
+                                        x-show="matchesGroup('extended')" :class="{ 'active': selectedRole === 'Aunt' && !isSavedCustomActive }" @click="selectPreset('Aunt', 'Aunt')">
+                                    <i class="bi bi-flower1" aria-hidden="true"></i> <span>Aunt</span>
+                                </button>
+                                <button type="button" class="btn kinship-chip" data-role="Grandparent" data-group="extended" data-label="Grandparent"
+                                        x-show="matchesGroup('extended')" :class="{ 'active': selectedRole === 'Grandparent' && !isSavedCustomActive }" @click="selectPreset('Grandparent', 'Grandparent')">
+                                    <i class="bi bi-award" aria-hidden="true"></i> <span>Grandparent</span>
+                                </button>
+                                <button type="button" class="btn kinship-chip" data-role="Cousin" data-group="extended" data-label="Cousin"
+                                        x-show="matchesGroup('extended')" :class="{ 'active': selectedRole === 'Cousin' && !isSavedCustomActive }" @click="selectPreset('Cousin', 'Cousin')">
+                                    <i class="bi bi-diagram-3" aria-hidden="true"></i> <span>Cousin</span>
+                                </button>
+                                <button type="button" class="btn kinship-chip" data-role="NieceNephew" data-group="extended" data-label="Niece / Nephew"
+                                        x-show="matchesGroup('extended')" :class="{ 'active': selectedRole === 'NieceNephew' && !isSavedCustomActive }" @click="selectPreset('NieceNephew', 'Niece / Nephew')">
+                                    <i class="bi bi-stars" aria-hidden="true"></i> <span>Niece / Nephew</span>
+                                </button>
+
+                                <!-- User-saved custom relationship chips -->
+                                <template x-for="savedTitle in savedCustomRoles" :key="savedTitle">
+                                    <button type="button" class="btn kinship-chip" data-role="Custom" data-group="custom"
+                                            x-show="matchesGroup('custom')"
+                                            :class="{ 'active': isSavedCustomActive && customRoleLabel === savedTitle }"
+                                            :title="savedTitle"
+                                            @click="selectSavedCustom(savedTitle)">
+                                        <i class="bi bi-bookmark-heart" aria-hidden="true"></i>
+                                        <span x-text="savedTitle"></span>
+                                    </button>
+                                </template>
+
+                                <!-- Add your own custom relationship trigger -->
+                                <button type="button" class="btn kinship-chip kinship-chip--custom" id="btnKinshipAddCustom" data-role="Custom" data-group="custom" data-label="Add your own"
+                                        x-show="matchesGroup('custom')"
+                                        :class="{ 'active': selectedRole === 'Custom' && !isSavedCustomActive }"
+                                        @click="openCustomCreator()">
+                                    <i class="bi bi-plus-circle" aria-hidden="true"></i> <span>Add your own…</span>
+                                </button>
+                            </div>
+
+                            <!-- Optional 1-Tap Personalise Trigger when on General family -->
+                            <div class="mt-2" x-show="selectedRole === 'General' && !showGeneralPersonaliser && activeCategory !== 'custom'" x-cloak>
+                                <button type="button" class="ifm-personalise-toggle-btn" id="btnOpenPersonaliseGeneral" @click="showGeneralPersonaliser = true; $nextTick(() => $refs.presetNameInput && $refs.presetNameInput.focus())">
+                                    <i class="bi bi-magic" aria-hidden="true"></i>
+                                    <span>Personalise greeting with a name or title</span>
+                                </button>
+                            </div>
+
+                            <!-- Mode A: Custom "Add your own" Personaliser Card -->
+                            <div class="ifm-personalise-box" id="customKinshipPanel" x-show="selectedRole === 'Custom' || activeCategory === 'custom'" x-collapse x-cloak>
+                                <div class="d-flex align-items-center justify-content-between gap-2 mb-1">
+                                    <span class="ifm-personalise-title">Add your own relationship to personalise</span>
+                                </div>
+                                <p class="ifm-personalise-hint mb-2">Tap a quick suggestion or type how you call them in your family:</p>
+
+                                <!-- Quick 1-Tap Inspiration Pills -->
+                                <div class="ifm-preset-row" role="group" aria-label="Suggested custom relationships">
+                                    <template x-for="suggestion in customSuggestions" :key="suggestion">
+                                        <button type="button" class="ifm-preset-pill"
+                                                :class="{ 'active': customRoleLabel.toLowerCase() === suggestion.toLowerCase() }"
+                                                @click="applySuggestion(suggestion)">
+                                            <span x-text="suggestion"></span>
+                                        </button>
+                                    </template>
+                                </div>
+
+                                <div class="row g-2">
+                                    <div class="col-12 col-sm-6">
+                                        <label for="customKinshipRoleInput" class="visually-hidden">Relationship or family title</label>
+                                        <input type="text" id="customKinshipRoleInput" x-ref="customRoleInput" x-model="customRoleLabel" @input="emitChange()"
+                                               maxlength="50" class="form-control form-control-sm"
+                                               placeholder="Title (e.g. Auntie, Great-Uncle, Godmother)"
+                                               style="min-height: 44px; border-radius: 10px; font-size: 0.84rem;">
+                                    </div>
+                                    <div class="col-12 col-sm-6">
+                                        <label for="customKinshipNameInput" class="visually-hidden">Relative's name (optional)</label>
+                                        <input type="text" id="customKinshipNameInput" x-model="recipientName" @input="emitChange()"
+                                               maxlength="60" class="form-control form-control-sm"
+                                               placeholder="Their name, e.g. Funke (optional)"
+                                               style="min-height: 44px; border-radius: 10px; font-size: 0.84rem;">
+                                    </div>
+                                </div>
+
+                                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-2">
+                                    <span class="ifm-personalise-hint" x-text="customHelperText()"></span>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <button type="button" class="ifm-clear-personalise-btn"
+                                                x-show="isSavedCustomActive && savedCustomRoles.includes(customRoleLabel.trim())"
+                                                @click="removeSavedCustom(customRoleLabel.trim())">
+                                            <i class="bi bi-trash3" aria-hidden="true"></i>
+                                            <span>Remove saved</span>
+                                        </button>
+                                        <button type="button" id="btnSaveCustomKinship" class="ifm-save-chip-btn"
+                                                x-show="canSaveCustomChip()"
+                                                @click="saveCustomChip($event)">
+                                            <i class="bi bi-bookmark-plus" aria-hidden="true"></i>
+                                            <span>Save to quick picks</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Mode B: Inline Name Personaliser for Selected Preset (e.g. Uncle -> Dear Uncle Tunde) -->
+                            <div class="ifm-personalise-box" id="presetKinshipPersonaliseBox"
+                                 x-show="selectedRole !== 'Custom' && activeCategory !== 'custom' && (selectedRole !== 'General' || showGeneralPersonaliser)"
+                                 x-collapse x-cloak>
+                                <div class="d-flex align-items-center justify-content-between gap-2 mb-1.5">
+                                    <label for="presetKinshipNameInput" class="ifm-personalise-title mb-0" x-text="presetPersonaliseHeading()"></label>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <input type="text" id="presetKinshipNameInput" x-ref="presetNameInput" x-model="recipientName" @input="emitChange()"
+                                           maxlength="60" class="form-control form-control-sm"
+                                           :placeholder="presetNamePlaceholder()"
+                                           style="min-height: 44px; border-radius: 10px; font-size: 0.84rem;">
+                                    <button type="button" class="ifm-clear-personalise-btn"
+                                            x-show="recipientName.trim().length > 0 || selectedRole === 'General'"
+                                            @click="clearPresetName()"
+                                            aria-label="Clear personalised name">
+                                        <i class="bi bi-x-lg" aria-hidden="true"></i>
+                                        <span>Clear</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
@@ -1109,6 +1562,208 @@ html.dark-mode #inviteFamilyModal .btn-link.text-danger {
 </script>
 
 <script nonce="{{ csp_nonce($nonce ?? null) }}">
+window.inviteKinshipPicker = function() {
+    const STORAGE_KEY = 'fp_custom_kinship_roles_v1';
+    return {
+        activeCategory: 'all',
+        selectedRole: 'General',
+        selectedLabel: 'General family',
+        customRoleLabel: '',
+        recipientName: '',
+        isSavedCustomActive: false,
+        showGeneralPersonaliser: false,
+        savedCustomRoles: [],
+        customSuggestions: ['Auntie', 'Great-Uncle', 'Great-Aunt', 'Godparent', 'Grandad', 'Grandma', 'In-Law'],
+
+        initPicker() {
+            try {
+                const raw = window.localStorage ? window.localStorage.getItem(STORAGE_KEY) : null;
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed)) {
+                        this.savedCustomRoles = parsed
+                            .map(v => String(v || '').trim().slice(0, 50))
+                            .filter(Boolean)
+                            .slice(0, 6);
+                    }
+                }
+            } catch (e) {
+                this.savedCustomRoles = [];
+            }
+        },
+
+        matchesGroup(group) {
+            if (this.activeCategory === 'all') return true;
+            return this.activeCategory === group;
+        },
+
+        setCategory(cat) {
+            this.activeCategory = cat;
+        },
+
+        selectPreset(role, label) {
+            this.selectedRole = role;
+            this.selectedLabel = label;
+            this.isSavedCustomActive = false;
+            if (this.activeCategory === 'custom') {
+                this.activeCategory = 'all';
+            }
+            this.emitChange(true);
+        },
+
+        openCustomCreator() {
+            this.activeCategory = 'custom';
+            this.selectedRole = 'Custom';
+            this.isSavedCustomActive = false;
+            this.emitChange(false);
+            this.$nextTick(() => {
+                if (this.$refs.customRoleInput) {
+                    this.$refs.customRoleInput.focus();
+                }
+            });
+        },
+
+        selectSavedCustom(title) {
+            this.selectedRole = 'Custom';
+            this.customRoleLabel = title;
+            this.isSavedCustomActive = true;
+            this.emitChange(true);
+        },
+
+        applySuggestion(suggestion) {
+            this.selectedRole = 'Custom';
+            this.customRoleLabel = suggestion;
+            this.isSavedCustomActive = this.savedCustomRoles.includes(suggestion);
+            this.emitChange(true);
+            this.$nextTick(() => {
+                if (this.$refs.customRoleInput) {
+                    this.$refs.customRoleInput.focus();
+                }
+            });
+        },
+
+        canSaveCustomChip() {
+            const clean = this.customRoleLabel.trim().replace(/\s+/g, ' ').slice(0, 50);
+            if (clean.length < 2) return false;
+            const exists = this.savedCustomRoles.some(item => item.toLowerCase() === clean.toLowerCase());
+            return !exists && this.savedCustomRoles.length < 6;
+        },
+
+        saveCustomChip(evt) {
+            const btn = evt && evt.currentTarget ? evt.currentTarget : null;
+            if (btn && window.ScoreTenantSpinner && typeof window.ScoreTenantSpinner.start === 'function') {
+                window.ScoreTenantSpinner.start(btn);
+            }
+            const clean = this.customRoleLabel.trim().replace(/\s+/g, ' ').slice(0, 50);
+            if (clean.length >= 2 && !this.savedCustomRoles.some(item => item.toLowerCase() === clean.toLowerCase())) {
+                this.savedCustomRoles = [...this.savedCustomRoles, clean].slice(0, 6);
+                this.customRoleLabel = clean;
+                this.isSavedCustomActive = true;
+                this.persistSavedRoles();
+                if (window.Alpine && typeof this.$toast === 'function') {
+                    this.$toast('Saved "' + clean + '" to your quick picks', 'success');
+                }
+            }
+            if (btn && window.ScoreTenantSpinner && typeof window.ScoreTenantSpinner.stop === 'function') {
+                setTimeout(() => window.ScoreTenantSpinner.stop(btn), 180);
+            }
+            this.emitChange(false);
+        },
+
+        removeSavedCustom(title) {
+            this.savedCustomRoles = this.savedCustomRoles.filter(item => item !== title);
+            this.isSavedCustomActive = false;
+            this.persistSavedRoles();
+            this.emitChange(false);
+        },
+
+        persistSavedRoles() {
+            try {
+                if (window.localStorage) {
+                    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(this.savedCustomRoles));
+                }
+            } catch (e) {}
+        },
+
+        clearPresetName() {
+            this.recipientName = '';
+            if (this.selectedRole === 'General') {
+                this.showGeneralPersonaliser = false;
+            }
+            this.emitChange(false);
+        },
+
+        activeSummaryLabel() {
+            const cleanName = this.recipientName.trim().replace(/\s+/g, ' ');
+            if (this.selectedRole === 'Custom') {
+                const cleanTitle = this.customRoleLabel.trim().replace(/\s+/g, ' ');
+                if (!cleanTitle && !cleanName) return 'Custom invite';
+                if (cleanTitle && cleanName) {
+                    return cleanName.toLowerCase().startsWith(cleanTitle.toLowerCase())
+                        ? cleanName
+                        : cleanTitle + ' ' + cleanName;
+                }
+                return cleanTitle || cleanName;
+            }
+            if (cleanName) {
+                if (this.selectedRole === 'General') return 'For ' + cleanName;
+                const base = this.selectedLabel;
+                return cleanName.toLowerCase().startsWith(base.toLowerCase()) ? cleanName : base + ' · ' + cleanName;
+            }
+            return this.selectedLabel || 'General family';
+        },
+
+        presetPersonaliseHeading() {
+            if (this.selectedRole === 'General') {
+                return 'Personalise greeting with their name (optional)';
+            }
+            return 'Personalise for ' + this.selectedLabel + ' (optional)';
+        },
+
+        presetNamePlaceholder() {
+            const examples = {
+                'Uncle': "Add name, e.g. Tunde → 'Dear Uncle Tunde'",
+                'Aunt': "Add name, e.g. Mary → 'Dear Aunt Mary'",
+                'Grandparent': "Add name or title, e.g. Grandma Bisi",
+                'Cousin': "Add name, e.g. Dayo → 'Hey Cousin Dayo'",
+                'NieceNephew': "Add name, e.g. Amara",
+                'Mum': "Optional pet name, e.g. Mama",
+                'Dad': "Optional title, e.g. Papa",
+                'Sister': "Add name, e.g. Tola",
+                'Brother': "Add name, e.g. Femi",
+                'Partner': "Add name, e.g. Beloved / Chidi",
+                'Child': "Add name, e.g. Ayo",
+                'General': "Add recipient's name, e.g. Auntie Funke"
+            };
+            return examples[this.selectedRole] || 'Add their name (optional)';
+        },
+
+        customHelperText() {
+            const cleanTitle = this.customRoleLabel.trim();
+            const cleanName = this.recipientName.trim();
+            if (!cleanTitle && !cleanName) {
+                return 'Previewing general family invite until you type above.';
+            }
+            return 'Live message preview updated automatically.';
+        },
+
+        emitChange(allowAutoLineage = false) {
+            const modalEl = document.getElementById('inviteFamilyModal');
+            if (!modalEl) return;
+            modalEl.dispatchEvent(new CustomEvent('kinship-selection-changed', {
+                detail: {
+                    role: this.selectedRole,
+                    customLabel: this.customRoleLabel,
+                    recipientName: this.recipientName,
+                    allowAutoLineage: Boolean(allowAutoLineage)
+                }
+            }));
+        }
+    };
+};
+</script>
+
+<script nonce="{{ csp_nonce($nonce ?? null) }}">
 (function() {
     let primaryInviteData = {
         invite_url: '',
@@ -1130,72 +1785,210 @@ html.dark-mode #inviteFamilyModal .btn-link.text-danger {
     let activeScope = '{{ ($activeLineageScope ?? "primary") === "maternal" ? "maternal" : "primary" }}';
     let inviteData = Object.assign({}, primaryInviteData);
     let currentRole = 'General';
+    let currentCustomLabel = '';
+    let currentRecipientName = '';
     let selectedContacts = [];
 
-    // Kinship template dictionary (British English copy, dynamically adapts for Marital vs Birth family code)
+    function sanitiseInlineText(val, maxLen) {
+        return String(val ?? '')
+            .replace(/[\x00-\x1F\x7F]/g, '')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .slice(0, maxLen);
+    }
+
+    function composeSalutation(prefix, roleWord, name) {
+        const cleanName = sanitiseInlineText(name, 60);
+        if (!cleanName) {
+            return `${prefix} ${roleWord},`;
+        }
+        const lowerName = cleanName.toLowerCase();
+        const lowerRole = roleWord.toLowerCase();
+        if (
+            lowerName.startsWith(lowerRole) ||
+            (lowerRole === 'aunt' && (lowerName.startsWith('auntie') || lowerName.startsWith('aunty'))) ||
+            (lowerRole === 'uncle' && lowerName.startsWith('uncle')) ||
+            (lowerRole === 'grandparent' && (lowerName.startsWith('grand') || lowerName.startsWith('mama') || lowerName.startsWith('baba') || lowerName.startsWith('nana') || lowerName.startsWith('papa')))
+        ) {
+            return `${prefix} ${cleanName},`;
+        }
+        return `${prefix} ${roleWord} ${cleanName},`;
+    }
+
+    function composeHeaderTitle(roleWord, name) {
+        const cleanName = sanitiseInlineText(name, 60);
+        if (!cleanName) return roleWord;
+        const lowerName = cleanName.toLowerCase();
+        const lowerRole = roleWord.toLowerCase();
+        if (
+            lowerName.startsWith(lowerRole) ||
+            (lowerRole === 'aunt' && (lowerName.startsWith('auntie') || lowerName.startsWith('aunty'))) ||
+            (lowerRole === 'grandparent' && (lowerName.startsWith('grand') || lowerName.startsWith('mama') || lowerName.startsWith('baba') || lowerName.startsWith('nana') || lowerName.startsWith('papa')))
+        ) {
+            return cleanName;
+        }
+        return `${roleWord} ${cleanName}`;
+    }
+
+    // Kinship template dictionary (British English copy, dynamically adapts for Marital vs Birth family code & personalisation)
     const kinshipTemplates = {
-        'General': (surname, url, code, isBirth) => isBirth
-            ? `🌳 *Family Heritage Invitation* 🌳\n\n` +
-              `You are invited to join our *${surname} Birth Family Network & Heritage Tree* on FamilyPlatform.\n\n` +
-              `🔑 *Birth Family Code:* #${code}\n\n` +
-              `✨ Claim your branch on our live family tree, preserve our heritage, share memories, and connect across generations.\n\n` +
-              `🔗 Tap to Enter Our Family Sanctuary:\n${url}\n\n` +
-              `Welcome to our living family legacy! 🏰`
-            : `🌳 *Family Heritage Invitation* 🌳\n\n` +
-              `You are invited to join our *${surname} Family Network & Heritage Tree*.\n\n` +
-              `🔑 *Family Code:* #${code}\n\n` +
-              `✨ Claim your branch on our live family tree, preserve our oral histories, share memories, and connect across generations.\n\n` +
-              `🔗 Tap to Enter Our Family Sanctuary:\n${url}\n\n` +
-              `Welcome to our living family legacy! 🏰`,
-        'Mum': (surname, url, code, isBirth) => `🌳 *Family Heritage Invitation for Mum* 🌳\n\n` +
-            `Hi Mum,\n\n` +
-            `I've set up our private *${surname} ${isBirth ? 'Birth Family' : 'Family'}* sanctuary.\n\n` +
-            `🔑 *${isBirth ? 'Birth Family Code' : 'Family Code'}:* #${code}\n\n` +
-            `✨ View our ancestral lineage, see cherished photos, and claim your spot on our living family tree:\n\n` +
-            `🔗 Tap to Claim Your Branch:\n${url}\n\n` +
-            `Welcome to our living family legacy! 🏰`,
-        'Dad': (surname, url, code, isBirth) => `🌳 *Family Heritage Invitation for Dad* 🌳\n\n` +
-            `Hi Dad,\n\n` +
-            `I've set up our private *${surname} ${isBirth ? 'Birth Family' : 'Family'}* sanctuary.\n\n` +
-            `🔑 *${isBirth ? 'Birth Family Code' : 'Family Code'}:* #${code}\n\n` +
-            `✨ View our ancestral lineage, see cherished photos, and claim your spot on our living family tree:\n\n` +
-            `🔗 Tap to Claim Your Branch:\n${url}\n\n` +
-            `Welcome to our living family legacy! 🏰`,
-        'Sister': (surname, url, code, isBirth) => `🌳 *Family Heritage Invitation for Sister* 🌳\n\n` +
-            `Hey sis,\n\n` +
-            `Join our private *${surname} ${isBirth ? 'Birth Family' : 'Family'}* heritage hub.\n\n` +
-            `🔑 *${isBirth ? 'Birth Family Code' : 'Family Code'}:* #${code}\n\n` +
-            `✨ Claim your branch on our living family tree, share memories, and preserve our stories:\n\n` +
-            `🔗 Tap to Claim Your Branch:\n${url}\n\n` +
-            `Welcome to our living family legacy! 🏰`,
-        'Brother': (surname, url, code, isBirth) => `🌳 *Family Heritage Invitation for Brother* 🌳\n\n` +
-            `Hey bro,\n\n` +
-            `Join our private *${surname} ${isBirth ? 'Birth Family' : 'Family'}* heritage hub.\n\n` +
-            `🔑 *${isBirth ? 'Birth Family Code' : 'Family Code'}:* #${code}\n\n` +
-            `✨ Claim your branch on our living family tree, share memories, and preserve our stories:\n\n` +
-            `🔗 Tap to Claim Your Branch:\n${url}\n\n` +
-            `Welcome to our living family legacy! 🏰`,
-        'Child': (surname, url, code) => `🌳 *Family Heritage Invitation* 🌳\n\n` +
-            `Hey,\n\n` +
-            `I've added you to our official *${surname} Family Tree*.\n\n` +
-            `🔑 *Family Code:* #${code}\n\n` +
-            `✨ Claim your profile, view our ancestral roots, and share memories:\n\n` +
-            `🔗 Tap to Claim Your Profile:\n${url}\n\n` +
-            `Welcome to our living family legacy! 🏰`,
-        'Grandparent': (surname, url, code, isBirth) => `🌳 *Family Heritage Invitation for Grandparent* 🌳\n\n` +
-            `Dear Grandparent,\n\n` +
-            `Our *${surname} ${isBirth ? 'Birth Family' : 'Family'}* tree and heritage have been preserved.\n\n` +
-            `🔑 *${isBirth ? 'Birth Family Code' : 'Family Code'}:* #${code}\n\n` +
-            `✨ View our family branches, photos, oral history recordings, and ancestral records:\n\n` +
-            `🔗 Tap to View Our Family Tree:\n${url}\n\n` +
-            `Welcome to our living family legacy! 🏰`,
-        'Cousin': (surname, url, code, isBirth) => `🌳 *Family Heritage Invitation for Cousin* 🌳\n\n` +
-            `Hey cousin,\n\n` +
-            `We are bringing the *${surname} ${isBirth ? 'Birth Family' : 'Family'}* together on our private family hub.\n\n` +
-            `🔑 *${isBirth ? 'Birth Family Code' : 'Family Code'}:* #${code}\n\n` +
-            `✨ Claim your branch on our live family tree and view our roots:\n\n` +
-            `🔗 Tap to Claim Your Branch:\n${url}\n\n` +
-            `Welcome to our living family legacy! 🏰`
+        'General': (surname, url, code, isBirth, name) => {
+            const cleanName = sanitiseInlineText(name, 60);
+            const greetingLine = cleanName ? `Dear ${cleanName},\n\n` : '';
+            return isBirth
+                ? `🌳 *Family Heritage Invitation* 🌳\n\n` +
+                  greetingLine +
+                  `You are invited to join our *${surname} Birth Family Network & Heritage Tree* on FamilyPlatform.\n\n` +
+                  `🔑 *Birth Family Code:* #${code}\n\n` +
+                  `✨ Claim your branch on our live family tree, preserve our heritage, share memories, and connect across generations.\n\n` +
+                  `🔗 Tap to Enter Our Family Sanctuary:\n${url}\n\n` +
+                  `Welcome to our living family legacy! 🏰`
+                : `🌳 *Family Heritage Invitation* 🌳\n\n` +
+                  greetingLine +
+                  `You are invited to join our *${surname} Family Network & Heritage Tree*.\n\n` +
+                  `🔑 *Family Code:* #${code}\n\n` +
+                  `✨ Claim your branch on our live family tree, preserve our oral histories, share memories, and connect across generations.\n\n` +
+                  `🔗 Tap to Enter Our Family Sanctuary:\n${url}\n\n` +
+                  `Welcome to our living family legacy! 🏰`;
+        },
+        'Mum': (surname, url, code, isBirth, name) => {
+            const cleanName = sanitiseInlineText(name, 60);
+            const salutation = cleanName ? `Hi ${cleanName},` : 'Hi Mum,';
+            return `🌳 *Family Heritage Invitation for ${cleanName || 'Mum'}* 🌳\n\n` +
+                `${salutation}\n\n` +
+                `I've set up our private *${surname} ${isBirth ? 'Birth Family' : 'Family'}* sanctuary.\n\n` +
+                `🔑 *${isBirth ? 'Birth Family Code' : 'Family Code'}:* #${code}\n\n` +
+                `✨ View our ancestral lineage, see cherished photos, and claim your spot on our living family tree:\n\n` +
+                `🔗 Tap to Claim Your Branch:\n${url}\n\n` +
+                `Welcome to our living family legacy! 🏰`;
+        },
+        'Dad': (surname, url, code, isBirth, name) => {
+            const cleanName = sanitiseInlineText(name, 60);
+            const salutation = cleanName ? `Hi ${cleanName},` : 'Hi Dad,';
+            return `🌳 *Family Heritage Invitation for ${cleanName || 'Dad'}* 🌳\n\n` +
+                `${salutation}\n\n` +
+                `I've set up our private *${surname} ${isBirth ? 'Birth Family' : 'Family'}* sanctuary.\n\n` +
+                `🔑 *${isBirth ? 'Birth Family Code' : 'Family Code'}:* #${code}\n\n` +
+                `✨ View our ancestral lineage, see cherished photos, and claim your spot on our living family tree:\n\n` +
+                `🔗 Tap to Claim Your Branch:\n${url}\n\n` +
+                `Welcome to our living family legacy! 🏰`;
+        },
+        'Sister': (surname, url, code, isBirth, name) => {
+            const cleanName = sanitiseInlineText(name, 60);
+            const salutation = cleanName ? `Hey ${cleanName},` : 'Hey sis,';
+            return `🌳 *Family Heritage Invitation for ${composeHeaderTitle('Sister', cleanName)}* 🌳\n\n` +
+                `${salutation}\n\n` +
+                `Join our private *${surname} ${isBirth ? 'Birth Family' : 'Family'}* heritage hub.\n\n` +
+                `🔑 *${isBirth ? 'Birth Family Code' : 'Family Code'}:* #${code}\n\n` +
+                `✨ Claim your branch on our living family tree, share memories, and preserve our stories:\n\n` +
+                `🔗 Tap to Claim Your Branch:\n${url}\n\n` +
+                `Welcome to our living family legacy! 🏰`;
+        },
+        'Brother': (surname, url, code, isBirth, name) => {
+            const cleanName = sanitiseInlineText(name, 60);
+            const salutation = cleanName ? `Hey ${cleanName},` : 'Hey bro,';
+            return `🌳 *Family Heritage Invitation for ${composeHeaderTitle('Brother', cleanName)}* 🌳\n\n` +
+                `${salutation}\n\n` +
+                `Join our private *${surname} ${isBirth ? 'Birth Family' : 'Family'}* heritage hub.\n\n` +
+                `🔑 *${isBirth ? 'Birth Family Code' : 'Family Code'}:* #${code}\n\n` +
+                `✨ Claim your branch on our living family tree, share memories, and preserve our stories:\n\n` +
+                `🔗 Tap to Claim Your Branch:\n${url}\n\n` +
+                `Welcome to our living family legacy! 🏰`;
+        },
+        'Partner': (surname, url, code, _isBirth, name) => {
+            const cleanName = sanitiseInlineText(name, 60);
+            const salutation = cleanName ? `Hi ${cleanName},` : 'Hi love,';
+            return `🌳 *Family Heritage Invitation${cleanName ? ' for ' + cleanName : ''}* 🌳\n\n` +
+                `${salutation}\n\n` +
+                `I've set up our private *${surname} Family* sanctuary so we can keep our photos, milestones, and family tree safe in one place.\n\n` +
+                `🔑 *Family Code:* #${code}\n\n` +
+                `✨ Join our household hub and claim your spot on our living family tree:\n\n` +
+                `🔗 Tap to Join Our Family Sanctuary:\n${url}\n\n` +
+                `Welcome to our living family legacy! 🏰`;
+        },
+        'Child': (surname, url, code, _isBirth, name) => {
+            const cleanName = sanitiseInlineText(name, 60);
+            const salutation = cleanName ? `Hey ${cleanName},` : 'Hey,';
+            return `🌳 *Family Heritage Invitation${cleanName ? ' for ' + cleanName : ''}* 🌳\n\n` +
+                `${salutation}\n\n` +
+                `I've added you to our official *${surname} Family Tree*.\n\n` +
+                `🔑 *Family Code:* #${code}\n\n` +
+                `✨ Claim your profile, view our ancestral roots, and share memories:\n\n` +
+                `🔗 Tap to Claim Your Profile:\n${url}\n\n` +
+                `Welcome to our living family legacy! 🏰`;
+        },
+        'Uncle': (surname, url, code, isBirth, name) => {
+            const headerTarget = composeHeaderTitle('Uncle', name);
+            const salutation = composeSalutation('Dear', 'Uncle', name);
+            return `🌳 *Family Heritage Invitation for ${headerTarget}* 🌳\n\n` +
+                `${salutation}\n\n` +
+                `We are bringing our private *${surname} ${isBirth ? 'Birth Family' : 'Family'}* heritage sanctuary together on FamilyPlatform.\n\n` +
+                `🔑 *${isBirth ? 'Birth Family Code' : 'Family Code'}:* #${code}\n\n` +
+                `✨ Claim your honoured branch on our living family tree, share cherished memories, and help preserve our family history across generations:\n\n` +
+                `🔗 Tap to Claim Your Branch:\n${url}\n\n` +
+                `Welcome to our living family legacy! 🏰`;
+        },
+        'Aunt': (surname, url, code, isBirth, name) => {
+            const headerTarget = composeHeaderTitle('Aunt', name);
+            const salutation = composeSalutation('Dear', 'Aunt', name);
+            return `🌳 *Family Heritage Invitation for ${headerTarget}* 🌳\n\n` +
+                `${salutation}\n\n` +
+                `We are bringing our private *${surname} ${isBirth ? 'Birth Family' : 'Family'}* heritage sanctuary together on FamilyPlatform.\n\n` +
+                `🔑 *${isBirth ? 'Birth Family Code' : 'Family Code'}:* #${code}\n\n` +
+                `✨ Claim your honoured branch on our living family tree, share cherished memories, and help preserve our family history across generations:\n\n` +
+                `🔗 Tap to Claim Your Branch:\n${url}\n\n` +
+                `Welcome to our living family legacy! 🏰`;
+        },
+        'Grandparent': (surname, url, code, isBirth, name) => {
+            const headerTarget = composeHeaderTitle('Grandparent', name);
+            const salutation = composeSalutation('Dear', 'Grandparent', name);
+            return `🌳 *Family Heritage Invitation for ${headerTarget}* 🌳\n\n` +
+                `${salutation}\n\n` +
+                `Our *${surname} ${isBirth ? 'Birth Family' : 'Family'}* tree and heritage have been preserved.\n\n` +
+                `🔑 *${isBirth ? 'Birth Family Code' : 'Family Code'}:* #${code}\n\n` +
+                `✨ View our family branches, photos, oral history recordings, and ancestral records:\n\n` +
+                `🔗 Tap to View Our Family Tree:\n${url}\n\n` +
+                `Welcome to our living family legacy! 🏰`;
+        },
+        'Cousin': (surname, url, code, isBirth, name) => {
+            const headerTarget = composeHeaderTitle('Cousin', name);
+            const salutation = composeSalutation('Hey', 'cousin', name);
+            return `🌳 *Family Heritage Invitation for ${headerTarget}* 🌳\n\n` +
+                `${salutation}\n\n` +
+                `We are bringing the *${surname} ${isBirth ? 'Birth Family' : 'Family'}* together on our private family hub.\n\n` +
+                `🔑 *${isBirth ? 'Birth Family Code' : 'Family Code'}:* #${code}\n\n` +
+                `✨ Claim your branch on our live family tree and view our roots:\n\n` +
+                `🔗 Tap to Claim Your Branch:\n${url}\n\n` +
+                `Welcome to our living family legacy! 🏰`;
+        },
+        'NieceNephew': (surname, url, code, isBirth, name) => {
+            const cleanName = sanitiseInlineText(name, 60);
+            const salutation = cleanName ? `Hey ${cleanName},` : 'Hey there,';
+            return `🌳 *Family Heritage Invitation${cleanName ? ' for ' + cleanName : ''}* 🌳\n\n` +
+                `${salutation}\n\n` +
+                `We are connecting the *${surname} ${isBirth ? 'Birth Family' : 'Family'}* across generations on our private family sanctuary.\n\n` +
+                `🔑 *${isBirth ? 'Birth Family Code' : 'Family Code'}:* #${code}\n\n` +
+                `✨ Claim your spot on our living family tree, explore our roots, and share family moments:\n\n` +
+                `🔗 Tap to Claim Your Spot:\n${url}\n\n` +
+                `Welcome to our living family legacy! 🏰`;
+        },
+        'Custom': (surname, url, code, isBirth, name, customTitle) => {
+            const cleanTitle = sanitiseInlineText(customTitle, 50);
+            const cleanName = sanitiseInlineText(name, 60);
+            if (!cleanTitle && !cleanName) {
+                return kinshipTemplates['General'](surname, url, code, isBirth, '');
+            }
+            const combinedTarget = cleanTitle
+                ? composeHeaderTitle(cleanTitle, cleanName)
+                : cleanName;
+            return `🌳 *Family Heritage Invitation for ${combinedTarget}* 🌳\n\n` +
+                `Dear ${combinedTarget},\n\n` +
+                `You are warmly invited to join our private *${surname} ${isBirth ? 'Birth Family' : 'Family'}* sanctuary on FamilyPlatform.\n\n` +
+                `🔑 *${isBirth ? 'Birth Family Code' : 'Family Code'}:* #${code}\n\n` +
+                `✨ Claim your branch on our live family tree, preserve our heritage, share cherished memories, and connect across generations:\n\n` +
+                `🔗 Tap to Enter Our Family Sanctuary:\n${url}\n\n` +
+                `Welcome to our living family legacy! 🏰`;
+        }
     };
 
     function getCleanPhoneNumber(phone) {
@@ -1267,7 +2060,7 @@ html.dark-mode #inviteFamilyModal .btn-link.text-danger {
         const code = inviteData.family_code || '';
         const isBirth = (activeScope === 'maternal');
         const generator = kinshipTemplates[currentRole] || kinshipTemplates['General'];
-        return generator(surname, url, code, isBirth);
+        return generator(surname, url, code, isBirth, currentRecipientName, currentCustomLabel);
     }
 
     function updateMessageUI() {
@@ -1442,35 +2235,36 @@ html.dark-mode #inviteFamilyModal .btn-link.text-danger {
             });
         });
 
-        // Kinship Role Chips (automatically switch between Birth and Marital family codes when appropriate)
-        const chips = document.querySelectorAll('.kinship-chip');
-        const birthRoles = ['Mum', 'Dad', 'Sister', 'Brother', 'Grandparent'];
-        const maritalRoles = ['Child'];
-        chips.forEach(chip => {
-            chip.addEventListener('click', function() {
-                chips.forEach(c => {
-                    c.classList.remove('active', 'btn-outline-primary');
-                    c.classList.add('btn-outline-secondary');
-                });
-                this.classList.remove('btn-outline-secondary');
-                this.classList.add('active', 'btn-outline-primary');
-                currentRole = this.getAttribute('data-role') || 'General';
+        // Kinship Picker Reactive Event Bridge (Alpine inviteKinshipPicker + fallback click support)
+        const birthRoles = ['Mum', 'Dad', 'Sister', 'Brother', 'Grandparent', 'Uncle', 'Aunt'];
+        const maritalRoles = ['Child', 'Partner'];
 
-                if (birthInviteData && birthInviteData.family_code) {
-                    if (birthRoles.includes(currentRole)) {
-                        setInviteLineageScope('maternal');
-                        return;
-                    } else if (maritalRoles.includes(currentRole)) {
-                        setInviteLineageScope('primary');
-                        return;
-                    }
-                }
+        function applyKinshipSelection(role, customLabel, recipientName, allowAutoLineage) {
+            currentRole = role || 'General';
+            currentCustomLabel = customLabel || '';
+            currentRecipientName = recipientName || '';
 
-                updateMessageUI();
-                if (selectedContacts.length > 0) {
-                    renderSelectedContacts();
+            if (allowAutoLineage && birthInviteData && birthInviteData.family_code) {
+                const customLower = currentCustomLabel.trim().toLowerCase();
+                const isBirthCustom = currentRole === 'Custom' && /^(great[-\s]?uncle|great[-\s]?aunt|auntie|aunty|grandad|grandma|grandpa|nana)/.test(customLower);
+                if (birthRoles.includes(currentRole) || isBirthCustom) {
+                    setInviteLineageScope('maternal');
+                    return;
+                } else if (maritalRoles.includes(currentRole)) {
+                    setInviteLineageScope('primary');
+                    return;
                 }
-            });
+            }
+
+            updateMessageUI();
+            if (selectedContacts.length > 0) {
+                renderSelectedContacts();
+            }
+        }
+
+        modalEl.addEventListener('kinship-selection-changed', function(e) {
+            const d = (e && e.detail) ? e.detail : {};
+            applyKinshipSelection(d.role, d.customLabel, d.recipientName, Boolean(d.allowAutoLineage));
         });
 
         // Native Contact Picker Trigger
@@ -1616,7 +2410,12 @@ html.dark-mode #inviteFamilyModal .btn-link.text-danger {
                     return;
                 }
 
+                const previousName = currentRecipientName;
+                if (name && !currentRecipientName) {
+                    currentRecipientName = name;
+                }
                 const msg = getPersonalisedMessage();
+                currentRecipientName = previousName;
                 window.location.href = buildSMSUri(phone, msg);
                 recordInviteStep();
             });

@@ -681,7 +681,7 @@ final class LinkPreviewService
                     || self::extractFacebookVideoId((string)($cached['canonical_url'] ?? '')) !== null;
                 $needsFacebookV2Upgrade = $isFacebookVideoCached
                     && $allowNetworkFetch
-                    && empty($extra['fb_v2']);
+                    && (empty($extra['fb_v2']) || empty($extra['video_url']));
 
                 $isFresh = !empty($cached['expires_at']) && strtotime((string)$cached['expires_at']) > time();
                 $hasRichContent = !empty($cached['image_url']) || !empty($cached['extra_data']) || !empty($cached['title']);
@@ -1934,8 +1934,12 @@ final class LinkPreviewService
             || self::isFacebookDomain($requestedUrl)
             || $fbVideoId !== null;
 
+        $rawDescForReel = (string)($data['description'] ?? '');
         $isReelUrl = str_contains(strtolower($url . ' ' . $requestedUrl), '/reel')
-            || str_contains(strtolower($url . ' ' . $requestedUrl), '/share/r/');
+            || str_contains(strtolower($url . ' ' . $requestedUrl), '/share/r/')
+            || str_contains(strtolower($url . ' ' . $requestedUrl), '/share/v/')
+            || str_contains(strtolower($title), 'reel by')
+            || str_contains(strtolower($rawDescForReel), 'reel');
         $aspectRatio = isset($data['aspect_ratio']) && is_string($data['aspect_ratio']) && trim($data['aspect_ratio']) !== ''
             ? trim($data['aspect_ratio'])
             : (($isInstagram || $isFacebook) && ($isReelUrl || $videoStreamUrl !== null) ? '9 / 16' : null);
@@ -2003,7 +2007,7 @@ final class LinkPreviewService
             if ($resolvedSiteName === 'Facebook') {
                 $description = $isFbStory
                     ? 'Facebook Stories require you to sign in on Facebook to watch.'
-                    : (str_contains($combinedUrlLower, '/reel/') || str_contains($combinedUrlLower, '/share/r/')
+                    : ($isReelUrl
                         ? 'Watch this reel on Facebook'
                         : ($isSocialVideo ? 'Watch this video on Facebook' : 'View this post on Facebook'));
             } elseif ($resolvedSiteName === 'Instagram') {
@@ -2879,6 +2883,17 @@ final class LinkPreviewService
     }
 
     /**
+     * Checks whether a URL is an opaque Facebook share redirect page (/share/v/, /share/r/, /share/p/).
+     */
+    public static function isFacebookShareUrl(?string $url): bool
+    {
+        if ($url === null || trim($url) === '') {
+            return false;
+        }
+        return preg_match('#^https?://(?:www\.|m\.|web\.)?(?:facebook\.com|fb\.com)/share/[a-z]+/[^\s"\'<>]+#i', trim($url)) === 1;
+    }
+
+    /**
      * Checks whether a URL is a Facebook video, reel, watch, or share-video link.
      */
     public static function isFacebookVideoOrShareUrl(string $url): bool
@@ -2887,7 +2902,7 @@ final class LinkPreviewService
         if ($trimmed === '' || !self::isFacebookDomain($trimmed)) {
             return false;
         }
-        return preg_match('#^https?://(?:www\.|m\.|web\.)?(?:facebook\.com/(?:[^/\s]+/videos/\d+|watch/?\?v=\d+|reel/\d+|share/[vr]/[^\s"\'<>]+|video\.php\?v=\d+)|fb\.watch/[^\s"\'<>]+|fb\.com/(?:watch|reel|share/[vr]|[^/\s]+/videos)/[^\s"\'<>]+)#i', $trimmed) === 1;
+        return preg_match('#^https?://(?:www\.|m\.|web\.)?(?:facebook\.com/(?:[^/\s]+/videos?/\d+|watch/?\?v=\d+|reels?/\d+|share/[vr]/[^\s"\'<>]+|video\.php\?v=\d+)|fb\.watch/[^\s"\'<>]+|fb\.com/(?:watch|reels?|share/[vr]|[^/\s]+/videos?)/[^\s"\'<>]+)#i', $trimmed) === 1;
     }
 
     /**
@@ -2902,7 +2917,7 @@ final class LinkPreviewService
         if (!self::isFacebookDomain($trimmed)) {
             return null;
         }
-        if (preg_match('~/(?:reel|videos)/(?:[^/\s?#]+/)?(\d{6,25})(?:[/?#]|$)~i', $trimmed, $m) === 1) {
+        if (preg_match('~/(?:reels?|videos?)/(?:[^/\s?#]+/)?(\d{6,25})(?:[/?#]|$)~i', $trimmed, $m) === 1) {
             return $m[1];
         }
         if (preg_match('~[?&]v=(\d{6,25})(?:&|$)~i', $trimmed, $m) === 1) {
@@ -2918,10 +2933,25 @@ final class LinkPreviewService
     public static function extractFacebookVideoIdFromHtml(string $html): ?string
     {
         if (preg_match('~oembed_video\?url=([^"&\s]+)~i', $html, $m) === 1) {
-            return self::extractFacebookVideoId(rawurldecode($m[1]));
+            $rawDecoded = rawurldecode(str_replace('&amp;', '&', $m[1]));
+            $extracted = self::extractFacebookVideoId($rawDecoded);
+            if ($extracted !== null) {
+                return $extracted;
+            }
         }
-        if (preg_match('~og:url"\s+content="(https://www\.facebook\.com/reel/\d{6,25}/?)"~i', $html, $m) === 1) {
-            return self::extractFacebookVideoId($m[1]);
+        if (preg_match('~<(?:meta|link)[^>]+(?:property|name)=["\']og:url["\'][^>]+content=["\']([^"\']+)["\']~i', $html, $m) === 1
+            || preg_match('~<(?:meta|link)[^>]+content=["\']([^"\']+)["\'][^>]+(?:property|name)=["\']og:url["\']~i', $html, $m) === 1
+        ) {
+            $extracted = self::extractFacebookVideoId($m[1]);
+            if ($extracted !== null) {
+                return $extracted;
+            }
+        }
+        if (preg_match('~fb://(?:video|reel)/(\d{6,25})~i', $html, $m) === 1) {
+            return $m[1];
+        }
+        if (preg_match('~/(?:reels?|videos?)/(\d{6,25})~i', $html, $m) === 1) {
+            return $m[1];
         }
         return null;
     }
@@ -3065,7 +3095,6 @@ final class LinkPreviewService
             ? $ogData['fb_video_id']
             : (self::extractFacebookVideoId($canonical) ?? self::extractFacebookVideoId($url));
 
-        $ogData['fb_v2'] = true;
         $ogData['site_name'] = 'Facebook';
         if (empty($ogData['domain'])) {
             $ogData['domain'] = 'facebook.com';
@@ -3075,25 +3104,31 @@ final class LinkPreviewService
         }
 
         $targetForPlugin = $fbVideoId !== null
-            ? (str_contains(strtolower($canonical . ' ' . $url), '/reel') || str_contains(strtolower($url), '/share/r/')
-                ? 'https://www.facebook.com/reel/' . $fbVideoId . '/'
-                : $canonical)
-            : $canonical;
+            ? 'https://www.facebook.com/reel/' . $fbVideoId . '/'
+            : (!self::isFacebookShareUrl($canonical) ? $canonical : null);
 
-        $pluginMeta = (($_ENV['APP_ENV'] ?? '') === 'testing')
+        $pluginMeta = (($targetForPlugin === null) || (($_ENV['APP_ENV'] ?? '') === 'testing'))
             ? null
             : self::fetchFacebookPluginVideoMetadata($targetForPlugin);
 
         if (is_array($pluginMeta)) {
             if (!empty($pluginMeta['video_url'])) {
                 $ogData['video_url'] = $pluginMeta['video_url'];
+                $ogData['fb_v2'] = true;
             }
             if (!empty($pluginMeta['aspect_ratio'])) {
                 $ogData['aspect_ratio'] = $pluginMeta['aspect_ratio'];
             }
         }
 
-        if (empty($ogData['aspect_ratio']) && (str_contains(strtolower($canonical . ' ' . $url), '/reel') || str_contains(strtolower($url), '/share/r/') || !empty($ogData['video_url']))) {
+        $isReel = str_contains(strtolower($canonical . ' ' . $url), '/reel')
+            || str_contains(strtolower($canonical . ' ' . $url), '/share/r/')
+            || str_contains(strtolower($canonical . ' ' . $url), '/share/v/')
+            || str_contains(strtolower((string)($ogData['title'] ?? '')), 'reel by')
+            || str_contains(strtolower((string)($ogData['description'] ?? '')), 'reel')
+            || !empty($ogData['video_url']);
+
+        if (empty($ogData['aspect_ratio']) && $isReel) {
             $ogData['aspect_ratio'] = '9 / 16';
         }
 
@@ -3124,8 +3159,9 @@ final class LinkPreviewService
                 );
                 $stmt->execute([$likePattern, $likePattern]);
                 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                    if (!empty($row['canonical_url']) && is_string($row['canonical_url']) && self::isFacebookDomain($row['canonical_url'])) {
-                        $canonicalHint = trim($row['canonical_url']);
+                    $candCanonical = trim((string)($row['canonical_url'] ?? ''));
+                    if ($candCanonical !== '' && self::isFacebookDomain($candCanonical) && !self::isFacebookShareUrl($candCanonical)) {
+                        $canonicalHint = $candCanonical;
                     }
                     $extra = json_decode((string)($row['extra_data'] ?? ''), true);
                     $cand = is_array($extra) && isset($extra['video_url']) && is_string($extra['video_url'])

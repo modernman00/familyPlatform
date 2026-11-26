@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'preact/hooks';
+import { useState, useEffect, useMemo, useRef } from 'preact/hooks';
 import {
     FAMILY_GIFS,
     GIF_CATEGORIES,
@@ -52,8 +52,12 @@ export function EmojiGifPicker({
     const [gifCategory, setGifCategory] = useState('all');
     const [gifSearch, setGifSearch] = useState('');
 
+    const prevInitialTabRef = useRef(initialTab);
     useEffect(() => {
-        setActiveTab(initialTab);
+        if (prevInitialTabRef.current !== initialTab) {
+            prevInitialTabRef.current = initialTab;
+            setActiveTab(initialTab);
+        }
     }, [initialTab]);
 
     // Async-load full emojibase-data only when Standard tab is active

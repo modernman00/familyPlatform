@@ -136,8 +136,33 @@ class VisualSupremacyRuntime {
         // Auto-observe post-media-stage containers
         this.refreshObservedCards();
 
-        // Re-check for dynamically inserted posts (e.g. infinite scroll, new post submission)
-        const observer = new MutationObserver(() => this.refreshObservedCards());
+        // Re-check for dynamically inserted posts only when an element containing .post-media-stage is added
+        let refreshScheduled = false;
+        const observer = new MutationObserver((mutations) => {
+            if (refreshScheduled) return;
+            let hasCandidate = false;
+            for (let i = 0; i < mutations.length && !hasCandidate; i++) {
+                const added = mutations[i].addedNodes;
+                for (let j = 0; j < added.length; j++) {
+                    const node = added[j];
+                    if (node && node.nodeType === 1) {
+                        if (
+                            (node.classList && node.classList.contains('post-media-stage')) ||
+                            (typeof node.querySelector === 'function' && node.querySelector('.post-media-stage:not([data-vse-observed])'))
+                        ) {
+                            hasCandidate = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (!hasCandidate) return;
+            refreshScheduled = true;
+            requestAnimationFrame(() => {
+                refreshScheduled = false;
+                this.refreshObservedCards();
+            });
+        });
         observer.observe(document.body, { childList: true, subtree: true });
     }
 
@@ -196,7 +221,7 @@ class VisualSupremacyRuntime {
             this.orientationHandler = (e) => this.handleDeviceOrientation(e);
             window.addEventListener('deviceorientation', this.orientationHandler, { passive: true });
             this.isSensorActive = true;
-            this.scheduleRenderLoop();
+            // Do not start a perpetual 60fps rAF loop until a real gyroscope reading arrives
         }
     }
 
@@ -218,6 +243,7 @@ class VisualSupremacyRuntime {
 
     handleDeviceOrientation(event) {
         if (this.isInputFocused || this.reducedMotion || this.isLowPowerMode) return;
+        if (event.gamma === null && event.beta === null) return;
 
         // Gamma: Left to Right (-90 to 90), Beta: Front to Back (-180 to 180)
         let g = event.gamma || 0;
@@ -230,6 +256,10 @@ class VisualSupremacyRuntime {
         const clamp = (val, max) => Math.max(-max, Math.min(max, val));
         this.targetOrientation.gamma = clamp(g, 15);
         this.targetOrientation.beta = clamp(b, 15);
+
+        if (this.activeCards.size > 0 && !this.rafId) {
+            this.scheduleRenderLoop();
+        }
     }
 
     setupDesktopPointerParallax() {
@@ -297,6 +327,13 @@ class VisualSupremacyRuntime {
                     card.style.setProperty('--vse-glint-pos', `${glintX}% ${glintY}%`);
                     card.classList.add('has-glint');
                 });
+            }
+
+            const deltaG = Math.abs(this.targetOrientation.gamma - this.orientation.gamma);
+            const deltaB = Math.abs(this.targetOrientation.beta - this.orientation.beta);
+            if (this.activeCards.size === 0 || (deltaG < 0.02 && deltaB < 0.02)) {
+                this.rafId = null;
+                return;
             }
 
             this.rafId = requestAnimationFrame(render);

@@ -1,11 +1,11 @@
 {
     "version": "v1.5.7",
-    "title": "Author-controlled post sharing with Web Push notifications, kinship mentions, and feed updates",
+    "title": "Fix(feed): prevent double-mount wiping SharePortalModal state on dynamic chunk import",
     "notes": [
+        "Fix(feed): prevent double-mount wiping SharePortalModal state on dynamic chunk import",
         "Author-controlled post sharing with Web Push notifications, kinship mentions, and feed updates",
-        "Feat(feed): add video subtitles service, scenic motion layer, and feed updates",
-        "Feat(feed): deploy keyset pagination, profile updates, and preflight fixes"
+        "Feat(feed): add video subtitles service, scenic motion layer, and feed updates"
     ],
     "released_at": "2026-11-26",
-    "commit": "a3cd994d"
+    "commit": "01687383"
 }

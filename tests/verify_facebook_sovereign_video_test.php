@@ -43,16 +43,29 @@ echo "=================================================================\n\n";
 
 runFbTest('Recognises Facebook domains and extracts numeric Reel/Video IDs', function (): void {
     assert(LinkPreviewService::isFacebookDomain('https://www.facebook.com/share/r/1AGvntUbdm/') === true);
+    assert(LinkPreviewService::isFacebookDomain('https://www.facebook.com/share/v/1A3sYHt8Gb/') === true);
     assert(LinkPreviewService::isFacebookDomain('https://fb.watch/abc123/') === true);
     assert(LinkPreviewService::isFacebookDomain('https://evilfacebook.com/reel/123') === false);
 
     assert(LinkPreviewService::isFacebookVideoOrShareUrl('https://www.facebook.com/share/r/1AGvntUbdm/') === true);
+    assert(LinkPreviewService::isFacebookVideoOrShareUrl('https://www.facebook.com/share/v/1A3sYHt8Gb/') === true);
     assert(LinkPreviewService::isFacebookVideoOrShareUrl('https://www.facebook.com/reel/1176514021862056/') === true);
+    assert(LinkPreviewService::isFacebookVideoOrShareUrl('https://www.facebook.com/reels/1176514021862056/') === true);
     assert(LinkPreviewService::isFacebookVideoOrShareUrl('https://www.facebook.com/zuck') === false);
 
     assert(LinkPreviewService::extractFacebookVideoId('https://www.facebook.com/reel/1176514021862056/') === '1176514021862056');
+    assert(LinkPreviewService::extractFacebookVideoId('https://www.facebook.com/reels/1176514021862056/') === '1176514021862056');
     assert(LinkPreviewService::extractFacebookVideoId('https://www.facebook.com/watch/?v=9876543210123') === '9876543210123');
     assert(LinkPreviewService::extractFacebookVideoId('https://www.facebook.com/share/r/1AGvntUbdm/') === null);
+    assert(LinkPreviewService::extractFacebookVideoId('https://www.facebook.com/share/v/1A3sYHt8Gb/') === null);
+
+    // HTML alternate oembed extraction with HTML entities and complex video path
+    $htmlOembed = '<link rel="alternate" href="https://graph.facebook.com/v27.0/oembed_video?url=https%3A%2F%2Fwww.facebook.com%2Flewishowes%2Fvideos%2Fwhy-70-of-divorces-filings-are-by-women-scott-galloway%2F1132680509492335%2F&amp;format=json" />';
+    assert(LinkPreviewService::extractFacebookVideoIdFromHtml($htmlOembed) === '1132680509492335');
+
+    // HTML deep link and og:url with query params
+    $htmlDeepLink = '<meta property="al:android:url" content="fb://video/1132680509492335" />';
+    assert(LinkPreviewService::extractFacebookVideoIdFromHtml($htmlDeepLink) === '1132680509492335');
 });
 
 runFbTest('Parses Facebook plugins/video.php HTML for hd_src/sd_src fbcdn.net streams', function (): void {

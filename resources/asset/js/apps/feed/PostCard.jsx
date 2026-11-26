@@ -9,7 +9,12 @@ import { RichTextTokens } from './RichTextTokens';
 import { formatPostTagForViewer } from './kinshipMentions';
 import CosmicOrrery from './CosmicOrrery';
 import ScenicMotionLayer, { LIVING_SCENIC_SLUGS } from './ScenicMotionLayer';
-import { WeeklyFunFactsPlayer } from './WeeklyFunFactsPlayer';
+import { createLazyModal } from '../shared/lazyIslandModal';
+
+const LazyWeeklyFunFactsPlayer = createLazyModal(
+    () => import(/* webpackChunkName: "feed-weekly-reel" */ './WeeklyFunFactsPlayer'),
+    'WeeklyFunFactsPlayer'
+);
 import {
     TEXT_STAGE_CATALOG,
     formatRelativeTime,
@@ -32,6 +37,7 @@ const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 export const PostCard = memo(function PostCard({
     post,
     bootstrap,
+    isFirstPost = false,
     isHighlighted = false,
     onReactPost,
     onVotePoll,
@@ -68,6 +74,8 @@ export const PostCard = memo(function PostCard({
     const [sliderPos, setSliderPos] = useState(50);
     const [brokenPreviewImgUrl, setBrokenPreviewImgUrl] = useState(null);
     const [brokenPhotoUrls, setBrokenPhotoUrls] = useState({});
+    const [singleImgLoaded, setSingleImgLoaded] = useState(false);
+    const [carouselMediaLoaded, setCarouselMediaLoaded] = useState(false);
     const [carouselIdx, setCarouselIdx] = useState(0);
     const [carouselAspect, setCarouselAspect] = useState('4 / 3');
     const [slideAspects, setSlideAspects] = useState({});
@@ -980,7 +988,7 @@ export const PostCard = memo(function PostCard({
 
                         {ownPost && (
                             <div className="fp-stage-converter mt-2" data-testid="infeed-stage-converter">
-                                <div className="fp-stage-converter__row">
+                                <div className="fp-stage-converter__row has-scroll-affordance" data-scroll-affordance="true">
                                     <button
                                         type="button"
                                         className="fp-stage-converter__trigger"
@@ -1201,9 +1209,9 @@ export const PostCard = memo(function PostCard({
                 </div>
             )}
 
-            {/* Approved Weekly Fun Facts 60fps Motion Presentation */}
+            {/* Approved Weekly Fun Facts 60fps Motion Presentation (lazy-loaded chunk) */}
             {hasWeeklyReel && (
-                <WeeklyFunFactsPlayer reel={post.weekly_reel} />
+                <LazyWeeklyFunFactsPlayer isOpen={hasWeeklyReel} reel={post.weekly_reel} />
             )}
 
             {/* Single Photo (Full-Width Natural Aspect — zero sidebars, uncropped) */}
@@ -1226,7 +1234,7 @@ export const PostCard = memo(function PostCard({
                                 <img src={singleImgUrl} alt="" loading="lazy" referrerPolicy="no-referrer" />
                             </div>
                             <div
-                                className="position-relative overflow-hidden post-media-stage vse-skeleton-surface"
+                                className={`position-relative overflow-hidden post-media-stage vse-skeleton-surface ${singleImgLoaded ? 'is-media-loaded' : ''}`}
                                 style={{
                                     borderRadius: '12px',
                                     width: '100%',
@@ -1253,6 +1261,7 @@ export const PostCard = memo(function PostCard({
                                         height="600"
                                         className="post-media-first-img"
                                         referrerPolicy="no-referrer"
+                                        onLoad={() => setSingleImgLoaded(true)}
                                         onError={() => setBrokenPhotoUrls((prev) => ({ ...prev, [images[0]]: true, [singleImgUrl]: true }))}
                                         style={{
                                             borderRadius: '12px',
@@ -1262,7 +1271,9 @@ export const PostCard = memo(function PostCard({
                                             objectFit: 'contain',
                                             display: 'block',
                                         }}
-                                        loading="lazy"
+                                        loading={isFirstPost ? 'eager' : 'lazy'}
+                                        fetchPriority={isFirstPost ? 'high' : 'auto'}
+                                        decoding={isFirstPost ? 'sync' : 'async'}
                                     />
                                 </button>
                                 <button
@@ -1310,23 +1321,35 @@ export const PostCard = memo(function PostCard({
 
                 const handleCarouselImageLoad = (el, idx) => {
                     if (!el) return;
-                    if (typeof window !== 'undefined' && window.AtgMediaSupremacy && typeof window.AtgMediaSupremacy.analyzeImage === 'function') {
-                        const info = window.AtgMediaSupremacy.analyzeImage(el);
-                        if (info?.aspectRatio) {
-                            setSlideAspects((prev) => ({ ...prev, [idx]: info.aspectRatio }));
-                            if (idx === 0 || idx === safeIdx) setCarouselAspect(info.aspectRatio);
-                        }
-                        if (info?.focalPosition) {
-                            setSlideFocals((prev) => ({ ...prev, [idx]: info.focalPosition }));
-                        }
-                    } else if (el.naturalWidth && el.naturalHeight) {
+                    if (idx === 0 || idx === safeIdx) {
+                        setCarouselMediaLoaded(true);
+                    }
+                    // Fast geometric aspect estimate without GPU->CPU pixel readback during active scroll
+                    if (el.naturalWidth && el.naturalHeight) {
                         const r = el.naturalWidth / el.naturalHeight;
                         const clamped = Math.min(1.91, Math.max(0.80, r));
                         const aspectStr = `${clamped.toFixed(4)} / 1`;
-                        const focalStr = r < 0.92 ? '50% 28%' : '50% 38%';
-                        setSlideAspects((prev) => ({ ...prev, [idx]: aspectStr }));
-                        setSlideFocals((prev) => ({ ...prev, [idx]: focalStr }));
-                        if (idx === 0 || idx === safeIdx) setCarouselAspect(aspectStr);
+                        const quickFocal = r < 0.92 ? '50% 28%' : '50% 38%';
+                        setSlideAspects((prev) => (prev[idx] === aspectStr ? prev : { ...prev, [idx]: aspectStr }));
+                        setSlideFocals((prev) => (prev[idx] ? prev : { ...prev, [idx]: quickFocal }));
+                        if (idx === 0 || idx === safeIdx) {
+                            setCarouselAspect((prev) => (prev === aspectStr ? prev : aspectStr));
+                        }
+                    }
+                    // Defer saliency canvas pixel readback (getImageData) to browser idle window so scrolling stays 60fps
+                    if (typeof window !== 'undefined' && window.AtgMediaSupremacy && typeof window.AtgMediaSupremacy.analyzeImage === 'function') {
+                        const runIdleSaliency = () => {
+                            if (!el.isConnected) return;
+                            const info = window.AtgMediaSupremacy.analyzeImage(el);
+                            if (info?.focalPosition) {
+                                setSlideFocals((prev) => (prev[idx] === info.focalPosition ? prev : { ...prev, [idx]: info.focalPosition }));
+                            }
+                        };
+                        if (typeof window.requestIdleCallback === 'function') {
+                            window.requestIdleCallback(runIdleSaliency, { timeout: 600 });
+                        } else {
+                            setTimeout(runIdleSaliency, 90);
+                        }
                     }
                 };
 
@@ -1372,7 +1395,7 @@ export const PostCard = memo(function PostCard({
                             )}
 
                             <div
-                                className="position-relative overflow-hidden post-media-stage vse-skeleton-surface"
+                                className={`position-relative overflow-hidden post-media-stage vse-skeleton-surface ${carouselMediaLoaded ? 'is-media-loaded' : ''}`}
                                 style={{
                                     borderRadius: '12px',
                                     aspectRatio: activeAspect,
@@ -1380,7 +1403,6 @@ export const PostCard = memo(function PostCard({
                                     maxHeight: '640px',
                                     width: '100%',
                                     background: '#0b0f19',
-                                    transition: 'aspect-ratio 0.38s cubic-bezier(0.16, 1, 0.3, 1)',
                                 }}
                             >
                                 {/* Fanciful Multi-Photo 3-Layer Luxury Stacked Badge */}
@@ -1500,8 +1522,9 @@ export const PostCard = memo(function PostCard({
                                                             referrerPolicy="no-referrer"
                                                             onLoad={(e) => handleCarouselImageLoad(e.currentTarget, idx)}
                                                             onError={() => setBrokenPhotoUrls((prev) => ({ ...prev, [src]: true, [resolvedSrc]: true }))}
-                                                            loading="lazy"
-                                                            decoding="async"
+                                                            loading={isFirstPost && idx === 0 ? 'eager' : 'lazy'}
+                                                            fetchPriority={isFirstPost && idx === 0 ? 'high' : 'auto'}
+                                                            decoding={isFirstPost && idx === 0 ? 'sync' : 'async'}
                                                         />
                                                     )}
                                                 </button>

@@ -112,7 +112,8 @@ class FeedRepository
         int $offset = 0,
         string $filter = '',
         ?string $cursor = null,
-        ?string $personId = null
+        ?string $personId = null,
+        bool $allowNetworkPreviewFetch = false
     ): array {
         $safeLimit = max(1, min(50, $limit));
         $decodedCursor = self::decodeCursor($cursor);
@@ -132,7 +133,7 @@ class FeedRepository
             ];
         }
 
-        $this->hydrateEngagement($rows, $userId);
+        $this->hydrateEngagement($rows, $userId, $allowNetworkPreviewFetch);
         $posts = array_map(
             fn(array $row) => PostDto::fromDatabaseRow($row, $userId)->toArray(),
             $rows
@@ -554,7 +555,7 @@ class FeedRepository
      * @param array<array<string, mixed>> &$rows
      * @param string $userId
      */
-    private function hydrateEngagement(array &$rows, string $userId): void
+    private function hydrateEngagement(array &$rows, string $userId, bool $allowNetworkPreviewFetch = true): void
     {
         if (empty($rows)) {
             return;
@@ -753,17 +754,20 @@ class FeedRepository
         }
 
         // Batch prefetch any uncached external URLs across the feed page in parallel
-        $batchExternalUrls = [];
-        foreach ($rows as $rItem) {
-            $rMsg = (string)($rItem['postMessage'] ?? ($rItem['content'] ?? ''));
-            if (\App\services\LinkPreviewService::containsPotentialUrl($rMsg)) {
-                foreach (\App\services\LinkPreviewService::extractAllPreviewableUrls($rMsg, 6) as $extU) {
-                    $batchExternalUrls[] = \App\services\LinkPreviewService::recoverTruncatedPartyPlatformUrl($extU, $rMsg);
+        // (Skipped on fast paginated feed slices where FeedShell hydrates cold URLs asynchronously via /api/link-preview)
+        if ($allowNetworkPreviewFetch) {
+            $batchExternalUrls = [];
+            foreach ($rows as $rItem) {
+                $rMsg = (string)($rItem['postMessage'] ?? ($rItem['content'] ?? ''));
+                if (\App\services\LinkPreviewService::containsPotentialUrl($rMsg)) {
+                    foreach (\App\services\LinkPreviewService::extractAllPreviewableUrls($rMsg, 6) as $extU) {
+                        $batchExternalUrls[] = \App\services\LinkPreviewService::recoverTruncatedPartyPlatformUrl($extU, $rMsg);
+                    }
                 }
             }
-        }
-        if (!empty($batchExternalUrls)) {
-            \App\services\LinkPreviewService::prefetchUncachedUrlsParallel($batchExternalUrls);
+            if (!empty($batchExternalUrls)) {
+                \App\services\LinkPreviewService::prefetchUncachedUrlsParallel($batchExternalUrls);
+            }
         }
 
         foreach ($rows as &$post) {
@@ -794,10 +798,10 @@ class FeedRepository
                 }
             }
 
-            // Hydrate OpenGraph link preview (from fast cache or auto-recovery)
+            // Hydrate OpenGraph link preview (from fast cache; live network unfurl only when $allowNetworkPreviewFetch is true)
             $msg = (string)($post['postMessage'] ?? ($post['content'] ?? ''));
             $hasExternalUrl = \App\services\LinkPreviewService::containsPotentialUrl($msg);
-            $post['link_preview'] = $hasExternalUrl ? \App\services\LinkPreviewService::getPreviewForPostText($msg) : null;
+            $post['link_preview'] = $hasExternalUrl ? \App\services\LinkPreviewService::getPreviewForPostText($msg, $allowNetworkPreviewFetch) : null;
 
             // Promote linked photos (Google Photos, iCloud, direct image links) to native post images (Multi-Image Support)
             $hasLocalImg = false;
@@ -813,7 +817,7 @@ class FeedRepository
                             $existingExternalVideos[] = $imgVal;
                         } elseif (\App\classes\VideoParser::isNonImageShareUrl($imgVal)) {
                             if (empty($post['link_preview'])) {
-                                $post['link_preview'] = \App\services\LinkPreviewService::fetchPreview($imgVal);
+                                $post['link_preview'] = \App\services\LinkPreviewService::fetchPreview($imgVal, $allowNetworkPreviewFetch);
                             }
                         } else {
                             $existingExternalImages[] = $imgVal;
@@ -824,7 +828,7 @@ class FeedRepository
 
             $alreadyHasExtractedMedia = !empty($existingExternalImages) || !empty($existingExternalVideos);
             if (!$hasLocalImg && !$alreadyHasExtractedMedia && $hasExternalUrl) {
-                $extractedAssets = \App\services\LinkPreviewService::extractPhotoAssetsFromText($msg, 6);
+                $extractedAssets = \App\services\LinkPreviewService::extractPhotoAssetsFromText($msg, 6, $allowNetworkPreviewFetch);
                 $finalImages = !empty($extractedAssets['images']) ? $extractedAssets['images'] : $existingExternalImages;
                 $finalVideos = !empty($extractedAssets['videos']) ? $extractedAssets['videos'] : $existingExternalVideos;
 

@@ -158,11 +158,12 @@ export function attachWebGL4kCas(video, canvas, opts = {}) {
         const vh = video.videoHeight || 0;
         if (vw <= 0 || vh <= 0) return;
 
-        // Orientation-aware 4K UHD upscaling (3840x2160 landscape, 2160x3840 portrait)
+        // Orientation-aware Full-HD GPU CAS sharpening (1920x1080 landscape, 1080x1920 portrait)
+        // Keeps GPU texture bandwidth 4x leaner than 3840x2160 so feed scrolling stays locked at 60fps
         const shortEdge = Math.min(vw, vh);
-        const scaleUp = shortEdge < 1080 ? 2.0 : (shortEdge < 1800 ? 1.5 : 1.0);
-        const maxW = vw >= vh ? 3840 : 2160;
-        const maxH = vw >= vh ? 2160 : 3840;
+        const scaleUp = shortEdge < 720 ? 1.5 : 1.0;
+        const maxW = vw >= vh ? 1920 : 1080;
+        const maxH = vw >= vh ? 1080 : 1920;
         const fitFactor = Math.min(1.0, maxW / (vw * scaleUp), maxH / (vh * scaleUp));
         const targetW = Math.max(2, Math.round(vw * scaleUp * fitFactor));
         const targetH = Math.max(2, Math.round(vh * scaleUp * fitFactor));

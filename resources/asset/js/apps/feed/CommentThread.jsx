@@ -4,8 +4,13 @@ import { apiFetch } from '../shared/apiClient';
 import { getCsrfToken, notifyToast } from '../shared/bootstrap';
 import { HEIRLOOM_REACTIONS, getHeirloomGlassSvg } from '../../components/profilePage/heirloomGlassReactions';
 import { isAllowedGifUrl } from '../../components/profilePage/gifCatalog';
-import { EmojiGifPicker } from './EmojiGifPicker';
+import { createLazyModal } from '../shared/lazyIslandModal';
 import { RichTextTokens } from './RichTextTokens';
+
+const LazyEmojiGifPicker = createLazyModal(
+    () => import(/* webpackChunkName: "feed-emoji-picker" */ './EmojiGifPicker'),
+    'EmojiGifPicker'
+);
 import {
     canEditComment,
     canModerateComment,
@@ -801,7 +806,8 @@ export const CommentThread = memo(function CommentThread({
                             </div>
 
                             {replyPickerTab && (
-                                <EmojiGifPicker
+                                <LazyEmojiGifPicker
+                                    isOpen={Boolean(replyPickerTab)}
                                     initialTab={replyPickerTab}
                                     onSelectEmoji={(em) => {
                                         setReplyDraft((prev) => `${prev}${em}`);
@@ -1003,7 +1009,8 @@ export const CommentThread = memo(function CommentThread({
                     )}
 
                     {pickerTab && (
-                        <EmojiGifPicker
+                        <LazyEmojiGifPicker
+                            isOpen={Boolean(pickerTab)}
                             initialTab={pickerTab}
                             onSelectEmoji={(em) => {
                                 setDraft((prev) => `${prev}${em}`);

@@ -127,8 +127,20 @@ final class InviteController
             $lastName  = trim((string)($input['last_name'] ?? ''));
             $relativeName = trim($firstName . ' ' . $lastName);
 
-            // Filter out accidental kinship placeholders as surnames (e.g. 'Father', 'Mother')
-            $kinshipWords = ['father', 'mother', 'son', 'daughter', 'brother', 'sister', 'uncle', 'aunt', 'in-law', 'inlaw', 'relative', 'me', 'parent', 'child', 'spouse', 'partner'];
+            // Sanitise optional kinship / custom relationship label (e.g. Uncle, Aunt, Godmother)
+            $rawRelationship = trim((string)($input['custom_relationship'] ?? ($input['relationship'] ?? '')));
+            $cleanRelationship = preg_replace('/[\x00-\x1F\x7F<>]/u', '', $rawRelationship) ?? '';
+            $cleanRelationship = preg_replace('/\s+/u', ' ', trim($cleanRelationship)) ?? '';
+            $relationship = mb_substr($cleanRelationship, 0, 50);
+            $hasExplicitCustomRelationship = isset($input['custom_relationship']) && trim((string)$input['custom_relationship']) !== '';
+
+            // Filter out accidental kinship placeholders as surnames (e.g. 'Father', 'Mother', 'Uncle', 'Aunt')
+            $kinshipWords = [
+                'father', 'mother', 'son', 'daughter', 'brother', 'sister',
+                'uncle', 'aunt', 'auntie', 'aunty', 'grandparent', 'grandpa', 'grandma', 'grandad',
+                'cousin', 'niece', 'nephew', 'godparent', 'godfather', 'godmother',
+                'stepfather', 'stepmother', 'in-law', 'inlaw', 'relative', 'me', 'parent', 'child', 'spouse', 'partner',
+            ];
             if (in_array(strtolower($familySurname), $kinshipWords, true)) {
                 $familySurname = '';
             }
@@ -144,7 +156,18 @@ final class InviteController
 
             // Beautiful WhatsApp View Format
             $codeLabel = $isBirthLineage ? 'Birth Family Code' : 'Family Code';
-            if ($relativeName !== '') {
+            if ($hasExplicitCustomRelationship && $relationship !== '') {
+                $salutationTarget = $relativeName !== ''
+                    ? (stripos($relativeName, $relationship) === 0 ? $relativeName : "{$relationship} {$relativeName}")
+                    : $relationship;
+                $whatsappMessage = "🌳 *Family Heritage Invitation for {$salutationTarget}* 🌳\n\n" .
+                    "Dear {$salutationTarget},\n\n" .
+                    "You are invited to connect with the *{$treeLabel}* on FamilyPlatform.\n\n" .
+                    "🔑 *{$codeLabel}:* #{$familyCode}\n\n" .
+                    "✨ Claim your branch on our live family tree, preserve our heritage, share memories, and connect across generations.\n\n" .
+                    "👉 Tap here to join our family sanctuary:\n{$inviteUrl}\n\n" .
+                    "Welcome to our living family legacy! 🏰";
+            } elseif ($relativeName !== '') {
                 $whatsappMessage = "🌳 *Family Heritage Invitation* 🌳\n\n" .
                     "Hello {$relativeName},\n\n" .
                     "You are invited to connect with the *{$treeLabel}* on FamilyPlatform.\n\n" .
@@ -213,6 +236,7 @@ final class InviteController
                 'token'              => $token,
                 'family_code'        => $familyCode,
                 'lineage_scope'      => $isBirthLineage ? 'maternal' : 'primary',
+                'relationship'       => $relationship !== '' ? $relationship : null,
                 'email_sent'         => $emailSent,
                 'email_recipient'    => $meta['email'] ?? null,
                 'tree_label'         => $treeLabel,

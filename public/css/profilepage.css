@@ -38,16 +38,25 @@
 
 body {
   background-color: var(--bg-color);
-  background-image: 
-    radial-gradient(at 0% 0%, var(--bg-radial-1) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, var(--bg-radial-2) 0px, transparent 50%),
-    radial-gradient(at 50% 100%, var(--bg-radial-3) 0px, transparent 50%);
-  background-attachment: fixed;
   color: var(--text-color);
   font-family: var(--font-sans, -apple-system, system-ui, sans-serif);
   transition: background-color 0.3s, color 0.3s;
   min-height: 100vh;
   padding: 0;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: 
+    radial-gradient(at 0% 0%, var(--bg-radial-1) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, var(--bg-radial-2) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, var(--bg-radial-3) 0px, transparent 50%);
+  transform: translateZ(0);
 }
 
 
@@ -67,11 +76,37 @@ body {
   height: fit-content;
   max-height: calc(100vh - 100px);
   overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .feed-column {
   flex: 1;
   min-width: 0;
+}
+
+/* Off-screen feed virtualisation: skip layout & paint work for below-fold feed wrappers */
+.feed-posts-container > [data-feed-item-wrapper]:nth-of-type(n+3) {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 500px;
+}
+
+.feed-posts-container > [data-feed-item-wrapper]:focus-within,
+.feed-posts-container > [data-feed-item-wrapper]:has(.dropdown-menu.show) {
+  content-visibility: visible;
+}
+
+/* Native vertical touch-scroll priority so horizontal carousels never delay vertical thumb flicks */
+.feed-post-card {
+  touch-action: pan-y;
+}
+
+.post-carousel-track,
+.kinship-carousel-track,
+.kinship-suggestions-scroll,
+.reels-tray-scroll,
+.fp-stage-converter__row {
+  touch-action: pan-x pan-y;
 }
 
 .sidebar-column {
@@ -81,6 +116,8 @@ body {
   height: fit-content;
   max-height: calc(100vh - 100px);
   overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .card {
@@ -508,6 +545,22 @@ img.rounded-circle {
     position: static;
     max-height: none;
     overflow: visible;
+    content-visibility: auto;
+    contain-intrinsic-size: auto 920px;
+  }
+
+  /* Mobile GPU Tile Diet: suppress invisible side-aura duplicate rasterisation & offscreen blur animations on phones */
+  .feed-media-aura-backdrop {
+    display: none !important;
+  }
+
+  .fp-text-stage__orb--a,
+  .fp-text-stage__orb--b,
+  .fp-poll-arena__orb--a,
+  .fp-poll-arena__orb--b {
+    animation: none !important;
+    will-change: auto !important;
+    filter: blur(16px);
   }
 }
 
@@ -3101,10 +3154,6 @@ video.feed-post-video::-webkit-media-controls-play-button,
   translate: 0px;
   rotate: 0deg;
   scale: 1;
-  transform-style: preserve-3d;
-  perspective: 1100px;
-  backdrop-filter: blur(22px) saturate(165%);
-  -webkit-backdrop-filter: blur(22px) saturate(165%);
   border: 1.5px solid rgba(255, 255, 255, 0.28);
   box-shadow:
     0 20px 42px -12px rgba(15, 23, 42, 0.42),
@@ -4552,7 +4601,10 @@ video.feed-post-video::-webkit-media-controls-play-button,
   overflow-x: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
-  padding: 4px 2px;
+  touch-action: pan-x pan-y;
+  padding: 4px 28px 4px 2px;
+  mask-image: linear-gradient(to right, #000000 calc(100% - 28px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, #000000 calc(100% - 28px), transparent 100%);
 }
 
 .fp-stage-converter__row::-webkit-scrollbar {
@@ -4708,10 +4760,6 @@ video.feed-post-video::-webkit-media-controls-play-button,
   translate: 0px;
   rotate: 0deg;
   scale: 1;
-  transform-style: preserve-3d;
-  perspective: 1100px;
-  backdrop-filter: blur(22px) saturate(165%);
-  -webkit-backdrop-filter: blur(22px) saturate(165%);
   border: 1.5px solid rgba(252, 231, 154, 0.48);
   box-shadow:
     0 22px 46px -12px rgba(15, 23, 42, 0.45),
@@ -5184,7 +5232,7 @@ body.dark-theme .post-composer__subtitle,
   border-radius: 14px;
   background-color: #f8fafc;
   border: 1.5px solid #cbd5e1;
-  cursor: text;
+  cursor: pointer;
   transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
 }
 

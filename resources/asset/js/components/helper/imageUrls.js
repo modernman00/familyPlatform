@@ -39,8 +39,10 @@ export function getPostImageUrl(img) {
     // Check safe external or blob URLs
     if (clean.startsWith('http://') || clean.startsWith('https://') || clean.startsWith('blob:')) {
         // Downsize oversized Google Photos / Googleusercontent CDN URLs (=s3840, =s2048, =s0) for feed cards
+        // (Use compact 640px width on narrow mobile viewports for 2x faster 4G/5G decode and transfer)
         if (/^https:\/\/(?:lh[3-6]\.googleusercontent\.com|[^/]+\.ggpht\.com)\//i.test(clean)) {
-            clean = clean.replace(/=s(?:3840|2048|0)(-no)?$/i, (_, noSuffix) => `=w900${noSuffix || ''}`);
+            const targetW = (typeof window !== 'undefined' && window.innerWidth > 0 && window.innerWidth <= 600) ? 640 : 900;
+            clean = clean.replace(/=s(?:3840|2048|0)(-no)?$/i, (_, noSuffix) => `=w${targetW}${noSuffix || ''}`);
         }
         return clean;
     }

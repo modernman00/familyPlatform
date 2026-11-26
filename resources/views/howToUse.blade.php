@@ -220,8 +220,8 @@
               <div class="col-md-4">
                 <div class="p-3 border rounded-3 bg-light h-100">
                   <span class="badge bg-primary mb-2">Touch 3 (Day 7)</span>
-                  <h6 class="fw-bold text-dark">WhatsApp Flywheel</h6>
-                  <p class="small text-muted mb-0">One-click WhatsApp invite generator enabling relatives to join and claim their spot on your family tree.</p>
+                  <h6 class="fw-bold text-dark">WhatsApp Flywheel &amp; Kinship Picker</h6>
+                  <p class="small text-muted mb-0">Categorised <strong>Invite Others</strong> picker (<em>All</em>, <em>Close</em>, <em>Extended</em>, <em>Custom</em>) with 1-tap presets for Mum, Dad, Sister, Brother, Spouse, Son/Daughter, <strong>Uncle</strong>, <strong>Aunt</strong>, Grandparent, Cousin, Niece/Nephew, or <strong>Add your own…</strong> to personalise any title and name.</p>
                 </div>
               </div>
             </div>
@@ -262,7 +262,7 @@
                 <div class="p-3 border rounded-3 bg-light h-100">
                   <span class="badge bg-success mb-2">Step 3 &middot; Lineage Trees</span>
                   <h6 class="fw-bold text-dark">Invite with the right code</h6>
-                  <p class="small text-muted mb-0">Choose <em>My Birth / Maiden Family</em> when adding parents or siblings. Invitations and new relatives land in your birth family tree, not your household tree.</p>
+                  <p class="small text-muted mb-0">Choose <em>My Birth / Maiden Family</em> (auto-selected for Mum, Dad, Sister, Brother, Uncle, Aunt, and Grandparent). Invitations and new relatives land in your birth family tree, not your household tree.</p>
                 </div>
               </div>
               <div class="col-md-3">

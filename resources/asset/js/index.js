@@ -205,12 +205,21 @@ if (window.location.pathname === '/register') {
 ) {
   if (qSel('.profilePageNav')) qSel('.profilePageNav').style.display = 'none'; // navbar mgt
 
-  routePromise = import(
-    /* webpackChunkName: 'profilePage' */
-    './components/profilePage/'
-  )
-    .then((module) => module.default)
-    .catch((err) => showError(err));
+  // Do NOT block Alpine.start() behind the profilePage auxiliary modal chunk on mobile:
+  // load lightweight profile listeners immediately after paint and defer heavy composer/event chunks to idle/intent.
+  const bootProfilePageChunk = () => {
+    import(
+      /* webpackChunkName: 'profilePage' */
+      './components/profilePage/'
+    )
+      .then((module) => module.default)
+      .catch((err) => showError(err));
+  };
+  if (typeof window.requestIdleCallback === 'function') {
+    window.requestIdleCallback(bootProfilePageChunk, { timeout: 600 });
+  } else {
+    setTimeout(bootProfilePageChunk, 80);
+  }
 } else if (window.location.pathname === '/login/changePW' || window.location.pathname === '/changePW') {
   if (qSel('.login')) qSel('.login').style.display = 'none'; // navbar mgt
   if (qSel('.signUp')) qSel('.signUp').style.display = 'none'; // navbar mgt
@@ -253,13 +262,34 @@ if (window.location.pathname === '/register') {
 // alpine:init event and initialise as empty {}.
 const startAlpine = () => routePromise.finally(() => Alpine.start());
 
-// Reels player & Create Modal handler lazy loader for feed & profile pages
+// Reels player & Create Modal handler lazy loader for feed & profile pages (deferred to idle or user tap)
+let reelsModuleLoaded = false;
+const loadReelsModuleOnce = () => {
+  if (reelsModuleLoaded) return;
+  reelsModuleLoaded = true;
+  import(
+    /* webpackChunkName: 'reels' */
+    './components/reels/reelsPlayer'
+  ).catch(() => {});
+};
+
 const loadReelsModuleIfPresent = () => {
-  if (document.getElementById('createReelModal') || document.querySelector('.reels-tray-scroll') || document.getElementById('reelsViewport')) {
-    import(
-      /* webpackChunkName: 'reels' */
-      './components/reels/reelsPlayer'
-    ).catch(() => {});
+  if (document.getElementById('reelsViewport')) {
+    loadReelsModuleOnce();
+    return;
+  }
+  const tray = document.querySelector('.reels-tray-scroll');
+  const modal = document.getElementById('createReelModal');
+  if (tray) {
+    tray.addEventListener('pointerdown', loadReelsModuleOnce, { once: true, passive: true });
+    tray.addEventListener('touchstart', loadReelsModuleOnce, { once: true, passive: true });
+  }
+  if (tray || modal) {
+    if (typeof window.requestIdleCallback === 'function') {
+      window.requestIdleCallback(loadReelsModuleOnce, { timeout: 1800 });
+    } else {
+      setTimeout(loadReelsModuleOnce, 900);
+    }
   }
 };
 

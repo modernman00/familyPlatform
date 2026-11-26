@@ -5,7 +5,7 @@
 @push('styles')
     <link rel="preload" href="/public/css/outfit.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="/public/css/outfit.css"></noscript>
-    <link rel="stylesheet" href="/public/css/seeProfile.css?v={{ time() }}">
+    <link rel="stylesheet" href="/public/css/seeProfile.css?v={{ assetVersion('css/seeProfile.css') }}">
 @endpush
 
 

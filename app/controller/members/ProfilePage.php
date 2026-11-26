@@ -152,7 +152,7 @@ final class ProfilePage extends ProcessImg
                     $initialFeedPage = (new \App\repository\FeedRepository())->getFeedPostsPage(
                         (string)$this->id,
                         is_array($bootstrapFamCodes) ? $bootstrapFamCodes : [(string)$bootstrapFamCodes],
-                        8,
+                        12,
                         0
                     );
                     $initialPosts = \App\controller\members\PostMessage::hydrateCommentsOnPosts(
