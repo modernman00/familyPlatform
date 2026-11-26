@@ -125,5 +125,19 @@ describe('Create Post composer: mobile bottom sheet', () => {
             expect(overflowViolations, 'Desktop horizontal overflow').to.have.length(0);
             expect(modalViolations, `Modal/mention DOM audit (Desktop): ${JSON.stringify(modalViolations)}`).to.have.length(0);
         });
+
+        // Test 3: Confirm & Share Post wiring on Mobile (390x844)
+        cy.viewport(390, 844);
+        cy.intercept('POST', '**/post', {
+            statusCode: 200,
+            body: { success: true, status: 'success', message: 'Post shared (intercepted)' },
+        }).as('submitMobilePost');
+        cy.get('#submitPost').click({ force: true });
+        cy.get('body').then(($body) => {
+            if ($body.find('#composerConfirmShareBtn:visible').length > 0) {
+                cy.get('#composerConfirmShareBtn').click({ force: true });
+            }
+        });
+        cy.wait('@submitMobilePost', { timeout: 15000 }).its('response.statusCode').should('eq', 200);
     });
 });
